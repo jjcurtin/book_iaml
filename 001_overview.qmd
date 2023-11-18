@@ -1,3 +1,9 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
 # Overview of Machine Learning
 
 ```{r conflict_policy}
@@ -106,9 +112,7 @@ For supervised machine learning problems, we assume $Y$ (outcome) is a function 
 
 $Y = f(X) + \epsilon$
 
-```{r u1-gen-1, fig.align = "center", out.height = 500, echo = FALSE} 
-knitr::include_graphics("figs/unit1_data_dgp.png")
-```
+![](figs/unit1_data_dgp.png){width=100%}
 
 **Terminology sidebar**:  Throughout the course we will distinguish between the raw **predictors** available in a dataset and the **features** that are derived from those raw predictors through various transformations.
 
@@ -198,9 +202,7 @@ Generally:
 * Parametric algorithms can be made less flexible through **regularization**.  There are techniques to make some non-parametric algorithms less flexible as well
 * You want the sweet spot for prediction.  You may want even less flexible for inference in increase interpretability.
 
-```{r  u1-gen-2, fig.align = "center", out.height = 500, echo = FALSE} 
-knitr::include_graphics("figs/unit1_flex_interpret.png")
-```
+![](figs/unit1_flex_interpret.png){width=100%}
 
 ***
 
@@ -330,7 +332,8 @@ We will attempt to model this cubic DGP with three different model configuration
 `r-colorize("If the DGP for y is a cubic function of x, what do we know about the expected bias for our three candidate model configurations in this example?", "red")`
 ^[The simple linear model will be biased b/c it can only represent y as a linear function of x.  The two polynomial models will be generally unbiased b/c they have x represented with 20th order polynomials.  LASSO will be slightly biased due to regularization but more on that in a later unit]
 
-```{r u1-ex1-1, echo = FALSE}
+```{r u1-ex1-1}
+#| echo: false
 
 library(tidyverse) # for general data wrangling
 library(tidymodels) # for modeling
@@ -338,7 +341,8 @@ library(tidymodels) # for modeling
 theme_set(theme_classic())
 ```
 
-```{r u1-ex1-2, echo = FALSE}
+```{r u1-ex1-2}
+#| echo: false
 
 # DGP sampling function
 get_sample <- function(params){
@@ -405,7 +409,9 @@ fit_lasso20 <- function(train){
 }
 ```
 
-```{r r u1-ex1-3, echo = FALSE}
+```{r r u1-ex1-3}
+#| echo: false
+
 # for plotting the raw data, the DGP, and model predictions
 plot_data <- function(data, line_names, line_colors, line_types, line_labels, title){
   xy <- data %>% 
@@ -433,7 +439,9 @@ plot_data <- function(data, line_names, line_colors, line_types, line_labels, ti
 }
 ```
 
-```{r u1-ex1-4, echo = FALSE}
+```{r u1-ex1-4}
+#| echo: false
+
 # adds model predictions to training set
 add_preds_train <- function(train, model, name){
   
@@ -454,7 +462,9 @@ add_preds_train <- function(train, model, name){
 }
 ```
 
-```{r u1-ex1-5, echo = FALSE}
+```{r u1-ex1-5}
+#| echo: false
+
 # adds model predictions to test set
 add_preds_test <- function(model_list, model_name, trains, test){
   
@@ -483,9 +493,7 @@ add_preds_test <- function(model_list, model_name, trains, test){
 ```
 
 
-
 ### Stimulation Steps
-
 
 With that introduction complete, lets start our simulation of the bias-variance trade-off
 
@@ -495,7 +503,9 @@ With that introduction complete, lets start our simulation of the bias-variance 
 
 * Here are plots of these four simulated training sets with a dotted line for the data generating process (DGP)
 
-```{r u1-ex1-9, echo = FALSE}
+```{r u1-ex1-9}
+#| echo: false
+
 params <- list(x_min = 0,
                x_max = 40,
                n = 100,     # training sample sizes of 100
@@ -518,7 +528,9 @@ walk2(trains$df, titles, ~ plot_data(data = .x,
 2. We get one more large random sample (N = 5000) with the same DGP to use as a test set to evaluate all the models 
 that will be fit in the training sample across all of the simulations.
 
-```{r u1-ex1-11, echo = FALSE}
+```{r u1-ex1-11}
+#| echo: false
+
 params$n = 5000 
 test <- get_sample(params)
 
@@ -533,7 +545,9 @@ plot_data(data = test,
 
 4. We use the resulting models to make predictions for observations in the same training set in which they were fit
 
-```{r u1-ex1-12, echo = FALSE}
+```{r u1-ex1-12}
+#| echo: false
+
 # fit the models
 trains$fit_lm1 <- map(trains$df, fit_lm1)           # simple linear model
 trains$fit_lm20 <- map(trains$df, fit_lm20)         # 20th order polynomial linear model
@@ -544,7 +558,6 @@ trains <- trains %>%
   mutate(df = map2(.$df, .$fit_lm1, add_preds_train, "pred_lm1")) %>% 
   mutate(df = map2(.$df, .$fit_lm20, add_preds_train, "pred_lm20")) %>% 
   mutate(df = map2(.$df, .$fit_lasso20, add_preds_train, "pred_lasso20"))
-
 
 # plot model predictions in each training set
 titles <- list("Train Set 1", "Train Set 2", "Train Set 3", "Train Set 4") 
@@ -586,14 +599,14 @@ for fitting any of the models.
 
 * Here are predictions from the four **simple linear models** (fit in each of the four training sets) in the **test set**
 
-```{r u1-ex1-15, echo = FALSE}
+```{r u1-ex1-15}
+#| echo: false
+
 # add predictions from these models into test
 
 test <- add_preds_test(trains$fit_lm1, "pred_lm1", trains$df, test)
 test <- add_preds_test(trains$fit_lm20, "pred_lm20", trains$df, test)
 test <- add_preds_test(trains$fit_lasso20, "pred_lasso20", trains$df, test)
-
-
 
 line_types <- c("dotted", rep("solid", n_sims))  # line type for all plots
 
@@ -624,7 +637,9 @@ and model variance will not contribute much to its reducible error.]
 
 * Here are predictions from the four **polynomial linear models** in the **test set**
 
-```{r u1-ex1-16b, echo = FALSE}
+```{r u1-ex1-16b}
+#| echo: false
+
 # Plot of Poly LMs in three training sets
 line_names <- c("y_dgp", str_c("pred_lm20_train_", 1:n_sims))
 line_labels <- c("DGP", str_c("Poly LM in Train ", 1:n_sims))
@@ -653,7 +668,9 @@ test set because noise is random and different in each dataset.]
 
 * Here are predictions from the four **polynomial LASSO models** in the **test set**
 
-```{r  u1-ex1-16c, echo = FALSE}
+```{r  u1-ex1-16c}
+#| echo: false
+
 # Plot of Poly LASSOs in three training sets
 line_names <- c("y_dgp", str_c("pred_lasso20_train_", 1:n_sims))
 line_labels <- c("DGP", str_c("Poly LASSO in Train ", 1:n_sims))
@@ -662,7 +679,6 @@ plot_data(data = test,
           line_names, line_colors, line_types, line_labels, 
           title = "Polynomial LASSO Models in Test Set")
 ```
-
 
 `r-colorize("How does their bias compare to the simple and polynomial linear models?", "red")`
 ^[It has low bias much like the polynomial linear model.  It is able to capture the true cubic DGP
@@ -692,7 +708,9 @@ To better understand this:
 * Specifically compare the performance of simple linear model (least flexible) with the polynomial linear model (most flexible)
 
 
-```{r u1-ex1-17, echo  = FALSE}
+```{r u1-ex1-17}
+#| echo: false
+
 rmse_train <- trains %>% 
   select(sim_num, df) %>% 
   unnest(cols = df) %>% 
@@ -750,7 +768,7 @@ bind_rows(rmse_test, rmse_train) %>%
         * Application assignment
       * Asychronous discussion and questions on Slack
       * Lab section on Tuesdays at 11:00 am - address previous weeks code
-      * Quiz and application assignments due Wednesdays at 5 pm
+      * Quiz and application assignments due Wednesdays at 8 pm
       * Wrap-up discussion and conceptual questions on Thursdays at 11 am.  Not a lecture
     * Self-paced (except for due dates and discussion)
     * Office hours
@@ -923,10 +941,7 @@ Useful conceptual examples of bias-variance
 
   * Example 1: Darts from @Yarkoni2017
   
-```{r  u1-diss-1, fig.align = "left", echo = FALSE}
-# , out.height = figsizer(fh5)
-knitr::include_graphics("figs/unit1_dartboard.png")
-```
+![]("figs/unit1_dartboard.png"){width=100%}
 
   * Example 2: Models (e.g. many scales made by Acme Co) to measure my weight
 
