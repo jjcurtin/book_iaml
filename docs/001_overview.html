@@ -295,12 +295,12 @@ div.csl-indent {
   <li><a href="#how-do-we-assess-model-performance" id="toc-how-do-we-assess-model-performance" class="nav-link" data-scroll-target="#how-do-we-assess-model-performance"><span class="header-section-number">1.3.2</span> How Do We Assess Model Performance?</a></li>
   </ul></li>
   <li><a href="#key-terminology-in-context" id="toc-key-terminology-in-context" class="nav-link" data-scroll-target="#key-terminology-in-context"><span class="header-section-number">1.4</span> Key Terminology in Context</a></li>
-  <li><a href="#an-example-of-overfitting-and-the-bias-variance-trade-off" id="toc-an-example-of-overfitting-and-the-bias-variance-trade-off" class="nav-link" data-scroll-target="#an-example-of-overfitting-and-the-bias-variance-trade-off"><span class="header-section-number">1.5</span> An Example of Overfitting and the Bias-Variance Trade-off</a>
+  <li><a href="#an-example-of-underfitting-overfitting-and-the-bias-variance-trade-off" id="toc-an-example-of-underfitting-overfitting-and-the-bias-variance-trade-off" class="nav-link" data-scroll-target="#an-example-of-underfitting-overfitting-and-the-bias-variance-trade-off"><span class="header-section-number">1.5</span> An Example of Underfitting, Overfitting and the Bias-Variance Trade-off</a>
   <ul class="collapse">
   <li><a href="#overview-of-example" id="toc-overview-of-example" class="nav-link" data-scroll-target="#overview-of-example"><span class="header-section-number">1.5.1</span> Overview of Example</a></li>
   <li><a href="#stimulation-steps" id="toc-stimulation-steps" class="nav-link" data-scroll-target="#stimulation-steps"><span class="header-section-number">1.5.2</span> Stimulation Steps</a></li>
   </ul></li>
-  <li><a href="#discussion---tuesday" id="toc-discussion---tuesday" class="nav-link" data-scroll-target="#discussion---tuesday"><span class="header-section-number">1.6</span> Discussion - Tuesday</a>
+  <li><a href="#discussion---tuesdaythursday" id="toc-discussion---tuesdaythursday" class="nav-link" data-scroll-target="#discussion---tuesdaythursday"><span class="header-section-number">1.6</span> Discussion - Tuesday/Thursday</a>
   <ul class="collapse">
   <li><a href="#course-overview" id="toc-course-overview" class="nav-link" data-scroll-target="#course-overview"><span class="header-section-number">1.6.1</span> Course Overview</a></li>
   <li><a href="#association-vs.-prediction" id="toc-association-vs.-prediction" class="nav-link" data-scroll-target="#association-vs.-prediction"><span class="header-section-number">1.6.2</span> Association vs.&nbsp;Prediction</a></li>
@@ -308,12 +308,8 @@ div.csl-indent {
   <li><a href="#data-generating-process" id="toc-data-generating-process" class="nav-link" data-scroll-target="#data-generating-process"><span class="header-section-number">1.6.4</span> Data Generating Process</a></li>
   <li><a href="#bias-overfitting-and-variance" id="toc-bias-overfitting-and-variance" class="nav-link" data-scroll-target="#bias-overfitting-and-variance"><span class="header-section-number">1.6.5</span> Bias, Overfitting, and Variance</a></li>
   <li><a href="#cross-validation" id="toc-cross-validation" class="nav-link" data-scroll-target="#cross-validation"><span class="header-section-number">1.6.6</span> Cross Validation</a></li>
-  </ul></li>
-  <li><a href="#discussion---thursday" id="toc-discussion---thursday" class="nav-link" data-scroll-target="#discussion---thursday"><span class="header-section-number">1.7</span> Discussion - Thursday</a>
-  <ul class="collapse">
-  <li><a href="#housekeeping" id="toc-housekeeping" class="nav-link" data-scroll-target="#housekeeping"><span class="header-section-number">1.7.1</span> Housekeeping</a></li>
-  <li><a href="#basic-framework-and-terminology" id="toc-basic-framework-and-terminology" class="nav-link" data-scroll-target="#basic-framework-and-terminology"><span class="header-section-number">1.7.2</span> Basic framework and terminology</a></li>
-  <li><a href="#bias-variance-tradeoff" id="toc-bias-variance-tradeoff" class="nav-link" data-scroll-target="#bias-variance-tradeoff"><span class="header-section-number">1.7.3</span> Bias-variance tradeoff</a></li>
+  <li><a href="#basic-framework-and-terminology" id="toc-basic-framework-and-terminology" class="nav-link" data-scroll-target="#basic-framework-and-terminology"><span class="header-section-number">1.6.7</span> Basic framework and terminology</a></li>
+  <li><a href="#bias-variance-tradeoff" id="toc-bias-variance-tradeoff" class="nav-link" data-scroll-target="#bias-variance-tradeoff"><span class="header-section-number">1.6.8</span> Bias-variance tradeoff</a></li>
   </ul></li>
   </ul>
 <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/jjcurtin/book_iaml/edit/main/001_overview.qmd" class="toc-action">Edit this page</a></p></div></div></nav>
@@ -494,7 +490,7 @@ div.csl-indent {
 <li>Models need to be flexible enough to fit <span class="math inline">\(f\)</span> well</li>
 <li>Additional flexibility beyond this can produce overfitting</li>
 <li>Parametric algorithms are generally less flexible than non-parametric algorithms</li>
-<li>Parametric algorithms can become more flexible by increasing the number of features (<code>p</code> from 610/710; e.g., using more predictors, more complex, non-linear forms to when deriving features from predictors)</li>
+<li>Parametric algorithms can become more flexible by increasing the number of features (<span class="math inline">\(p\)</span> from 610/710; e.g., using more predictors, more complex, non-linear forms to when deriving features from predictors)</li>
 <li>Parametric algorithms can be made less flexible through <strong>regularization</strong>. There are techniques to make some non-parametric algorithms less flexible as well</li>
 <li>You want the sweet spot for prediction. You may want even less flexible for inference in increase interpretability.</li>
 </ul>
@@ -520,18 +516,19 @@ div.csl-indent {
 <hr>
 <p>Two types of performance problems are typical</p>
 <ol type="1">
-<li>Models are <strong>biased</strong> if they don’t adequately represent the true <span class="math inline">\(f\)</span>
+<li>Models are <strong>underfit</strong> if they don’t adequately represent the true <span class="math inline">\(f\)</span>, typically because they have oversimplied the relationship (e.g., linear function fit to quadratic DGP, missing key interaction terms)
 <ul>
+<li>This models will yield <strong>biased</strong> predictions. In other words, they will systematically either under-predict or over-predict <span class="math inline">\(Y\)</span> in some regions of the function.</li>
 <li>Biased models will perform poorly in both training and test sets</li>
 </ul></li>
-<li>Models are <strong>overfit</strong> if they are too flexible and begin to fit the noise in the training set
+<li>Models are <strong>overfit</strong> if they are too flexible and begin to fit the noise in the training set.
 <ul>
 <li>These models will perform well (too well actually) in the training set but poorly in test or validation sets</li>
 <li>They will show high <strong>variance</strong> such that the model and its predictions change drastically depending on the training set where it is fit</li>
 </ul></li>
 </ol>
 <hr>
-<p>More generally, these two problems are largely inversely related</p>
+<p>More generally, these problems and their consequences for model performance are largely inversely related</p>
 <ul>
 <li>This is known as the <strong>Bias-Variance trade-off</strong></li>
 <li>We previously discussed reducible and irreducible error
@@ -566,17 +563,17 @@ div.csl-indent {
 <p><strong>Validation sets</strong> are subsets that are used for <strong>model selection</strong> (or, more accurately, for model configuration selection). During model selection, each (fitted) model — one for every candidate model configuration — is used to make predictions for observations in a validation set that, importantly, does not overlap with the model’s training set. On the basis of each model’s performance in the validation set, the relatively best model configuration (i.e., the configuration of the model that performs best relative to all other model configurations) is identified and selected. If you have only one model configuration, validation set(s) are not needed because there is no need to select among model configurations.</p>
 <p><strong>Test sets</strong> are subsets that are used for <strong>model evaluation</strong>. Generally, a model with the previously identified best configuration is re-fit to all available data other than the test set. This fitted model is used to predict observations in the test set to estimate how well this model is expected to perform for new observations.</p>
 </section>
-<section id="an-example-of-overfitting-and-the-bias-variance-trade-off" class="level2" data-number="1.5">
-<h2 data-number="1.5" class="anchored" data-anchor-id="an-example-of-overfitting-and-the-bias-variance-trade-off"><span class="header-section-number">1.5</span> An Example of Overfitting and the Bias-Variance Trade-off</h2>
+<section id="an-example-of-underfitting-overfitting-and-the-bias-variance-trade-off" class="level2" data-number="1.5">
+<h2 data-number="1.5" class="anchored" data-anchor-id="an-example-of-underfitting-overfitting-and-the-bias-variance-trade-off"><span class="header-section-number">1.5</span> An Example of Underfitting, Overfitting and the Bias-Variance Trade-off</h2>
 <section id="overview-of-example" class="level3" data-number="1.5.1">
 <h3 data-number="1.5.1" class="anchored" data-anchor-id="overview-of-example"><span class="header-section-number">1.5.1</span> Overview of Example</h3>
-<p>The concepts of overfitting and the bias-variance trade-off are critical to understand</p>
+<p>The concepts of underfitting vs.&nbsp;overfitting and the bias-variance trade-off are critical to understand</p>
 <ul>
 <li><p>It is also important to understand how model flexibility can affect both the bias and variance of that model’s performance</p></li>
 <li><p>It can help to make these abstract concepts concrete by exploring real models that are fit in actual data</p></li>
 <li><p>We will conduct a very simple simulation to demonstrate these concepts</p></li>
 </ul>
-<p>The code in this example is secondary to understanding the concepts of overfitting, bias, and the bias-variance trade-off</p>
+<p>The code in this example is secondary to understanding the concepts of underfittinng, overfitting, bias, variance, and the bias-variance trade-off</p>
 <ul>
 <li>We will not display much of it so that you can maintain focus on the concepts</li>
 <li>You will have plenty of time to learn the underlying</li>
@@ -725,8 +722,8 @@ div.csl-indent {
 <p><code>r-colorize("Would these observations about bias and variance of these three model configurations always be the same regardless of the DGP?", "red")</code> <a href="#fn12" class="footnote-ref" id="fnref12" role="doc-noteref"><sup>12</sup></a></p>
 </section>
 </section>
-<section id="discussion---tuesday" class="level2" data-number="1.6">
-<h2 data-number="1.6" class="anchored" data-anchor-id="discussion---tuesday"><span class="header-section-number">1.6</span> Discussion - Tuesday</h2>
+<section id="discussion---tuesdaythursday" class="level2" data-number="1.6">
+<h2 data-number="1.6" class="anchored" data-anchor-id="discussion---tuesdaythursday"><span class="header-section-number">1.6</span> Discussion - Tuesday/Thursday</h2>
 <section id="course-overview" class="level3" data-number="1.6.1">
 <h3 data-number="1.6.1" class="anchored" data-anchor-id="course-overview"><span class="header-section-number">1.6.1</span> Course Overview</h3>
 <ol type="1">
@@ -746,15 +743,17 @@ div.csl-indent {
 <li>Asychronous discussion and questions on Slack</li>
 <li>Lab section on Tuesdays at 11:00 am - address previous weeks code</li>
 <li>Quiz and application assignments due Wednesdays at 8 pm</li>
+<li>Quizzes used to encourage and assess reading. Also to guide discussion.</li>
 <li>Wrap-up discussion and conceptual questions on Thursdays at 11 am. Not a lecture</li>
 </ul></li>
 <li>Self-paced (except for due dates and discussion)</li>
+<li>Workload similar to 610/710</li>
 <li>Office hours
 <ul>
 <li>John - Thursdays, 1 – 2 pm</li>
-<li>Matt - Tuesdays 1:30 - 2:30 pm</li>
-<li>Sarah - Mondays 11 - 12 pm</li>
-<li>personal appointments &amp; Slack</li>
+<li>Michelle - UPDATE</li>
+<li>Kendra - UPDATE</li>
+<li>Personal appointments &amp; Slack</li>
 </ul></li>
 </ul></li>
 <li><p>The web book</p>
@@ -775,11 +774,12 @@ div.csl-indent {
 </ul></li>
 <li><p>Why these tools?</p>
 <ul>
-<li><code>rmarkdown</code>?
+<li><code>Quarto</code>
 <ul>
+<li>Scientific publishing system (reproducible code, with output, presentations, papers)</li>
 <li>Tool for collaboration</li>
-<li>Interactive with static product (knit html)</li>
-<li>Application assignments &amp; web book (bookdown - a superset of R Markdown)</li>
+<li>Interactive with static product (render to html or pdf)</li>
+<li>Application assignments &amp; web book</li>
 </ul></li>
 <li><code>tidyverse</code>?
 <ul>
@@ -789,10 +789,9 @@ div.csl-indent {
 <li><code>tidymodels</code>?
 <ul>
 <li>Consistent interface to hundreds of statistical algorithms</li>
-<li>Under VERY active development (young but maturing)</li>
+<li>Under VERY active development</li>
 <li>Well-supported and documented (<a href="https://www.tidymodels.org/">tidymodels.org</a>)</li>
-<li>Be careful with other web documentation</li>
-<li>Data wrangling in <code>dplyr</code> vs.&nbsp;<code>recipes</code></li>
+<li>Be careful with other web documentation (often out of date)</li>
 </ul></li>
 </ul></li>
 <li><p>Why me?</p>
@@ -806,7 +805,7 @@ div.csl-indent {
 <li>Safe and respectful</li>
 <li>VERY encouraging of questions, discussion, and tangents</li>
 <li>Have fun</li>
-<li><a href="http://dionysus.psych.wisc.edu/iaml/index.html#accommodations-polices">Accomodations</a> and <a href="http://dionysus.psych.wisc.edu/iaml/index.html#complaints">Complaints</a></li>
+<li><a href="https://jjcurtin.github.io/book_iaml/#accommodations-polices">Accomodations</a> and <a href="https://jjcurtin.github.io/book_iaml/#complaints">Complaints</a></li>
 </ul></li>
 <li><p>ChatGPT</p>
 <ul>
@@ -818,8 +817,8 @@ div.csl-indent {
 <li><p>Academic Integrity</p>
 <ul>
 <li>Do not cheat! Only you lose.</li>
-<li>No collaboration with classmates, peers, previous students on anything graded</li>
-<li>All cheating reported to Department and Dean of Students. If homework or quizzes, zero on all them because I can’t trust them. If exam, zero on exam.</li>
+<li>No collaboration with classmates, peers, previous students on anything graded (including application assignments)</li>
+<li>All cheating reported to Department and Dean of Students. If application assignment or quizzes, zero on all of them because I can’t trust them. If exam, zero on exam.</li>
 </ul></li>
 </ol>
 </section>
@@ -870,19 +869,8 @@ div.csl-indent {
 <li><code>r-colorize("How are replication and cross-validation different?", "red")</code></li>
 </ul>
 </section>
-</section>
-<section id="discussion---thursday" class="level2" data-number="1.7">
-<h2 data-number="1.7" class="anchored" data-anchor-id="discussion---thursday"><span class="header-section-number">1.7</span> Discussion - Thursday</h2>
-<section id="housekeeping" class="level3" data-number="1.7.1">
-<h3 data-number="1.7.1" class="anchored" data-anchor-id="housekeeping"><span class="header-section-number">1.7.1</span> Housekeeping</h3>
-<ul>
-<li>Quizzes - scoring, submission deadline, feedback, use of Q10</li>
-<li>New unit - reading, lectures, application assignment, quiz</li>
-<li>Course load - comparable to 610/710</li>
-</ul>
-</section>
-<section id="basic-framework-and-terminology" class="level3" data-number="1.7.2">
-<h3 data-number="1.7.2" class="anchored" data-anchor-id="basic-framework-and-terminology"><span class="header-section-number">1.7.2</span> Basic framework and terminology</h3>
+<section id="basic-framework-and-terminology" class="level3" data-number="1.6.7">
+<h3 data-number="1.6.7" class="anchored" data-anchor-id="basic-framework-and-terminology"><span class="header-section-number">1.6.7</span> Basic framework and terminology</h3>
 <ul>
 <li><p><code>r-colorize("Supervised vs. unsupervised machine learning?", "red")</code></p></li>
 <li><p><code>r-colorize("Supervised regression vs classification?", "red")</code></p></li>
@@ -915,7 +903,7 @@ div.csl-indent {
 </li>
 <li>Just need better model (<span class="math inline">\(\hat{f}(X)\)</span>).<br>
 </li>
-<li>You didn’t consider this (much) in 610 because you were limited to one statistical algorithm (GLM) AND it didnt have hyperparameters.</li>
+<li>You didn’t consider this (much) in 610 because you were limited to one statistical algorithm (GLM) AND it didn’t have hyperparameters.</li>
 <li>You did reduce error by coding predictors (feature engineering) differently (interactions <span class="math inline">\(X1*X2\)</span>, polynomial terms <span class="math inline">\(X^2\)</span>, power transformations of X) This course will teach you methods to decrease reducible error (and validly estimate total error of that best model)</li>
 </ul></li>
 </ul>
@@ -939,10 +927,10 @@ div.csl-indent {
 </ul></li>
 </ul>
 </section>
-<section id="bias-variance-tradeoff" class="level3" data-number="1.7.3">
-<h3 data-number="1.7.3" class="anchored" data-anchor-id="bias-variance-tradeoff"><span class="header-section-number">1.7.3</span> Bias-variance tradeoff</h3>
+<section id="bias-variance-tradeoff" class="level3" data-number="1.6.8">
+<h3 data-number="1.6.8" class="anchored" data-anchor-id="bias-variance-tradeoff"><span class="header-section-number">1.6.8</span> Bias-variance tradeoff</h3>
 <ul>
-<li><p>What is bias, overfitting, and variance?</p></li>
+<li><p>What is underfitting, overfitting, bias, and variance?</p></li>
 <li><p>Bias and variance are general concepts to understand during any estimation process</p>
 <ul>
 <li>Estimate mean, median, standard deviation</li>
@@ -959,9 +947,9 @@ div.csl-indent {
 <ul>
 <li>Example 2: Models (e.g.&nbsp;many scales made by Acme Co) to measure my weight</li>
 </ul>
-<section id="bias" class="level4" data-number="1.7.3.1">
-<h4 data-number="1.7.3.1" class="anchored" data-anchor-id="bias"><span class="header-section-number">1.7.3.1</span> Bias</h4>
-<p>Biased models are generally less complex models than the data-generating process for your outcome</p>
+<section id="bias" class="level4" data-number="1.6.8.1">
+<h4 data-number="1.6.8.1" class="anchored" data-anchor-id="bias"><span class="header-section-number">1.6.8.1</span> Bias</h4>
+<p>Biased models are generally less complex models (i.e., underfit) than the data-generating process for your outcome</p>
 <ul>
 <li><p>Biased models lead to errors in prediction because the model will systematically over- or under-predict outcomes (scores or probabilities) for specific values of predictor(s) (bad for prediction goals!)</p></li>
 <li><p>Parameter estimates from biased models may over or under-estimate the true effect of a predictor (bad for explanatory goals!)</p></li>
@@ -971,12 +959,12 @@ div.csl-indent {
 <hr>
 <p>Bias <strong>seems</strong> like a bad thing.</p>
 <ul>
-<li><p>Both bias and variance (due to overfitting) are sources of (reducible) prediction errors (and imprecise/inaccurate parameter estimates). They are also often inversely related (i.e., the trade-off).</p></li>
+<li><p>Both bias (due to underfitting) and variance (due to overfitting) are sources of (reducible) prediction errors (and imprecise/inaccurate parameter estimates). They are also often inversely related (i.e., the trade-off).</p></li>
 <li><p>A model configuration needs to be flexible enough to represent the true DGP.</p>
 <ul>
 <li>Any more flexibility will lead to overfitting.<br>
 </li>
-<li>Any less flexibility will lead to bias.</li>
+<li>Any less flexibility will lead to underfitting.</li>
 </ul></li>
 <li><p>Ideally, if your model configuration is perfectly matched to the DGP, it will have very low bias and very low variance (holding other factors like N constant)</p></li>
 <li><p>The world is complex. In many instances,</p>
@@ -988,8 +976,8 @@ div.csl-indent {
 </ul></li>
 </ul>
 </section>
-<section id="overfitting---variance" class="level4" data-number="1.7.3.2">
-<h4 data-number="1.7.3.2" class="anchored" data-anchor-id="overfitting---variance"><span class="header-section-number">1.7.3.2</span> Overfitting - Variance</h4>
+<section id="overfitting---variance" class="level4" data-number="1.6.8.2">
+<h4 data-number="1.6.8.2" class="anchored" data-anchor-id="overfitting---variance"><span class="header-section-number">1.6.8.2</span> Overfitting - Variance</h4>
 <p><code>r-colorize("Consider example of p = n - 1 in general linear model.  What happens in this situation?  How is this related to overfitting and model flexibility?", "red")</code> <a href="#fn16" class="footnote-ref" id="fnref16" role="doc-noteref"><sup>16</sup></a></p>
 <p>Factors that increase overfitting</p>
 <ul>
@@ -1037,22 +1025,19 @@ Yarkoni, Tal, and Jacob Westfall. 2017. <span>“Choosing <span>Prediction Over 
 <section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
 <hr>
 <ol>
-<li id="fn1"><p>The simple linear model will be biased b/c it can only represent y as a linear function of x. The two polynomial models will be generally unbiased b/c they have x represented with 20th order polynomials. LASSO will be slightly biased due to regularization but more on that in a later unit<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>The simple linear model is clearly biased. It systemically underestimates Y in some portions of the X distribution and overestimates Y in other portions of the X distribution.<br>
-This is true across training sets.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>The simple linear model will underfit the true DGP and therefore it will be biased b/c it can only represent y as a linear function of x. The two polynomial models will be generally unbiased b/c they have x represented with 20th order polynomials. LASSO will be slightly biased due to regularization but more on that in a later unit<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>The simple linear model is clearly biased. It systemically underestimates Y in some portions of the X distribution and overestimates Y in other portions of the X distribution. This is true across training sets.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn3"><p>The polynomial linear model appears to overfit the data in the training set. In other words, it seems to follow both the signal/DGP and the noise. However, you can’t be certain of this with only one training set and without knowing the DGP.<br>
 It is possible that the wiggles in the prediction line represent the real DGP.<br>
 You will need a test set to be certain about the degree of overfitting.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn4"><p>Yes, consistent with what we saw in the training sets, the simple linear model systematically overestimates Y in some places and underestimates it in others. The DGP is clearly NOT linear but this simple model can only make linear predictions. It is a fairly biased model.<br>
-This bias will make a large contribution to the reducible error of the model<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn4"><p>Yes, consistent with what we saw in the training sets, the simple linear model systematically overestimates Y in some places and underestimates it in others. The DGP is clearly NOT linear but this simple model can only make linear predictions. It is a fairly biased model that underfits the true DGP. This bias will make a large contribution to the reducible error of the model<a href="#fnref4" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn5"><p>There is not much variance in the prediction lines across the models that were fit to different training sets. The slopes are very close across models and the intercepts only vary by a small amount. The simple linear model configuration does not appear to have high variance and model variance will not contribute much to its reducible error.<a href="#fnref5" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn6"><p>There is not much systematic bias. The overall function is generally cubic as is the DGP.<br>
-Bias will not contribute much to the model’s reducible error.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn6"><p>There is not much systematic bias. The overall function is generally cubic as is the DGP. Bias will not contribute much to the model’s reducible error.<a href="#fnref6" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn7"><p>There is much higher model variance for this polynomial linear model relative to the simple linear model. Although all four models generally predict Y as a cubic function of X, there is also a non-systematic wiggle that is different for each of the models.<a href="#fnref7" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn8"><p>Model variance is a result of overfitting to the training set. If a model fits noise in its training set, that noise will be different in every dataset. Therefore, you end up with different models depending on the training set in which they are fit. And none of those models will do well with new data as you can see in this test set because noise is random and different in each dataset.<a href="#fnref8" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn9"><p>It has low bias much like the polynomial linear model. It is able to capture the true cubic DGP fairly well. The regularization process slightly reduced the magnitude of the cubic (the prediction line is a little straighter than it should be) but not by much.<a href="#fnref9" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn10"><p>It has low variance, much like the simple linear model. All four models, fit in different training sets resulted in very similar prediction lines.<a href="#fnref10" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn11"><p>The <strong>simple linear model</strong> is biased and won’t even fit train for this reason. However, it’s not very flexible so it won’t be overfit to train and therefore should fit comparably in test. The <strong>polynomial linear model</strong> won’t be biased at all given that the DGP is polynomial. However, it is overly flexible (20th order) and so will substantially overfit the training data such that it will show high variance and its performance will be poor in test. The <strong>polynomial LASSO</strong> will be the sweet spot in bias-variance trade-off. It has a little bias but not much. However, it is not as flexible due to regularization by lambda so it won’t be overfit to its training set. Therefore, it should do well in the test set.<a href="#fnref11" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn11"><p>The <strong>simple linear model</strong> is underfit to the TRUE DGP. Therfore it is systematically biased everywhere it is use and won’t even fit train for this reason. However, it’s not very flexible so it won’t be overfit to the noise in train and therefore should fit comparably in test. The <strong>polynomial linear model</strong> won’t be biased at all given that the DGP is polynomial. However, it is overly flexible (20th order) and so will substantially overfit the training data such that it will show high variance and its performance will be poor in test. The <strong>polynomial LASSO</strong> will be the sweet spot in bias-variance trade-off. It has a little bias but not much. However, it is not as flexible due to regularization by lambda so it won’t be overfit to its training set. Therefore, it should do well in the test set.<a href="#fnref11" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn12"><p>No.&nbsp;A model configuration needs to be flexible enough and/or well designed to represent the DGP for the data that you are modeling. The two polynomial models in this example were each able to represent a cubic DGP. The simple linear model was not. The polynomial linear model was too flexible for a cubic given that it had 20 polynomials of X. Therefore, it was overfit to its training set and had high variance. However, if the DGP was a different shape, the story would be different. If the DGP was linear the simple linear model would not have been biased and would have performed best. If this DGP was some other form (step function), it may be that none of the models would work well.<a href="#fnref12" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn13"><p><strong>Association</strong> quantifies the relationship between variables within a sample (predictors-outcome). <strong>Prediction</strong> requires using an established model to predict (future?) outcomes for <strong>new</strong> (“out-of-sample,”held-out”) participants. <a href="#fnref13" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 <li id="fn14"><p>When you p-hack, you are overfitting the training set (your sample). You try out many, many different model configurations and choose the one you like best rather than what works well in new data. This model likely capitalizes on noise in your sample. It won’t fit well in another sample. In other words, your conclusions are not linked to the true DGP and would be different if you used a different sample. In a different vein, your significance test is wrong. The SE does not reflect the model variance that resulted from testing many different configurations b/c your final model didn’t “know” about the other models. Statistically invalid conclusion!<a href="#fnref14" class="footnote-back" role="doc-backlink">↩︎</a></p></li>

@@ -736,7 +736,7 @@ bind_rows(rmse_test, rmse_train) %>%
 `r-colorize("Would these observations about bias and variance of these three model configurations always be the same regardless of the DGP?", "red")`
 ^[No.  A model configuration needs to be flexible enough and/or well designed to represent the DGP for the data that you are modeling.   The two polynomial models in this example were each able to represent a cubic DGP.  The simple linear model was not.  The polynomial linear model was too flexible for a cubic given that it had 20 polynomials of X.  Therefore, it was overfit to its training set and had high variance.  However, if the DGP was a different shape, the story would be different.  If the DGP was linear the simple linear model would not have been biased and would have performed best. If this DGP was some other form (step function), it may be that none of the models would work well.]
 
-## Discussion - Tuesday
+## Discussion - Tuesday/Thursday
 
 ### Course Overview
 
@@ -753,13 +753,15 @@ bind_rows(rmse_test, rmse_train) %>%
       * Asychronous discussion and questions on Slack
       * Lab section on Tuesdays at 11:00 am - address previous weeks code
       * Quiz and application assignments due Wednesdays at 8 pm
+      * Quizzes used to encourage and assess reading.  Also to guide discussion.
       * Wrap-up discussion and conceptual questions on Thursdays at 11 am.  Not a lecture
     * Self-paced (except for due dates and discussion)
+    * Workload similar to 610/710
     * Office hours
       * John - Thursdays, 1 – 2 pm
       * Michelle - UPDATE 
       * Kendra - UPDATE 
-      * personal appointments & Slack
+      * Personal appointments & Slack
 
 3. The web book
     * Primary source for all course materials
@@ -799,7 +801,7 @@ bind_rows(rmse_test, rmse_train) %>%
     * Safe and respectful
     * VERY encouraging of questions, discussion, and tangents
     * Have fun
-    * [Accomodations](http://dionysus.psych.wisc.edu/iaml/index.html#accommodations-polices) and [Complaints](http://dionysus.psych.wisc.edu/iaml/index.html#complaints)
+    * [Accomodations](https://jjcurtin.github.io/book_iaml/#accommodations-polices) and [Complaints](https://jjcurtin.github.io/book_iaml/#complaints)
     
 8. ChatGPT
     * Yay!  May develop into an amazing tool in your workflow
@@ -809,8 +811,8 @@ bind_rows(rmse_test, rmse_train) %>%
     
 9. Academic Integrity
     * Do not cheat!  Only you lose.
-    * No collaboration with classmates, peers, previous students on anything graded
-    * All cheating reported to Department and Dean of Students.  If homework or quizzes, zero on all them because I can't trust them.  If exam, zero on exam.
+    * No collaboration with classmates, peers, previous students on anything graded (including application assignments)
+    * All cheating reported to Department and Dean of Students.  If application assignment or quizzes, zero on all of them because I can't trust them.  If exam, zero on exam.
     
     
 ### Association vs. Prediction
@@ -854,14 +856,6 @@ bind_rows(rmse_test, rmse_train) %>%
 * `r-colorize("What is it?", "red")`
 * `r-colorize("How are replication and cross-validation different?", "red")`
 
-## Discussion - Thursday
-
-### Housekeeping
-
-* Quizzes - scoring, submission deadline, feedback, use of Q10
-* New unit - reading, lectures, application assignment, quiz
-* Course load - comparable to 610/710
-
 ### Basic framework and terminology
 
 * `r-colorize("Supervised vs. unsupervised machine learning?", "red")`
@@ -892,7 +886,7 @@ Reducible vs. Irreducible error?
 * **Reducible error** comes from mismatch between $\hat{f}(X)$ and the true $f(X)$.  
    * We can reduce this without new data.  
    * Just need better model ($\hat{f}(X)$).   
-   * You didn't consider this (much) in 610 because you were limited to one statistical algorithm (GLM) AND it didnt have hyperparameters.
+   * You didn't consider this (much) in 610 because you were limited to one statistical algorithm (GLM) AND it didn't have hyperparameters.
    * You did reduce error by coding predictors (feature engineering) differently (interactions $X1*X2$, polynomial terms $X^2$, power transformations of X)
    This course will teach you methods to decrease reducible error (and validly estimate total error of that best model)
 
@@ -912,7 +906,7 @@ Reducible vs. Irreducible error?
 
 ### Bias-variance tradeoff
 
-* What is bias, overfitting, and variance?
+* What is underfitting, overfitting, bias, and variance?
 
 * Bias and variance are general concepts to understand during any estimation process
    * Estimate mean, median, standard deviation
@@ -932,7 +926,7 @@ Useful conceptual examples of bias-variance
 
 #### Bias
 
-Biased models are generally less complex models than the data-generating process for your outcome
+Biased models are generally less complex models (i.e., underfit) than the data-generating process for your outcome
 
 * Biased models lead to errors in prediction because the model will systematically over- or under-predict  outcomes (scores or probabilities) for specific values of predictor(s) (bad for prediction goals!)
 
@@ -947,11 +941,11 @@ Biased models are generally less complex models than the data-generating process
 
 Bias **seems** like a bad thing. 
 
-* Both bias and variance (due to overfitting) are sources of (reducible) prediction errors (and imprecise/inaccurate parameter estimates).  They are also often inversely related (i.e., the trade-off).  
+* Both bias (due to underfitting) and variance (due to overfitting) are sources of (reducible) prediction errors (and imprecise/inaccurate parameter estimates).  They are also often inversely related (i.e., the trade-off).  
 
 * A model configuration needs to be flexible enough to represent the true DGP.  
   * Any more flexibility will lead to overfitting.   
-  * Any less flexibility will lead to bias.
+  * Any less flexibility will lead to underfitting.
 
 * Ideally, if your model configuration is perfectly matched to the DGP, it will have very low bias and very low variance (holding other factors like N constant)
 
