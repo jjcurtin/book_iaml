@@ -20,7 +20,26 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
-</style>
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
 
 
 <script src="site_libs/quarto-nav/quarto-nav.js"></script>
@@ -272,7 +291,7 @@ ul.task-list li input[type="checkbox"] {
   <li><a href="#an-introductory-framework-for-machine-learning" id="toc-an-introductory-framework-for-machine-learning" class="nav-link" data-scroll-target="#an-introductory-framework-for-machine-learning"><span class="header-section-number">1.2</span> An Introductory Framework for Machine Learning</a></li>
   <li><a href="#more-details-on-supervised-techniques" id="toc-more-details-on-supervised-techniques" class="nav-link" data-scroll-target="#more-details-on-supervised-techniques"><span class="header-section-number">1.3</span> More Details on Supervised Techniques</a>
   <ul class="collapse">
-  <li><a href="#how-do-we-estimate-f" id="toc-how-do-we-estimate-f" class="nav-link" data-scroll-target="#how-do-we-estimate-f"><span class="header-section-number">1.3.1</span> How Do We Estimate <code>f</code>?</a></li>
+  <li><a href="#how-do-we-estimate-f" id="toc-how-do-we-estimate-f" class="nav-link" data-scroll-target="#how-do-we-estimate-f"><span class="header-section-number">1.3.1</span> How Do We Estimate <span class="math inline">\(f\)</span>?</a></li>
   <li><a href="#how-do-we-assess-model-performance" id="toc-how-do-we-assess-model-performance" class="nav-link" data-scroll-target="#how-do-we-assess-model-performance"><span class="header-section-number">1.3.2</span> How Do We Assess Model Performance?</a></li>
   </ul></li>
   <li><a href="#key-terminology-in-context" id="toc-key-terminology-in-context" class="nav-link" data-scroll-target="#key-terminology-in-context"><span class="header-section-number">1.4</span> Key Terminology in Context</a></li>
@@ -352,18 +371,18 @@ ul.task-list li input[type="checkbox"] {
 <p><strong>Readings</strong></p>
 <ul>
 <li><a href="syllabus.pdf">PSY 752 course syllabus</a></li>
-<li><span class="citation" data-cites="ISL">@ISL</span> <a href="pdfs/isl_2.pdf">Chapter 2, pp 15 - 42</a></li>
-<li><span class="citation" data-cites="Yarkoni2017">@Yarkoni2017</span> <a href="pdfs/yarkoni_2017_choosing_prediction_over_explanation.pdf">paper</a></li>
+<li><span class="citation" data-cites="ISL">James et al. (<a href="#ref-ISL" role="doc-biblioref">2023</a>)</span> <a href="pdfs/isl_2.pdf">Chapter 2, pp 15 - 42</a></li>
+<li><span class="citation" data-cites="Yarkoni2017">Yarkoni and Westfall (<a href="#ref-Yarkoni2017" role="doc-biblioref">2017</a>)</span> <a href="pdfs/yarkoni_2017_choosing_prediction_over_explanation.pdf">paper</a></li>
 </ul>
 <p><strong>Lecture &amp; Discussion Videos</strong></p>
 <ul>
-<li><a href="https://www.loom.com/share/c61baac1b7b94ca7bb5c27feb9f99c2a">Lecture 1: Overview</a>; ~ 40 mins</li>
-<li><a href="https://www.loom.com/share/aa50f305a79b44aa84c823eeb3dd1fdc">Lecture 2: Terminology</a>; ~ 19 mins</li>
-<li><a href="https://www.loom.com/share/07b90a3321c84854a96a8eaefed6b6a9">Lecture 3: An Empirical Example</a>; ~ 28 mins</li>
-<li><a href="https://dionysus.psych.wisc.edu/iaml/videos/discussion_unit1_2023.mp4">Discussion</a></li>
+<li><a href="">Lecture 1: Overview</a>; ~ 40 mins</li>
+<li><a href="">Lecture 2: Terminology</a>; ~ 19 mins</li>
+<li><a href="">Lecture 3: An Empirical Example</a>; ~ 28 mins</li>
+<li><a href="">Discussion</a></li>
 </ul>
 <p>Post questions/discuss readings or lectures in Slack</p>
-<p>The <a href="https://canvas.wisc.edu/courses/345486/quizzes/424938">unit quiz</a> is due by 5 pm on Wednesday January 25th</p>
+<p>The <a href="">unit quiz</a> is due by 8 pm on Wednesday January 31st</p>
 </section>
 <section id="an-introductory-framework-for-machine-learning" class="level2" data-number="1.2">
 <h2 data-number="1.2" class="anchored" data-anchor-id="an-introductory-framework-for-machine-learning"><span class="header-section-number">1.2</span> An Introductory Framework for Machine Learning</h2>
@@ -399,12 +418,12 @@ ul.task-list li input[type="checkbox"] {
 </section>
 <section id="more-details-on-supervised-techniques" class="level2" data-number="1.3">
 <h2 data-number="1.3" class="anchored" data-anchor-id="more-details-on-supervised-techniques"><span class="header-section-number">1.3</span> More Details on Supervised Techniques</h2>
-<p>For supervised machine learning problems, we assume <span class="math inline">\(Y\)</span> (outcome) is a function of some <strong>data generating process</strong> (DGP, <code>f</code>) involving a set of Xs (features) plus the addition of random error (<span class="math inline">\(\epsilon\)</span>) that is independent of X and with mean of 0</p>
+<p>For supervised machine learning problems, we assume <span class="math inline">\(Y\)</span> (outcome) is a function of some <strong>data generating process</strong> (DGP, <span class="math inline">\(f\)</span>) involving a set of Xs (features) plus the addition of random error (<span class="math inline">\(\epsilon\)</span>) that is independent of X and with mean of 0</p>
 <p><span class="math inline">\(Y = f(X) + \epsilon\)</span></p>
 <p><img src="figs/unit1_data_dgp.png" class="img-fluid" style="width:100.0%"></p>
 <p><strong>Terminology sidebar</strong>: Throughout the course we will distinguish between the raw <strong>predictors</strong> available in a dataset and the <strong>features</strong> that are derived from those raw predictors through various transformations.</p>
 <hr>
-<p>We estimate <code>f</code> (the DGP) for two main reasons: <strong>prediction</strong> and/or <strong>inference</strong> (i.e., explanation per Yarkoni and Westfall, 2017)</p>
+<p>We estimate <span class="math inline">\(f\)</span> (the DGP) for two main reasons: <strong>prediction</strong> and/or <strong>inference</strong> (i.e., explanation per Yarkoni and Westfall, 2017)</p>
 <p><span class="math inline">\(\hat{Y} = \hat{f}(X)\)</span></p>
 <p>For <strong>prediction</strong>, we are most interested in the accuracy of <span class="math inline">\(\hat{Y}\)</span> and typically treat <span class="math inline">\(\hat{f}\)</span> as a black box</p>
 <p>For <strong>inference</strong>, we are typically interested in the way that <span class="math inline">\(Y\)</span> is affected by <span class="math inline">\(X\)</span></p>
@@ -429,15 +448,15 @@ ul.task-list li input[type="checkbox"] {
 <li><span class="math inline">\([f(X) - \hat{f}(X)]^2\)</span> is reducible and <span class="math inline">\(Var(\epsilon)\)</span> is irreducible</li>
 <li>Irreducible error results from other important <span class="math inline">\(X\)</span> that we fail to measure and from measurement error in <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span></li>
 <li>Irreducible error serves as an (unknown) bounds for model accuracy (without collecting additional Xs)</li>
-<li>Reducible error results from a mismatch between <span class="math inline">\(\hat{f}\)</span> and the true <code>f</code></li>
+<li>Reducible error results from a mismatch between <span class="math inline">\(\hat{f}\)</span> and the true <span class="math inline">\(f\)</span></li>
 </ul>
-<p>This course will focus on techniques to estimate <code>f</code> with the goal of minimizing reducible error</p>
+<p>This course will focus on techniques to estimate <span class="math inline">\(f\)</span> with the goal of minimizing reducible error</p>
 <hr>
 <section id="how-do-we-estimate-f" class="level3" data-number="1.3.1">
-<h3 data-number="1.3.1" class="anchored" data-anchor-id="how-do-we-estimate-f"><span class="header-section-number">1.3.1</span> How Do We Estimate <code>f</code>?</h3>
-<p>To estimate <code>f</code>:</p>
+<h3 data-number="1.3.1" class="anchored" data-anchor-id="how-do-we-estimate-f"><span class="header-section-number">1.3.1</span> How Do We Estimate <span class="math inline">\(f\)</span>?</h3>
+<p>To estimate <span class="math inline">\(f\)</span>:</p>
 <ul>
-<li><p>We need a sample of <code>n</code> observations of <code>Y</code> and <code>X</code> that we will call our <strong>training</strong> set</p></li>
+<li><p>We need a sample of <span class="math inline">\(n\)</span> observations of <span class="math inline">\(Y\)</span> and <span class="math inline">\(X\)</span> that we will call our <strong>training</strong> set</p></li>
 <li><p>There are two types of statistical algorithms that we can use for <span class="math inline">\(\hat{f}\)</span>:</p>
 <ul>
 <li><strong>Parametric</strong> algorithms</li>
@@ -447,20 +466,20 @@ ul.task-list li input[type="checkbox"] {
 <hr>
 <p><strong>Parametric</strong> algorithms:</p>
 <ul>
-<li>First, make an assumption about the functional form or shape of <code>f</code>.<br>
+<li>First, make an assumption about the functional form or shape of <span class="math inline">\(f\)</span>.<br>
 </li>
 <li>For example, the general linear model assumes: <span class="math inline">\(f(X) = \beta_0 + \beta_1*X_1 + \beta_2*X2 + ... + \beta_p*X_p\)</span></li>
 <li>Next, a model using that algorithm is <strong>fit</strong> to the training set. In other words, the parameter estimates (e.g., <span class="math inline">\(\beta_0, \beta_1\)</span>) are derived to minimize some <strong>cost function</strong> (e.g., mean squared error for the linear model)</li>
-<li>Parametric algorithms reduce the problem of estimating <code>f</code> down to one of only estimating some set of parameters for a chosen model</li>
+<li>Parametric algorithms reduce the problem of estimating <span class="math inline">\(f\)</span> down to one of only estimating some set of parameters for a chosen model</li>
 <li>Parametric algorithms often yield more interpretable models</li>
-<li>But they are often not very flexible. If you chose the wrong algorithm (shape for <span class="math inline">\(\hat{f}\)</span> that does not match <code>f</code>) the model will not fit well in the training set (and more importantly not in the new <strong>test set</strong> either)</li>
+<li>But they are often not very flexible. If you chose the wrong algorithm (shape for <span class="math inline">\(\hat{f}\)</span> that does not match <span class="math inline">\(f\)</span>) the model will not fit well in the training set (and more importantly not in the new <strong>test set</strong> either)</li>
 </ul>
 <p><strong>Terminology sidebar</strong>: A <strong>training set</strong> is a subset of your full dataset that is used to fit a model. In contrast, a <strong>validation set</strong> is a subset that has not been included in the training set and is used to select a best model from among competing model configurations. A <strong>test set</strong> is a third subset of the full dataset that has not been included in either the training or validation sets and is used for evaluating the performance of your fitted final/best model.</p>
 <hr>
 <p><strong>Non-parametric</strong> algorithms:</p>
 <ul>
-<li>Do not make any assumption about the form/shape of <code>f</code></li>
-<li>Can fit well for a wide variety of forms/shapes for <code>f</code></li>
+<li>Do not make any assumption about the form/shape of <span class="math inline">\(f\)</span></li>
+<li>Can fit well for a wide variety of forms/shapes for <span class="math inline">\(f\)</span></li>
 <li>This flexibility comes with costs
 <ul>
 <li>They generally require larger <code>n</code> in the training set than parametric algorithms to achieve comparable performance</li>
@@ -472,7 +491,7 @@ ul.task-list li input[type="checkbox"] {
 <p>Generally:</p>
 <ul>
 <li>Flexibility and interpretability are inversely related</li>
-<li>Models need to be flexible enough to fit <code>f</code> well</li>
+<li>Models need to be flexible enough to fit <span class="math inline">\(f\)</span> well</li>
 <li>Additional flexibility beyond this can produce overfitting</li>
 <li>Parametric algorithms are generally less flexible than non-parametric algorithms</li>
 <li>Parametric algorithms can become more flexible by increasing the number of features (<code>p</code> from 610/710; e.g., using more predictors, more complex, non-linear forms to when deriving features from predictors)</li>
@@ -486,7 +505,7 @@ ul.task-list li input[type="checkbox"] {
 <h3 data-number="1.3.2" class="anchored" data-anchor-id="how-do-we-assess-model-performance"><span class="header-section-number">1.3.2</span> How Do We Assess Model Performance?</h3>
 <p>There is no universally best statistical algorithm</p>
 <ul>
-<li><p>Depends on the true <code>f</code> and your goal (prediction or inference)</p></li>
+<li><p>Depends on the true <span class="math inline">\(f\)</span> and your goal (prediction or inference)</p></li>
 <li><p>We often compare multiple statistical algorithms (various parametric and non-parametric options) and model configurations more generally (combinations of different algorithms with different sets of features)</p></li>
 <li><p>When comparing models/configurations, we need to both <strong>fit</strong> these models and then <strong>select</strong> the best one</p></li>
 </ul>
@@ -501,7 +520,7 @@ ul.task-list li input[type="checkbox"] {
 <hr>
 <p>Two types of performance problems are typical</p>
 <ol type="1">
-<li>Models are <strong>biased</strong> if they don’t adequately represent the true <code>f</code>
+<li>Models are <strong>biased</strong> if they don’t adequately represent the true <span class="math inline">\(f\)</span>
 <ul>
 <li>Biased models will perform poorly in both training and test sets</li>
 </ul></li>
@@ -721,7 +740,7 @@ ul.task-list li input[type="checkbox"] {
 <ul>
 <li>Pre-recorded lectures</li>
 <li>Web book material</li>
-<li>Readings (<span class="citation" data-cites="ISL">@ISL</span> and other sources; All free)</li>
+<li>Readings (<span class="citation" data-cites="ISL">James et al. (<a href="#ref-ISL" role="doc-biblioref">2023</a>)</span> and other sources; All free)</li>
 <li>Application assignment</li>
 </ul></li>
 <li>Asychronous discussion and questions on Slack</li>
@@ -934,7 +953,7 @@ ul.task-list li input[type="checkbox"] {
 <hr>
 <p>Useful conceptual examples of bias-variance</p>
 <ul>
-<li>Example 1: Darts from <span class="citation" data-cites="Yarkoni2017">@Yarkoni2017</span></li>
+<li>Example 1: Darts from <span class="citation" data-cites="Yarkoni2017">Yarkoni and Westfall (<a href="#ref-Yarkoni2017" role="doc-biblioref">2017</a>)</span></li>
 </ul>
 <p><img src="figs/unit1_dartboard.png" class="img-fluid" style="width:100.0%"></p>
 <ul>
@@ -1004,6 +1023,14 @@ ul.task-list li input[type="checkbox"] {
 </ul>
 
 
+<div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-ISL" class="csl-entry" role="listitem">
+James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2023. <em>An <span>Introduction</span> to <span>Statistical Learning</span>: With <span>Applications</span> in <span>R</span></em>. 2nd ed. Springer <span>Texts</span> in <span>Statistics</span>. <span>New York</span>: <span>Springer-Verlag</span>.
+</div>
+<div id="ref-Yarkoni2017" class="csl-entry" role="listitem">
+Yarkoni, Tal, and Jacob Westfall. 2017. <span>“Choosing <span>Prediction Over Explanation</span> in <span>Psychology</span>: <span>Lessons From Machine Learning</span>.”</span> <em>Perspectives on Psychological Science</em> 12 (6): 1100–1122.
+</div>
+</div>
 </section>
 </section>
 </section>
