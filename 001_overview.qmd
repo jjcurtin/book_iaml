@@ -197,7 +197,7 @@ Generally:
 * Models need to be flexible enough to fit $f$ well
 * Additional flexibility beyond this can produce overfitting
 * Parametric algorithms are generally less flexible than non-parametric algorithms
-* Parametric algorithms can become more flexible by increasing the number of features (`p` from 610/710; e.g., using more predictors, more complex, non-linear forms to when deriving features from predictors)
+* Parametric algorithms can become more flexible by increasing the number of features ($p$ from 610/710; e.g., using more predictors, more complex, non-linear forms to when deriving features from predictors)
 * Parametric algorithms can be made less flexible through **regularization**.  There are techniques to make some non-parametric algorithms less flexible as well
 * You want the sweet spot for prediction.  You may want even less flexible for inference in increase interpretability.
 
@@ -229,16 +229,17 @@ We will learn many other performance metrics in a later unit
 
 Two types of performance problems are typical
   
-1. Models are **biased** if they don't adequately represent the true $f$
+1. Models are **underfit** if they don't adequately represent the true $f$, typically because they have oversimplied the relationship (e.g., linear function fit to quadratic DGP, missing key interaction terms)
+    * This models will yield **biased** predictions.  In other words, they will systematically either under-predict or over-predict $Y$ in some regions of the function.
     * Biased models will perform poorly in both training and test sets
   
-2. Models are **overfit** if they are too flexible and begin to fit the noise in the training set
+2. Models are **overfit** if they are too flexible and begin to fit the noise in the training set.
     * These models will perform well (too well actually) in the training set but poorly in test or validation sets
     * They will show high **variance** such that the model and its predictions change drastically depending on the training set where it is fit 
 
 -----
 
-More generally, these two problems are largely inversely related
+More generally, these problems and their consequences for model performance are largely inversely related
   
 * This is known as the **Bias-Variance trade-off**
 * We previously discussed reducible and irreducible error
@@ -285,12 +286,12 @@ Broadly, resampling techniques create multiple subsets of data random samples th
 **Test sets** are subsets that are used for **model evaluation**.  Generally, a model with the previously identified best configuration is re-fit to all available data other than the test set.  This fitted model is used to predict observations in the test set to estimate how well this model is expected to perform for new observations.  
 
 
-## An Example of Overfitting and the Bias-Variance Trade-off 
+## An Example of Underfitting, Overfitting and the Bias-Variance Trade-off 
 
 
 ### Overview of Example
 
-The concepts of overfitting and the bias-variance trade-off are critical to understand
+The concepts of underfitting vs. overfitting and the bias-variance trade-off are critical to understand
 
   * It is also important to understand how model flexibility can affect both the bias and variance of that model's performance  
 
@@ -298,7 +299,7 @@ The concepts of overfitting and the bias-variance trade-off are critical to unde
   
   * We will conduct a very simple simulation to demonstrate these concepts
 
-The code in this example is secondary to understanding the concepts of overfitting, bias, and the bias-variance trade-off
+The code in this example is secondary to understanding the concepts of underfittinng, overfitting, bias, variance, and the bias-variance trade-off
 
 * We will not display much of it so that you can maintain focus on the concepts
 * You will have plenty of time to learn the underlying 
@@ -330,7 +331,7 @@ We will attempt to model this cubic DGP with three different model configuration
 
 
 `r-colorize("If the DGP for y is a cubic function of x, what do we know about the expected bias for our three candidate model configurations in this example?", "red")`
-^[The simple linear model will be biased b/c it can only represent y as a linear function of x.  The two polynomial models will be generally unbiased b/c they have x represented with 20th order polynomials.  LASSO will be slightly biased due to regularization but more on that in a later unit]
+^[The simple linear model will underfit the true DGP and therefore it will be biased b/c it can only represent y as a linear function of x.  The two polynomial models will be generally unbiased b/c they have x represented with 20th order polynomials.  LASSO will be slightly biased due to regularization but more on that in a later unit]
 
 ```{r u1-ex1-1}
 #| echo: false
@@ -527,8 +528,7 @@ walk2(trains$df, titles, ~ plot_data(data = .x,
 
 -----
 
-2. We get one more large random sample (N = 5000) with the same DGP to use as a test set to evaluate all the models 
-that will be fit in the training sample across all of the simulations.
+2. We get one more large random sample (N = 5000) with the same DGP to use as a test set to evaluate all the models that will be fit in the training sample across all of the simulations.
 
 ```{r u1-ex1-11}
 #| echo: false
@@ -576,14 +576,10 @@ walk2(trains$df, titles,
 ```
 
 `r-colorize("Look in any training set.  Can you see evidence of bias for any model configuration?", "red")`
-^[The simple linear model is clearly biased.  It systemically underestimates Y in some portions of 
-the X distribution and overestimates Y in other portions of the X distribution.   
-This is true across training sets.]
+^[The simple linear model is clearly biased.  It systemically underestimates Y in some portions of the X distribution and overestimates Y in other portions of the X distribution.  This is true across training sets.]
 
 `r-colorize("Can you see any evidence of overfitting for any model configuration?", "red")`
-^[The polynomial linear model appears to overfit the data in the training set.  In other words,
-it seems to follow both the signal/DGP and the noise.  However, you can't be certain
-of this with only one training set and without knowing the DGP.  
+^[The polynomial linear model appears to overfit the data in the training set.  In other words, it seems to follow both the signal/DGP and the noise.  However, you can't be certain of this with only one training set and without knowing the DGP.  
 It is possible that the wiggles in the prediction line represent the real DGP.  
 You will need a test set to be certain about the degree of overfitting.]
 
@@ -623,16 +619,10 @@ plot_data(data = test,
 
 
 `r-colorize("Can you see evidence of bias for the simple linear models?", "red")` 
-^[Yes, consistent with what we saw in the training sets, the simple linear model systematically
-overestimates Y in some places and underestimates it in others.  The DGP is clearly NOT linear
-but this simple model can only make linear predictions.  It is a fairly biased model.  
-This bias will make a large contribution to the reducible error of the model]
+^[Yes, consistent with what we saw in the training sets, the simple linear model systematically overestimates Y in some places and underestimates it in others.  The DGP is clearly NOT linear but this simple model can only make linear predictions.  It is a fairly biased model that underfits the true DGP.  This bias will make a large contribution to the reducible error of the model]
 
 `r-colorize("How much variance across the simple linear models is present?", "red")` 
-^[There is not much variance in the prediction lines across the models that were fit to different
-training sets.  The slopes are very close across models and the intercepts only vary by 
-a small amount.   The simple linear model configuration does not appear to have high variance
-and model variance will not contribute much to its reducible error.]
+^[There is not much variance in the prediction lines across the models that were fit to different training sets.  The slopes are very close across models and the intercepts only vary by a small amount.   The simple linear model configuration does not appear to have high variance and model variance will not contribute much to its reducible error.]
 
 
 -----
@@ -652,18 +642,13 @@ plot_data(data = test,
 ```
 
 `r-colorize("Are they systematically biased?", "red")`
-^[There is not much systematic bias.  The overall function is generally cubic as is the DGP.  
-Bias will not contribute much to the model's reducible error.]
+^[There is not much systematic bias.  The overall function is generally cubic as is the DGP. Bias will not contribute much to the model's reducible error.]
 
 `r-colorize("How does the variance of these models compare to the variance of the simple linear models?", "red")`
-^[There is much higher model variance for this polynomial linear model relative to the simple linear model. Although
-all four models generally predict Y as a cubic function of X, there is also a non-systematic wiggle that is 
-different for each of the models.]
+^[There is much higher model variance for this polynomial linear model relative to the simple linear model. Although all four models generally predict Y as a cubic function of X, there is also a non-systematic wiggle that is different for each of the models.]
 
 `r-colorize("How does this demonstrate the connection between model overfitting and model variance?", "red")`
-^[Model variance is a result of overfitting to the training set.  If a model fits noise in its training set,
-that noise will be different in every dataset.  Therefore, you end up with different models depending on the
-training set in which they are fit.  And none of those models will do well with new data as you can see in this
+^[Model variance is a result of overfitting to the training set.  If a model fits noise in its training set, that noise will be different in every dataset.  Therefore, you end up with different models depending on the training set in which they are fit.  And none of those models will do well with new data as you can see in this
 test set because noise is random and different in each dataset.]
 
 -----
@@ -683,14 +668,11 @@ plot_data(data = test,
 ```
 
 `r-colorize("How does their bias compare to the simple and polynomial linear models?", "red")`
-^[It has low bias much like the polynomial linear model.  It is able to capture the true cubic DGP
-fairly well.  The regularization process slightly reduced the magnitude of the cubic
-(the prediction line is a little straighter than it should be) but not by much.]
+^[It has low bias much like the polynomial linear model.  It is able to capture the true cubic DGP fairly well.  The regularization process slightly reduced the magnitude of the cubic (the prediction line is a little straighter than it should be) but not by much.]
 
 
 `r-colorize("How does their variance compare to the simple and polynomial linear models?", "red")`
-^[It has low variance, much like the simple linear model.  All four models, fit in different
-training sets resulted in very similar prediction lines.]
+^[It has low variance, much like the simple linear model.  All four models, fit in different training sets resulted in very similar prediction lines.]
 
 
 -----
@@ -698,7 +680,7 @@ training sets resulted in very similar prediction lines.]
 6. Now we will **quantify** the performance of these models in training and test sets with the **root mean square error** performance metric.  This is the standard deviation of the error when comparing the predicted values for y to the actual values (ground truth) for y.
 
 `r-colorize("What do we expect about RMSE for the three models in train and test?", "red")`
-^[The **simple linear model** is biased and won’t even fit train for this reason.  However, it’s not very flexible so it won’t be overfit to train and therefore should fit comparably in test.  The **polynomial linear model** won't be biased at all given that the DGP is polynomial.  However, it is overly flexible (20th order) and so will substantially overfit the training data such that it will show high variance and its performance will be poor in test.  The **polynomial LASSO** will be the sweet spot in bias-variance trade-off.  It has a little bias but not much.  However, it is not as flexible due to regularization by lambda so it won’t be overfit to its training set.  Therefore, it should do well in the test set.]
+^[The **simple linear model** is underfit to the TRUE DGP.  Therfore it is systematically biased everywhere it is use and won’t even fit train for this reason.  However, it’s not very flexible so it won’t be overfit to the noise in train and therefore should fit comparably in test.  The **polynomial linear model** won't be biased at all given that the DGP is polynomial.  However, it is overly flexible (20th order) and so will substantially overfit the training data such that it will show high variance and its performance will be poor in test.  The **polynomial LASSO** will be the sweet spot in bias-variance trade-off.  It has a little bias but not much.  However, it is not as flexible due to regularization by lambda so it won’t be overfit to its training set.  Therefore, it should do well in the test set.]
 
 -----
 
@@ -775,8 +757,8 @@ bind_rows(rmse_test, rmse_train) %>%
     * Self-paced (except for due dates and discussion)
     * Office hours
       * John - Thursdays, 1 – 2 pm
-      * Matt - Tuesdays 1:30 - 2:30 pm
-      * Sarah - Mondays 11 - 12 pm
+      * Michelle - UPDATE 
+      * Kendra - UPDATE 
       * personal appointments & Slack
 
 3. The web book
@@ -794,19 +776,19 @@ bind_rows(rmse_test, rmse_train) %>%
     * Grades are secondary (quizzes, application assignments, exams)
 
 5. Why these tools?
-    * `rmarkdown`?
+    * `Quarto`
+      * Scientific publishing system (reproducible code, with output, presentations, papers)
       * Tool for collaboration
-      * Interactive with static product (knit html)
-      * Application assignments & web book (bookdown - a superset of R Markdown)
+      * Interactive with static product (render to html or pdf)
+      * Application assignments & web book 
     * `tidyverse`?
       * The tidyverse is an opinionated collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data     structures
       * Unmatched for data wrangling, EDA, and data visualization
     * `tidymodels`?
       * Consistent interface to hundreds of statistical algorithms
-      * Under VERY active development (young but maturing)
+      * Under VERY active development 
       * Well-supported and documented ([tidymodels.org](https://www.tidymodels.org/))
-      * Be careful with other web documentation
-      * Data wrangling in `dplyr` vs. `recipes`
+      * Be careful with other web documentation (often out of date)
     
 6. Why me?
     * Primary tools in our research program
