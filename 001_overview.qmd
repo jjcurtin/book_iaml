@@ -44,9 +44,9 @@ tidymodels_conflictRules() # from fun_ml.R
 
 **Readings**
 
-* [PSY 752 course syllabus](https://dionysus.psych.wisc.edu/iaml/pdfs/syllabus.pdf)
-* @ISL [Chapter 2, pp 15 - 42](https://dionysus.psych.wisc.edu/iaml/pdfs/ISLRv2.pdf)
-* @Yarkoni2017 [paper](https://dionysus.psych.wisc.edu/iaml/pdfs/yarkoni_2017_choosing_prediction_over_explanation.pdf)
+* [PSY 752 course syllabus](syllabus.pdf)
+* @ISL [Chapter 2, pp 15 - 42](pdfs/isl_2.pdf)
+* @Yarkoni2017 [paper](pdfs/yarkoni_2017_choosing_prediction_over_explanation.pdf)
 
 
 **Lecture & Discussion Videos**
@@ -362,7 +362,7 @@ get_sample <- function(params){
               y = rnorm(length(x), b0 + (b1 * x) + (b2 * x^2) + (b3 * (x + h)^3), params$noise),
               y_dgp = b0 + (b1 * x) + (b2 * x^2) + (b3 * (x + h)^3))
 }
-|> 
+ 
 # functions to fit each of the three model configurations in train
 
 fit_lm1 <- function(train){
@@ -422,11 +422,13 @@ plot_data <- function(data, line_names, line_colors, line_types, line_labels, ti
     pivot_longer(cols = all_of(line_names),  
                  names_to = "model", 
                  values_to = "pred") %>% 
-    mutate(model = factor(model, levels = line_names, labels = line_labels, ordered = TRUE)) # to maintain order of lines
+    mutate(model = factor(model, levels = line_names, labels = line_labels, 
+                          ordered = TRUE)) # to maintain order of lines
   
   p <- ggplot(data = data, aes(x = x)) +
     geom_point(data = xy, aes(x = x, y = y), color = "gray") +
-    geom_line(data = preds, aes(x = x, y = pred, group = model, color = model, linetype = model), size = 1.25) +
+    geom_line(data = preds, aes(x = x, y = pred, group = model, color = model, 
+                                linetype = model), size = 1.25) +
     scale_color_manual(values = line_colors) +
     scale_linetype_manual(values = line_types) +
     ylim(0, 1600) +
