@@ -1,1 +1,1625 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
 # Exploratory Data Analysis
+
+## Overview of Unit
+  
+**Learning Objectives**
+  
+* Stages of Analysis
+* Best practices for data storage, variable classing, data dictionaries
+* Problems and solutions regarding data leakage
+* Key goals and techniques cleaning EDA
+  * Tidying names and response labels
+  * Appropriate visualizations based on variable class
+  * Summary statistics based on variable class
+* Proper splitting for training/validation and test sets
+* Key goals and techniques modeling EDA
+  * Appropriate visualizations based on variable class
+  * Summary statistics based on variable class
+* Introductory use of recipes for feature engineering
+
+
+**Readings**
+[NOTE: These are short chapters.  You are reading to understand the framework of visualizing data in R.  Don't feel like you have to memorize the details.  These are reference materials that you can turn back to when you need to write code!]
+
+* @RDS [Chapter 1, Data Visualization](https://r4ds.hadley.nz/data-visualize)
+* @RDS [Chapter 9, Layers](https://r4ds.hadley.nz/layers)
+* @RDS [Chapter 10, Exploratory Data Analysis](https://r4ds.hadley.nz/eda)
+
+
+**Lecture Videos**
+  
+* [Lecture 1: Overview of EDA](); ~ 24 mins
+* [Lecture 2: EDA for Cleaning](); ~ 33 mins
+* [Lecture 3: Introduction to Recipes](); ~ 17 mins
+* [Lecture 4: EDA for Modeling Part I](); ~ 17 mins
+* [Lecture 5: EDA for Modeling Part II](); ~ 22 mins
+* [Discussion]()
+
+Post questions or discuss readings or lectures in Slack
+
+**Application Assignment**
+ 
+ NEED TO UPDATE!!!
+ 
+* [data](https://dionysus.psych.wisc.edu/iaml/homework/unit_2/ames_raw_class.csv)
+* [data dictionary](https://dionysus.psych.wisc.edu/iaml/homework/unit_2/ames_data_dictionary.pdf)
+* cleaning EDA:  [rmd](https://dionysus.psych.wisc.edu/iaml/homework/unit_2/hw_unit_2_cleaning.Rmd) 
+[html](https://dionysus.psych.wisc.edu/iaml/homework/unit_2/hw_unit_2_cleaning.html)
+* modeling EDA: [rmd](https://dionysus.psych.wisc.edu/iaml/homework/unit_2/hw_unit_2_modeling.Rmd)
+[html](https://dionysus.psych.wisc.edu/iaml/homework/unit_2/hw_unit_2_modeling.html)
+* [fun_modeling.R]("https://github.com/jjcurtin/lab_support/blob/main/fun_modeling.R?raw=true")
+* solutions:  [knit cleaning EDA](https://dionysus.psych.wisc.edu/iaml/homework/unit_2/key_unit_2_cleaning.html); [knit modeling EDA](https://dionysus.psych.wisc.edu/iaml/homework/unit_2/key_unit_2_modeling.html)
+
+Submit the [application assignment]() and [unit quiz]() by 8 pm on Wednesday, January 31st
+
+
+## Overview of Exploratory Data Analysis
+
+
+### Stages of Data Analysis and Model Development
+
+These are the main stages of data analysis for machine learning and the data that are used
+
+1. EDA: Cleaning (full dataset)
+
+2. EDA: Split data into training, validation and test set(s)
+
+3. EDA: Modeling (training sets)
+
+4. Model Building: Feature engineering (training sets)
+
+5. Model Building: Fit many models configurations (training set)
+
+6. Model Building: Evaluate many models configurations (validation sets)
+
+7. Final Model Evaluation: Select final/best model configuration (validation sets)
+
+8. Final Model Evaluation: Fit best model configuration (use both training and validation sets)
+
+9. Final Model Evaluation: Evaluate final model configuration (test sets)
+
+10. Final Model Evaluation: Fit best model configuration to ALL data (training, validation, and test sets) if you plan to use it for applications.
+
+
+The earlier stages are highly iterative:
+
+* You may iterate some through EDA stages 1-3 if you find further errors to clean in stage 3 [**But make sure you resplit into the same sets**]
+* You will iterate many times though stages 3-6 as you learn more about your data both through EDA for modeling and evaluating actual models in validation
+
+
+You will NOT iterate back to earlier stages after you select a final model configuration
+
+* Stages 7 - 10 are performed ONLY ONCE
+* Only one model configuration is selected and re-fit and only that model is brought into test for evaluation
+* Any more than this is essentially equivalent to p-hacking in traditional analyses
+* Step 10 only happens if you plan to use the model in some application
+
+### Data file formats
+
+We generally store data as CSV [comma-separated value] files
+
+* Easy to **view directly** in a text editor
+* Easy to **share** because others can use/import into any data analysis platform
+* Works with **version control** (e.g. git, svn)
+* use `read_csv()` and `write_csv()`
+
+Exceptions include: 
+
+* We **may** consider binary (.rds) format for very big files because read/write can be slow for csv files.  
+* Binary file format provides a modest additional protection for sensitive data (which we also don't share)
+* use `read_rds()` and `write_rds()`
+
+
+See [chapter 7 - Data Import](https://r4ds.hadley.nz/data-import) in @RDS for more details and advanced techniques for importing data using `read_csv()`
+
+
+### Classing Variables
+We store and class variables in R based on their data type.
+
+For **nominal** variables:
+
+* We store (in csv files) these variables as character class with descriptive text labels for the levels
+  * Easier to share/document
+  * Reduces errors
+* We class these variables in R as unordered factors when we load them (using `read_csv()`)
+* **Special case**: for a dichotomous outcome variable, the positive/event level of dichotomous factor outcome should be first level of the factor but we still keep it unordered.
+* **NOTE**: The order of levels for an unordered factor may also matter for factor predictors (e.g., `step_dummy()` uses first level as reference).
+
+
+For **ordinal** variables: 
+
+* We store (in csv files) these variables as character class with descriptive text labels for the levels
+	* Easier to share/document
+	* Reduces errors
+* We class these variables in R as ordered factors
+* Confirm that the order is set up correctly
+* During feature engineering stage, we can then either
+  * Treat as an ordered or unordered factor and create features using `step_dummy()`
+  * Treat as a numeric variable using `step_ordinalscore()`
+	  
+For **interval and ratio** variables:
+
+* We store these variables as numeric
+* We class these variables as numeric (either integer or double - let R decide) during the read and clean stage (They are typically already in this class when read in)
+
+-----
+
+We will refer to both nominal and ordinal variables as categorical variables
+
+* They are stored as character
+* They are classed as factors
+* They include a limited number of unique responses
+* Similar EDA approaches are used with both
+* Ordinal variables may show non-linear relations b/c they may not be evenly spaced.  In these instances, we can use feature engineering approaches that are also used for nominal variables
+
+We will often refer to interval and ratio variables as numeric variables
+
+* The are stored as numeric
+* They are classed with one of two numeric data types
+* They have many (infinite?) unique responses
+* Similar EDA approaches are used with both
+* Similar feature engineering approaches are used with both
+
+
+### Data Dictionaries
+
+You should always make a data dictionary for use with your data files.  
+
+* Ideally, these are created during the planning phase of your study, prior to the start of data collection
+* Still useful if created at the start of data analysis
+
+Data dictionaries:
+
+* help you keep track of your variables and their characteristics (e.g., valid ranges, valid responses)
+* can be used by you to check your data during EDA
+* can be provided to others when you share your data (data are not generally useful to others without a data dictionary)
+
+We will see a variety of data dictionaries throughout the course.   Many are not great as you will learn.
+
+
+### The Ames Housing Prices Dataset
+
+We will use the Ames Housing Prices dataset as a running example this unit (and some future units and application assignments as well)
+
+* You can [read more](http://jse.amstat.org/v19n3/decock.pdf) about the original dataset created by Dean DeCock 
+
+* The data set contains data from home sales of individual residential property in Ames, Iowa
+from 2006 to 2010
+
+* The original data set includes 2930 observations of sales price and a large number of explanatory
+variables (23 nominal, 23 ordinal, 14 discrete, and 20 continuous)
+
+* This is the [original data dictionary](data/ames_data_dictionary.pdf)
+
+* The challenge with this dataset is to build the best possible prediction model for the
+sale price of the homes.
+
+-----
+
+First, lets set up our environment with functions from important packages.  I strongly recommend reviewing our recommendations for best practices regarding [managing function conflicts](https://jjcurtin.github.io/book_dwvt/conflicts.html) now. It will save you a lot of headaches in the future.
+
+* First we set a conflicts policy that will produce errors if we have unanticipated conflicts.
+* We next source a library of functions that we use for common tasks in machine learning.  This includes a function (`tidymodels_conflictRules()`) that sets conflict rules to allow us to attach `tidymodels` functions without conflicts with `tidyverse` functions.  You can [review](https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true) that function to see what it does (search for that function name at the link)
+* Then we use that function
+```{r conflict_policy}
+options(conflicts.policy = "depends.ok")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+tidymodels_conflictRules()
+```
+
+Now we load packages for functions that we will use regularly.  There are five things to note RE best practices
+
+1. If we will use a lot of functions from a package (e.g., `tidyverse`, `tidymodels`), we attach the full package
+2. If we will use only several functions from a package (but plan to use them repeatedly), we use the `include.only` parameter to just attach those functions.
+3.  At times, if we plan to use a single function from a package only 1-2x times, we may not even attach that function at all.  Instead, we just call it using its namespace (i.e.  `packagename::functionname`)
+4. If a package has a function that conflicts with our primary packages and we don't plan to use that function, we load the package but exclude the function.  If we really needed it, we can call it with its namespace as per option 3 above.
+5. Pay attention to conflicts that were allowed to make sure you understand and accept them. (I left the package messages and warnings in the book this time to see them. I will hide them to avoid cluttering book in later units but you should always review them.)
+```{r u2-overview-1}
+library(janitor, include.only = "clean_names")
+library(cowplot, include.only = "plot_grid") # for plot_grid()
+library(kableExtra, exclude = "group_rows") # exclude dplyr conflict
+library(tidyverse) # for general data wrangling
+library(tidymodels) # for modeling
+```
+
+Then we source (from github) two other libraries of functions that we use commonly for exploratory data analyses.  You should review these function scripts to see how I've written this code. 
+```{r}
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+```
+
+Finally, we tune our environment a bit more by setting plot themes and print options
+```{r}
+theme_set(theme_classic())
+options(tibble.width = Inf)
+```
+
+And we set a relative path to our data.  This assumes you are using an RStudio Project with the path to the data relative to that project file.  I've provided more detail [elsewhere](https://jjcurtin.github.io/book_dwvt/file_and_path_management.html) on best practices for managing files and paths.
+```{r}
+path_data <- "data"
+```
+
+Here is a quick glimpse of the subset of observations we will work with in Units 2-3 and the first two application assignments.  Note that we re-class all character variables as unordered factors for now
+
+
+```{r u2-overview-2}
+data_all <- read_csv(here::here(path_data, "ames_raw_class.csv"),   # <1>
+                     col_types = cols()) |> # <2> 
+  mutate(across(where(is.character), as_factor)) |> # <3> 
+  glimpse() # <4>
+```
+1. First we read data using a relative path and the `here::here()` function.  This is a replacement for `file.path()` that works better for both interactive use and rendering in Quarto when using projects.
+2.  We use `col_types = cols()` to let R guess the correct class for each column. This suppresses messages that aren't important at this point prior to EDA.
+3. Then we use a mutate to re-class all character data to unordered factors.
+4. It is good practice to always `glimpse()` data after you read it.
+
+-----
+
+Dataset Notes: 
+
+* Dataset has N = 1955 rather than 2930.
+  * I have held out remaining observations to serve as a test set for a friendly competition in Unit 3
+  * I will judge your models' performance with this test set at that time!
+  * More on the importance of held out test sets as we progress through the course
+
+* This full dataset has 81 variables.  For the lecture examples in units 2-3 we will only use a subset of the predictors
+
+* You will use different predictors in the next two application assignments
+
+```{r  u2-overview-3}
+data_all <- data_all |> 
+  select(SalePrice,
+         `Gr Liv Area`, 
+         `Lot Area`, 
+         `Year Built`, 
+         `Overall Qual`, 
+         `Garage Cars`,
+         `Garage Qual`,
+         `MS Zoning`,
+         `Lot Config` ,
+         `Bldg Type`) |> 
+  glimpse()
+```
+
+**Coding Sidebar**: 
+
+* Notice the non-standard variable names that include spaces.  
+* We use the back-ticks around the variable names to allow us reference those variables.  
+* We will fix this during the cleaning process.
+* Never use spaces in variable names when setting up your own data!!! (More on this in a moment...)
+
+
+## Exploratory Data Analysis for Data Cleaning
+
+EDA *could* be done using either `tidyverse` packages and functions or `tidymodels` (mostly using the `recipes` package.)
+
+* We prefer to use the richer set of functions available in the tidyverse (and `dplyr` and `purrr` packages in particular).
+
+* We will reserve the use of recipes for feature engineering only when we are building features for models that we will fit in our training sets and evaluation in our validation and test sets.  
+
+
+### Data Leakage Issues
+Data leakage refers to a mistake made by the creator of a machine learning model in which they accidentally share information between their training set and held-out validation or test sets
+
+* Training sets are used to fit models with different configurations
+* Validation sets are used to select the best model among those with different configurations (not needed if you only have one configuration)
+* Test sets are used to evaluate a best model
+
+* When splitting data-sets into training, validation and test sets, the goal is to ensure that no data (or information more broadly) are shared between the three
+  * No data or information from test should influence either fitting or selecting models 
+  * Test should only be used once to evaluate a best/final model
+  * Train and validation set also must be segregated (although validation sets may be used to evaluate many models)
+  * Information necessary for transformations and other feature engineering (e.g., means/sds for centering/scaling, procedures for missing data imputation) must all be based only on training data.
+  * Data leakage is common if you are not careful.
+
+In particular, if we begin to use test data or information about test during model fitting
+
+* We risk overfitting
+* This is essentially the equivalent of p-hacking in traditional analyses
+* Will report too optimistic performance estimate, which could have harmful real-world consequences.
+
+
+### Tidy variable names
+
+Use snake case for variable names
+
+* `clean_names()` from `janitor` package is useful for this.
+* May need to do further correction of variable names using `rename()`
+* See more details about tidy names for objects (e.g., variables, dfs, functions) per [Tidy Style Guide](https://style.tidyverse.org/syntax.html#object-names)
+
+
+```{r u2-clean-1}
+data_all <- data_all |> 
+  clean_names("snake")
+
+data_all |> names()
+```
+
+### Explore variable classes
+
+At this point, variables should be classed as either numeric or factor
+
+* Interval and ratio variables use numeric classes (dbl or int)
+* Nominal and ordinal variable use factor (unordered or ordered)
+* Useful for variable selection later (e.g., `where(is.numeric)`)
+
+Subsequent cleaning steps are clearer if we have this established/confirmed now
+
+-----
+
+We have one variable to change to factor class
+
+* `overall_qual` is ordinal 
+
+```{r u2-clean-2}
+data_all |> glimpse()
+```
+
+```{r u2-clean-3}
+data_all <-  data_all |> 
+  mutate(overall_qual = as_factor(overall_qual)) |> 
+  glimpse()
+```
+
+### Skimming the data
+
+`skim()` from the `skimr` package is a wonderful and customizable function for summary statistics
+
+* It is highly customizable so we can write our own versions for our own needs
+* We use different versions for cleaning and modeling EDA
+* For cleaning EDA, we just remove some stats that we don't want to see at this time
+* We can get many of the summary stats for cleaning in one call 
+* We have a custom skim defined in the `fun_eda.R` library that we use regularly.  Here is the code but you can use the function directly if you sourced `fun_eda.R` (as we did above)
+
+```{r u2-clean-4}
+#| eval: false
+
+skim_some <- skim_with(numeric = sfl(mean = NULL, sd = NULL, p25 = NULL, p50 = NULL, p75 = NULL, hist = NULL))
+```
+
+-----
+
+Here is what we get with our new `skim_some()` function
+
+* We will refer to this again for each characteristic we want to review for instructional purposes 
+* We can already see that we can use `skim_some()` to confirm that we only have numeric and character classes
+```{r u2-clean-5}
+data_all |> 
+  skim_some()
+```
+
+**Coding sidebar 1:**
+
+* Write functions whenever you will repeat code often. You can now reuse `skim_some()`
+* `skim_with()` is an example of a function factory - a function that is used to create a new function
+  * `partial()` and `compose()` are two other function factories we will use at times
+  * More details on function factories is available in [Advanced R](https://adv-r.hadley.nz/function-factories.html)
+
+-----
+
+**Coding sidebar 2:**
+  
+* Gather useful functions together in a script that you can reuse.
+* All of the reusable functions in this and later units are available to you in one of my [public github repositories](https://github.com/jjcurtin/lab_support). 
+* You can load these functions into your workspace directly from github using `devtools::source_url()`. For example: `devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_modeling.R?raw=true")`
+* You should start to gather your favorite custom functions together in your own script(s).  
+* You can save your own scripts in a local file and load them into your workspace using `source()` or you can make your own github repo so you can begin to share your code with others!
+
+### Missing Data - All variables
+
+`skim_some()` provides us with missing data counts and complete data proportions for each variable
+
+
+```{r u2-clean-6}
+data_all |> 
+  skim_some()
+```
+
+-----
+
+View full observation for missing value
+
+* `print()` will print only 20 rows and number of columns that will display for width of page
+  * Set `options()` if you will do a lot of printing and want full dataframe printed
+* Use `kbl()` from `kableExtra` package for formatted tables
+* Use `View()` interactively in R Studio
+
+**Option 1 (Simple)**:  Use print() with `options()`
+
+```{r u2-clean-7}
+options(tibble.width = Inf, tibble.print_max = Inf)
+
+data_all |> filter(is.na(garage_cars)) |> 
+  print()
+
+data_all |> filter(is.na(garage_qual)) |> 
+  print()
+```
+
+-----
+
+Here are some more advanced options using `kbl()` for the df with many rows
+
+* `kable()` tables from `knitr` package and `kableExtra` extensions (including `kbl()`) are very useful during EDA and also final publication quality tables
+* use `library(kableExtra)`
+* see [vignettes for kableExtra](https://cran.r-project.org/web/packages/kableExtra/vignettes/awesome_table_in_html.html)
+
+**Option 2 (more advanced)**: Use a function for kables that we created.  Code is displayed here but the function is available to you if you source fun_eda.R from Github
+
+```{r u2-clean-9, eval = FALSE}
+#| eval: false
+
+# Might want to use height = "100%" if only printing a few rows
+print_kbl <- function(data, height = "500px") { # <1>
+  data |> 
+    kbl(align = "r") |> 
+    kable_styling(bootstrap_options = c("striped", "condensed")) |> 
+    scroll_box(height = height, width = "100%") # <2>
+}
+```
+1. Defaults to a output box of height = "500px".  Can set to other values if preferred.
+2. Might want to use `height = "100%"` if only printing a few rows. 
+
+-----
+
+```{r}
+data_all |> filter(is.na(garage_qual)) |> 
+  print_kbl()
+```
+
+
+**Option 3 (Most advanced)**: Line by line kable table. You can make this as complicated and customized as you like. This is a simple example of options
+
+```{r u2-clean-8}
+data_all |> filter(is.na(garage_qual)) |> 
+  kbl(align = "r") |> 
+  kable_styling(bootstrap_options = c("striped", "condensed")) |> 
+  scroll_box(height = "500px", width = "100%")
+```
+
+-----
+
+**Coding sidebar:**
+
+* In the above example, we created a function (`print_kbl()`) from scratch (rather than using a function factory)
+* See [functions chapter](https://r4ds.hadley.nz/functions.html) in @RDS for help.
+* See [functionals chapter](https://adv-r.hadley.nz/functionals.html) in @AR. 
+
+-----
+
+In this instance, if we consult our [data dictionary](data/ames_data_dictionary.pdf), we see that `NA` for `garage_qual` should be coded as "no garage".  We will correct this in our data set.  
+
+This is a pretty poor choice on the part of the researchers who created the dataset because it becomes impossible to distinguish between `NA` that means no garage vs. true NA for the variable.  In fact, if you later do really careful EDA on the full data set with all variables, you will see this problem likely exists in this dataset
+
+Anyway, let's correct all the `NA` for `garage_qual` to "no_garage" using `mutate()` 
+
+```{r u2-clean-10}
+data_all <- data_all |> 
+  mutate(garage_qual = fct_expand(garage_qual, "no_garage"), # <1>
+         garage_qual = replace_na(garage_qual, "no_garage")) # <2>
+
+```
+1. First add a new level to the factor
+2. Then recode NA to that new level
+
+We will leave the `NA` for `garage_cars` as `NA` because its not clear if that is truly missing or not, based on further EDA not shown here.
+
+### Explore Min/Max Response for Numeric Variables
+
+We should explore mins and maxes for all numeric variables to detect out of valid range numeric responses
+
+Could also do this for ordinal variables that are coded with numbers
+
+* e.g., `overall_qual` (1-10) vs. `garage_qual` (no_garage, Po, Fa, TA, Gd, Ex)
+* This is only a temporary mutation of `overall_qual` for this check
+
+We can use `skim_some()` again
+
+* p0 = min
+* p100 = max
+
+```{r u2-clean-11}
+data_all |>
+  mutate(overall_qual = as.numeric(overall_qual)) |> 
+  skim_some()
+```
+
+### Explore All Responses for Categorical Variables
+
+We should explore all unique responses for nominal variables
+
+Might also do this for ordinal variables that are coded with labels vs. numbers.  
+
+```{r u2-clean-13}
+data_all |> 
+  select(where(is.factor)) |>
+  walk(\(column) print(levels(column)))
+```
+
+
+**Coding sidebar**: 
+
+* Above, we demonstrate the use of an anonymous function (`\(column) print(levels(column))`), which is a function we use once that we don't bother to assign a name (since we won't reuse it).  We often use anonymous functions when using the functions from the `purrr` package (e.g., `map()`, `walk()`) 
+* We use `walk()` from the `purrr` package to apply our anonymous function to all columns of the data frame at once
+* Just copy this code for now
+* We will see simpler uses later that will help you understand iteration with `purrr` functions
+* See the chapter on [iteration](https://r4ds.hadley.nz/iteration) in *R for Data Science (2e)* for more info on `map()` and `walk()`
+
+### Tidy Responses for Categorical Variables
+
+Feature engineering with nominal and ordinal variables typically involves 
+
+* Converting nominal predictors to factors
+* Converting ordinal predictors to ordered factors
+* Often creating dummy features from factors and ordered factors
+
+This feature engineering will use response labels for naming new features
+
+* Therefore, it is a good idea to have the responses snake-cased and cleaned up a bit so that these new feature names are clean/clear.
+
+Here is an easy way to convert responses for character variables to snake case using a function (`tidy_responses()`) we share in `fun_eda.R` (reproduced here). This uses regular expressions (regex), which will will learn about in a later unit on text processing.
+You could expand this cleaning function if you encounter other issues that need to be cleaned in the factor levels.
+```{r u2-clean-14}
+#| eval: false
+
+tidy_responses <- function(column){
+  # replace all non-alphanumeric with _
+  column <- fct_relabel(column, \(column) str_replace_all(column, "\\W", "_"))
+  # replace whitespace with _
+  column <- fct_relabel(column, \(column) str_replace_all(column, "\\s+", "_"))
+  # replace multiple _ with single _
+  column <- fct_relabel(column, \(column) str_replace_all(column, "\\_+", "_"))
+  #remove _ at end of string
+  column <- fct_relabel(column, \(column) str_replace_all(column, "\\_$", ""))
+  # remove _ at start of string
+  column <- fct_relabel(column, \(column) str_replace_all(column, "\\^_", ""))
+  # convert to lowercase
+  column <- fct_relabel(column, tolower)
+  factor(column)
+}
+```
+
+Let's use the function
+
+```{r u2-clean-15}
+data_all <- data_all |> 
+  mutate(across(where(is.factor), tidy_responses)) |> 
+  glimpse()
+```
+
+**Coding sidebar**: See [more details](https://tidyselect.r-lib.org/reference/language.html) on the tidy selection helpers like `all_of()` and `where()`
+
+-----
+
+Alas, these response labels were pretty poorly chosen so some didn't convert well
+
+* Avoid this problem and choose good response labels from the start for your own data
+* You can use `fct_recode()` to do further recodes inside of `mutate()` if you want to clean the labels further
+* Here, we show you what we got from using `tidy_responses()`
+```{r u2-clean-16}
+data_all |> 
+  select(where(is.factor)) |>
+  walk(\(column) print(levels(column)))
+```
+
+The full dataset is now clean!
+
+### Train/Validate/Test Splits
+
+The final task we typically do as part of the data preparation process is to split
+the full dataset into training, validation and test sets.
+
+* Test sets are "typically" between 20-30% of your full dataset
+  * There are costs and benefits to larger test sets
+  * We will learn about these costs/benefits in the unit on resampling
+  * I have already held out the test set
+  
+* There are many approaches to validation sets
+  * For now (until unit 5) we will use a single validation set approach
+  * We will use 25% of the remaining data (after holding out the test set) as a validation set for this example
+
+* It is typical to split data on the outcome within strata
+  * For a categorical outcome, this makes the proportions of the response categories more balanced across the train, validation, and test sets
+  * For a numeric outcome, we first break up the distribution into temporary bins (see $breaks = 4$ below) and then we split within these bins
+* **IMPORTANT**: Set a seed so that you can reproduce these splits if you later do more cleaning
+
+
+```{r u2-clean-18}
+set.seed(20110522)
+splits <- data_all |> 
+  initial_split(prop = 3/4, strata = "sale_price", breaks = 4)
+```
+
+-----
+
+We then extract the training set from the splits and save it
+
+* Training sets are used for "analysis"- hence the name of the function
+```{r u2-clean-19}
+splits |> 
+  analysis() |> # <1> 
+  glimpse() |> 
+  write_csv(here::here(path_data, "ames_clean_class_trn.csv"))
+```
+1. `analysis()` pulls out the training set from our split of `data_all`
+
+-----
+
+We will not need the validation set for modeling EDA
+
+* It should NOT be used for anything other than evaluating models to select the best model configuration
+* We do NOT do Modeling EDA or Model Fitting with the validation set
+* Save it in this clean form for easy use when you need it
+* We use the validation set to "assess" models that we have fit in training sets - hence the name of the function
+
+```{r u2-clean-20}
+splits |> 
+  assessment() |> # <1> 
+  glimpse() |> 
+  write_csv(here::here(path_data, "ames_clean_class_val.csv"))
+```
+1. `assessment()` pulls out the validation set from our split of `data_all`
+
+## Exploratory Data Analysis for Modeling
+
+Now let's begin our Modeling EDA
+
+We prefer to write separate scripts for Cleaning vs, Modeling EDA (but not displayed here)
+
+* This keeps these two processes separate in our minds
+* Cleaning EDA is done with full dataset but Modeling EDA is only done with a training set - NEVER use validation or test set
+
+-----
+
+Lets re-load (and glimpse) our training set to pretend we are at the start of a new script.
+
+Now that we are done cleaning the data, we should start to fully class our variables for how we will use them for modeling EDA and modeling more generally.
+
+* Numeric predictors are classes as numeric (int or double)
+* categorical predictors are classed as unordered or ordered factors.
+
+
+```{r}
+ data_trn <- read_csv(file.path(path_data, "ames_clean_class_trn.csv")) |> 
+  glimpse()
+```
+
+
+Opps, notice that `overall_qual` is back to being classed as numeric (dbl).  
+
+* This is because `read_csv()` guesses the type for each column and we used only numbers for this ordinal categorical variable.   
+* You can avoid spending a lot of time re-classing all of your data sets by specifying their type when you first read them.  
+* I prefer to indicate column types with the `col_types` parameter set to a string or use a list as below.  See `vignette("readr")` for more info.  
+* It is good practice to supply an explicit column specification. It is more work, but it ensures that you get warnings if the data changes in unexpected ways.
+* Lets try this again
+  * We can also convert character classes to unordered and ordered factors at this point too
+
+```{r}
+ data_trn <- 
+  read_csv(here::here(path_data, "ames_clean_class_trn.csv"), 
+           col_types = list(sale_price = col_double(), # <1>
+                            gr_liv_area = col_double(),
+                            lot_area = col_double(),
+                            year_built = col_double(),
+                            overall_qual = col_factor(levels = as.character(1:10), # <2>
+                                                      ordered = TRUE),
+                            garage_cars = col_double(),
+                            garage_qual = 
+                              col_factor(levels = c("no_garage", "po", "fa", "ta", "gd", "ex"), 
+                                         ordered = TRUE),
+                            ms_zoning = col_factor(), # <3>
+                            lot_config = col_factor(),
+                            bldg_type = col_factor())) |> 
+  glimpse()
+```
+1. Use `col_double()` to class numeric columns
+2. For ordered factors, use `col_factor()` and need to indicate `levels` in order and set `ordered = TRUE`
+3. For unordered factors, use `col_factor()` again but can just use the default ordering unless there is a reason to re-order
+
+* Alternatively, you can read the data using `col_types = cols()` and then use mutate statements to class the columns as needed.  Both approaches follow best practices.
+-----
+
+There are 3 basic types of Modeling EDA you should always do
+
+1. Explore missingness for predictors
+2. Explore univariate distributions for outcome and predictors
+3. Explore bivariate relationships between predictors and outcome
+
+As a result of this exploration, we will:
+
+* Identify promising predictors
+* Determine appropriate feature engineering for those predictors (e.g., transformations)
+* Identify outliers and consider how to handle when model building
+* Consider how to handle imputation for missing data (if any)
+
+### Overall Summary of Feature Matrix
+
+Before we dig into individual variables and their distributions and relationships with the outcome, it's nice to start with a big picture of the dataset
+
+* We use another customized version of `skim()` from the `skimr` package to provide this
+* Just needed to augment it with skewness and kurtosis statistics for numeric variables
+* and remove histogram b/c we don't find that small histogram useful
+* included in `fun_eda.R` on github
+```{r}
+#| eval: false
+
+skew_na <- partial(e1071::skewness, na.rm = TRUE)
+kurt_na <- partial(e1071::kurtosis, na.rm = TRUE)
+
+skim_all <- skimr::skim_with(numeric = skimr::sfl(skew = skew_na, 
+                                                  kurtosis = kurt_na, 
+                                                  hist = NULL))
+```
+
+```{r}
+data_trn |> 
+  skim_all()
+```
+
+Careful review of this output provides a great orientation to our data
+
+### Univariate Distributions
+
+Exploration of univariate distributions are useful to 
+
+* Understand variation and distributional shape
+* May suggest need to consider transformations as part of feature engineering
+* Can identify univariate outliers (valid but disconnected from distribution so not detected in cleaning)
+
+
+We generally select different visualizations and summary statistics for categorical vs. numeric variables
+
+#### Categorical Variables
+
+##### Barplots
+
+The primary visualization for categorical variables is the bar plot
+
+Define and customize it within a function for repeated use.  We share this and all the remaining plots used in this unit in `fun_plot.R`. Source it to use them without having to re-code each time
+```{r u2-modeling-1}
+#| eval: false
+
+plot_bar <- function(df, x){
+  x_label_size <- if_else(skimr::n_unique(df[[x]]) < 7, 11, 7)
+  
+  df |>
+    ggplot(aes(x = .data[[x]])) +
+    geom_bar() +
+    theme(axis.text.x = element_text(angle = 90, size = x_label_size, vjust = 0.5, hjust = 1),
+          axis.text.y = element_text(size = 11))
+}
+```
+
+**Coding sidebar**: When defining functions, generally put data as first argument so you can pipe in data using tidy pipelines
+
+There are pros and cons to writing functions that accept variable names that are quoted vs. unquoted
+
+* It depends a bit on how you will use them.
+* .data[[argument]] is used in functions with quoted arguments
+* embracing {{}} is used for unquoted arguments
+* For these plot functions, I use quoted variable names and then pipe those into `map()` to make multiple plots (see below)
+* see `?vignette("programming")` or info on [tidy evaluation](https://r4ds.hadley.nz/functions.html#indirection-and-tidy-evaluation) in @RDS for more details
+
+-----
+
+Bar plots reveal low frequency responses for nominal and ordinal variables
+
+* See `bldg_type`
+
+```{r u2-modeling-2}
+data_trn |> plot_bar("bldg_type")
+```
+
+-----
+
+Bar plots can display distributional shape for ordinal variables.  May suggest the 
+need for transformations if we later treat the ordinal variable as numeric
+
+* See `overall_qual`.  Though it is not very skewed.
+
+```{r u2-modeling-3}
+data_trn |> plot_bar("overall_qual")
+```
+
+-----
+
+**Coding sidebar**: 
+
+We can make all of our plots iteratively using `map()` from the `purrr package.
+
+
+```{r u2-modeling-4}
+data_trn |> 
+  select(where(is.factor)) |> # <1> 
+  names() |> # <2> 
+  map(\(name) plot_bar(df = data_trn, x = name)) |> # <3> 
+  plot_grid(plotlist = _, ncol = 2) # <4>
+```
+1. Select only the factor columns
+2. Get their names as strings (that is why we use quoted variables in these plot functions
+3. Use `map()` to iterative `plot_bar()` over every column.  (see [iteration](https://r4ds.hadley.nz/iteration.html) in @RDS)
+4. Use `plot_grid()` from `cowplot` package to display the list of plots in a grid
+
+##### Tables
+
+We tend to prefer visualizations vs. summary statistics for EDA.   However, tables can be useful.
+
+Here is a function that was described in @RDS that we like because
+
+* Includes counts and proportions
+* Includes NA as a category
+
+We have included it in `fun_eda.R` for your use.
+```{r}
+#| eval: false
+
+tab <- function(df, var, sort = FALSE) {
+  df |>  dplyr::count({{ var }}, sort = sort) |> 
+    dplyr::mutate(prop = n / sum(n))
+} 
+```
+
+Tables can be used to identify responses that have very low frequency and to think
+about the need to handle missing values
+
+* See `ms_zoning`
+* May want to collapse low frequency (or low percentage) categories to reduce the number of features 
+needed to represent the predictor
+
+```{r u2-modeling-5}
+data_trn |> tab(ms_zoning)
+```
+
+* or maybe sorted
+```{r}
+data_trn |> tab(ms_zoning, sort = TRUE)
+```
+
+but could see this with plot as well
+
+```{r u2-modeling-6}
+data_trn |> plot_bar("ms_zoning")
+```
+
+
+#### Numeric Variables 
+
+##### Histograms
+
+Histograms are a useful/common visualization for numeric variables
+
+Let's define a histogram function (included in `fun_plots.r`)
+
+* Bin size should be explored a bit to find best representation
+* Somewhat dependent on n (my default here is based on this training set)
+* This is one of the limitations of histograms
+```{r u2-modeling-8}
+#| eval: false
+
+plot_hist <- function(df, x, bins = 100){
+  df |>
+    ggplot(aes(x = .data[[x]])) +
+    geom_histogram(bins = bins) +
+    theme(axis.text.x = element_text(size = 11),
+          axis.text.y = element_text(size = 11))
+}
+```
+
+Let's look at `sale_price`
+
+* It is positively skewed
+* May suggest units (dollars) are not interval in nature (makes sense)
+* Could cause problems for some algorithms (e.g., lm) when features are normal
+```{r u2-modeling-9}
+data_trn |> plot_hist("sale_price")
+```
+
+
+##### Smoothed Frequency Polygons
+
+Frequency polygons are also commonly used
+
+Define a frequency polygon function and use it (included in `fun_plots.r`)
+
+* Bins may matter again
+```{r u2-modeling-10}
+#| eval: false
+
+plot_freqpoly <- function(df, x, bins = 50){
+  df |>
+    ggplot(aes(x = .data[[x]])) +
+    geom_freqpoly(bins = bins) +
+    theme(axis.text.x = element_text(size = 11),
+          axis.text.y = element_text(size = 11))
+}
+```
+
+```{r u2-modeling-11}
+data_trn |> plot_freqpoly("sale_price")
+```
+
+##### Simple Boxplots
+
+Boxplots display 
+
+* Median as line
+* 25%ile and 75%ile as hinges
+* Highest and lowest points within 1.5 * IQR (interquartile-range: difference between scores at 25% and 75%iles)
+* Outliers outside of 1.5 * IQR
+
+Define a boxplot function and use it (included in `fun_plots.r`)
+```{r u2-modeling-12}
+#| eval: false
+
+plot_boxplot <- function(df, x){
+  x_label_size <- if_else(skimr::n_unique(df[[x]]) < 7, 11, 7)
+  
+  df |>
+    ggplot(aes(x = .data[[x]])) +
+    geom_boxplot() +
+    theme(axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          axis.text.x = element_text(angle = 90, size = x_label_size, vjust = 0.5, hjust = 1))
+}
+```
+
+```{r u2-modeling-13}
+data_trn |> plot_boxplot("sale_price")
+```
+
+
+##### Combined Boxplot and Violin Plots
+
+The combination of a boxplot and violin plot is particularly useful
+
+* This is our favorite
+* Get all the benefits of the boxplot
+* Can clearly see shape of distribution given the violin plot overlay
+* Can also clearly see the tails
+
+
+Define a combined plot (included in `fun_plots.r`)
+
+```{r u2-modeling-14}
+#| eval: false
+
+plot_box_violin <- function(df, x){
+  x_label_size <- if_else(skimr::n_unique(df[[x]]) < 7, 11, 7)
+  
+  df |>
+    ggplot(aes(x = .data[[x]])) +
+    geom_violin(aes(y = 0), fill = "green", color = NA) +
+    geom_boxplot(width = .1, fill = NA, lwd = 1.1, fatten = 1.1) +
+    theme(axis.text.y = element_blank(),
+          axis.ticks.y = element_blank(),
+          axis.title.y = element_blank(),
+          axis.text.x = element_text(angle = 90, size = x_label_size, vjust = 0.5, hjust = 1))
+}
+```
+
+
+Here is the plot for `sale_price`
+
+* In this instance, the skew is NOT due to only a few outliers
+```{r u2-modeling-15}
+data_trn |> plot_box_violin("sale_price")
+```
+
+-----
+
+**Coding sidebar**: 
+
+* You can make figures for all numeric variables at once using `select()` and `map()` as before
+
+```{r u2-modeling-16}
+data_trn |> 
+  select(where(is.numeric)) |> # <1> 
+  names() |> 
+  map(\(name) plot_box_violin(df = data_trn, x = name)) |> 
+  plot_grid(plotlist = _, ncol = 2)
+```
+1. Now select numeric rather than factor but otherwise same as previous example
+
+##### Summary Statistics
+
+`skim_all()` provided all the summary statistics you likely needed for numeric variables
+
+* mean & median (p50)
+* sd & IQR (see difference between p25 and p75)
+* skew & kurtosis
+
+You can get skim of only numeric variables if you like
+```{r}
+data_trn |> 
+  select(where(is.numeric)) |> 
+  skim_all()
+```
+
+
+### Bivariate Relationships with Outcome
+
+Bivariate relationships with the outcome are useful to detect
+
+* Which predictors display some relationship with the outcome
+* What feature engineering (transformations) might maximize that relationship
+* Are there any bivariate (model) outliers
+
+Again, we prefer visualizations but summary statistics are also available
+
+#### Both Numeric
+
+##### Scatterplots
+
+Scatterplots are the preferred visualization when both variables are numeric
+
+
+Define a scatterplot function (included in `fun_plots.r`)
+
+* add a simple line
+* add a LOWESS line (Locally Weighted Scatterplot Smoothing)
+* These lines are useful for considering shape of relationship
+```{r u2-modeling-18}
+#| eval: false
+
+plot_scatter <- function(df, x, y){
+  df |>
+    ggplot(aes(x = .data[[x]], y = .data[[y]])) +
+    geom_point() +
+    geom_smooth(method = "lm", formula = y ~ x, col = "red") +
+    geom_smooth(method = "loess", formula = y ~ x, col = "green") +
+    theme(axis.text.x = element_text(size = 11),
+          axis.text.y = element_text(size = 11))
+}
+```
+
+-----
+
+Let's consider relationship between `gr_liv_area` and `sale_price`
+
+* Care most about influential points (both model outlier and leverage)
+* Can be *typically* spotted in bivariate plots (but could do more sophisticated assessments)
+* We might:
+  * retain as is
+  * drop
+  * bring to fence
+
+If bivariate outliers are detected, you should return to cleaning mode to verify that they aren't result of scoring/coding errors.  If they are:
+
+  * Fix in full dataset
+  * Use same train/test split after fixing
+```{r u2-modeling-19}
+data_trn |> plot_scatter("gr_liv_area", "sale_price")
+```
+
+-----
+
+Here is another example where the relationship might be non-linear
+
+```{r u2-modeling-21}
+data_trn |> plot_scatter("year_built", "sale_price")
+```
+
+-----
+
+A transformation of `sale_price` might help the relationship with $year\_built$ but might hurt `gr_liv_area`
+
+Maybe need to transform both `sale_price` and `gr_liv_area` as both were skewed
+
+This might require some more EDA but here is a start
+
+* Quick and temporary Log (base e) of `sale_price`
+* This doesn't seem promising by itself
+
+```{r u2-modeling-22}
+  
+data_trn |> 
+  mutate(sale_price = log(sale_price)) |> 
+  plot_scatter("gr_liv_area", "sale_price")
+
+data_trn |> 
+  mutate(sale_price = log(sale_price)) |>
+  plot_scatter("year_built", "sale_price")
+```
+
+-----
+
+Can make scatterplots for ordered factors as well
+
+* But other (perhaps better) options also exist for this combination of variable classes.
+* Use `as.numeric()` to allow for lm and LOWESS lines on otherwise categorical variable
+```{r u2-modeling-23}
+data_trn |> 
+  mutate(overall_qual = as.numeric(overall_qual)) |> 
+  plot_scatter("overall_qual", "sale_price")
+```
+
+-----
+
+**Coding sidebar**:  Use `jitter()` with x to help with overplotting
+
+```{r u2-modeling-24}
+data_trn |> 
+  mutate(overall_qual = jitter(as.numeric(overall_qual))) |> 
+  plot_scatter("overall_qual", "sale_price")
+```
+
+-----
+
+When the dataset is large, overplotting can even be a problem with true numeric variables
+
+* You can bin the values to remove this problem
+* Continue to use lm and LOWESS lines
+* This dataset doesn't have much of an overplotting problem but.....
+
+```{r u2-modeling-25}
+#| eval: false
+
+plot_hexbin <- function(df, x, y){
+  df |>
+    ggplot(aes(x = .data[[x]], y = .data[[y]])) +
+    geom_hex() +
+    geom_smooth(method = "lm", col = "red") +
+    geom_smooth(method = "loess", col = "green")  +
+    theme(axis.text.x = element_text(size = 11),
+          axis.text.y = element_text(size = 11))
+}
+```
+
+```{r u2-modeling-26}
+data_trn |> plot_hexbin("gr_liv_area", "sale_price")
+```
+
+-----
+
+##### Correlations & Plots
+
+Correlations are useful summary statistics for numeric variables
+
+Some statistical algorithms are sensitive to high correlations among features (multi-collinearity)
+
+At best, highly correlated features add unnecessary flexibility and can lead to overfitting
+
+We can visualize correlations among predictors/features using `corrplot.mixed()` from `corrplot` package
+
+* Best for numeric variables
+* Can include ordered categorical or two level unordered categorical variables if transformed to numeric
+* Can include unordered categorical variables with > 2 levels if first transformed appropriately (e.g., dummy features, not demonstrated yet)
+* Works best with relatively small set of variables
+* Need to consider how to handle missing values
+
+```{r u2-modeling-27}
+data_trn |> 
+  mutate(overall_qual = as.numeric(overall_qual),
+         garage_qual = as.numeric(garage_qual)) |> 
+  select(where(is.numeric)) |> 
+  cor(use = "pairwise.complete.obs") |> 
+  corrplot::corrplot.mixed()
+```
+
+**coding sidebar**  Note use of namespace (`corrplot::corrplot.mixed()`) to call this function from corrplot
+
+#### Categorical and Numeric
+
+##### Grouped Box + Violin Plots
+
+A grouped version of the combined box and violin plot is our preferred visualization for relationship between categorical and numeric variables (included in `fun_plots.r`)
+
+* Often best when feature is categorical and outcome is numeric but can reverse
+* Can use with ordered or unordered categorical variable
+* @RDS also describes use of grouped frequency polygons for this combination of variable classes
+
+
+```{r u2-modeling-28}
+#| eval: false
+
+plot_grouped_box_violin <- function(df, x, y){
+  x_label_size <- if_else(skimr::n_unique(df[[x]]) < 7, 11, 7)
+  
+  df |>
+    ggplot(aes(x = .data[[x]], y = .data[[y]])) +
+    geom_violin(fill = "green", color = NA) +
+    geom_boxplot(width = .1, fill = NA, lwd = 1.1, fatten = 1.1) +
+    theme(axis.text.x = element_text(angle = 90, size = x_label_size, vjust = 0.5, hjust = 1),
+          axis.text.y = element_text(size = 11))
+}
+```
+
+Here is the relationship between `overall_qual` and `sale_price`
+
+* Tend to prefer this over the scatterplot (with `as.numeric()`) for ordered categorical variables
+* Increasing spread of `sale_price` at higher levels of `overall_qual` is clearer in this plot
+
+```{r u2-modeling-29}
+data_trn |> plot_grouped_box_violin("overall_qual", "sale_price")
+```
+
+-----
+
+Here is a box + violin with an unordered categorical variable
+
+* More variation and skew in `sale_price` for one family homes (additional features, moderators?)
+* Position of townhouse (interior vs. exterior) seems to matter (don't collapse?)
+
+```{r u2-modeling-30}
+data_trn |> plot_grouped_box_violin("bldg_type", "sale_price")
+```
+
+-----
+
+When we have a categorical predictor (ordered or unordered) and a numeric outcome, we often want to see both the relationship between the variables AND the variability on the categorical variable alone.   We like this combined plot enough when doing EDA to provide a specific function (included in `fun_plots.r`)!  It is our go to for understanding the potential effect of a categorical predictor
+
+```{r  u2-modeling-31}
+#| eval: false
+
+plot_categorical <- function(df, x, y, ordered = FALSE){
+  if (ordered) {
+    df <- df |>
+      mutate(!!x := fct_reorder(.data[[x]], .data[[y]]))
+  }
+  
+  x_label_size <- if_else(skimr::n_unique(df[[x]]) < 7, 11, 7)
+  
+  p_bar <- df |>
+    ggplot(aes(x = .data[[x]])) +
+    geom_bar()  +
+    theme(axis.text.x = element_text(angle = 90, size = x_label_size, vjust = 0.5, hjust = 1),
+          axis.text.y = element_text(size = 11))
+  
+  p_box <- df |>
+    ggplot(aes(x = .data[[x]], y = .data[[y]])) +
+    geom_violin(fill = "green", color = NA) +
+    geom_boxplot(width = .1, fill = NA, lwd = 1.1, fatten = 1.1) +
+    theme(axis.text.x = element_text(angle = 90, size = x_label_size, vjust = 0.5, hjust = 1),
+          axis.text.y = element_text(size = 11))
+  
+  return(list(p_bar, p_box))
+}
+```
+
+```{r}
+data_trn |> plot_categorical("bldg_type", "sale_price") |> 
+  plot_grid(plotlist = _, ncol = 1)
+```
+
+
+#### Both Categorical
+
+##### Stacked Barplots
+
+Stacked Barplots:
+
+* Can be useful with both ordered and unordered categorical variables
+* Can create with either raw counts or percentages.  
+  * Displays different perspective (particularly with uneven distributions across levels)
+  * Depends on your question
+* Often, you will place the outcome on the x-axis and the feature is coded by fill
+
+```{r u2-modeling-32}
+#| eval: false
+
+plot_grouped_barplot_count <- function(df, x, y){
+  x_label_size <- if_else(skimr::n_unique(df[[x]]) < 7, 11, 7)
+  
+  df |>
+    ggplot(aes(x = .data[[y]], fill = .data[[x]])) +
+    geom_bar(position = "stack") +
+    theme(axis.text.x = element_text(angle = 90, size = x_label_size, vjust = 0.5, hjust = 1),
+          axis.text.y = element_text(size = 11))
+}
+
+plot_grouped_barplot_percent <- function(df, x, y){
+  x_label_size <- if_else(skimr::n_unique(df[[x]]) < 7, 11, 7)
+  
+  df |>
+    ggplot(aes(x = .data[[y]], fill = .data[[x]])) +
+    geom_bar(position = "fill") +
+    labs(y = "Proportion") +
+    theme(axis.text.x = element_text(angle = 90, size = x_label_size, vjust = 0.5, hjust = 1),
+          axis.text.y = element_text(size = 11))
+}
+```
+
+-----
+
+For example, if we wanted to learn about how `bldg_type` varies by `lot_config`, see these plots
+
+```{r u2-modeling-33}
+data_trn |> plot_grouped_barplot_count("lot_config", "bldg_type")
+```
+
+```{r u2-modeling-34}
+data_trn |> plot_grouped_barplot_percent("lot_config", "bldg_type")
+```
+
+-----
+
+May want to plot both ways
+
+```{r u2-modeling-35}
+data_trn |> plot_grouped_barplot_percent("lot_config", "bldg_type")
+```
+
+```{r u2-modeling-36}
+data_trn |> plot_grouped_barplot_percent("bldg_type", "lot_config")
+```
+
+##### Tile Plot
+
+Tile plots may be useful if both categorical variables are ordered
+
+```{r u2-modeling-37}
+#| eval: false
+  
+plot_tile <- function(df, x, y){
+  df |>
+    count(.data[[x]], .data[[y]]) |>
+    ggplot(aes(x = .data[[x]], y = .data[[y]])) +
+    geom_tile(mapping = aes(fill = n))
+}
+```
+
+```{r u2-modeling-38}
+data_trn |> plot_tile("overall_qual", "garage_qual")
+```
+
+-----
+
+You might also consider a scatterplot with jitter in this instance
+```{r u2-modeling-39}
+data_trn |> 
+  mutate(overall_qual = jitter(as.numeric(overall_qual)),
+         garage_qual = as.numeric(garage_qual)) |> 
+  plot_scatter("overall_qual", "garage_qual")
+```
+
+
+
+##### Two-way Tables
+
+Two-way tables are sometimes a useful summary statistic for two categorical variables.  We can use `tabyl()` from the janitor package for this
+
+For example, the relationship between `bldg_type` and `lot_config`
+```{r u2-modeling-40}
+data_trn |> janitor::tabyl(bldg_type, lot_config)
+```
+
+
+## Working with Recipes
+
+Recipes are used for feature engineering in `tidymodels` using the [$recipes$](https://recipes.tidymodels.org/) package
+
+* Used for transforming raw predictors into features used in our models
+* Describes all steps to make feature matrix.  For example:
+  * Transforming factors into "dummy" features if needed
+  * Linear and non-linear transformations (e.g., log, box-cox)
+  * Polynomials and interactions (i.e., `x1 * x1` or `x1 * x2`)
+  * Missing value imputations
+  
+* Recipes use only information from the training set in all feature engineering
+  * "Prepping" a recipe involves calculating any statistics needed for the transformations that will be applied to engineer features (e.g., mean and standard deviation to normalize a numeric variable)
+  * A "prepped" recipe does not derive any statistics from validation or test sets
+  * However, a "prepped" recipe can be **applied** to a validation or test set to make feature matrices from those data for evaluation
+  * Proper use of recipes is an important tool to prevent data leakage between train and either validation or test
+  * Consider example of standardizing `x1` for a feature in train vs. validation and test.  Must use mean and sd from TRAIN to standardize `x1` in train, validate, and test.  VERY IMPORTANT.
+
+We will work with recipes extensively when model building starting in unit 3
+
+For now, we will only use the recipe to indicate roles as a gentle introduction.
+
+We will expand on this recipe in unit 3
+
+Recipe syntax is very similar to generic `tidyverse` syntax (created by same group)
+
+* Actually a subset of `tidyverse` functions
+* Less flexible/powerful but focused on our needs and easier to learn
+* You will eventually know both
+
+-----
+
+Recipes are used in Modeling scripts (which is a third type of script after cleaning and modeling EDA scripts)
+
+* Lets reload training again to pretend we are starting a new script
+* Here we demonstrate using mutate rather than specifying `col_types`
+
+```{r u2-recipes-1}
+ data_trn <- read_csv(file.path(path_data, "ames_clean_class_trn.csv"), 
+                      col_types = cols()) |> 
+  mutate(across(where(is.character), as_factor), # <1>
+         overall_qual = ordered(overall_qual, # <2>
+                               levels = as.character(1:10))) |> 
+  glimpse()
+```
+1. We first use `as_factor()` to set up all character variables as unordered since most are unordered
+2. We then make `overall_qual` ordred using the `ordered()` function.
+
+-----
+
+Recipes can be used to indicate the outcome and predictors that will be used in the model
+
+* Can use `.` to indicate all predictors
+  * Currently, our preferred method with some exceptions
+  * We can exclude some predictors later by changing their role, removing them with a later recipe step ($step\_rm()$), or specifying a more precise formula when we fit the model
+  * See [Roles in Recipes](https://recipes.tidymodels.org/articles/Roles.html) for more info
+
+* Can use specific names of predictors along with $+$ if only a few predictors
+  * e.g., `sale_price ~ lot_area + year_built + overall_qual`
+
+* Do NOT indicate interactions here
+  * All predictors are combined with `+`
+  * Interactions are specified by a later explicit feature engineering step
+```{r u2-recipes-2}
+rec <- recipe(sale_price ~ ., data = data_trn)
+
+rec
+
+summary(rec)
+```
+
+
+-----
+
+### Prepping and Baking a Recipe
+
+You can apply the recipe to any dataset (e.g., training, validation, test) to make a feature matrix from that dataset
+
+There are two discrete (and important) steps
+
+* You `prep()` a recipe using the training set
+  * This uses the training set to calculate any statistics or other information that is necessary for feature engineering
+  * e.g., means and sds to standardize a variable, factor loadings for a PCA, frequencies for identifying infrequent levels of a categorical variable
+  * **IMPORTANT**: if you have any variables that are still classed as character you need to include `strings_as_factors = FALSE`.   If you are following our recommended practices, all  your character variables have been classed as factors by this point so you don't need to do this.
+
+
+* You `bake()` a dataset using a prepped recipe to get a feature matrix from the the raw predictors and the outcome 
+* You will bake the train, validatation, and test sets before fitting or evaluating models for now (some of this is automated in the future)
+  * Baking will use information obtained from prepping the training set
+  * THIS IS HOW WE PREVENT DATA LEAKAGE FROM TRAINING INTO INTO VALIDATION OR TEST SETS!
+-----
+
+Let's make a feature matrix from the training set
+
+* We use training for both prepping the recipe and then baking the raw training data into a feature matrix
+* If we were making features for validation or test sets, we would use the training set to prep the recipe, but those other sets for the baking a feature matrix
+
+
+```{r}
+rec_prep <- rec |> # <1>
+  prep(data_trn) #<2>
+
+feat_trn <- rec_prep |> 
+  bake(NULL) # <3>
+  
+```
+1. We start by prepping our raw/original recipe (`rec`)
+2. We use the `prep()` function on on the training data.  Recipes are ALWAYS prepped using training data.  This makes sure that are recipes will always only use information from the training set when making features for any subsequent dataset.
+3. To get the actual features, we `bake()` the prepped recipe.  If we want features from training, we don't need to provide any new data to `bake()` because the training data were retrained in the prepped recipe (by default at least).  Use `NULL` instead.  If we wanted features for a new dataset (e.g., validation or test sets), we would supply those new data to `bake()`.  We will do that in later units.
+
+-----
+
+We should generally at least glimpse (and typically do some more EDA) on our features to make sure our recipe is doing what we expect.
+
+```{r}
+feat_trn |> glimpse()
+
+feat_trn |> skim_all()
+```
+
+We can now use our features from training to train models, but that will take place in the next unit!
+
+
+## Discussion Topics
+
+0. House keeping
+    * Unit 2 solutions
+    * Quizzes
+    * Course evals for extra credit (to quiz score)!
+    * Unit 3 homework
+      * test set predictions
+      * free lunch!
+      
+1. Review
+    * Goal is to develop model that closely approximates DGP
+    * Goal is to evaluate (estimate) how close our model is to the DGP (how much error) with as little error as possible
+    * Bias, overfitting/variance for any estimate (model and performance of model)
+    * candidate model configurations
+    * fit, select, evaluate
+    * training, validation, test
+
+2. Review: 2.2.1 Stages of Data Analysis and Model Development
+
+3. Best practices (discuss quickly)
+    * csv for data sharing, viewing, git (though be careful with data in github or other public repo!)
+    * variable values saved as text when nominal and ordinal (self-documenting)
+    * Create data dictionary - Documentation is critical!!
+    * snake_case for variables and self-documenting names (systematic names too)
+
+4. Review: 2.3.1 Data Leakage Issues
+    * Review section in webbook
+    * Cleaning EDA is done with full dataset (but univariate).  Very limited (variable names, values, find errors)
+    * Modeling EDA is only done with a training set (or even "eyeball" sample) - NEVER use validate or test set
+    * Never estimate anything with full data set (e.g., missing values, standardize, etc)
+    * Use recipes, prep (all estimation) with held in data than bake the appropriate set
+    * Put test aside
+    * You work with validation but never explore with validation (will still catch leakage with test but will be mislead to be overly optimistic and spoil test)
+    
+5. Functions sidenote - fun_modeling.R on [github](https://github.com/jjcurtin/lab_support)
+
+6. Review: 2.4.2 Prepping and Baking a Recipe
+     * Review section in web book
+     * prep always with held in data, bake with held in & out data.
+
+7. EDA for modeling
+
+    * limitless, just scratched the surface
+    * Differs some based on dimenstionality of dataset
+    * Learning about DGP
+      * understand univariate distributions, frequencies
+      * bivariate relationships
+      * interactions (3 or more variables)
+      * patterns in data
+
+
+8.  Extra topics, time permitting
+
+8.1. Missing data
+  
+    * Exclude vs. Impute in training data.  Outcomes?
+    * How to impute
+    * Missing in validate or test (can't exclude?). Exclude cases with missing outcomes.
+
+8.2. Outliers
+    * Drop or fix errors!
+    * Goal is always to estimate DGP
+    * Exclude
+    * Retain
+    * Bring to fence
+    * Don't exclude/change outcome in validate/test
+
+8.3. Issues with high dimensionality
+
+    * Hard to do predictor level EDA
+    * Common choices (normality transformations)
+    * observed vs. predicted plots
+    * Methods for automated variable selection (glmnet)
+    
+8.4. Distributional Shape
+
+    * Measurement issues (interval scale)
+    * Implications for relationships with other variables
+    * Solutions?
+  
+8.5. Linearity vs. More Complex Relationships
+
+    * Transformations
+    * Choice of statistical algorithm
+    * Do you need a linear model?
+
+8.6. Interactions
+
+    * Domain expertise
+    * Visual options for interactions
+    * But what do do with high dimensional data?
+    * Explanatory vs. prediction goals (algorithms that accommodate interactions)
+
+8.7. How to handle all of these decisions in the machine learning framework
+
+    * Goal is to develop a model that most closely approximates the DGP
+    * How does validation and test help this?
+    * Preregistration?
+      * Pre-reg for performance metric, resampling method   
+      * Use of resampling for other decisions
+      * Use of resampling to find correct model to test explanatory goals
+  
+
+  
+8.8. Model Assumptions
+
+    * Why do we make assumptions?
+      * Inference
+      * Flexibility wrt DGP
