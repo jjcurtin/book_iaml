@@ -330,7 +330,7 @@ We will attempt to model this cubic DGP with three different model configuration
 * A (20th order) **polynomial LASSO model** that uses the same 20 polynomials of x as features but "regularizes" to remove unimportant features from the model
 
 
-`r-colorize("If the DGP for y is a cubic function of x, what do we know about the expected bias for our three candidate model configurations in this example?", "red")`
+[If the DGP for y is a cubic function of x, what do we know about the expected bias for our three candidate model configurations in this example?]{.red}
 ^[The simple linear model will underfit the true DGP and therefore it will be biased b/c it can only represent y as a linear function of x.  The two polynomial models will be generally unbiased b/c they have x represented with 20th order polynomials.  LASSO will be slightly biased due to regularization but more on that in a later unit]
 
 ```{r u1-ex1-1}
@@ -575,10 +575,10 @@ walk2(trains$df, titles,
                   title = .y))
 ```
 
-`r-colorize("Look in any training set.  Can you see evidence of bias for any model configuration?", "red")`
+[Look in any training set.  Can you see evidence of bias for any model configuration?]{.red}
 ^[The simple linear model is clearly biased.  It systemically underestimates Y in some portions of the X distribution and overestimates Y in other portions of the X distribution.  This is true across training sets.]
 
-`r-colorize("Can you see any evidence of overfitting for any model configuration?", "red")`
+[Can you see any evidence of overfitting for any model configuration?]{.red}
 ^[The polynomial linear model appears to overfit the data in the training set.  In other words, it seems to follow both the signal/DGP and the noise.  However, you can't be certain of this with only one training set and without knowing the DGP.  
 It is possible that the wiggles in the prediction line represent the real DGP.  
 You will need a test set to be certain about the degree of overfitting.]
@@ -618,10 +618,10 @@ plot_data(data = test,
 ```
 
 
-`r-colorize("Can you see evidence of bias for the simple linear models?", "red")` 
+[Can you see evidence of bias for the simple linear models?]{.red} 
 ^[Yes, consistent with what we saw in the training sets, the simple linear model systematically overestimates Y in some places and underestimates it in others.  The DGP is clearly NOT linear but this simple model can only make linear predictions.  It is a fairly biased model that underfits the true DGP.  This bias will make a large contribution to the reducible error of the model]
 
-`r-colorize("How much variance across the simple linear models is present?", "red")` 
+[How much variance across the simple linear models is present?]{.red} 
 ^[There is not much variance in the prediction lines across the models that were fit to different training sets.  The slopes are very close across models and the intercepts only vary by a small amount.   The simple linear model configuration does not appear to have high variance and model variance will not contribute much to its reducible error.]
 
 
@@ -641,13 +641,13 @@ plot_data(data = test,
           title = "Polynomial Linear Models in Test Set")
 ```
 
-`r-colorize("Are they systematically biased?", "red")`
+[Are they systematically biased?]{.red}
 ^[There is not much systematic bias.  The overall function is generally cubic as is the DGP. Bias will not contribute much to the model's reducible error.]
 
-`r-colorize("How does the variance of these models compare to the variance of the simple linear models?", "red")`
+[How does the variance of these models compare to the variance of the simple linear models?]{.red}
 ^[There is much higher model variance for this polynomial linear model relative to the simple linear model. Although all four models generally predict Y as a cubic function of X, there is also a non-systematic wiggle that is different for each of the models.]
 
-`r-colorize("How does this demonstrate the connection between model overfitting and model variance?", "red")`
+[How does this demonstrate the connection between model overfitting and model variance?]{.red}
 ^[Model variance is a result of overfitting to the training set.  If a model fits noise in its training set, that noise will be different in every dataset.  Therefore, you end up with different models depending on the training set in which they are fit.  And none of those models will do well with new data as you can see in this
 test set because noise is random and different in each dataset.]
 
@@ -667,11 +667,11 @@ plot_data(data = test,
           title = "Polynomial LASSO Models in Test Set")
 ```
 
-`r-colorize("How does their bias compare to the simple and polynomial linear models?", "red")`
+[How does their bias compare to the simple and polynomial linear models?]{.red}
 ^[It has low bias much like the polynomial linear model.  It is able to capture the true cubic DGP fairly well.  The regularization process slightly reduced the magnitude of the cubic (the prediction line is a little straighter than it should be) but not by much.]
 
 
-`r-colorize("How does their variance compare to the simple and polynomial linear models?", "red")`
+[How does their variance compare to the simple and polynomial linear models?]{.red}
 ^[It has low variance, much like the simple linear model.  All four models, fit in different training sets resulted in very similar prediction lines.]
 
 
@@ -679,7 +679,7 @@ plot_data(data = test,
 
 6. Now we will **quantify** the performance of these models in training and test sets with the **root mean square error** performance metric.  This is the standard deviation of the error when comparing the predicted values for y to the actual values (ground truth) for y.
 
-`r-colorize("What do we expect about RMSE for the three models in train and test?", "red")`
+[What do we expect about RMSE for the three models in train and test?]{.red}
 ^[The **simple linear model** is underfit to the TRUE DGP.  Therfore it is systematically biased everywhere it is use and won’t even fit train for this reason.  However, it’s not very flexible so it won’t be overfit to the noise in train and therefore should fit comparably in test.  The **polynomial linear model** won't be biased at all given that the DGP is polynomial.  However, it is overly flexible (20th order) and so will substantially overfit the training data such that it will show high variance and its performance will be poor in test.  The **polynomial LASSO** will be the sweet spot in bias-variance trade-off.  It has a little bias but not much.  However, it is not as flexible due to regularization by lambda so it won’t be overfit to its training set.  Therefore, it should do well in the test set.]
 
 -----
@@ -733,7 +733,7 @@ bind_rows(rmse_test, rmse_train) %>%
 
 -----
 
-`r-colorize("Would these observations about bias and variance of these three model configurations always be the same regardless of the DGP?", "red")`
+[Would these observations about bias and variance of these three model configurations always be the same regardless of the DGP?]{.red}
 ^[No.  A model configuration needs to be flexible enough and/or well designed to represent the DGP for the data that you are modeling.   The two polynomial models in this example were each able to represent a cubic DGP.  The simple linear model was not.  The polynomial linear model was too flexible for a cubic given that it had 20 polynomials of X.  Therefore, it was overfit to its training set and had high variance.  However, if the DGP was a different shape, the story would be different.  If the DGP was linear the simple linear model would not have been biased and would have performed best. If this DGP was some other form (step function), it may be that none of the models would work well.]
 
 ## Discussion - Tuesday/Thursday
@@ -751,11 +751,12 @@ bind_rows(rmse_test, rmse_train) %>%
         * Readings (@ISL and other sources;  All free)
         * Application assignment
       * Asychronous discussion and questions on Slack
-      * Lab section on Tuesdays at 11:00 am - address previous weeks code
+      * Lab section on Tuesdays at 11:00 am - address previous week's code
       * Quiz and application assignments due Wednesdays at 8 pm
-      * Quizzes used to encourage and assess reading.  Also to guide discussion.
+      
       * Wrap-up discussion and conceptual questions on Thursdays at 11 am.  Not a lecture
     * Self-paced (except for due dates and discussion)
+    * Quizzes used to encourage and assess reading.  Also to guide discussion.
     * Workload similar to 610/710
     * Office hours
       * John - Thursdays, 1 – 2 pm
@@ -817,7 +818,7 @@ bind_rows(rmse_test, rmse_train) %>%
     
 ### Association vs. Prediction
 
-* `r-colorize("What is the difference between association vs. prediction?", "red")`
+* [What is the difference between association vs. prediction?]{.red}
 ^[**Association** quantifies the relationship between variables within a sample (predictors-outcome).  **Prediction** requires using an established model to predict (future?) outcomes for **new** ("out-of-sample, "held-out") participants. ]
 
 
@@ -832,8 +833,8 @@ bind_rows(rmse_test, rmse_train) %>%
 
 ### Prediction vs. Explanation
 
-* `r-colorize("Examples of valuable prediction without explanation?", "red")`
-* `r-colorize("Can you have explanation without prediction?", "red")`
+* [Examples of valuable prediction without explanation?]{.red}
+* [Can you have explanation without prediction?]{.red}
 * Prediction models can provide insight or tests of explanatory theories (e.g., do causes actually predict in new data; variable importance)
 
 * Goal of scientific psychology is to understand human behavior.  It involves both **explaining** behavior (i.e., identifying causes) and **predicting** (yet to be observed) behaviors.
@@ -848,36 +849,36 @@ bind_rows(rmse_test, rmse_train) %>%
 
 * What are they and how are they related?
 
-* `r-colorize("Describe problem of p-hacking with respect to overfitting?", "red")`
+* [Describe problem of p-hacking with respect to overfitting?]{.red}
 ^[When you p-hack, you are overfitting the training set (your sample).  You try out many, many different model configurations and choose the one you like best rather than what works well in new data.  This model likely capitalizes on noise in your sample.  It won't fit well in another sample.  In other words, your conclusions are not linked to the true DGP and would be different if you used a different sample.  In a different vein, your significance test is wrong.  The SE does not reflect the model variance that resulted from testing many different configurations b/c your final model didn't "know" about the other models.  Statistically invalid conclusion!]
 
 ### Cross Validation
 
-* `r-colorize("What is it?", "red")`
-* `r-colorize("How are replication and cross-validation different?", "red")`
+* [What is it?]{.red}
+* [How are replication and cross-validation different?]{.red}
 
 ### Basic framework and terminology
 
-* `r-colorize("Supervised vs. unsupervised machine learning?", "red")`
+* [Supervised vs. unsupervised machine learning?]{.red}
 
-* `r-colorize("Supervised regression vs classification?", "red")`
+* [Supervised regression vs classification?]{.red}
 
 -----
 
-* `r-colorize("What is a data generating process?", "red")`
+* [What is a data generating process?]{.red}
    * $Y = f(X) + \epsilon$
    * Both function and Xs are generally unknown
    * $\hat{Y} = \hat{f}(X)$
 
 
-* `r-colorize("Why do we estimate the data generating process?", "red")`
+* [Why do we estimate the data generating process?]{.red}
 
 -----
 
 Reducible vs. Irreducible error?
 
 * Our predictions will have error
-* You learned to estimate parameters in the GLM to mimimize error in 610
+* You learned to estimate parameters in the GLM to minimize error in 610
 * But error remained non-zero (in your sample and more importantly with same model in new samples) unless you perfectly estimated the DGP
 * That error can be divided into two sources
 * **Irreducible error** comes from measurement error in X, Y and missing X because predictors (causes) not measured.
@@ -892,7 +893,7 @@ Reducible vs. Irreducible error?
 
 -----
 
-* `r-colorize("What are the **three general steps** by which we estimate and evaluate the data generating process with a sample of data?  Lets use all this vocabulary!", "red")`
+* [What are the **three general steps** by which we estimate and evaluate the data generating process with a sample of data?  Lets use all this vocabulary!]{.red}
    * Candidate model configurations
       * Statistical algorithms
       * Hyperparameters
@@ -921,7 +922,7 @@ Useful conceptual examples of bias-variance
   
 ![](figs/unit1_dartboard.png){width=100%}
 
-  * Example 2: Models (e.g. many scales made by Acme Co) to measure my weight
+  * Example 2: Models (e.g. many scales made by Acme Co.) to measure my weight
 
 
 #### Bias
@@ -934,7 +935,7 @@ Biased models are generally less complex models (i.e., underfit) than the data-g
 
 -----
 
-`r-colorize("Are GLMs biased models?", "red")`
+[Are GLMs biased models?]{.red}
 ^["GLM parameter estimates are BLUE - best **linear** unbiased estimators. Parameter estimates from any sample are unbiased estimates of the linear model coefficients for population model but if DGP is not linear, this linear model will produce biased predictions and have biased parameter estimates.]
 
 -----
@@ -947,7 +948,7 @@ Bias **seems** like a bad thing.
   * Any more flexibility will lead to overfitting.   
   * Any less flexibility will lead to underfitting.
 
-* Ideally, if your model configuration is perfectly matched to the DGP, it will have very low bias and very low variance (holding other factors like N constant)
+* Ideally, if your model configuration is perfectly matched to the DGP, it will have very low bias and very low variance (assuming sufficiently large N)
 
 * The world is complex.  In many instances, 
 
@@ -959,14 +960,14 @@ Bias **seems** like a bad thing.
 
 #### Overfitting - Variance
 
-`r-colorize("Consider example of p = n - 1 in general linear model.  What happens in this situation?  How is this related to overfitting and model flexibility?", "red")`
-^[The  model will perfectly fit the sample data even when there is no relationship between the predictors and the outcome.  e.g., Any two points can be fit perfectly with one predictor (line), any three points can be fit perfectly with two predictors (plane).  This model will NOT predict well in new data.  This model is overfit because n-1 predictors is too flexible for the linear model]
+[Consider example of p = n - 1 in general linear model.  What happens in this situation?  How is this related to overfitting and model flexibility?]{.red}
+^[The  model will perfectly fit the sample data even when there is no relationship between the predictors and the outcome.  e.g., Any two points can be fit perfectly with one predictor (line), any three points can be fit perfectly with two predictors (plane).  This model will NOT predict well in new data.  This model is overfit because n-1 predictors is too flexible for the linear model. You will fit the noise in the training data.]
 
 Factors that increase overfitting
 
 * Small N
 * Complex models (e.g, many predictors, p relative to n, non-parametric models)
-* Weak effects of predictors (lots of noise available to "overfit")
+* Weak effects of predictors (lots of noise available to overfit)
 * Correlated predictors (for some algorithms like the GLM)
 * Choosing between many model configurations (e.g. different predictors or predictor sets, transformations, types of statistical models) - lets return to this when we consider p-hacking
 
@@ -976,17 +977,17 @@ You might have noticed that many of the above factors contribute to the standard
 
 * Small N
 * Big p
-* Small `R^2^` (weak effects)
+* Small $R^2$ (weak effects)
 * Correlated predictors
 
 The standard error increases as model overfitting increases due to these factors
 
-`r-colorize("Explain the link between model variance/overfitting, standard errors, and sampling distributions?", "red")`
+[Explain the link between model variance/overfitting, standard errors, and sampling distributions?]{.red}
 ^[All parameter estimates have a sampling distribution.  This is the distribution of estimates that you would get if you repeatedly fit the same model to new samples.  When a model is overfit, that means that aspects of the model (its parameter estimates, its predictions) will vary greatly from sample to sample.  This is represented by a large standard error (the SD of the sampling distribution) for the model's parameter estimates.  It also means that the predictions you will make in new data will be very different depending on the sample that was used to estimate the parameters.]
 
 -----
 
-`r-colorize("Describe problem of p-hacking with respect to overfitting?", "red")`
+[Describe problem of p-hacking with respect to overfitting?]{.red}
 ^[When you p-hack, you are overfitting the training set (your sample).  You try out many, many different model configurations and choose the one you like best rather than what works well in new data.  This model likely capitalizes on noise in your sample.  It won't fit well in another sample.  In other words, your conclusions are not linked to the true DGP and would be different if you used a different sample.  In a different vein, your significance test is wrong.  The SE does not reflect the model variance that resulted from testing many different configurations b/c your final model didn't "know" about the other models.  Statistically invalid conclusion!]
 
 -----
