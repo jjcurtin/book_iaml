@@ -127,9 +127,10 @@ For **nominal** variables:
 * We store (in csv files) these variables as character class with descriptive text labels for the levels
   * Easier to share/document
   * Reduces errors
-* We class these variables in R as unordered factors when we load them (using `read_csv()`)
-* **Special case**: for a dichotomous outcome variable, the positive/event level of dichotomous factor outcome should be first level of the factor but we still keep it unordered.
-* **NOTE**: The order of levels for an unordered factor may also matter for factor predictors (e.g., `step_dummy()` uses first level as reference).
+* We class these variables in R as factors when we load them (using `read_csv()`)
+* In some cases, we should pay some attention to the order of the levels of the variable
+  * For a dichotomous outcome variable, the positive/event level of dichotomous factor outcome should be first level of the factor
+  * The order of levels may also matter for factor predictors (e.g., `step_dummy()` uses first level as reference).
 
 
 For **ordinal** variables: 
@@ -137,11 +138,13 @@ For **ordinal** variables:
 * We store (in csv files) these variables as character class with descriptive text labels for the levels
 	* Easier to share/document
 	* Reduces errors
-* We class these variables in R as ordered factors
-* Confirm that the order is set up correctly
+* We class these variables in R as factors
+  * It is easier to do EDA with these variables classes as factors
+  * We use standsrd factors (not ordered)
+* Confirm that the order of the levels is set up correctly
 * During feature engineering stage, we can then either
-  * Treat as an ordered or unordered factor and create features using `step_dummy()`
-  * Treat as a numeric variable using `step_ordinalscore()`
+  * Treat as a nominal variable and create features using `step_dummy()`
+  * Treat as a interval variable using `step_ordinalscore()`
 	  
 For **interval and ratio** variables:
 
@@ -250,6 +253,7 @@ Here is a quick glimpse of the subset of observations we will work with in Units
 
 ```{r u2-overview-2}
 data_all <- read_csv(here::here(path_data, "ames_raw_class.csv"),   # <1>
+                     n
                      col_types = cols()) |> # <2> 
   mutate(across(where(is.character), as_factor)) |> # <3> 
   glimpse() # <4>
