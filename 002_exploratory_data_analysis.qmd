@@ -45,8 +45,6 @@ Post questions or discuss readings or lectures in Slack
 
 **Application Assignment**
  
- NEED TO UPDATE!!!
- 
 * [data](https://dionysus.psych.wisc.edu/iaml/homework/unit_2/ames_raw_class.csv)
 * [data dictionary](https://dionysus.psych.wisc.edu/iaml/homework/unit_2/ames_data_dictionary.pdf)
 * cleaning EDA:  [rmd](https://dionysus.psych.wisc.edu/iaml/homework/unit_2/hw_unit_2_cleaning.Rmd) 
@@ -128,7 +126,7 @@ For **nominal** variables:
   * Easier to share/document
   * Reduces errors
 * We class these variables in R as factors when we load them (using `read_csv()`)
-* In some cases, we should pay some attention to the order of the levels of the variable
+* In some cases, we should pay attention to the order of the levels of the variable. e.g., 
   * For a dichotomous outcome variable, the positive/event level of dichotomous factor outcome should be first level of the factor
   * The order of levels may also matter for factor predictors (e.g., `step_dummy()` uses first level as reference).
 
@@ -138,13 +136,13 @@ For **ordinal** variables:
 * We store (in csv files) these variables as character class with descriptive text labels for the levels
 	* Easier to share/document
 	* Reduces errors
-* We class these variables in R as factors
+* We class these variables in R as factors (just like nominal variables)
   * It is easier to do EDA with these variables classes as factors
-  * We use standsrd factors (not ordered)
-* Confirm that the order of the levels is set up correctly
+  * We use standard factors (not ordered)
+* Confirm that the order of the levels is set up correctly.  This is very important for ordinal variables.
 * During feature engineering stage, we can then either
   * Treat as a nominal variable and create features using `step_dummy()`
-  * Treat as a interval variable using `step_ordinalscore()`
+  * Treat as an interval variable using `step_ordinalscore()`
 	  
 For **interval and ratio** variables:
 
@@ -158,6 +156,7 @@ We will refer to both nominal and ordinal variables as categorical variables
 * They are stored as character
 * They are classed as factors
 * They include a limited number of unique responses
+* We can indicate the order of the levels
 * Similar EDA approaches are used with both
 * Ordinal variables may show non-linear relations b/c they may not be evenly spaced.  In these instances, we can use feature engineering approaches that are also used for nominal variables
 
@@ -223,6 +222,7 @@ Now we load packages for functions that we will use regularly.  There are five t
 3.  At times, if we plan to use a single function from a package only 1-2x times, we may not even attach that function at all.  Instead, we just call it using its namespace (i.e.  `packagename::functionname`)
 4. If a package has a function that conflicts with our primary packages and we don't plan to use that function, we load the package but exclude the function.  If we really needed it, we can call it with its namespace as per option 3 above.
 5. Pay attention to conflicts that were allowed to make sure you understand and accept them. (I left the package messages and warnings in the book this time to see them. I will hide them to avoid cluttering book in later units but you should always review them.)
+
 ```{r u2-overview-1}
 library(janitor, include.only = "clean_names")
 library(cowplot, include.only = "plot_grid") # for plot_grid()
@@ -243,7 +243,7 @@ theme_set(theme_classic())
 options(tibble.width = Inf)
 ```
 
-And we set a relative path to our data.  This assumes you are using an RStudio Project with the path to the data relative to that project file.  I've provided more detail [elsewhere](https://jjcurtin.github.io/book_dwvt/file_and_path_management.html) on best practices for managing files and paths.
+And we set a relative path to our data.  This assumes you are using an RStudio project with the path to the data relative to that project file.  I've provided more detail [elsewhere](https://jjcurtin.github.io/book_dwvt/file_and_path_management.html) on best practices for managing files and paths.
 ```{r}
 path_data <- "data"
 ```
@@ -253,14 +253,13 @@ Here is a quick glimpse of the subset of observations we will work with in Units
 
 ```{r u2-overview-2}
 data_all <- read_csv(here::here(path_data, "ames_raw_class.csv"),   # <1>
-                     n
                      col_types = cols()) |> # <2> 
   mutate(across(where(is.character), as_factor)) |> # <3> 
   glimpse() # <4>
 ```
 1. First we read data using a relative path and the `here::here()` function.  This is a replacement for `file.path()` that works better for both interactive use and rendering in Quarto when using projects.
 2.  We use `col_types = cols()` to let R guess the correct class for each column. This suppresses messages that aren't important at this point prior to EDA.
-3. Then we use a mutate to re-class all character data to unordered factors.
+3. Then we use a mutate to re-class all character data to factors.  This should handle most of our nominal and ordinal variables.  We may need to still class some that were missed because they appeared to be numeric.
 4. It is good practice to always `glimpse()` data after you read it.
 
 -----
@@ -350,8 +349,8 @@ data_all |> names()
 At this point, variables should be classed as either numeric or factor
 
 * Interval and ratio variables use numeric classes (dbl or int)
-* Nominal and ordinal variable use factor (unordered or ordered)
-* Useful for variable selection later (e.g., `where(is.numeric)`)
+* Nominal and ordinal variable use factor class
+* Useful for variable selection later (e.g., `where(is.numeric)`, `where(is.factor)`)
 
 Subsequent cleaning steps are clearer if we have this established/confirmed now
 
@@ -359,17 +358,26 @@ Subsequent cleaning steps are clearer if we have this established/confirmed now
 
 We have one variable to change to factor class
 
-* `overall_qual` is ordinal 
-
 ```{r u2-clean-2}
 data_all |> glimpse()
 ```
 
+`overall_qual` is ordinal.  
+* We should convert it to a factor and confirm the levels are ordered properly.  
+* The data dictionary indicates that valid values range from 1 - 10.
+
 ```{r u2-clean-3}
+oq_levels <- as.character(1:10) # <1>
+
 data_all <-  data_all |> 
-  mutate(overall_qual = as_factor(overall_qual)) |> 
+  mutate(overall_qual = fct(as.character(overall_qual), # <2>
+                            levels = oq_levels)) |> # <3>
   glimpse()
 ```
+1. It is always best to explicitly set the levels of an ordinal factor in the order you prefer.  You may also want to explicitly set the levels for a nominal factor as well for error checking purposes (see below).  The levels should be provided as character class.
+2. We prefer to use `forcats::fct()` for creating factors.  It is stricter than the base R equivalent (`factor()`).  `fct()` requires that the variable be character class prior to conversion.  If numeric, just change to character in place.
+3. We indicate the levels here.  `fct()` will then generate an error if any value is not a valid level
+
 
 ### Skimming the data
 
@@ -514,6 +522,35 @@ data_all <- data_all |>
 
 We will leave the `NA` for `garage_cars` as `NA` because its not clear if that is truly missing or not, based on further EDA not shown here.
 
+
+-----
+
+We have one other issue with `garage_qual`.  It is an ordinal variable but we never reviewed the order of its levels.  The data dictionary indicates the levels are ordered (best to worst) as:
+
+* Ex (excellent)
+* Gd (good)
+* TA (typical/average)
+* Fa (fair)
+* Po (poor)
+
+And we might assume that no garage is even worse than a poor garage.  Lets see what they are.
+
+```{r}
+data_all$garage_qual |> levels()
+```
+
+To fix this, we can use `forcats::fct_relevel()`.
+```{r}
+gq_levels <- c("no_garage", "Po", "Fa", "TA", "Gd", "Ex") # <1>
+data_all <- data_all |> 
+  mutate(garage_qual = fct_relevel(garage_qual, gq_levels)) # <2>
+
+data_all$garage_qual |> levels() # <3>
+```
+1. Make a vector that indicates the valid levels in order
+2. Pass that into `fct_relevel()`.  See `?fct_relevel` for other ways to adjust the  levels of a factor.
+3. Confirm that the levels are now correct
+
 ### Explore Min/Max Response for Numeric Variables
 
 We should explore mins and maxes for all numeric variables to detect out of valid range numeric responses
@@ -559,16 +596,17 @@ data_all |>
 
 Feature engineering with nominal and ordinal variables typically involves 
 
-* Converting nominal predictors to factors
-* Converting ordinal predictors to ordered factors
-* Often creating dummy features from factors and ordered factors
+* Converting to factors
+* Often creating dummy features from these factors
 
 This feature engineering will use response labels for naming new features
 
 * Therefore, it is a good idea to have the responses snake-cased and cleaned up a bit so that these new feature names are clean/clear.
 
-Here is an easy way to convert responses for character variables to snake case using a function (`tidy_responses()`) we share in `fun_eda.R` (reproduced here). This uses regular expressions (regex), which will will learn about in a later unit on text processing.
-You could expand this cleaning function if you encounter other issues that need to be cleaned in the factor levels.
+Here is an easy way to convert responses for character variables to snake case using a function (`tidy_responses()`) we share in `fun_eda.R` (reproduced here). 
+
+* This uses regular expressions (regex), which will will learn about in a later unit on text processing.
+* You could expand this cleaning function if you encounter other issues that need to be cleaned in the factor levels.
 ```{r u2-clean-14}
 #| eval: false
 
@@ -601,16 +639,38 @@ data_all <- data_all |>
 
 -----
 
-Alas, these response labels were pretty poorly chosen so some didn't convert well
+Alas, these response labels were pretty poorly chosen so some didn't convert well.  And some are really hard to understand too.
 
 * Avoid this problem and choose good response labels from the start for your own data
-* You can use `fct_recode()` to do further recodes inside of `mutate()` if you want to clean the labels further
 * Here, we show you what we got from using `tidy_responses()`
 ```{r u2-clean-16}
 data_all |> 
   select(where(is.factor)) |>
   walk(\(column) print(levels(column)))
 ```
+
+-----
+
+Lets clean them up a bit more manually
+
+```{r}
+data_all <- data_all |> 
+  mutate(ms_zoning = fct_recode(ms_zoning,
+                                res_low = "rl",
+                                res_med = "rm",
+                                res_high = "rh",
+                                float = "fv",
+                                agri = "a_agr",
+                                indus = "i_all",
+                                commer = "c_all"),
+         bldg_type = fct_recode(bldg_type,   # <1>
+                                one_fam = "1fam",
+                                two_fam = "2fmcon",
+                                town_end = "twnhse",
+                                town_inside = "twnhs"))
+                                
+```
+1. Note that I did not need to list all levels in the recode.  Only the levels I wanted to change.
 
 The full dataset is now clean!
 
