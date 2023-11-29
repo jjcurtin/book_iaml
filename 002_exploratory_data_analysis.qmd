@@ -254,12 +254,12 @@ Here is a quick glimpse of the subset of observations we will work with in Units
 ```{r u2-overview-2}
 data_all <- read_csv(here::here(path_data, "ames_raw_class.csv"),   # <1>
                      col_types = cols()) |> # <2> 
-  mutate(across(where(is.character), as_factor)) |> # <3> 
+  mutate(across(where(is.character), factor)) |> # <3> 
   glimpse() # <4>
 ```
 1. First we read data using a relative path and the `here::here()` function.  This is a replacement for `file.path()` that works better for both interactive use and rendering in Quarto when using projects.
 2.  We use `col_types = cols()` to let R guess the correct class for each column. This suppresses messages that aren't important at this point prior to EDA.
-3. Then we use a mutate to re-class all character data to factors.  This should handle most of our nominal and ordinal variables.  We may need to still class some that were missed because they appeared to be numeric.
+3. Then we use a mutate to re-class all character data to factors.  This should handle most of our nominal and ordinal variables.  We may need to still class some that were missed because they appeared to be numeric.  I prefer `factor()` to `forcats::fct()` because factor orders the levels alphabetically.  Be aware that this *could* change if your code is used in a region of the world where this sorting is different.  I still prefer this to the alternative (in `fct()`) that orders by the order the levels are found in your data.
 4. It is good practice to always `glimpse()` data after you read it.
 
 -----
@@ -367,16 +367,15 @@ data_all |> glimpse()
 * The data dictionary indicates that valid values range from 1 - 10.
 
 ```{r u2-clean-3}
-oq_levels <- as.character(1:10) # <1>
+oq_levels <- 1:10 # <1>
 
-data_all <-  data_all |> 
-  mutate(overall_qual = fct(as.character(overall_qual), # <2>
-                            levels = oq_levels)) |> # <3>
+t <-  data_all |> 
+  mutate(overall_qual = factor(overall_qual, 
+                               levels = oq_levels)) |> # <2>
   glimpse()
 ```
-1. It is always best to explicitly set the levels of an ordinal factor in the order you prefer.  You may also want to explicitly set the levels for a nominal factor as well for error checking purposes (see below).  The levels should be provided as character class.
-2. We prefer to use `forcats::fct()` for creating factors.  It is stricter than the base R equivalent (`factor()`).  `fct()` requires that the variable be character class prior to conversion.  If numeric, just change to character in place.
-3. We indicate the levels here.  `fct()` will then generate an error if any value is not a valid level
+1. It is always best to explicitly set the levels of an ordinal factor in the order you prefer.  It is not necessary here because `overall_qual` was numeric and therefore sorts in the expected order.  However, if it had been numbers stores as characters, it could sort incorrectly (e.g., 1, 10, 2, 3, ...).  And obviously if the orders levels were names, the order would have to be specified.
+2. We indicate the levels here.
 
 
 ### Skimming the data
@@ -676,8 +675,7 @@ The full dataset is now clean!
 
 ### Train/Validate/Test Splits
 
-The final task we typically do as part of the data preparation process is to split
-the full dataset into training, validation and test sets.
+The final task we typically do as part of the data preparation process is to split the full dataset into training, validation and test sets.
 
 * Test sets are "typically" between 20-30% of your full dataset
   * There are costs and benefits to larger test sets
@@ -690,7 +688,7 @@ the full dataset into training, validation and test sets.
 
 * It is typical to split data on the outcome within strata
   * For a categorical outcome, this makes the proportions of the response categories more balanced across the train, validation, and test sets
-  * For a numeric outcome, we first break up the distribution into temporary bins (see $breaks = 4$ below) and then we split within these bins
+  * For a numeric outcome, we first break up the distribution into temporary bins (see `breaks = 4` below) and then we split within these bins
 * **IMPORTANT**: Set a seed so that you can reproduce these splits if you later do more cleaning
 
 
@@ -750,44 +748,64 @@ Now that we are done cleaning the data, we should start to fully class our varia
 
 
 ```{r}
- data_trn <- read_csv(file.path(path_data, "ames_clean_class_trn.csv")) |> 
+ data_trn <- read_csv(here::here(path_data, "ames_clean_class_trn.csv")) |> 
   glimpse()
 ```
 
 
-Opps, notice that `overall_qual` is back to being classed as numeric (dbl).  
+Opps:
 
-* This is because `read_csv()` guesses the type for each column and we used only numbers for this ordinal categorical variable.   
-* You can avoid spending a lot of time re-classing all of your data sets by specifying their type when you first read them.  
-* I prefer to indicate column types with the `col_types` parameter set to a string or use a list as below.  See `vignette("readr")` for more info.  
-* It is good practice to supply an explicit column specification. It is more work, but it ensures that you get warnings if the data changes in unexpected ways.
-* Lets try this again
-  * We can also convert character classes to unordered and ordered factors at this point too
+* Notice that `overall_qual` is back to being classed as numeric (dbl).  
+  * This is because `read_csv()` guesses the type for each column and we used only numbers for this ordinal categorical variable.   
+* Notice that your factors are back to character
+  * This is because csv files don't save anything other than the values (labels for factors).  They are the cleaned labels though!
+* You should class all variables using the same approach as before (often just a copy/paste).  My preferred way is via mutates
 
 ```{r}
  data_trn <- 
   read_csv(here::here(path_data, "ames_clean_class_trn.csv"), 
-           col_types = list(sale_price = col_double(), # <1>
-                            gr_liv_area = col_double(),
-                            lot_area = col_double(),
-                            year_built = col_double(),
-                            overall_qual = col_factor(levels = as.character(1:10), # <2>
-                                                      ordered = TRUE),
-                            garage_cars = col_double(),
-                            garage_qual = 
-                              col_factor(levels = c("no_garage", "po", "fa", "ta", "gd", "ex"), 
-                                         ordered = TRUE),
-                            ms_zoning = col_factor(), # <3>
-                            lot_config = col_factor(),
-                            bldg_type = col_factor())) |> 
+           col_types = cols()) |>  # <1>
+  mutate(across(where(is.character), factor)) |> # <2>
+  mutate(overall_qual = factor(overall_qual),  # <3>
+         overall_qual = fct_relevel(overall_qual, as.character(1:10)), # <4>
+         garage_qual = fct_relevel(garage_qual, c("no_garage", "po", "fa", 
+                                                  "ta", "gd", "ex"))) |>  # <5> 
   glimpse()
 ```
-1. Use `col_double()` to class numeric columns
-2. For ordered factors, use `col_factor()` and need to indicate `levels` in order and set `ordered = TRUE`
-3. For unordered factors, use `col_factor()` again but can just use the default ordering unless there is a reason to re-order
+1. use col_types = cols() to suppress messages about default class assignments
+2. use `mutate()` with `across()` to change all character variables to factors
+3. use `mutate()` with `factor()` to change numeric variable to factor.
+4. use `mutate()` with `fct_relevel()` to explicitly set levels of an ordered factor
+5. notice the warning about the unknown level.  Always explore warnings!  In this instance, its fine.  There were only two observations with ex and neither ended up in the training split.   Still best to include this level to note it exists!
 
-* Alternatively, you can read the data using `col_types = cols()` and then use mutate statements to class the columns as needed.  Both approaches follow best practices.
 -----
+
+**Coding sidebar**:  We will likely re-class the Ames dataset many times (for training, validation, test).  We could copy/paste these mutates each time but whenever you do something more than twice, I recommend writing a function.  We might write this one to re-class the ames variables
+
+```{r}
+class_ames <- function(df){
+  
+  df |>
+    mutate(across(where(is.character), factor)) |> 
+    mutate(overall_qual = factor(overall_qual), 
+           overall_qual = fct_relevel(overall_qual, as.character(1:10)), 
+           garage_qual = fct_relevel(garage_qual, c("no_garage", "po", "fa", 
+                                                    "ta", "gd", "ex")))
+}
+```
+
+Now we can use it every time we read in one of the Ames datasets
+
+```{r}
+#| warning: false
+
+data_trn <- 
+  read_csv(here::here(path_data, "ames_clean_class_trn.csv"), col_types = cols()) |> 
+  class_ames() |> 
+  glimpse()
+```
+
+---
 
 There are 3 basic types of Modeling EDA you should always do
 
@@ -1289,7 +1307,8 @@ plot_grouped_box_violin <- function(df, x, y){
     ggplot(aes(x = .data[[x]], y = .data[[y]])) +
     geom_violin(fill = "green", color = NA) +
     geom_boxplot(width = .1, fill = NA, lwd = 1.1, fatten = 1.1) +
-    theme(axis.text.x = element_text(angle = 90, size = x_label_size, vjust = 0.5, hjust = 1),
+    theme(axis.text.x = element_text(angle = 90, size = x_label_size, 
+                                     vjust = 0.5, hjust = 1),
           axis.text.y = element_text(size = 11))
 }
 ```
@@ -1332,14 +1351,16 @@ plot_categorical <- function(df, x, y, ordered = FALSE){
   p_bar <- df |>
     ggplot(aes(x = .data[[x]])) +
     geom_bar()  +
-    theme(axis.text.x = element_text(angle = 90, size = x_label_size, vjust = 0.5, hjust = 1),
+    theme(axis.text.x = element_text(angle = 90, size = x_label_size, 
+                                     vjust = 0.5, hjust = 1),
           axis.text.y = element_text(size = 11))
   
   p_box <- df |>
     ggplot(aes(x = .data[[x]], y = .data[[y]])) +
     geom_violin(fill = "green", color = NA) +
     geom_boxplot(width = .1, fill = NA, lwd = 1.1, fatten = 1.1) +
-    theme(axis.text.x = element_text(angle = 90, size = x_label_size, vjust = 0.5, hjust = 1),
+    theme(axis.text.x = element_text(angle = 90, size = x_label_size, 
+                                     vjust = 0.5, hjust = 1),
           axis.text.y = element_text(size = 11))
   
   return(list(p_bar, p_box))
@@ -1373,7 +1394,8 @@ plot_grouped_barplot_count <- function(df, x, y){
   df |>
     ggplot(aes(x = .data[[y]], fill = .data[[x]])) +
     geom_bar(position = "stack") +
-    theme(axis.text.x = element_text(angle = 90, size = x_label_size, vjust = 0.5, hjust = 1),
+    theme(axis.text.x = element_text(angle = 90, size = x_label_size, 
+                                     vjust = 0.5, hjust = 1),
           axis.text.y = element_text(size = 11))
 }
 
@@ -1384,7 +1406,8 @@ plot_grouped_barplot_percent <- function(df, x, y){
     ggplot(aes(x = .data[[y]], fill = .data[[x]])) +
     geom_bar(position = "fill") +
     labs(y = "Proportion") +
-    theme(axis.text.x = element_text(angle = 90, size = x_label_size, vjust = 0.5, hjust = 1),
+    theme(axis.text.x = element_text(angle = 90, size = x_label_size, 
+                                     vjust = 0.5, hjust = 1),
           axis.text.y = element_text(size = 11))
 }
 ```
@@ -1456,7 +1479,7 @@ data_trn |> janitor::tabyl(bldg_type, lot_config)
 
 ## Working with Recipes
 
-Recipes are used for feature engineering in `tidymodels` using the [$recipes$](https://recipes.tidymodels.org/) package
+Recipes are used for feature engineering in `tidymodels` using the [`recipes`](https://recipes.tidymodels.org/) package
 
 * Used for transforming raw predictors into features used in our models
 * Describes all steps to make feature matrix.  For example:
@@ -1464,13 +1487,22 @@ Recipes are used for feature engineering in `tidymodels` using the [$recipes$](h
   * Linear and non-linear transformations (e.g., log, box-cox)
   * Polynomials and interactions (i.e., `x1 * x1` or `x1 * x2`)
   * Missing value imputations
-  
+* Proper use of recipes is an important tool to prevent data leakage between train and either validation or test.
 * Recipes use only information from the training set in all feature engineering
-  * "Prepping" a recipe involves calculating any statistics needed for the transformations that will be applied to engineer features (e.g., mean and standard deviation to normalize a numeric variable)
-  * A "prepped" recipe does not derive any statistics from validation or test sets
-  * However, a "prepped" recipe can be **applied** to a validation or test set to make feature matrices from those data for evaluation
-  * Proper use of recipes is an important tool to prevent data leakage between train and either validation or test
-  * Consider example of standardizing `x1` for a feature in train vs. validation and test.  Must use mean and sd from TRAIN to standardize `x1` in train, validate, and test.  VERY IMPORTANT.
+* Consider example of standardizing `x1` for a feature in train vs. validation and test.  Must use mean and sd from TRAIN to standardize `x1` in train, validate, and test.  VERY IMPORTANT.
+
+
+We use recipes in a two step process - `prep()` and `bake()`
+  
+* "Prepping" a recipe involves calculating any statistics needed for the transformations that will be applied to engineer features (e.g., mean and standard deviation to normalize a numeric variable).
+  * Prepping is done with the `prep()` function.
+  * Prepping is **always** done only with training data.  A "prepped" recipe does not derive any statistics from validation or test sets.
+
+* "Baking" is the process of calculating the features
+  * Baking is done with the `bake()` function.
+  * We used our prepped recipe when we bake.
+  * Whereas we only prep a recipe with training data, we can use a prepped recipe to bake features from any dataset (training, validation, or test).
+
 
 We will work with recipes extensively when model building starting in unit 3
 
@@ -1489,18 +1521,14 @@ Recipe syntax is very similar to generic `tidyverse` syntax (created by same gro
 Recipes are used in Modeling scripts (which is a third type of script after cleaning and modeling EDA scripts)
 
 * Lets reload training again to pretend we are starting a new script
-* Here we demonstrate using mutate rather than specifying `col_types`
 
 ```{r u2-recipes-1}
  data_trn <- read_csv(file.path(path_data, "ames_clean_class_trn.csv"), 
                       col_types = cols()) |> 
-  mutate(across(where(is.character), as_factor), # <1>
-         overall_qual = ordered(overall_qual, # <2>
-                               levels = as.character(1:10))) |> 
+  class_ames() |> # <1> 
   glimpse()
 ```
-1. We first use `as_factor()` to set up all character variables as unordered since most are unordered
-2. We then make `overall_qual` ordred using the `ordered()` function.
+1. Remember our function for classing! 
 
 -----
 
@@ -1530,43 +1558,32 @@ summary(rec)
 
 ### Prepping and Baking a Recipe
 
-You can apply the recipe to any dataset (e.g., training, validation, test) to make a feature matrix from that dataset
-
-There are two discrete (and important) steps
-
-* You `prep()` a recipe using the training set
-  * This uses the training set to calculate any statistics or other information that is necessary for feature engineering
-  * e.g., means and sds to standardize a variable, factor loadings for a PCA, frequencies for identifying infrequent levels of a categorical variable
-  * **IMPORTANT**: if you have any variables that are still classed as character you need to include `strings_as_factors = FALSE`.   If you are following our recommended practices, all  your character variables have been classed as factors by this point so you don't need to do this.
-
-
-* You `bake()` a dataset using a prepped recipe to get a feature matrix from the the raw predictors and the outcome 
-* You will bake the train, validatation, and test sets before fitting or evaluating models for now (some of this is automated in the future)
-  * Baking will use information obtained from prepping the training set
-  * THIS IS HOW WE PREVENT DATA LEAKAGE FROM TRAINING INTO INTO VALIDATION OR TEST SETS!
------
-
 Let's make a feature matrix from the training set
 
-* We use training for both prepping the recipe and then baking the raw training data into a feature matrix
-* If we were making features for validation or test sets, we would use the training set to prep the recipe, but those other sets for the baking a feature matrix
+There are two discrete (and important) steps
+ * `prep()`
+ * `bake()`
 
+First we prep the recipe using the training data
 
 ```{r}
 rec_prep <- rec |> # <1>
-  prep(data_trn) #<2>
-
-feat_trn <- rec_prep |> 
-  bake(NULL) # <3>
-  
+  prep(training = data_trn) #<2>
 ```
 1. We start by prepping our raw/original recipe (`rec`)
 2. We use the `prep()` function on on the training data.  Recipes are ALWAYS prepped using training data.  This makes sure that are recipes will always only use information from the training set when making features for any subsequent dataset.
-3. To get the actual features, we `bake()` the prepped recipe.  If we want features from training, we don't need to provide any new data to `bake()` because the training data were retrained in the prepped recipe (by default at least).  Use `NULL` instead.  If we wanted features for a new dataset (e.g., validation or test sets), we would supply those new data to `bake()`.  We will do that in later units.
 
 -----
 
-We should generally at least glimpse (and typically do some more EDA) on our features to make sure our recipe is doing what we expect.
+Second, we bake the training data using this prepped recipe to get a feature matrix from it.  
+```{r}
+feat_trn <- rec_prep |> 
+  bake(new_data = data_trn)
+```
+
+-----
+
+Finally, we should generally at least glimpse (and typically do some more EDA) on our features to make sure our recipe is doing what we expect.
 
 ```{r}
 feat_trn |> glimpse()
@@ -1576,6 +1593,7 @@ feat_trn |> skim_all()
 
 We can now use our features from training to train models, but that will take place in the next unit!
 
+We could also use the prepped recipe to bake validation or test data to evaluate trained models.  That too will happen in the next unit!
 
 ## Discussion Topics
 
