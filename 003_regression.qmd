@@ -17,7 +17,7 @@ editor_options:
   - Extensions to interactive and non-linear effects of features
   
 - K Nearest Neighbor (KNN)
-  - Hyperparameter `k`
+  - Hyperparameter $k$
   - Scaling predictors
   - Extensions to categorical variables
 
@@ -165,7 +165,7 @@ These configurations will differ with respect to the features
   - Transformations applied to those predictors as part of feature engineering
   - Inclusion (or not) of interactions among features
 
-- The KNN model configurations will also differ with respect to its hyperparameter- `k`
+- The KNN model configurations will also differ with respect to its hyperparameter- $k$
 
 -----
 
@@ -1497,8 +1497,8 @@ K Nearest Neighbor
 - Algorithm "memorizes" the training set (**lazy learning**)
   - Lazy learning is most useful for large, continuously changing datasets with few attributes (features) that are commonly queried (e.g., online recommendation systems)
 
-- Prediction for any new observation is based on `k` most similar observations from the dataset
-  - `k` provides direct control  over the bias-variance trade-off for this algorithm
+- Prediction for any new observation is based on $k$ most similar observations from the dataset
+  - $k$ provides direct control  over the bias-variance trade-off for this algorithm
   
 -----
 
@@ -1596,7 +1596,7 @@ data_trn_demo |>
 
 ### The hyperparameter k
 
-KNN is our first example of a statistical algorithm that includes a **hyperparameter**, in this case `k`
+KNN is our first example of a statistical algorithm that includes a **hyperparameter**, in this case $k$
 
 - Algorithm hyperparameters differ from parameters in that they cannot be estimated while fitting the algorithm to the training set
 
@@ -1681,13 +1681,13 @@ feat_val_demo |>
 
 -----
 
-Let's pause and consider our conceptual understanding of the impact of `k` on the bias-variance trade-off
+Let's pause and consider our conceptual understanding of the impact of $k$ on the bias-variance trade-off
 
-[How will the size of `k` influence model performance (e.g., bias, overfitting/variance)?].{red}
-^[Smaller values of `k` will tend to increase overfitting (and therefore variance across training samples) but decrease bias.  Larger values of k will tend to decrease overfitting but increase bias.  We need to find the Goldilocks "sweet spot"]
+[How will the size of $k$ influence model performance (e.g., bias, overfitting/variance)?].{red}
+^[Smaller values of $k$ will tend to increase overfitting (and therefore variance across training samples) but decrease bias.  Larger values of k will tend to decrease overfitting but increase bias.  We need to find the Goldilocks "sweet spot"]
 
 [How will k = 1 perform in training and validation sets?].{red}
-^[`k` = 1 will perfectly fit the training set.  Therefore it is very dependent on the training set (high variance).  It will fit both the DGP and the noise in the training set.  Clearly it will likely not do as well in validation (it will be overfit to training).  `k` needs to be larger if there is more noise (to average over more cases).  `k` needs to be smaller if the relationships are complex. (More on choosing `k` by resampling in unit 5.]
+^[$k$ = 1 will perfectly fit the training set.  Therefore it is very dependent on the training set (high variance).  It will fit both the DGP and the noise in the training set.  Clearly it will likely not do as well in validation (it will be overfit to training).  $k$ needs to be larger if there is more noise (to average over more cases).  $k$ needs to be smaller if the relationships are complex. (More on choosing $k$ by resampling in unit 5.]
 
 -----
 
@@ -1757,7 +1757,7 @@ rmse_vec(feat_val_demo$y2,
 
 -----
 
-What if we go the other way and increase `k` to 75
+What if we go the other way and increase $k$ to 75
 
 ```{r u3-knn-17}
 fit_75nn_demo <- 
@@ -1846,7 +1846,7 @@ To make a prediction for some new observation, we need to identify the observati
 - IMPORTANT: We care only about:
 
   - Distance between a validation observation and all the training observations
-  - Need to find the `k` observations in training that are nearest to the validation observation (i.e., its neighbors)
+  - Need to find the $k$ observations in training that are nearest to the validation observation (i.e., its neighbors)
   - Distance is defined based on these observations' features, not their outcomes
 
 -----
@@ -2101,16 +2101,16 @@ error_val
 ```
 
 - Too high, now we have bias......
-- We will learn a more rigorous method for selecting the optimal value for `k` (i.e., **tuning** this hyperparameter) in unit 5
+- We will learn a more rigorous method for selecting the optimal value for $k$ (i.e., **tuning** this hyperparameter) in unit 5
 
 -----
 
-To better understand bias-variance trade-off, let's look at error across these three values of `k` in train and validation for Ames
+To better understand bias-variance trade-off, let's look at error across these three values of $k$ in train and validation for Ames
 
 Training
 
 - Remember that training error would be 0 for `k = 1`
-- Training error is increasing as `k` increases b/c it KNN is overfitting less (so its not fitting the noise in train as well)
+- Training error is increasing as $k$ increases b/c it KNN is overfitting less (so its not fitting the noise in train as well)
 
 ```{r u3-knn-34}
 rmse_vec(feat_trn$sale_price, 
@@ -2124,11 +2124,11 @@ rmse_vec(feat_trn$sale_price,
 
 Validation
 
-- Validation error is first going down as `k` increases (and it would have been very high for `k = 1`)
+- Validation error is first going down as $k$ increases (and it would have been very high for `k = 1`)
 - Bias is likely increasing a bit
 - But this is compensated by big decreases in overfitting variance
 - The trade-off is good for `k = 20` relative to 5 and 1
-- At some point, as `k` increases the increase in bias outweighed the decrease in variance and validation error increased too.
+- At some point, as $k$ increases the increase in bias outweighed the decrease in variance and validation error increased too.
 ```{r u3-knn-35}
 rmse_vec(feat_val$sale_price, 
          predict(fit_5nn_5num, feat_val)$.pred)
@@ -2196,10 +2196,10 @@ error_val
 - Now it helps.  
 - Might have to do with interactions with other predictors that we didn't model in the linear model
 - KNN automatically accommodates interactions.  Why?
-- This model is a bit more complex and might benefit further from higher `k`
+- This model is a bit more complex and might benefit further from higher $k$
 
 
-As a teaser, here is another performance metric for this model - `R^2`.   Not too shabby!  Remember, there is certainly some irreducible error in `sale_price` that will put a ceiling on `R^2` and a floor on `RMSE`
+As a teaser, here is another performance metric for this model - $R^2$.   Not too shabby!  Remember, there is certainly some irreducible error in `sale_price` that will put a ceiling on $R^2$ and a floor on RMSE
 ```{r u3-knn-39}
 rsq_vec(feat_val$sale_price, 
         predict(fit_20nn_5num_mszone, feat_val)$.pred)
