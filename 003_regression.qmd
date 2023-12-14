@@ -525,10 +525,10 @@ rmse_vec(truth = feat_val$sale_price,
 Let's record how well this model performed in validation so we can compare it to subsequent models
 
 ```{r u3-simple-17}
-error_val <- bind_rows(error_val, 
-                        tibble(model = "simple linear model", 
-                               rmse_val = rmse_vec(truth = feat_val$sale_price, 
-                                                   estimate = predict(fit_lm_1, feat_val)$.pred)))
+error_val <- bind_rows(error_val,
+                       tibble(model = "simple linear model",
+                              rmse_val = rmse_vec(truth = feat_val$sale_price,
+                                                  estimate = predict(fit_lm_1, feat_val)$.pred)))
 
 error_val
 ```
@@ -848,7 +848,7 @@ We will recode `ms_zoning` to have only 3 levels to make our example simple (tho
 ```{r}
 data_dummy <- data_trn |> 
   select(sale_price, ms_zoning)  |> # <1>
-  mutate(ms_zoning3 = fct_recode(ms_zoning, # <2>
+  mutate(ms_zoning3 = fct_collapse(ms_zoning, # <2>
                                  "residential" = c("res_high", "res_med", "res_low"),
                                  "commercial" = c("agri", "commer", "indus"),
                                  "floating" = "float")) |> # <3>
@@ -1014,7 +1014,17 @@ plot_3d$plane3d(lm(sale_price ~ f1 + f2, data = d))
   - This approach uses one additional dummy coded feature for the final category.  
   - We won't spend time on this but you should be familiar with the term b/c it is often confused with dummy coding.
   
-  
+---
+
+**Coding Sidebar**
+
+When creating dummy coded features from factors that have levels with infrequent observations, you may occasionally end up with novel levels in your validation or test sets that were not present in your training set.  
+
+- This will cause you issues.  
+- These issues are mostly resolved if you make sure to explicitly list all possible levels for a factor when classing that factor in the training data, even if the level doesn't exist in the training data.   
+- We provide more detail on this issue in an [appendix]().
+
+
 ### Unordered Categorical Predictors
 
 Now that we understand how to use dummy coding to feature engineer unordered categorical predictors, let's consider some potentially important ones that are available to us.  Are any promising?
@@ -1091,6 +1101,25 @@ Data dictionary entry: Type of dwelling
 
 Let's do some feature engineering with `ms_zoning`.  We can now do this formally in a recipe so that it can be used in our modeling workflow.
 
+First, if you noticed earlier, there are some levels for `ms_zoning` that are pretty infrequent.  Lets make sure both `data_trn` and `data_val` have all levels set for this factor.
+
+```{r}
+data_trn |> pull(ms_zoning) |> levels()
+data_val |> pull(ms_zoning) |> levels()
+```
+
+As expected, we are missing a level (`agri`) in `data_val`.  Lets fix that.
+
+```{r}
+data_val <- data_val |> 
+  mutate(ms_zoning = factor(ms_zoning, 
+                            levels = c("agri", "commer", "float", "indus", "res_high", "res_low", "res_med")))
+```
+
+-----
+
+With that fixed, let's proceed:
+
 - We will collapse categories down to three levels (commercial, residential, floating village) as before but now using `step_mutate()` combined with `fct_collapse()` to do this inside of our recipe.  
 - We will convert to dummy features using `step_dummy()`.  The first level of the factor will be set to the reference level when we call `step_dummy()`. 
 - `step_dummy()` is a poor choice for function name.  It actually uses whatever contrast coding we have set up in R.  However, the default is are dummy coded contrasts (R calls this treatment contrasts). See `?contrasts` and `options("contrasts")` for more info.
@@ -1111,10 +1140,9 @@ rec
 
 -----
 
-When working with factors that that have levels with  infrequent observations, you may occasionally end up with novel levels in your valdiation or test sets that were not present in your training set.  This will cause you issues.  These issues are mostly resolved if you make sure you explicitly list all possible levels for a factor when classing that factor in the training data, even if the level doesnt exist in the training data.   
+**Coding Sidebar**
 
 You should also read more about some other `step_()` functions that you might use for categorical predictors:
-- `step_novel()` to handle unanticipated levels that are found in val or test but not train.
 - `step_other()` to combine all low frequency categories into a single "other" category.
 - `step_unknown()` to assign missing values their own category
 - You can use selector functions.  For example, you could make dummy variables out of all of your factors using `step_dummy(all_nominal_predictors())`.  
@@ -1127,28 +1155,40 @@ We have also described these in the section on factor steps in Appendix 1
 
 Let's see if the addition of `ms_zoning` helped
 
-- Notice the addition of the dummy coded features to the feature matrix (including a feature for the "new" level)
+- Notice the addition of the dummy coded features to the feature matrix
 - Notice the removal of the factor `ms_zoning`
-- Notice the use of the names for dummy coded features in the fit formula
 ```{r u3-categorical-6}
-feat_trn <- rec |> 
-  make_features(data_trn, data_trn)
+rec_prep <- rec |> 
+  prep(data_trn)
 
-feat_val <- rec |> 
-  make_features(data_trn, data_val) 
+feat_trn <- rec_prep |> 
+  bake(data_trn)
 
-fit_lm_41cat <- 
+feat_val <- rec_prep |> 
+  bake(data_val)
+```
+
+```{r}
+feat_trn |> skim_all()
+
+feat_val |> skim_all()
+```
+
+Now lets fit a model with these features
+
+```{r}
+fit_lm_6 <- 
   linear_reg() |> 
   set_engine("lm") |> 
-  fit(sale_price ~ gr_liv_area + lot_area + year_built + garage_cars + ms_zoning_floating + ms_zoning_commercial, data = feat_trn)
+  fit(sale_price ~ ., data = feat_trn)
 
 plot_truth(truth = feat_val$sale_price, 
-           estimate = predict(fit_lm_41cat, feat_val)$.pred)
+           estimate = predict(fit_lm_6, feat_val)$.pred)
 
 error_val <- error_val |> 
-  bind_rows(tibble(model = "4 predictor linear model and ms_zoning", 
+  bind_rows(tibble(model = "6 feature linear model w/ms_zoning", 
                    rmse_val = rmse_vec(feat_val$sale_price,
-                                       predict(fit_lm_41cat,
+                                       predict(fit_lm_6,
                                                feat_val)$.pred)))
 
 error_val
@@ -1156,7 +1196,7 @@ error_val
 
 Removing Yeo Johnson transformation but adding dummy coded `ms_zoning` may have helped a little
 
-`r colorize("Will the addition of new predictors/features to a model always reduce RMSE in train?  in validation?", "red")`
+[Will the addition of new predictors/features to a model always reduce RMSE in train?  in validation?].{red}
 ^[As you know, the estimation procedure in linear models is OLS.  Parameter estimates are derived to minimize the SSE in the data set in which they are derived.  For this reason, adding a predictor will never increase RMSE in the training set and it will usually lower it even when it is not part of the DGP.   However, this is not true in validation.  A predictor will only meaningfully lower RMSE in validation if it is part of the DGP.  Also, a bad predictor could even increase RMSE in validation due to overfitting.]
 
 ### Ordered Categorical Predictors
@@ -1172,9 +1212,9 @@ Let's consider `overall_qual`
 
 
 ```{r u3-categorical-7}
-feat_trn |> 
+data_trn |> 
   plot_categorical("overall_qual", "sale_price") |> 
-  plot_grid(plotlist = ., ncol = 2)
+  plot_grid(plotlist = _, ncol = 2)
 ```
 
 Observations:
@@ -1189,37 +1229,65 @@ Observations:
 
 Let's add `overall_qual` to our model as numeric
 
-We can use `step_ordinalscore()`
+Remember that this predictor was ordinal so we paid special attention to the order of the levels when we classed this factor.  Lets confirm they are in order
+
+```{r}
+data_trn |> pull(overall_qual) |> levels()
+```
+
+To convert this to numeric (with levels in this order), we can use another simple mutate inside our recipe.
 
 ```{r u3-categorical-8}
 rec <- 
-  recipe(sale_price ~ ., data = data_trn) |> 
+  recipe(sale_price ~  ~ gr_liv_area + lot_area + year_built + garage_cars + 
+           ms_zoning + overall_qual, data = data_trn) |> 
   step_impute_median(garage_cars) |> 
   step_mutate(ms_zoning = fct_collapse(ms_zoning,
-                                       residential = c("rl", "rm", "rh"),
-                                       commercial = c("c", "i", "a"),
-                                       floating = "fv")) |>
-  step_dummy(ms_zoning) |> 
-  step_ordinalscore(overall_qual)
+                                 "residential" = c("res_high", "res_med", "res_low"),
+                                 "commercial" = c("agri", "commer", "indus"),
+                                 "floating" = "float"),
+              overall_qual = as.numeric(overall_qual)) |>
+  step_dummy(ms_zoning)
 
 rec
 ```
 
+**Coding Sidebar**
+
+There is a step function called `step_ordinalscore()` but it requires that the factor is classed as an ordered factor.  It is also more complicated than needed in our opinion.  Just use `as.numeric()`
+
+-----
+
 Let's evaluate this model
 
-```{r u3-categorical-13}
-fit_lm_5_1cat <- 
+- Making features
+- Skipping the skim to save space (we promised we checked it previously!)
+- Fitting model
+```{r}
+rec_prep <- rec |> 
+  prep(data_trn)
+
+feat_trn <- rec_prep |> 
+  bake(data_trn)
+
+feat_val <- rec_prep |> 
+  bake(data_val)
+
+fit_lm_7 <- 
   linear_reg() |> 
   set_engine("lm") |> 
-  fit(sale_price ~ gr_liv_area + lot_area + year_built + garage_cars + overall_qual, data = feat_trn)
+  fit(sale_price ~ ., data = feat_trn)
+```
 
-
+- Plotting results
+- Quantifying held out error
+```{r}
 plot_truth(truth = feat_val$sale_price, 
-                                 estimate = predict(fit_lm_5_1cat, feat_val)$.pred)
+                                 estimate = predict(fit_lm_7, feat_val)$.pred)
 
 error_val <- bind_rows(error_val, 
-                        tibble(model = "5 predictor linear model + ms_zoning", 
-                               rmse_val = rmse_vec(feat_val$sale_price, predict(fit_lm_5_1cat, feat_val)$.pred)))
+                        tibble(model = "7 feature linear model", 
+                               rmse_val = rmse_vec(feat_val$sale_price, predict(fit_lm_7, feat_val)$.pred)))
 
 error_val
 ```
@@ -1235,6 +1303,7 @@ There may be interactive effects among our predictors
 - Some statistical algorithms (e.g., KNN) can naturally accommodate interactive effects without any feature engineering
 - Linear models cannot
 - Nothing to fear, tidymodels makes it easy to feature engineer interactions
+- [BUT - as we will learn, we generally think that if you expect lots of interactions, the linear model may not be the best model to use]
 
 -----
 
@@ -1252,14 +1321,15 @@ In the `tidymodels` framework
 
 ```{r u3-interactions-1}
 rec <- 
-  recipe(sale_price ~ ., data = data_trn) |> 
+  recipe(sale_price ~  ~ gr_liv_area + lot_area + year_built + garage_cars + 
+           ms_zoning + overall_qual, data = data_trn) |> 
   step_impute_median(garage_cars) |> 
   step_mutate(ms_zoning = fct_collapse(ms_zoning,
-                                       residential = c("rl", "rm", "rh"),
-                                       commercial = c("c", "i", "a"),
-                                       floating = "fv")) |>
+                                 "residential" = c("res_high", "res_med", "res_low"),
+                                 "commercial" = c("agri", "commer", "indus"),
+                                 "floating" = "float"),
+              overall_qual = as.numeric(overall_qual)) |>
   step_dummy(ms_zoning) |> 
-  step_ordinalscore(overall_qual) |> 
   step_interact(~ overall_qual:year_built)
 
 rec
@@ -1269,38 +1339,50 @@ rec
 
 Let's prep, bake, fit, and evaluate! 
 
-- Note the new interaction term
+- Note the new interaction term (we just skim `feat_trn` here)
 - Named using "_x_" to specify the interaction
 
 ```{r u3-interactions-2}
-feat_trn <- rec |> 
-  make_features(data_trn, data_trn)
+rec_prep <- rec |> 
+  prep(data_trn)
 
-feat_val <- rec |> 
-  make_features(data_trn, data_val)
+feat_trn <- rec_prep |> 
+  bake(data_trn)
 
-fit_lm_5_1cat_int <- 
+feat_val <- rec_prep |> 
+  bake(data_val)
+```
+
+```{r}
+feat_trn |> skim_all()
+```
+
+- fix model
+- plot
+- calculate held out error
+
+```{r}
+fit_lm_8 <- 
   linear_reg() |> 
   set_engine("lm") |> 
-  fit(sale_price ~ gr_liv_area + lot_area + year_built + garage_cars + overall_qual + overall_qual_x_year_built
-      , data = feat_trn)
-
+  fit(sale_price ~., 
+      data = feat_trn)
 
 plot_truth(truth = feat_val$sale_price, 
-           estimate = predict(fit_lm_5_1cat_int, feat_val)$.pred)
+           estimate = predict(fit_lm_8, feat_val)$.pred)
 
 error_val <- bind_rows(error_val, 
                       tibble(model = 
-                               "5 predictor linear model + ms_zoning + interaction", 
+                               "8 feature linear model w/interaction", 
                              rmse_val = rmse_vec(feat_val$sale_price,
-                                                 predict(fit_lm_5_1cat_int,
+                                                 predict(fit_lm_8,
                                                          feat_val)$.pred)))
 
 error_val
 ```
 
 
-- That didnt help
+- That helped!
 
 -----
 
@@ -1309,7 +1391,7 @@ You can also feature engineer interactions with categorical predictors
 - The categorical predictors should first be converted to dummy code features
 - You will indicate the interactions using the variable names that will be assigned to these dummy code features
 - Use `starts_with()` or `matches()` to make it easy if there are many features associated with a categorical predictor
-- Can use "~ .^2" to include all two way interactions (be careful if you have dummy code features!)
+- Can use "~ .^2" to include all two way interactions (be careful if you have dummy coded features!)
 
 Let's code an interaction between `ms_zoning` & `year_built`.  
 
@@ -1317,56 +1399,64 @@ Let's code an interaction between `ms_zoning` & `year_built`.
 - Old commercial spaces are never cool
 - Maybe this is why the main effect of `ms_zoning` wasn't useful
 
-
-Notice we are removing `lot_config` and `bldg_type as well with `step_rm()`.  This will allow us to use the `.` operator in `fit()`
 ```{r u3-interactions-6}
 rec <- 
-  recipe(sale_price ~ ., data = data_trn) |> 
+  recipe(sale_price ~  ~ gr_liv_area + lot_area + year_built + garage_cars + 
+           ms_zoning + overall_qual, data = data_trn) |> 
   step_impute_median(garage_cars) |> 
   step_mutate(ms_zoning = fct_collapse(ms_zoning,
-                                       residential = c("rl", "rm", "rh"),
-                                       commercial = c("c", "i", "a"),
-                                       floating = "fv")) |>
+                                 "residential" = c("res_high", "res_med", "res_low"),
+                                 "commercial" = c("agri", "commer", "indus"),
+                                 "floating" = "float"),
+              overall_qual = as.numeric(overall_qual)) |>
   step_dummy(ms_zoning) |> 
-  step_ordinalscore(overall_qual) |> 
-  step_interact(~ starts_with("ms_zoning_"):year_built) |> 
-  step_rm(lot_config, bldg_type, garage_qual)
+  step_interact(~ overall_qual:year_built) |> 
+  step_interact(~ starts_with("ms_zoning_"):year_built)  
 
 rec
 ```
 
 ----- 
 
-Notice that the feature matrix now only contains the features we care about
-
-We can now use `.` to select all features in the feature matrix
-
 ```{r u3-interactions-8, warning = FALSE}
-feat_trn <- rec |> 
-  make_features(data_trn, data_trn)
+rec_prep <- rec |> 
+  prep(data_trn)
 
-feat_val <- rec |> 
-  make_features(data_trn, data_val, FALSE)
+feat_trn <- rec_prep |> 
+  bake(data_trn)
 
-fit_lm_5_1int <- 
+feat_val <- rec_prep |> 
+  bake(data_val)
+```
+
+- Yup, we have two new interaction features as expected
+```{r}
+feat_trn |> skim_all()
+```
+
+- Fit model
+- Plot
+- Quantify held out error
+
+```{r}
+fit_lm_10 <- 
   linear_reg() |> 
   set_engine("lm") |> 
   fit(sale_price ~ ., data = feat_trn)
 
-
 plot_truth(truth = feat_val$sale_price, 
-           estimate = predict(fit_lm_5_1int, feat_val)$.pred)
+           estimate = predict(fit_lm_10, feat_val)$.pred)
 
 error_val <- error_val |> 
-  bind_rows(tibble(model = "5 predictor linear model + ms_zoning & its interaction", 
+  bind_rows(tibble(model = "10 feature linear model w/interactions", 
                    rmse_val = rmse_vec(feat_val$sale_price,
-                                       predict(fit_lm_5_1int,
+                                       predict(fit_lm_10,
                                                feat_val)$.pred)))
 
 error_val
 ```
 
-- Model worse again
+- Not really any better 
 - Shouldn't just include all interactions without reason
   - Either you have done EDA to support them or
   - You have substantive interest in them (explanatory question)
@@ -1434,7 +1524,7 @@ This figure displays:
  - Prediction line from a simple linear model
  - Red lines to represent three new observations (X = 10, 50, 90) we want to make predictions for via a standard KNN
 
-`r colorize("What would 5-NN predictions look like for each of these three new values of X?", "red")`
+[What would 5-NN predictions look like for each of these three new values of X?].{red}
 ^[For x = 10, find the five observations that have X values closest to 10.  Average the Y values for those 5 observations and that is your prediction ($\hat{Y}$) associated with that new value of X.  Repeat to make predictions for $\hat{Y}$ for any other value of X, e.g., 50, 90, or any other value]
  
 
@@ -1585,10 +1675,10 @@ val_demo_baked |>
 
 Let's pause and consider our conceptual understanding of the impact of `k` on the bias-variance trade-off
 
-`r colorize("How will the size of k influence model performance (e.g., bias, overfitting/variance)?", "red")`
+[How will the size of k influence model performance (e.g., bias, overfitting/variance)?].{red}
 ^[Smaller values of $k$ will tend to increase overfitting (and therefore variance across training samples) but decrease bias.  Larger values of k will tend to decrease overfitting but increase bias.  We need to find the Goldilocks "sweet spot"]
 
-`r colorize("How will k = 1 perform in training and validation sets?", "red")`
+[How will k = 1 perform in training and validation sets?].{red}
 ^[$k$ = 1 will perfectly fit the training set.  Therefore it is very dependent on the training set (high variance).  It will fit both the DGP and the noise in the training set.  Clearly it will likely not do as well in validation (it will be overfit to training).  $k$ needs to be larger if there is more noise (to average over more cases).  $k$ needs to be smaller if the relationships are complex. (More on choosing $k$ by resampling in unit 5.]
 
 -----
@@ -1877,7 +1967,7 @@ Let's use KNN with Ames
 rec <- 
   recipe(sale_price ~ ., data = data_trn) |> 
   step_impute_median(garage_cars) |> 
-  step_ordinalscore(overall_qual) |> 
+  step_mutate(overall_qual = as.numeric(overall_qual)) |> 
   step_range(gr_liv_area, lot_area, year_built, garage_cars, overall_qual)
 
 rec
@@ -2027,7 +2117,7 @@ Let's do one final example and add one of our unordered categorical variables in
 rec <- 
   recipe(sale_price ~ ., data = data_trn) |> 
   step_impute_median(garage_cars) |> 
-  step_ordinalscore(overall_qual) |> 
+  step_mutate(overall_qual = as.numeric(overall_qual)) |> 
   step_range(gr_liv_area, lot_area, year_built, garage_cars, overall_qual) |> 
   step_mutate(ms_zoning = fct_collapse(ms_zoning,
                                        residential = c("rl", "rm", "rh"),
