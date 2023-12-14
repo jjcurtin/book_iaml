@@ -18,7 +18,7 @@ editor_options:
   
 - K Nearest Neighbor (KNN)
   - Hyperparameter `k`
-  - Normalization of predictors
+  - Scaling predictors
   - Extensions to categorical variables
 
 
@@ -35,7 +35,7 @@ editor_options:
 - [Lecture 4: Extension to Categorical Predictors](https://www.loom.com/share/0bd1664f12044cce98cd6013d054bb40); ~ 20 mins
 - [Lecture 5: Extension to Interactions and Non-Linear Effects](https://www.loom.com/share/6fced9ba33c5481f818949f7fd356837); ~ 12 mins
 - [Lecture 6: Introduction to KNN](https://www.loom.com/share/025888d65a6a4c0b9479d8263dde4076); ~ 19 mins
-- [Lecture 7: Distance and Normalization in KNN](https://www.loom.com/share/eaa39314f59d437e85b6a5e49c2a2959); ~8 mins
+- [Lecture 7: Distance and Scaling in KNN](https://www.loom.com/share/eaa39314f59d437e85b6a5e49c2a2959); ~8 mins
 - [Lecture 8: KNN with Ames](https://www.loom.com/share/1ba103e128a54a9f9ab681b2b9029a71); ~ 12 mins
 - [Discussion](https://dionysus.psych.wisc.edu/iaml/videos/discussion_unit3_2023.mp4)
 
@@ -532,6 +532,7 @@ error_val <- bind_rows(error_val,
 
 error_val
 ```
+
 -----
 
 For explanatory purposes, we might want to visualize the relationship between a raw predictor and the outcome (in addition to examining the parameter estimates and the associated statistical tests)
@@ -1485,7 +1486,7 @@ K Nearest Neighbor
 
 - Is a non-parametric regression and classification statistical algorithm
   - It does not yield specific parameter estimates for features/predictors (or statistical tests for those parameter estimates)
-  - There are still ways to use it to address explanatory questions (visualizations, model comparisons)
+  - There are still ways to use it to address explanatory questions (visualizations, model comparisons, feature importance)
 
 - Very simple but also powerful (listed commonly among top 10 algorithms)
   - By powerful, it is quite flexible and can accommodate many varied DGPs without the need for much feature engineering with its predictors
@@ -1503,9 +1504,10 @@ K Nearest Neighbor
 
 To better understand KNN let's simulate training data for three different DGPs (linear - y, polynomial - y2, and step - y3)
 
-```{r u3-knn-1, echo = FALSE}
+```{r u3-knn-1}
+#| echo: false
 set.seed(55231)
-trn_demo <- tibble(x = runif(150, 1, 100),
+data_trn_demo <- tibble(x = runif(150, 1, 100),
                y = rnorm(150, x, 10),
                y_dgp = rnorm(150, x ,0),
                y2 = rnorm(150, x^4 / 800000, 8),
@@ -1530,14 +1532,15 @@ This figure displays:
 
 DGP: $y = rnorm(150, x, 10)$
 
-```{r u3-knn-2, echo = FALSE}
-trn_demo |> 
+```{r u3-knn-2}
+#| echo: false
+data_trn_demo |> 
   ggplot(aes(x = x, y = y)) +
-    geom_line(aes(x = x, y = y_dgp, color = "blue"), size = 1.5) +
+    geom_line(aes(x = x, y = y_dgp, color = "blue"), linewidth = 1.5) +
     geom_smooth(aes(color = "green"), method='lm',formula=y ~ x,  se = FALSE) +
-    geom_vline(xintercept = 10, color = "red", size = 1.5)+
-    geom_vline(xintercept = 50, color = "red", size = 1.5)+
-    geom_vline(xintercept = 90, color = "red", size = 1.5) +
+    geom_vline(xintercept = 10, color = "red", linewidth = 1.5)+
+    geom_vline(xintercept = 50, color = "red", linewidth = 1.5)+
+    geom_vline(xintercept = 90, color = "red", linewidth = 1.5) +
     geom_point(aes(y = y), color = "black") +
     scale_color_identity(name = "Model",
                        breaks = c("blue", "green"),
@@ -1549,12 +1552,13 @@ trn_demo |>
 
 KNN can easily accommodate non-linear relationships between numeric predictors and outcomes without any feature engineering for predictors
 
-In fact, it can flexibly handle ANY shape of relationship
+In fact, it can flexibly handle **any** shape of relationship
 
 DGP: $y2 = rnorm(150, x^4 / 800000, 8)$
 
-```{r u3-knn-3, echo = FALSE}
-trn_demo |> 
+```{r u3-knn-3}
+#| echo: false
+data_trn_demo |> 
   ggplot(aes(x = x, y = y2)) +
     geom_line(aes(x = x, y = y2_dgp, color = "blue"), size = 1.5) +
     geom_smooth(aes(color = "green"), method='lm',formula=y ~ x,  se = FALSE) +
@@ -1572,20 +1576,20 @@ trn_demo |>
 
 DGP: $y3 = if\_else(x < 40, rnorm(150, 25, 10),  rnorm(150, 75, 10))$
 
-```{r u3-knn-4, echo = FALSE}
-trn_demo |> 
+```{r u3-knn-4}
+#| echo: false
+data_trn_demo |> 
   ggplot(aes(x = x, y = y3)) +
-    geom_line(aes(x = x, y = y3_dgp, color = "blue"), size = 1.5) +
+    geom_line(aes(x = x, y = y3_dgp, color = "blue"), linewidth = 1.5) +
     geom_smooth(aes(color = "green"), method='lm',formula=y ~ x,  se = FALSE) +
-    geom_vline(xintercept = 10, color = "red", size = 1.5)+
-    geom_vline(xintercept = 50, color = "red", size = 1.5)+
-    geom_vline(xintercept = 90, color = "red", size = 1.5) +
+    geom_vline(xintercept = 10, color = "red", linewidth = 1.5)+
+    geom_vline(xintercept = 50, color = "red", linewidth = 1.5)+
+    geom_vline(xintercept = 90, color = "red", linewith = 1.5) +
     geom_point(aes(y = y3), color = "black") +
     scale_color_identity(name = "Model",
                        breaks = c("blue", "green"),
                        labels = c("DGP", "linear model"),
                        guide = "legend")
-
 ```
 
 -----
@@ -1608,9 +1612,8 @@ KNN is our first example of a statistical algorithm that includes a **hyperparam
 Using the polynomial DGP above, let's look at a 5-NN yields
 
 - Note the new category of algorithm, new engine, and the need to set a mode (because KNN can be used for regression and classification)
-- We can look in the package documentation to better understand what is being done.
+- We can look in the package documentation to better understand what is being done (`?kknn::train.kknn`).
 ```{r u3-knn-5}
-
 nearest_neighbor() |>   
   set_engine("kknn") |>   
   set_mode("regression") |> 
@@ -1620,28 +1623,31 @@ nearest_neighbor() |>
 Set up simple feature engineering recipe and get training features (nothing happening but let's follow normal routine anyway)
 ```{r u3-knn-7}
 rec <- 
-  recipe(y2 ~ ., data = trn_demo)
+  recipe(y2 ~ x, data = data_trn_demo)
 
-trn_demo_baked <- rec |> 
-  make_features(trn_demo, trn_demo)
+rec_prep <- rec |> 
+  prep(data_trn_demo)
+
+feat_trn_demo <- rec_prep |> 
+  bake(data_trn_demo)
 ```
 
 -----
 
 Fit 5NN
 ```{r u3-knn-8}
-fit_demo_5nn <- 
+fit_5nn_demo <- 
   nearest_neighbor() |>   
   set_engine("kknn") |>   
   set_mode("regression") |> 
-  fit(y2 ~ x, data = trn_demo_baked)
+  fit(y2 ~ ., data = feat_trn_demo)
 ```
 
 -----
 
 Get a validation set (a new sample using same polynomial DGP)
 ```{r u3-knn-9}
-val_demo <- tibble(x = runif(200, 1, 100),
+data_val_demo <- tibble(x = runif(200, 1, 100),
                y = rnorm(200, x, 10),
                y_dgp = rnorm(200, x ,0),
                y2 = rnorm(200, x^4 / 800000, 8),
@@ -1649,8 +1655,8 @@ val_demo <- tibble(x = runif(200, 1, 100),
                y3 = if_else(x < 40, rnorm(200, 25, 10),  rnorm(200, 75, 10)),
                y3_dgp = if_else(x < 40, rnorm(200, 25, 0),  rnorm(200, 75, 0)))
 
-val_demo_baked <- rec |> 
-  make_features(trn_demo, val_demo)
+feat_val_demo <- rec_prep |> 
+  bake(data_val_demo)
 ```
 
 Display 5NN predictions in validation 
@@ -1658,12 +1664,14 @@ Display 5NN predictions in validation
 - KNN (with `k = 5`) does a pretty good job of representing the shape of the DGP (low bias)
 - KNN displays some (but minimal) evidence of overfitting
 - Simple linear model does not perform well (clear/high bias)
+
 ```{r u3-knn-10}
-val_demo_baked |> 
+feat_val_demo |> 
+  bind_cols(data_val_demo |> select(y, y2_dgp)) |> # add in other outcomes from data
   ggplot(aes(x = x, y = y2)) +
-    geom_line(aes(x = x, y = y2_dgp, color = "blue"), size = 1.5) +
-    geom_smooth(aes(color = "green"), method = 'lm',formula = y ~ x,  se = FALSE) +
-    geom_line(aes(x = x, y = predict(fit_demo_5nn, val_demo_baked)$.pred, color = "red"), size = 1.5) +
+    geom_line(aes(x = x, y = y2_dgp, color = "blue"), linewidth = 1.5) +
+    geom_smooth(aes(color = "green"), method = 'lm', formula = y ~ x,  se = FALSE) +
+    geom_line(aes(x = x, y = predict(fit_5nn_demo, feat_val_demo)$.pred, color = "red"), linewidth = 1.5) +
     geom_point(aes(y = y2), color = "black") +
     scale_color_identity(name = "Model",
                        breaks = c("blue", "green", "red"),
@@ -1675,11 +1683,11 @@ val_demo_baked |>
 
 Let's pause and consider our conceptual understanding of the impact of `k` on the bias-variance trade-off
 
-[How will the size of k influence model performance (e.g., bias, overfitting/variance)?].{red}
-^[Smaller values of $k$ will tend to increase overfitting (and therefore variance across training samples) but decrease bias.  Larger values of k will tend to decrease overfitting but increase bias.  We need to find the Goldilocks "sweet spot"]
+[How will the size of `k` influence model performance (e.g., bias, overfitting/variance)?].{red}
+^[Smaller values of `k` will tend to increase overfitting (and therefore variance across training samples) but decrease bias.  Larger values of k will tend to decrease overfitting but increase bias.  We need to find the Goldilocks "sweet spot"]
 
 [How will k = 1 perform in training and validation sets?].{red}
-^[$k$ = 1 will perfectly fit the training set.  Therefore it is very dependent on the training set (high variance).  It will fit both the DGP and the noise in the training set.  Clearly it will likely not do as well in validation (it will be overfit to training).  $k$ needs to be larger if there is more noise (to average over more cases).  $k$ needs to be smaller if the relationships are complex. (More on choosing $k$ by resampling in unit 5.]
+^[`k` = 1 will perfectly fit the training set.  Therefore it is very dependent on the training set (high variance).  It will fit both the DGP and the noise in the training set.  Clearly it will likely not do as well in validation (it will be overfit to training).  `k` needs to be larger if there is more noise (to average over more cases).  `k` needs to be smaller if the relationships are complex. (More on choosing `k` by resampling in unit 5.]
 
 -----
 
@@ -1690,34 +1698,38 @@ Fit new model
 Recipe and features have not changed
 
 ```{r u3-knn-12}
-fit_demo_1nn <- 
-  nearest_neighbor(neighbors = 1) |>   
+fit_1nn_demo <- 
+  nearest_neighbor(neighbors = 1) |>  # <1> 
   set_engine("kknn") |>   
   set_mode("regression") |> 
-  fit(y2 ~ x, data = trn_demo_baked)
+  fit(y2 ~ ., data = feat_trn_demo)
 ```
+1. Set k with `neighbors = `
 
 -----
 
 Visualize prediction models in Train and Validation
 
-```{r u3-knn-14, echo = FALSE}
-plot_train <- trn_demo_baked |> 
+```{r u3-knn-14}
+#| echo: false
+plot_train <- feat_trn_demo |> 
+  bind_cols(data_trn_demo |> select(y, y2_dgp)) |> # add in other outcomes for fig
   ggplot(aes(x = x, y = y2)) +
     geom_line(aes(x = x, y = y2_dgp, color = "blue"), size = 1.5) +
-    geom_line(aes(x = x, y = predict(fit_demo_5nn, trn_demo_baked)$.pred, color = "red"), size = 1.5) +
-    geom_line(aes(x = x, y = predict(fit_demo_1nn, trn_demo_baked)$.pred, color = "green"), size = 1.5) +
+    geom_line(aes(x = x, y = predict(fit_5nn_demo, feat_trn_demo)$.pred, color = "red"), size = 1.5) +
+    geom_line(aes(x = x, y = predict(fit_1nn_demo, feat_trn_demo)$.pred, color = "green"), size = 1.5) +
     geom_point(aes(y = y2), color = "black") +
     scale_color_identity(name = "Model",
                        breaks = c("blue", "red", "green"),
                        labels = c("DGP", "k = 5", "k = 1"),
                        guide = "legend")
 
-plot_val <- val_demo_baked |> 
+plot_val <- feat_val_demo |> 
+  bind_cols(data_val_demo |> select(y, y2_dgp)) |> # add in other outcomes from data
   ggplot(aes(x = x, y = y2)) +
     geom_line(aes(x = x, y = y2_dgp, color = "blue"), size = 1.5) +
-    geom_line(aes(x = x, y = predict(fit_demo_5nn, val_demo_baked)$.pred, color = "red"), size = 1.5) +
-    geom_line(aes(x = x, y = predict(fit_demo_1nn, val_demo_baked)$.pred, color = "green"), size = 1.5) +
+    geom_line(aes(x = x, y = predict(fit_5nn_demo, feat_val_demo)$.pred, color = "red"), size = 1.5) +
+    geom_line(aes(x = x, y = predict(fit_1nn_demo, feat_val_demo)$.pred, color = "green"), size = 1.5) +
     geom_point(aes(y = y2), color = "black") +
     scale_color_identity(name = "Model",
                        breaks = c("blue", "red", "green"),
@@ -1733,14 +1745,14 @@ Calculate RMSE in validation for two KNN models
 
 `k = 1`
 ```{r u3-knn-15}
-rmse_vec(val_demo_baked$y2, 
-         predict(fit_demo_1nn, val_demo_baked)$.pred)
+rmse_vec(feat_val_demo$y2, 
+         predict(fit_1nn_demo, feat_val_demo)$.pred)
 ```
 
 `k = 5`
 ```{r u3-knn-16}
-rmse_vec(val_demo_baked$y2, 
-         predict(fit_demo_5nn, val_demo_baked)$.pred)
+rmse_vec(feat_val_demo$y2, 
+         predict(fit_5nn_demo, feat_val_demo)$.pred)
 ```
 
 -----
@@ -1748,36 +1760,39 @@ rmse_vec(val_demo_baked$y2,
 What if we go the other way and increase `k` to 75
 
 ```{r u3-knn-17}
-fit_demo_75nn <- 
+fit_75nn_demo <- 
   nearest_neighbor(neighbors = 75) |>   
   set_engine("kknn") |>   
   set_mode("regression") |> 
-  fit(y2 ~ x, data = trn_demo_baked)
+  fit(y2 ~ ., data = feat_trn_demo)
 ```
 
 -----
 
 Visualize prediction models in Train and Validation
 
-```{r u3-knn-19, echo = FALSE}
-plot_train <- trn_demo_baked |> 
+```{r u3-knn-19}
+#|echo: false
+plot_train <- feat_trn_demo |> 
+  bind_cols(data_trn_demo |> select(y, y2_dgp)) |> # add in other outcomes for fig
   ggplot(aes(x = x, y = y2)) +
-    geom_line(aes(x = x, y = y2_dgp, color = "blue"), size = 1.5) +
-    geom_line(aes(x = x, y = predict(fit_demo_5nn, trn_demo_baked)$.pred, color = "red"), size = 1.5) +
-    geom_line(aes(x = x, y = predict(fit_demo_1nn, trn_demo_baked)$.pred, color = "green"), size = 1.5) +
-    geom_line(aes(x = x, y = predict(fit_demo_75nn, trn_demo_baked)$.pred, color = "yellow"), size = 1.5) +
+    geom_line(aes(x = x, y = y2_dgp, color = "blue"), linewidth = 1.5) +
+    geom_line(aes(x = x, y = predict(fit_5nn_demo, feat_trn_demo)$.pred, color = "red"), linewidth = 1.5) +
+    geom_line(aes(x = x, y = predict(fit_1nn_demo, feat_trn_demo)$.pred, color = "green"), linewidth = 1.5) +
+    geom_line(aes(x = x, y = predict(fit_75nn_demo, feat_trn_demo)$.pred, color = "yellow"), linewidth = 1.5) +
     geom_point(aes(y = y2), color = "black") +
     scale_color_identity(name = "Model",
                        breaks = c("blue", "red", "green", "yellow"),
                        labels = c("DGP", "k = 5", "k = 1", "k = 75"),
                        guide = "legend")
 
-plot_val <- val_demo_baked |> 
+plot_val <- feat_val_demo |> 
+  bind_cols(data_val_demo |> select(y, y2_dgp)) |> # add in other outcomes for fig
   ggplot(aes(x = x, y = y2)) +
-    geom_line(aes(x = x, y = y2_dgp, color = "blue"), size = 1.5) +
-    geom_line(aes(x = x, y = predict(fit_demo_5nn, val_demo_baked)$.pred, color = "red"), size = 1.5) +
-    geom_line(aes(x = x, y = predict(fit_demo_1nn, val_demo_baked)$.pred, color = "green"), size = 1.5) +
-    geom_line(aes(x = x, y = predict(fit_demo_75nn, val_demo_baked)$.pred, color = "yellow"), size = 1.5) +
+    geom_line(aes(x = x, y = y2_dgp, color = "blue"), linewidth = 1.5) +
+    geom_line(aes(x = x, y = predict(fit_5nn_demo, feat_val_demo)$.pred, color = "red"), linewidth = 1.5) +
+    geom_line(aes(x = x, y = predict(fit_1nn_demo, feat_val_demo)$.pred, color = "green"), linewidth = 1.5) +
+    geom_line(aes(x = x, y = predict(fit_75nn_demo, feat_val_demo)$.pred, color = "yellow"), linewidth = 1.5) +
     geom_point(aes(y = y2), color = "black") +
      scale_color_identity(name = "Model",
                        breaks = c("blue", "red", "green", "yellow"),
@@ -1791,30 +1806,30 @@ plot_grid(plot_train, plot_val, labels = list("Training Set", "Validation Set"),
 
 Calculate RMSE in validation for three KNN models
 
-THIS IS THE BIAS-VARIANCE TRADE-OFF IN ACTION
+**This is the bias-variance trade-off in action**
 
 `k = 1`
 
 high variance
 ```{r u3-knn-20}
-rmse_vec(val_demo_baked$y2, 
-         predict(fit_demo_1nn, val_demo_baked)$.pred)
+rmse_vec(feat_val_demo$y2, 
+         predict(fit_1nn_demo, feat_val_demo)$.pred)
 ```
 
 `k = 5`
 
 just right (well better at least)
 ```{r u3-knn-21}
-rmse_vec(val_demo_baked$y2, 
-         predict(fit_demo_5nn, val_demo_baked)$.pred)
+rmse_vec(feat_val_demo$y2, 
+         predict(fit_5nn_demo, feat_val_demo)$.pred)
 ```
 
 `k = 75`
 
 high bias
 ```{r u3-knn-22}
-rmse_vec(val_demo_baked$y2, 
-         predict(fit_demo_75nn, val_demo_baked)$.pred)
+rmse_vec(feat_val_demo$y2, 
+         predict(fit_75nn_demo, feat_val_demo)$.pred)
 ```
 -----
 
@@ -1856,7 +1871,8 @@ $Distance = \sqrt{(2 - 1)^2 + (5 - 2)^2}$
 
 $Distance = 3.2$
 
-```{r u3-knn-23, echo = FALSE}
+```{r u3-knn-23}
+#| echo: false
 distance2 <- tibble(x1 = c(1, 2), x2 = c(2, 5), 
                    x1h = c(1, 2), x2h = c(2, 2),
                    x1v = c(2, 2), x2v = c(2, 5))
@@ -1864,9 +1880,9 @@ distance2 <- tibble(x1 = c(1, 2), x2 = c(2, 5),
 distance2 |> 
   ggplot(aes(x = x1, y = x2)) +
     geom_point(color = c("red", "blue"), size = 3) +
-    geom_line(color = "green", size = 1.5) +
-    geom_line(aes(x = x1h, y = x2h), color = "gray", size = 1.5) +
-    geom_line(aes(x = x1v, y = x2v), color = "gray", size = 1.5) +
+    geom_line(color = "green", linewidth = 1.5) +
+    geom_line(aes(x = x1h, y = x2h), color = "gray", linewidth = 1.5) +
+    geom_line(aes(x = x1v, y = x2v), color = "gray", linewidth = 1.5) +
     geom_text(x = .9, y = 2, label = "p", size = 5) +
     geom_text(x = 2.1, y = 5, label = "q", size = 5) +
     geom_text(x = 1.5, y = 1.8, label = "A = 1", size = 5) +
@@ -1877,6 +1893,7 @@ distance2 |>
 ```
 
 -----
+
 One dimensional (one feature) is simply the subtraction of scores on that feature (x1) between p and q
 
 $Distance = \sqrt{(q1 - p1)^2}$
@@ -1891,7 +1908,7 @@ distance1 <- tibble(x1 = c(1, 2), x2 = c(1, 1))
 distance1 |> 
   ggplot(aes(x = x1, y = x2)) +
     geom_point(color = c("red", "blue"), size = 3) +
-    geom_line(color = "green", size = 1.5) +
+    geom_line(color = "green", linewidth = 1.5) +
     geom_text(x = .9, y = 1, label = "p", size = 5) +
     geom_text(x = 2.1, y = 1, label = "q", size = 5) +
     geom_text(x = 1.5, y = 1.1, label = "Distance = 1", size = 5) +
@@ -1919,8 +1936,8 @@ $Distance = |A + B|$
 distance2 |> 
   ggplot(aes(x = x1, y = x2)) +
     geom_point(color = c("red", "blue"), size = 3) +
-    geom_line(aes(x = x1h, y = x2h), color = "green", size = 1.5) +
-    geom_line(aes(x = x1v, y = x2v), color = "green", size = 1.5) +
+    geom_line(aes(x = x1h, y = x2h), color = "green", linewidth = 1.5) +
+    geom_line(aes(x = x1v, y = x2v), color = "green", linewidth = 1.5) +
     geom_text(x = .9, y = 2, label = "p", size = 5) +
     geom_text(x = 2.1, y = 5, label = "q", size = 5) +
     geom_text(x = 1.5, y = 1.8, label = "A = 1", size = 5) +
@@ -1928,7 +1945,6 @@ distance2 |>
     scale_x_continuous(limits = c(0,6), breaks = 0:6) +
     scale_y_continuous(limits = c(0,6), breaks = 0:6)
 ```
-
 
 -----
 
@@ -1941,17 +1957,19 @@ distance2 |>
 - This default (like all defaults) can be changed when you define the algorithm using `nearest_neighbor()`
 
 
-### Normalization of X
+### Scaling X
 
-Distance is dependent on scales of all the features
+Distance is dependent on scales of all the features.  We need to put all features on the same scale
 
-- We need to put all features on the same scale
+- Scale all features to SD = 1 (using `step_scale(all_numeric_predictors())`)
+- Range correct [0, 1] all features (using `step_range(all_numeric_predictors())`)
 
-  - Typical to range correct [0, 1] all features
-  - Or to scale all features to SD = 1
+### Categorical Predictors
 
-- KNN generally accommodates categorical variables as dummy variables (like linear models)
-  - Dummy coding will be the same in recipe as before
+KNN requires numeric features (for distance calculation).
+
+- For categorical predictors, you will need to use dummy coding or other feature engineering that results in numeric features. 
+- e.g., `step_dummy(all_factor_predictors())`
 
 -----
 
@@ -1959,24 +1977,41 @@ Distance is dependent on scales of all the features
 
 Let's use KNN with Ames
 
-- Train a model using only numeric predictors and $overall\_qual$ as numeric
+- Train a model using only numeric predictors and `overall_qual` as numeric
 - Use the default `k = 5` algorithm
 - range correct all features
 
 ```{r u3-knn-26}
 rec <- 
-  recipe(sale_price ~ ., data = data_trn) |> 
+  recipe(sale_price ~ gr_liv_area + lot_area + year_built + garage_cars + overall_qual, 
+         data = data_trn) |> 
   step_impute_median(garage_cars) |> 
   step_mutate(overall_qual = as.numeric(overall_qual)) |> 
-  step_range(gr_liv_area, lot_area, year_built, garage_cars, overall_qual)
+  step_scale(all_numeric_predictors()) # <1>
 
 rec
+```
+1.  Remember to take advantage of these selectors for easier code! See `?has_role` for more details
 
-feat_trn <- rec |> 
-  make_features(data_trn, data_trn)
+```{r}
+rec_prep <- rec |> 
+  prep(feat_trn)
 
-feat_val <- rec |> 
-  make_features(data_trn, data_val)
+feat_trn <- rec_prep |>
+  bake(data_trn)
+
+feat_val <- rec_prep |> 
+  bake(data_val)
+```
+
+Skim training features.  Note all SD = 1
+```{r}
+feat_trn |> skim_all()
+```
+
+Skim validation features.  Note SD.  [Why not exactly 1?].{red}
+```{r}
+feat_val |> skim_all()
 ```
 
 -----
@@ -1988,9 +2023,7 @@ fit_5nn_5num <-
   nearest_neighbor() |>   
   set_engine("kknn") |>   
   set_mode("regression") |> 
-  fit(sale_price ~ 
-        gr_liv_area + lot_area + year_built + garage_cars + overall_qual, 
-      data = feat_trn)
+  fit(sale_price ~ ., data = feat_trn)
 ```
 
 ```{r u3-knn-28}
@@ -2016,7 +2049,6 @@ plot_truth(truth = feat_val$sale_price,
 
 ```
 
-
 -----
 
 But 5NN may be overfit. `k = 5` is pretty low
@@ -2029,7 +2061,7 @@ fit_20nn_5num <-
   nearest_neighbor(neighbors = 20) |>   
   set_engine("kknn") |>   
   set_mode("regression") |> 
-  fit(sale_price ~ gr_liv_area + lot_area + year_built + garage_cars + overall_qual, data = feat_trn)
+  fit(sale_price ~ ., data = feat_trn)
 ```
 
 ```{r u3-knn-31}
@@ -2054,7 +2086,7 @@ fit_50nn_5num <-
   nearest_neighbor(neighbors = 50) |>   
   set_engine("kknn") |>   
   set_mode("regression") |> 
-  fit(sale_price ~ gr_liv_area + lot_area + year_built + garage_cars + overall_qual, data = feat_trn)
+  fit(sale_price ~ ., data = feat_trn)
 ```
 
 ```{r u3-knn-33}
@@ -2111,28 +2143,33 @@ rmse_vec(feat_val$sale_price,
 Let's do one final example and add one of our unordered categorical variables into the model: `ms_zoning`
 
 - Need to collapse levels and then dummy
-- No need to scale; already 0 - 1
 
 ```{r u3-knn-36}
 rec <- 
-  recipe(sale_price ~ ., data = data_trn) |> 
+  recipe(sale_price ~ gr_liv_area + lot_area + year_built + garage_cars + 
+           overall_qual + ms_zoning, data = data_trn) |> 
   step_impute_median(garage_cars) |> 
   step_mutate(overall_qual = as.numeric(overall_qual)) |> 
-  step_range(gr_liv_area, lot_area, year_built, garage_cars, overall_qual) |> 
   step_mutate(ms_zoning = fct_collapse(ms_zoning,
-                                       residential = c("rl", "rm", "rh"),
-                                       commercial = c("c", "i", "a"),
-                                       floating = "fv")) |>
+                                 "residential" = c("res_high", "res_med", "res_low"),
+                                 "commercial" = c("agri", "commer", "indus"),
+                                 "floating" = "float")) |>
   step_dummy(ms_zoning) |> 
-  step_rm(lot_config, bldg_type, garage_qual)
+  step_scale(all_numeric_predictors())
 
 rec
+```
 
-feat_trn <- rec |> 
-  make_features(data_trn, data_trn)
 
-feat_val <- rec |> 
-  make_features(data_trn, data_val)
+```{r}
+rec_prep <- rec |> 
+  prep(data_trn)
+
+feat_trn <- rec_prep |> 
+  bake(data_trn)
+
+feat_val <- rec_prep |> 
+  bake(data_val)
 ```
 
 -----
@@ -2159,7 +2196,7 @@ error_val
 - Now it helps.  
 - Might have to do with interactions with other predictors that we didn't model in the linear model
 - KNN automatically accommodates interactions.  Why?
-- This model is a bit more complex and might benefit further from higher $k$
+- This model is a bit more complex and might benefit further from higher `k`
 
 
 As a teaser, here is another performance metric for this model - `R^2`.   Not too shabby!  Remember, there is certainly some irreducible error in `sale_price` that will put a ceiling on `R^2` and a floor on `RMSE`
@@ -2168,7 +2205,7 @@ rsq_vec(feat_val$sale_price,
         predict(fit_20nn_5num_mszone, feat_val)$.pred)
 ```
 
-Overall, we now have a model that predicts housing prices with about 35K of error and accounting for 84% of the variance.  I am sure you can improve on this!
+Overall, we now have a model that predicts housing prices with about 30K of RMSE and accounting for 84% of the variance.  I am sure you can improve on this!
 
 
 ## Discussion
@@ -2243,10 +2280,10 @@ fit_knn_int <-
   fit(y ~ x1 + x2 + x1_x2, data = data)
 
 data <- data |> 
-  mutate(pred_lm = predict(fit_lm, .)$.pred,
-         pred_lm_int = predict(fit_lm_int, .)$.pred,
-         pred_knn = predict(fit_knn, .)$.pred,
-         pred_knn_int = predict(fit_knn_int, .)$.pred)
+  mutate(pred_lm = predict(fit_lm, data)$.pred,
+         pred_lm_int = predict(fit_lm_int, data)$.pred,
+         pred_knn = predict(fit_knn, data)$.pred,
+         pred_knn_int = predict(fit_knn_int, data)$.pred)
 ```
 
 - Predictions from linear model with and without interaction
