@@ -1,1 +1,1531 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
 # Introduction to Classification Models
+
+## Unit Overview
+Learning Objectives
+
+- Bayes classifier 
+- Logistic regression
+  - probability, odds, and logit models
+  - definitions of odds and odds ratios
+- K nearest neighbors
+- Linear discriminant analysis
+- Quadratic discriminant analysis
+- Regularized discriminant analysis
+- Decision boundaries in the two feature space
+- Relative costs and benefits of these different statistical algorithms
+
+**Readings**
+
+- @ISL [Chapter 4, pp 129 - 164](https://dionysus.psych.wisc.edu/iaml/pdfs/ISLRv2.pdf)
+
+
+**Lecture Videos**
+  
+- [Lecture 1: The Bayes Classifier](https://mediaspace.wisc.edu/media/unit_4_lecture_1/1_1xd7r1iu) ~ 5 mins
+- [Lecture 2: Conceptual Overview of Logistic Regression](https://mediaspace.wisc.edu/media/unit_4_lecture_2/1_9sus2omj) ~ 17 mins
+- [Lecture 3: EDA with the Cars Dataset](https://mediaspace.wisc.edu/media/unit_4_lecture_3/1_09elf2j0) ~17 mins
+- [Lecture 4: Logistic Regression with Cars Dataset](https://mediaspace.wisc.edu/media/unit_4_lecture_4/1_u2h7zewx) ~32 mins
+- [Lecture 5: KNN with Cars Dataset](https://mediaspace.wisc.edu/media/unit_4_lecture_5/1_d803u6zv) ~14 mins
+- [Lecture 6: LDA, DQA, RDA with Cars Dataset](https://mediaspace.wisc.edu/media/unit_4_lecture_6/1_1c221ev8) ~12 mins
+- [Lecture 7: Comparisons among Classifiers](https://mediaspace.wisc.edu/media/unit_4_lecture_7/1_r881n5qr) ~14 mins
+
+- [Discussion](https://dionysus.psych.wisc.edu/iaml/videos/discussion_unit4_2023.mp4)
+Post questions or discuss readings or lectures on the appropriate Slack channel
+
+**Application Assignment**
+  
+- data: [raw](homework/unit_4/titanic_raw.csv); [test](https://dionysus.psych.wisc.edu/iaml/homework/unit_4/titanic_test_cln.csv)
+- [data dictionary](homework/unit_4/titanic_data_dictionary.png)
+- [cleaning EDA rmd](homework/unit_4/hw_unit_4_eda_cleaning.Rmd)
+- [rda rmd](homework/unit_4/hw_unit_4_fit_rda.Rmd)
+- [knn rmd](homework/unit_4/hw_unit_4_fit_knn.Rmd)
+- [fun_modeling.R](https://github.com/jjcurtin/lab_support/blob/main/fun_modeling.R?raw=true)
+- solution: [modeling EDA](homework/unit_4/key_unit_4_eda_modeling.html) [rda](homework/unit_4/key_unit_4_fit_rda.html); [knn](homework/unit_4/key_unit_4_fit_knn.html)
+
+Post questions to application_assignments
+
+Submit the application assignment [here](https://canvas.wisc.edu/courses/345486/assignments/1827996) and complete the [unit quiz](https://canvas.wisc.edu/courses/345486/quizzes/424936) by 5 pm on Wednesday, February 15th
+
+-----
+
+Our eventual goal in this unit is to build a machine learning classification model that can accurately predict who lived vs. died on the titanic.  
+
+To begin, we need to:
+
+- Set up conflicts policies
+- We will hide this in future units (showing one last time)
+```{r u4-conflict_policy}
+options(conflicts.policy = "depends.ok")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+tidymodels_conflictRules()
+```
+
+- Load the packages we will need
+```{r u4-packages}
+#| message: false
+#| warning: false
+library(janitor, include.only = "clean_names")
+library(cowplot, include.only = "plot_grid") # for plot_grid()
+library(kableExtra, exclude = "group_rows") # exclude dplyr conflict
+library(tidyverse) # for general data wrangling
+library(tidymodels) # for modeling
+```
+
+- source additional class functions libraries
+- We will hide this in future units (showing one last time)
+```{r u4-source}
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+```
+
+- set display options
+- We will hide this in future units (showing one last time)
+```{r u4-display}
+theme_set(theme_classic())
+options(tibble.width = Inf)
+```
+
+- handle paths
+```{r u4-paths}
+path_data <- "./data"
+``` 
+
+
+## Bayes classifier
+
+First, lets introduce the Bayes classifier, which is the classifier that will have the lowest error rate of all classifiers using the same set of features. 
+
+The figure below displays simulated data for a classification problem for K = 2 classes as a function of `X1` and `X2`
+
+
+```{r} 
+#| echo: false
+# NEED THIS? out.height = figsizer(fh5), fig.align="center", 
+
+knitr::include_graphics("figs/unit4_two_class_decision_boundry.png")
+```
+
+The Bayes classifier assigns each observation its most likely class given its conditional probabilities for the values for `X1` and `X2`
+
+- $Pr(Y = k | X = x_0) for\:k = 1:K$
+- For K = 2, this means assigning to the class with Pr > .50
+- This decision boundary for the two class problem is displayed in the figure
+
+-----
+
+The Bayes classifier provides the minimum error rate for test data
+
+- Error rate for any $x_0$ will be $1 - max (Pr( Y = k | X = x_0))$
+- Overall error rate will be the average of this across all possible X
+- This is the irreducible error for classification problems
+- This is a theoretical model b/c (except for simulated data), we don't know the conditional probabilities based on X
+- Many classification models try to estimate these conditionals
+
+Let's talk now about some of these classification models
+
+-----
+
+## Logistic regression: A Conceptual Review
+
+Logistic regression (a special case of the **generalized** linear model) estimates the conditional probability for each class given X (a specific set of values for our features)
+
+- In the binary outcome case, we will often refer to the two outcomes as the positive class and the negative class
+- This makes most sense in some applied settings where we are most interested in predicting if one of the two classes is likely, e.g., 
+  - Presence of heart disease
+  - Positive for some psychiatric diagnoses
+  - Lapse back to alcohol use in patients with alcohol use disorder
+
+We prefer to use logistic regression over the **general** linear model with unordered categorical outcomes because:
+
+- The General Linear Model makes predictions that are not bounded by [0, 1] and do not represent true estimates of conditional probability for each class
+- Logistic regression approaches can be modified to accommodate multi-class outcomes (i.e., more than two levels) even when those outcomes are unordered 
+
+Nonetheless, the general linear model is still used at times to predict binary outcomes (see [Linear Probability Model](https://en.wikipedia.org/wiki/Linear_probability_model)) so you should be aware of it.  We won't discuss it further here.
+
+```{r } 
+#| echo: false
+# Still need this?  out.height = figsizer(fh5), fig.align="center"
+
+knitr::include_graphics("figs/unit4_lm_vs_logistic.png")
+```
+
+-----
+
+Logistic regression provides predicted conditional probabilities for one class (positive class) for any specific set of values for our features (X)
+
+$Pr(positive\:class | X) = \frac{e^{\beta_0 + \beta_1*X_1 + \beta_2*X_2 + ... + \beta_p * X_p}}{1 + e^{\beta_0 + \beta_1*X_1 + \beta_2*X_2 + ... + \beta_p * X_p}}$
+
+These conditional probabilities are bounded by [0, 1]
+
+To maximize accuracy (as per Bayes classifier),  we predict the positive case if Pr(positive class | X) > .5 for any specific X, otherwise we predict the negative class   
+
+-----
+
+As a simple parametric model, logistic regression is commonly used for explanatory purposes as well as prediction
+
+For these reasons, it is worthwhile to fully understand how to work with the logistic function to quantify and describe the effects of your features/predictors in terms of 
+
+- Probability 
+- Odds
+- [Log-odds or logit]
+- Odds ratio
+
+-----
+
+The logistic function yields the probability of the positive class given X
+
+However, in some instances, it may make more sense to describe the odds of the positive case occurring (e.g., horse racing) rather than probability
+
+Odds are defined with respect to probabilities as follows:
+
+$odds = \frac{Pr(positive\:class|X)} {1 - Pr(positive\:class|X)}$
+
+
+For example, if the UW Badgers have a .5 probability of winning some upcoming game based on X, their odds of winning are 1 (to 1)
+
+- $\frac{0.5} {1 - 0.5}$
+
+
+If the UW Badgers have a .75 probability of winning some upcoming game based on X, their odds of winning are 3 (:1; '3 to 1')
+
+- $\frac{0.75} {1 - 0.75}$
+
+
+If the UW Badgers have a .25 probability of winning some upcoming game based on X, their odds of winning are .33 (1:3)
+
+- $\frac{0.25} {1 - 0.25}$
+
+-----
+
+The logistic function can be modified to provide odds directly:
+
+**Logistic function**:
+$Pr(positive\:class | X) = \frac{e^{\beta_0 + \beta_1*X_1 + \beta_2*X_2 + ... + \beta_p * X_p}}{1 + e^{\beta_0 + \beta_1*X_1 + \beta_2*X_2 + ... + \beta_p * X_p}}$
+
+
+**Definition of odds**:
+
+$odds = \frac{Pr(positive\:class|X)} {1 - Pr(positive\:class|X)}$
+
+Substitute logistic function for $Pr(positive\:class|X)$ on top and bottom and simplify to get: 
+
+
+$odds(positive\:class|X) = e^{\beta_0 + \beta_1*X_1 + \beta_2*X_2 + ... + \beta_p * X_p}$
+
+Odds are bounded by [0, $\infty$]
+
+-----
+
+The logistic function can be modified further such that the outcome (log-odds/logit) is a linear function of your features
+
+If we take the natural log (base e) of both sides of the odds equation, we get:
+
+$log(odds(positive\:class|X)) = \beta_0 + \beta_1*X_1 + \beta_2*X_2 + ... + \beta_p * X_p$
+
+Log-odds are unbounded $[-\infty, \infty]$
+
+Use of logit transformation provides the connection between the general linear model and generalized linear models (in this case with link = logit, family = binomial).  Notice that the logit/log-odds is a linear combination of the features (just like in the general linear model)
+
+-----
+
+**Odds** and **probability** are descriptive but they are not linear functions of X
+
+  - Therefore, parameter estimates from these models aren't very useful to describe the effect of features
+  - This is because unit change in Y per unit change in any specific feature is not the same for all values of the feature
+
+**Log-odds** are a linear function of X
+
+- Therefore, you can say that log-odds of positive class increases by $\beta_1$ for every one unit increase in $x_1$
+- However, log-odds are NOT very descriptive/intuitive so they are not that useful for explanatory purposes
+
+-----
+
+The **odds ratio** addresses these problems
+
+Odds are defined at a specific set of values across the features in your model.  For example, with one feature:
+ 
+$odds = \frac{Pr(positive\:class|x_1)} {1 - Pr(positive\:class|x_1)}$
+
+The odds ratio describes the change in odds for a change of c units in your feature
+
+With some manipulation: 
+
+- $Odds\:ratio  =  \frac{odds(x+c)}{odds(x)}$
+
+- $Odds\:ratio  =  \frac{e^{\beta_0 + \beta_1*(x_1 + c)}}{e^{\beta_0 + \beta_1*x_1}}$
+
+- $Odds\:ratio  = e^{c*\beta_1}$
+
+-----
+
+As an example, if we fit a logistic regression model to predict the probability of the Badgers winning a home football game given the attendance (measured in individual spectators at the game), we might find $\beta_1$ = .000075. 
+
+Given this, the odds ratio associated with every increase in 10,000 spectators:
+
+- $= e^{c * \beta_1}$
+- $= e^{10000 * .000075}$
+- $= 2.1$
+- For every increase of 10,000 spectators, the odds of the Badgers winning doubles
+
+## The Cars Dataset
+
+Let's put it all of this together in the cars dataset from Carnegie Mellon's [StatLib Dataset Archive](http://lib.stat.cmu.edu/datasets/)  Our goal is to build a classifier (machine learning model for a categorical outcome) that classifies cars as either high or low mpg.
+
+-----
+
+### Cleaning EDA
+Let's start with some cleaning EDA
+
+- Open and "skim" it RE variable names, classes & missing data
+- Variable names are already tidy
+- no missing data
+- mins (p0) and maxes(p100) for numeric look good
+```{r u4-cars-1}
+data_all <- read_csv(here::here(path_data, "auto_all.csv"),
+                     col_types = cols()) |> 
+  glimpse()
+
+data_all |> skim_some()
+```
+
+-----
+
+- After reviewing the [data dictionary](data/auto_data_dictionary.pdf), we see that `origin` is an unordered categorical variable that is coded numeric (where 1 = American, 2 = European, and 3 = Japanese).  Let's recode as character with meaningful labels and then convert to factor
+- In fact, lets change all our categorical variables (`mgp`, `origin`, and `name`) to factors.  
+- `mpg` is ordinal, so lets set the levels to indicate the order.
+
+```{r u4-cars-2}
+data_all <- data_all |> 
+  mutate(origin = case_when(origin == 1 ~ "american", 
+                            origin == 2 ~ "european", 
+                            origin == 3 ~ "japanese")) |>
+  mutate(mpg = factor(mpg, levels = c("low", "high")),
+         origin = factor(origin),
+         name = factor(name)) |> 
+  glimpse()
+```
+
+-----
+
+- Explore responses for categorical variables
+  - Other than `name`, responses for all other variables are tidy
+
+```{r u4-cars-3}
+data_all |> 
+  select(where(is.factor)) |>
+  walk(\(column) print(levels(column)))
+```
+
+- `name` has many different responses
+- We won't know how to handle this until we get to later units in the class on natural language processing!
+- Remove `name`
+```{r u4-cars-4}
+data_all <- data_all |> 
+  select(-name)
+```
+
+-----
+
+Finally, let's make and save our training and validation sets.  If we were doing model building for prediction we would also need a test set but we will focus this unit on just selecting the best model but not rigorously evaluating it.
+
+- Let's use a 75/25 split, stratified on `mpg`
+- Don't forget to set a seed in case you need to resplit again in the future!
+
+```{r u4-cars-5}
+set.seed(20110522) 
+
+splits <- data_all |> 
+  initial_split(prop = .75, strata = "mpg")
+
+splits |> 
+  analysis() |> 
+  glimpse() |> 
+  write_csv(here::here(path_data, "auto_trn.csv"))
+  
+splits |> 
+  assessment() |> 
+  glimpse() |> 
+  write_csv(here::here(path_data, "auto_val.csv"))
+```
+
+[Any concerns about using this training-validation split?].{red}
+^[These sample sizes are starting to get a little small.  Fitted models will have higher variance with only 75% (N = 294) observations and performance in validation (with only N = 98 observations) may not be a very precise estimate of true validation error.  We will learn more robust methods in the unit on resampling.]
+
+-----
+
+### Modeling EDA
+
+Let's do some quick modeling EDA to get a sense of the data.  We will keep it quick and dirty.
+
+- Open train ( we don't need validate for modeling EDA)
+- [We are pretending this is a new script....]
+- Let's make sure to class all variable appropriately
+
+```{r  u4-cars-6}
+data_trn <- read_csv(here::here(path_data, "auto_trn.csv"),
+                     col_type = cols()) |> 
+  mutate(mpg = factor (mpg, levels  = c("low", "high")),
+         origin = factor(origin)) |> 
+  glimpse()
+```
+
+-----
+
+- Bar plot for outcome
+  - Outcome is balanced
+  - Unbalanced outcomes can be more complicated (more on this later)
+```{r u4-cars-9}
+data_trn |> plot_bar("mpg")
+```
+
+-----
+
+- Grouped (by `mpg`) box/violin plots for numeric predictors
+
+```{r u4-cars-10}
+data_trn |> 
+  select(where(is.numeric)) |> 
+  names() |> 
+  map(~ plot_grouped_box_violin(df = data_trn, x = "mpg", y = .x)) |> 
+  plot_grid(plotlist = _, ncol = 2)
+```
+
+-----
+
+- Grouped barplot for origin
+
+```{r u4-cars-11}
+data_trn |> 
+  plot_grouped_barplot_percent(x = "origin", y = "mpg")
+```
+
+```{r u4-cars-12}
+data_trn |> 
+  plot_grouped_barplot_percent(x = "mpg", y = "origin")
+```
+
+-----
+
+- Correlation plots for numeric
+- Can dummy code categorical predictors to examine correlations (point biserial, phi) including them
+- We will do this manually using tidyverse here.
+- Set american to be reference level (its the first level)
+
+```{r u4-cars-13}
+data_trn |> 
+  mutate(mpg_high = if_else(mpg == "high", 1, 0), #<1>
+         origin_japan = if_else(origin == "japanese", 1, 0),
+         origin_europe = if_else(origin == "european", 1, 0)) |> 
+  select(-origin, -mpg) |> #<2>
+  cor() |> 
+  corrplot::corrplot.mixed()  #<3>
+```
+1. If manually coding an binary outcome variable, best practice is to set the positive class to be 1
+2. Remove origin after convert to dummy-coded features
+3. use namespace:: because didnt load the `corrplot` package
+
+- `cylinders`, `displacement`, `horsepower`, and `weight` are all essentially the same construct (big, beefy car!)
+- All are strongly correlated with `mpg`
+
+-----
+
+## Logistic Regression - Model Building
+Now that we understand our data a little better, let's build some models
+
+Let's also try to simultaneously pretend that we: 
+
+1. Are building and selecting a best prediction model that will be evaluated with some additional held out test data
+2. Have an explanatory question about production `year` - Are we more likely to have efficient cars more recently because of improvements in "technology", above and beyond broad car characteristics (e.g., the easy stuff like `weight`, `displacement`, etc.)
+
+To be clear, prediction and explanation goals are often separate (though prediction is an important foundation explanation)
+
+Either way, we need a validation set
+
+- Open it and class variables
+- Perhaps we should have written a function for this? (I would if we were going to do this any more times!)
+```{r u4-lr-1}
+data_val <- read_csv(here::here(path_data, "auto_val.csv"),
+                     col_type = cols()) |> 
+  mutate(mpg = factor (mpg, levels = c("low", "high")),
+         origin = factor(origin)) |> 
+  glimpse()
+```
+
+-----
+
+Let's predict high `mpg` from car beefiness and `year`
+
+We likely want to combine the beefy variables into one construct/factor (`beef`)
+
+  - We can use PCA to extract one factor
+  - Input variables should be centered and scaled for PCA.  Easy peasy
+  - PCA will be calculated with `data_trn` during `prep()`.  These statistics from `data_trn` will be used to `bake()`
+```{r u4-lr-2}
+rec <- recipe(mpg ~ ., data = data_trn) |> #<1> 
+  step_pca(cylinders, displacement, horsepower, weight, 
+           options = list(center = TRUE, scale. = TRUE), 
+           num_comp = 1, 
+           prefix = "beef_") #<2>
+
+rec #<3>
+```
+1. Using `.` now in the recipe to leave all variables in the feature  matrix.  We can later select the ones we want use for prediction
+2. We will have one PCA component, it will be called `beef_1`
+3. Notice that right now we have 7 predictors.  We will need to remember to select down to only `beef_` and `year`
+
+
+Now, `prep()` the recipe and `bake()` some feature for training and validation sets
+```{r}
+rec_prep <- rec |> 
+  prep(data_trn)
+
+feat_trn <- rec_prep |> 
+  bake(data_trn)
+
+feat_val <- rec_prep |> 
+  bake(data_val)
+```
+
+- Lets skim our training features
+- We can see there are features in there we won't use
+- `mpg`, `year`, and `beef_1` look good
+```{r}
+feat_trn |> skim_all()
+```
+
+-----
+
+Fit the model configuration in train
+```{r u4-lr-3}
+fit_lr_2 <- 
+  logistic_reg() |> #<1> 
+  set_engine("glm") |> #<2>
+  fit(mpg ~ beef_1 + year, data = feat_trn) #<3>
+```
+1. category of algorithm is logistics regression
+2. Set engine to be generalized linear model.  No need to `set_mode("classification") because logistic regression glm is only used for classification
+3. Notice that we explicitly indicate which features to use as predictors because our feature matrix has more than just these two in it because we used `.` in our recipe and our datasets have more columns.
+
+-----
+
+Let's look at the logistic model and its parameter estimates from train
+
+```{r u4-lr-4}
+fit_lr_2 |> tidy()
+```
+
+```{r}
+#| include: false
+b0 <- get_estimate(fit_lr_2, "(Intercept)")
+b1 <- get_estimate(fit_lr_2, "beef")
+b2 <- get_estimate(fit_lr_2, "year")
+```
+
+$Pr(high|(beef, year)) = \frac{e^{b0 + b1*beef + b2*year}}{1 + e^{b0 + b1*beef  + b2*year}}$
+
+-----
+
+Use `predict()` to get these probabilities (**or predicted class**, more on that later) directly from the model for any data
+
+- Let's get $Pr(high|year)$ holding beef constant at its mean
+- Let's also get the 95% conf int around these probabilities
+- `predict()` returns probabilities for high and low.  We will select out the low columns
+- Ambiguity is removed by their choice to label by the actual outcome labels (Nice!)
+
+```{r u4-lr-5}
+p_high <- #<1>
+  tibble(year = seq(min(feat_val$year), max(feat_val$year), .1),
+         beef_1 = mean(feat_val$beef_1)) 
+
+p_high <- p_high |> #<2>
+  bind_cols(predict(fit_lr_2, new_data = p_high, type = "prob")) |> 
+  bind_cols(predict(fit_lr_2, new_data = p_high, type = "conf_int")) |> 
+  select(-.pred_low, -.pred_lower_low, -.pred_upper_low) |> 
+  glimpse()
+```
+1. First, make a dataframe with feature values to get predictions 
+2. Then bind in predictions and remove unnecessary columns
+-----
+
+Can plot this relationship using the predicted probabilities
+
+```{r u4-lr-6}
+ggplot() +
+  geom_point(data = feat_val, aes(x = year, y = 2 - as.numeric(mpg)), 
+             position = position_jitter(height = 0.05, width = 0.05)) +
+  geom_line(data = p_high, mapping = aes(x = year, y = .pred_high)) +
+  geom_ribbon(data = p_high, 
+              aes(x = year, ymin = .pred_lower_high, ymax = .pred_upper_high), 
+              linetype = 2, alpha = 0.1) +
+  scale_x_continuous(name = "Production Year (19XX)", breaks = seq(70,82,2)) +
+  ylab("Pr(High MPG)")
+```
+
+-----
+
+Can plot odds instead of probabilities using odds equation and coefficients from the model
+
+$odds = \frac{Pr(positive\:class|x_1)} {1 - Pr(positive\:class|x_1)}$
+
+NOTE: Harder to also plot raw data as scatter plot when plotting odds vs. probabilities.  Maybe use second Y axis?
+```{r u4-lr-7}
+p_high <- p_high |> 
+  mutate(.odds_high = .pred_high / (1 - .pred_high),
+         .odds_lower_high = .pred_lower_high / (1 - .pred_lower_high),
+         .odds_upper_high = .pred_upper_high / (1 - .pred_upper_high))
+ggplot() +
+  geom_line(data = p_high, mapping = aes(x = year, y = .odds_high)) +
+  geom_ribbon(data = p_high, 
+              aes(x = year, ymin = .odds_lower_high, ymax = .odds_upper_high), 
+              linetype = 2, alpha = 0.1) +
+  scale_x_continuous(name = "Production Year (19XX)", breaks = seq(70,82,2)) +
+  ylab("Odds(High MPG)")
+```
+
+-----
+
+Odds ratio for year:
+
+$Odds\:ratio  = e^{c*\beta_1}$
+
+- Get the parameter estimate/coefficient from the model
+```{r u4-lr-8}
+exp(get_estimate(fit_lr_2, "year"))
+```
+
+For every one year increase (holding beef constant), the odds of a car being categorized as high mpg increase by a factor of `r exp(get_estimate(fit_lr_2, "year"))`
+
+-----
+
+You can do this for other values of c as well (not really needed here because a 1 year unit makes sense)
+
+$Odds\:ratio  = e^{c*\beta_1}$
+
+```{r u4-lr-9}
+exp(10 * get_estimate(fit_lr_2, "year"))
+```
+
+
+For every 10 year increase (holding beef constant), the odds of a car being categorized as high mpg increase by a factor of `r exp(10 * get_estimate(fit_lr_2, "year"))`
+
+
+-----
+
+Testing parameter estimates
+
+- `tidy()` provides z-tests for the parameter estimates
+- This is not the recommended statistical test
+
+```{r u4-lr-10}
+fit_lr_2 |> tidy()
+```
+
+The preferred test for parameter estimates from logistic regression is the likelihood ratio test
+
+- You can get this using `Anova()` from the `car` package (as you learn in 610/710)
+- The glm  object is returned using $fit
+```{r,  u4-lr-11, warning = FALSE}
+#| warning: false
+car::Anova(fit_lr_2$fit, type = 3)
+```
+
+-----
+
+Accuracy is a very common performance metric for classification models
+
+How accurate is our two feature model?
+
+- Note the use of `type = "class"`
+```{r u4-lr-12}
+# in train
+accuracy_vec(feat_trn$mpg, predict(fit_lr_2, feat_trn, type = "class")$.pred_class)
+
+# in validate
+accuracy_vec(feat_val$mpg, predict(fit_lr_2, feat_val, type = "class")$.pred_class)
+```
+
+You can see some evidence of over-fitting to the training set in that model performance is a bit lower in validation
+
+-----
+
+Let's take a look at the decision boundary for this model in the validation set
+
+We need a function to plot the decision boundary **because we will use it repeatedly** to compare decision boundaries across statistical models
+
+```{r u4-lr-13}
+plot_decision_boundary <- function(data, model, x_names, y_name, n_points = 100) {
+  
+  preds <- crossing(X1 = seq(min(data[[x_names[1]]]), 
+                                 max(data[[x_names[1]]]), 
+                                 length = n_points),
+                   X2 = seq(min(data[[x_names[2]]]), 
+                                 max(data[[x_names[2]]]), 
+                                 length = n_points))
+  names(preds) <- x_names
+  preds[[y_name]] <- predict(model, preds)$.pred_class
+  preds[[y_name]] <- as.numeric(preds[[y_name]])-1
+  
+  ggplot(data = data, 
+         aes(x = .data[[x_names[1]]], 
+             y = .data[[x_names[2]]], 
+             color = .data[[y_name]])) +
+    geom_contour(data = preds, 
+                 aes(x = .data[[x_names[1]]], 
+                     y = .data[[x_names[2]]], 
+                     z = .data[[y_name]]), 
+                 color = "black", breaks = .5, linewidth = 2) +
+    geom_point(size = 2, alpha = .5) +
+    labs(x = x_names[1], y = x_names[2], color = y_name)
+}
+```
+
+-----
+
+Logistic regression produces a linear decision boundary when you consider a scatter plot of the points by the two features.  Points on one side of the line are assigned to one class and points on the other side of the line are assigned to the other class.  This decision boundary would be a plane if there were three features  Harder to visualize in higher dimensional space.
+
+We will contrast this decision boundary from logistic regression with other statistical algorithms in a bit.
+
+Here is the decision boundary for this model in both train and validation sets
+```{r u4-lr-14}
+p_train <- feat_trn |> 
+  plot_decision_boundary(fit_lr_2, x_names = c("year", "beef_1"), y_name = "mpg", n_points = 400)
+
+p_val <- feat_val |> 
+  plot_decision_boundary(fit_lr_2, x_names = c("year", "beef_1"), y_name = "mpg", n_points = 400)
+
+plot_grid(p_train, p_val, labels = list("Train", "Validation"), hjust = -1.5)
+```
+
+-----
+
+What if you wanted to try to improve this models predictions?
+
+What if you wanted to have the best set of covariates to test the effect of year. [Assuming the best covariates are those that account for the most variance in mpg]?
+
+For either prediction or explanation, you need to find this best model
+
+We can compare model performance in validation set to find this best model
+
+- We can use that one for our prediction goal
+- We can test the effect of year in that model for our explanation goal
+  - This is a principled way to decide on the best model for our explanatory goal (vs. p-hacking)
+  - We get to explore and we end up with the best model to provide our focal test
+  
+
+Let's quickly fit another model we might have considered.   This model will contain the 4 variables from our PCA but as individual features rather than one PCA component score (`beef`)
+
+-----
+
+Make features for this model 
+- No feature engineering needed because raw variables are all numeric already)
+- We will give the features dfs new names to retain the old features that included `beef_1`
+
+```{r u4-lr-15}
+rec_raw <- recipe(mpg ~ ., data = data_trn) 
+
+rec_raw_prep <- rec_raw |> 
+  prep(data_trn)
+
+feat_raw_trn <- rec_raw_prep |> 
+  bake(data_trn)
+
+feat_raw_val <- rec_raw_prep |> 
+  bake(data_val)
+```
+
+Fit PCA features individually + year
+```{r u4-lr-17}
+fit_lr_raw <- 
+  logistic_reg() |> 
+  set_engine("glm") |> 
+  fit(mpg ~ cylinders + displacement + horsepower + weight + year, 
+      data = feat_raw_trn)
+```
+
+----- 
+
+Which is the best prediction model?
+
+- Beef PCA
+```{r u4-lr-18}
+accuracy_vec(feat_val$mpg, predict(fit_lr_2, feat_val)$.pred_class)
+```
+
+- Individual raw features from PCA
+```{r u4-lr-19}
+accuracy_vec(feat_raw_val$mpg, predict(fit_lr_raw, feat_raw_val)$.pred_class)
+```
+
+The PCA beef model fits best.  The model with individual features likely increases overfitting a bit but doesn't yield a reduction in bias because all the other variables are so highly correlated.
+
+-----
+
+`fit_lr_2` is your choice for best model for prediction (at least it is descriptively better)
+
+If you had an explanatory question about `year`, how would you have chosen between these two tests of `year` in these two different but all reasonable models
+
+- You might have chose the model with individual features because the effect of year is stronger.  That is NOT the model that comes closes to the DGP.  We believe the appropriate model is the beef model that has higher overall accuracy!
+
+
+```{r u4-lr-21}
+car::Anova(fit_lr_2$fit, type = 3)
+
+car::Anova(fit_lr_raw$fit, type = 3)
+```
+
+
+This is a start for us to start to consider the use of resampling methods to make decisions about how to best pursue explanatory goals.
+
+Could you now test your `year` effect in the full sample?  Let's discuss.
+
+
+## K nearest neighbors
+
+### Conceptual Overview
+Let's switch gears to a non-parametric method we already know.  KNN can be used as a classifier as well as for regression problems
+
+KNN tries to determine conditional class possibilities for any set of features by looking at observed classes for similar values of for these features in the training set
+
+-----
+
+```{r  } 
+#| echo: false
+# still need?  u4-knn-1, out.height = figsizer(fh5), fig.align="center"
+
+knitr::include_graphics("figs/unit4_knn_example.png")
+```
+
+The above figure illustrates the application of 3-NN to a small sample training set (N = 12) with 2 predictors 
+
+- For test observation X in the left panel, we would predict class = blue because blue is the majority class (highest probability) among the 3 nearest training observations
+- If we calculated these probabilities for all possible combinations of the two predictors in the training set, it would yield the decision boundaries depicted in the right panel
+
+-----
+
+KNN can produce complex decision boundaries
+
+- This makes it flexible (can reduce bias)
+- This makes it susceptible to variance/overfitting problems
+
+Remember that we can control this bias-variance trade-off with K.  As K increases, variance reduces (but bias may increase).  As K decreases, bias may be reduced but variance increases. Choose a K that produces good performance in new (validation or test) data
+
+-----
+
+These figures depict the KNN (and Bayes classifier) decision boundaries for the earlier simulated 2 class problem with `X1` and `X2`
+
+- K = 10 appears to provide the sweet spot b/c it closely approximates the Bayes decision boundary
+- Of course, you wouldn't know the true Bayes decision boundary if the data were real (not simulated)
+- But K = 10 would also yield the lowest test error (which is how it should be chosen)
+  - Bayes classifier test error: .1304
+  - K = 10 test error: 1363
+  - K = 1 test error: .1695
+  - K = 100 test err: .1925
+
+
+```{r} 
+#| echo: false
+# still need? u4-knn-2, out.height = figsizer(fh5), fig.align="center"
+knitr::include_graphics("figs/unit3_knn_k.png")
+```
+
+```{r} 
+#| echo: false
+# still need? u4-knn-3, out.height = figsizer(fh5), fig.align="center"
+knitr::include_graphics("figs/unit4_knn_k_2.png")
+```
+
+-----
+
+You can NOT make the decision about K based on training error
+
+This figure depicts training and test error for simulated data example as function of 1/K
+
+- Training error decreases as 1/K increases.  At 1 (K=1) training error is 0
+- Test error shows expected inverted U
+
+  - For high K (left side), error is high because of high variance
+  - As move right (lower K), variance is reduced rapidly with little increase in bias.  Error is reduced.
+  - Eventually, there is diminishing return from reducing variance but bias starts to increase rapidly.  Error increases again.
+
+```{r} 
+#| echo: false
+# still need?  u4-knn-4, out.height = figsizer(fh5), fig.align="center", echo=FALSE
+knitr::include_graphics("figs/unit4_knn_error.png")
+```
+ 
+### A Return to Cars
+
+Let's demonstrate KNN using the Cars dataset
+
+- Calculate `beef_1` PCA component
+- Scale both features
+- Make train and validation feature matrices
+
+```{r  u4-knn-5}
+rec <- recipe(mpg ~ ., data = data_trn) |> 
+  step_pca(cylinders, displacement, horsepower, weight,
+           options = list(center = TRUE, scale. = TRUE), 
+           num_comp = 1, prefix = "beef_") |> 
+  step_scale(year, beef_1)
+
+rec_prep <- rec |> 
+  prep(data = data_trn)
+
+feat_trn <- rec_prep |> 
+  bake(data_trn)
+
+feat_val <- rec_prep |> 
+  bake(data_val)
+```
+
+-----
+
+Fit models with varying K.  
+
+```{r  u4-knn-6}
+# K = 1
+fit_1nn_2 <- 
+  nearest_neighbor(neighbors = 1) |> 
+  set_engine("kknn") |>
+  set_mode("classification") |>  #<1>
+  fit(mpg ~ beef_1 + year, data = feat_trn)
+
+# K = 5
+fit_5nn_2 <- 
+  nearest_neighbor(neighbors = 5) |> 
+  set_engine("kknn") |> 
+  set_mode("classification") |>   
+  fit(mpg ~ beef_1 + year, data = feat_trn)
+
+# K = 10
+fit_10nn_2 <- 
+  nearest_neighbor(neighbors = 10) |> 
+  set_engine("kknn") |> 
+  set_mode("classification") |>   
+  fit(mpg ~ beef_1 + year, data = feat_trn)
+
+# K = 20
+fit_20nn_2 <- 
+  nearest_neighbor(neighbors = 20) |> 
+  set_engine("kknn") |> 
+  set_mode("classification") |>   
+  fit(mpg ~ beef_1 + year, data = feat_trn)
+```
+1. Notice that we now use `set_mode("classification")`
+
+-----
+
+Of course, training accuracy goes down with decreasing flexibility as k increases
+```{r  u4-knn-7}
+# K = 1
+accuracy_vec(feat_trn$mpg, predict(fit_1nn_2, feat_trn)$.pred_class)
+
+# K = 5
+accuracy_vec(feat_trn$mpg, predict(fit_5nn_2, feat_trn)$.pred_class)
+
+# K = 10
+accuracy_vec(feat_trn$mpg, predict(fit_10nn_2, feat_trn)$.pred_class)
+
+# K = 20
+accuracy_vec(feat_trn$mpg, predict(fit_20nn_2, feat_trn)$.pred_class)
+```
+
+In contrast, validation accuracy first increases and then eventually decreases as k increase.
+
+K = 10 is preferred based on validation accuracy
+```{r  u4-knn-8}
+# K = 1
+accuracy_vec(feat_val$mpg, predict(fit_1nn_2, feat_val)$.pred_class)
+
+# K = 5
+accuracy_vec(feat_val$mpg, predict(fit_5nn_2, feat_val)$.pred_class)
+
+# K = 10
+accuracy_vec(feat_val$mpg, predict(fit_10nn_2, feat_val)$.pred_class)
+
+# K = 20
+accuracy_vec(feat_val$mpg, predict(fit_20nn_2, feat_val)$.pred_class)
+```
+
+-----
+
+Let's look at the decision boundaries for 10-NN in training and validation sets
+
+- A very complex decision boundary
+- Clearly trying hard to segregate the points
+- In Ames, the relationships were non-linear and therefore KNN did much better than the linear model
+- Here, the decision boundary is pretty linear so the added flexibility of KNN doesn't get us much.  
+  - Maybe we gain a little in bias reduction but lose a little in overfitting
+  - Ends up performing comparable to logistic regression (a generalized linear model)
+
+```{r  u4-knn-9}
+p_train <- feat_trn |> 
+  plot_decision_boundary(fit_10nn_2, x_names = c("year", "beef_1"), y_name = "mpg")
+
+p_val <- feat_val |> 
+  plot_decision_boundary(fit_10nn_2, x_names = c("year", "beef_1"), y_name = "mpg")
+
+plot_grid(p_train, p_val, labels = list("Train", "Validation"), hjust = -1.5)
+```
+
+-----
+
+[How do you think the parametric logistic regression compares to the non-parametric KNN with respect to explanatory goals?  Consider our (somewhat artificial) question about the effect of `year`.].{red}
+^[The logistic regression provides coefficients (parameter estimates) that can be used to describe changes in probability, odds and odds ratio associated with change in year.  These parameter estimates can be tested via inferential procedures.  KNN does not provide any parameter estimates.  With KNN, we can visualize decision boundary (only in 2 or three dimensions) or the predicted outcome by any feature, controlling for other features but these relationships may be complex in shape.  Of course, if the relationships are complex, we might not want to hide that.  We will learn more about feature importance for explanation in a later unit.]
+
+-----
+
+Plot of probability of high_mpg by year, holding `beef_1` constant at its mean based on 10-NN
+
+- Get $Pr(high|year)$ holding beef constant at its mean
+- `predict()` returns probabilities for high and low.
+
+```{r  u4-knn-10}
+p_high <- 
+  tibble(year = seq(min(feat_val$year), max(feat_val$year), .1),
+         beef_1 = mean(feat_val$beef_1))
+p_high <- p_high |> 
+  bind_cols(predict(fit_10nn_2, p_high, type = "prob")) |> 
+  glimpse()
+```
+
+
+```{r  u4-knn-11}
+ggplot() +
+  geom_point(data = feat_val, aes(x = year, y = 2 - as.numeric(mpg)), 
+             position = position_jitter(height = 0.05, width = 0.05)) +
+  geom_line(data = p_high, mapping = aes(x = year, y = .pred_high)) +
+  scale_x_continuous(name = "Production Year (19XX)", 
+                     breaks = seq(0, 1, length.out = 7), 
+                     labels = as.character(seq(70, 82, length.out = 7))) +
+  ylab("Pr(High MPG)")
+```
+
+In a later unit, we will learn about feature ablation that we can combine with model comparisons to potentially test predictor effects in non-parametric models
+
+## Linear and Quadratic Discriminant Analysis
+
+### Linear Discriminant Analysis
+LDA models the distributions of the Xs separately for each class
+
+Then uses Bayes theorem to estimate $Pr(Y = k | X)$ for each k and assigns the  observation to the class with the highest probability
+
+$Pr(Y = k|X) = \frac{\pi_k * f_k(X)}{\sum_{l = 1}^{K} f_l(X)}$
+
+where
+
+- $\pi_k$ is the prior probability that an observation comes from class k (estimated from frequencies of k in training)
+- $f_k(X)$ is the density function of X for an observation from class k
+  -  $f_k(X)$ is large if there is a high probability that an observation in class k has that set of values for X and small if that probability is low
+  - $f_k(X)$ is difficult to estimate unless we make some simplifying assumptions (i.e., X is multivariate normal and common covariance matrix ($\sum$) across K classes)
+  - With these assumptions, we can estimate $\pi_k$, $\mu_k$, and $\sigma^2$ from the training set and calculate $Pr(Y = k|X)$ for each k
+
+-----
+
+With a single feature, the probability of any class k, given X is:
+
+$Pr(Y = k|X) = \frac{\pi_k \frac{1}{\sqrt{2\pi\sigma}}\exp(-\frac{1}{2\sigma^2}(x-\mu_k)^2)}{\sum_{l=1}^{K}\pi_l\frac{1}{2\sigma^2}\exp(-\frac{1}{2\sigma^2}(x-\mu_l)^2)}$
+
+LDA is a parametric model, but is it interpretable?
+
+-----
+
+Application of LDA to Cars data set with two predictors
+
+Notice that LDA produces linear decision boundary (see @ISL for formula for discriminant function derived from the probability function on last slide)
+
+```{r u4-da-1}
+rec <- recipe(mpg ~ ., data = data_trn) |> 
+  step_pca(cylinders, displacement, horsepower, weight, 
+           options = list(center = TRUE, scale. = TRUE), 
+           num_comp = 1, 
+           prefix = "beef_")
+
+rec_prep <- rec |> 
+  prep(data_trn)
+
+feat_trn <- rec_prep |> 
+  bake(data_trn)
+
+feat_val <- rec_prep |> 
+  bake(data_val)
+```
+
+-----
+
+Fit the LDA in train
+```{r u4-da-2}
+library(discrim, exclude = "smoothness")
+
+discrim_linear() |> 
+  set_engine("MASS") |> 
+  translate()
+
+fit_lda_2 <- 
+  discrim_linear() |> 
+  set_engine("MASS") |> 
+  fit(mpg ~ beef_1 + year, data = feat_trn)
+```
+
+-----
+
+Accuracy and decision boundary
+
+```{r u4-da-3}
+accuracy_vec(feat_val$mpg, predict(fit_lda_2, feat_val)$.pred_class)
+```
+
+```{r u4-da-4}
+p_train <- feat_trn |> 
+  plot_decision_boundary(fit_lda_2, x_names = c("year", "beef_1"), y_name = "mpg", n_points = 400)
+
+p_val <- feat_val |> 
+  plot_decision_boundary(fit_lda_2, x_names = c("year", "beef_1"), y_name = "mpg", n_points = 400)
+
+plot_grid(p_train, p_val, labels = list("Train", "Validation"), hjust = -1.5)
+```
+
+
+### Quadratic Discriminant Analysis
+
+QDA relaxes one restrictive assumption of LDA
+  
+- Still required multivariate normal X
+- **But it allows each class to have its own $\sum$**
+- This makes it:
+  - More flexible
+  - Able to model non-linear decision boundaries (see formula for discriminant in @ISL)
+  - But requires substantial increase in parameter estimation (more potential to overfit)
+
+-----
+
+Application of RDA (Regularized Discriminant Analysis) algorithm to Car data set with two features
+
+- The algorithm that is available in tidymodels is actually a regularized discriminant analysis, `rda()` from the `klaR` package
+- There are two hyperparameters, `frac_common_cov` and `frac_identity`, that can each vary between 0 - 1 
+  - When `frac_common_cov = 1` and `frac_identity = 0`, this is an LDA
+  - When `frac_common_cov = 0` and `frac_identity = 0`, this is a QDA
+  - These hyperparameters can be tuned to different values to improve the fit dependent on the true DGP
+  - More on hyperparameter tuning in unit 5
+  - This is a flexible algorithm that likely replaces the need to fit separate LDA and QDA models
+- see https://discrim.tidymodels.org/reference/discrim_regularized.html
+
+Here is a true QDA using `frac_common_cov = 1` and `frac_identity = 0`
+```{r u4-da-5}
+discrim_regularized(frac_common_cov = 0, frac_identity = 0) |> 
+  set_engine("klaR") |> 
+  translate()
+
+fit_qda_2 <- 
+  discrim_regularized(frac_common_cov = 0, frac_identity = 0) |> 
+  set_engine("klaR") |> 
+  fit(mpg ~ beef_1 + year, data = feat_trn)
+```
+
+-----
+
+Accuracy and decision boundary
+
+```{r u4-da-6}
+accuracy_vec(feat_val$mpg, 
+             predict(fit_qda_2, feat_val)$.pred_class)
+```
+
+```{r u4-da-7}
+p_train <- feat_trn |> 
+  plot_decision_boundary(fit_qda_2, x_names = c("year", "beef_1"), y_name = "mpg", n_points = 400)
+
+p_val <- feat_val |> 
+  plot_decision_boundary(fit_qda_2, x_names = c("year", "beef_1"), y_name = "mpg", n_points = 400)
+
+plot_grid(p_train, p_val, labels = list("Train", "Validation"), hjust = -1.5)
+```
+
+-----
+
+## Comparisons between these four classifiers
+
+- Both logistic and LDA are linear functions of X and therefore produce linear decision boundaries
+
+- LDA makes additional assumptions about X (multivariate normal and common $\sum$) beyond logistic regression.  Relative performance is based on the quality of this assumption
+
+- QDA relaxes the LDA assumption about common $\sum$ (and RDA can relax it partially)
+  - This also allows for nonlinear decision boundaries
+  - QDA is therefore more flexible, which means possibly less bias but more potential for overfitting
+
+- Both QDA and LDA assume multivariate normal X so *may* not accommodate categorical predictors very well.  Logistic and KNN do accommodate categorical predictors
+
+- KNN is non-parametric and therefore the most flexible
+  - Increased overfitting, decreased bias?
+  - Not very interpretable.  But LDA/QDA, although parametric, aren't as interpretable as logistic regression
+
+- Logistic regression fails when classes are perfectly separated (but does that ever happen?) and is less stable when classes are well separated
+
+- LDA, KNN, and QDA naturally accommodate more than two classes  
+  - Logistic requires additional tweak (**Briefly describe: multiple one vs other classes models approach**)
+  
+- Logisitic regression requires relatively large sample sizes.  LDA/QDA may perform better with smaller sample sizes if X is multivariate normal.
+
+-----
+  
+## A quick tour of many classifiers
+
+The Cars dataset had strong predictors and a mostly linear decision boundary for the two predictors we considered
+
+This will not be true in many cases
+
+Let's consider a more complex two predictor decision boundary in the **circle** dataset from the `mlbench` package (lots of cool datasets for ML)
+
+This will hopefully demonstrate that the key is to have a algorithm that can model the DGP
+
+- This is NO best algorithm
+- The best algorithm depends on 
+  - The DGP
+  - The goal (prediction vs. explanation)
+  
+It will also demonstrate the power of tidymodels to allow us to fit many different statistical algorithms
+which all have their own syntax using a common syntax provided by tidymodels.
+
+Example adapted to tidymodels from a demonstration by [Michael Hahsler](https://michael.hahsler.net/SMU/EMIS7332/R/viz_classifier.html)
+
+```{r u4-tour-1}
+library(mlbench)
+set.seed(20140102)
+data_trn <- as_tibble(mlbench.circle(200)) |> 
+  rename(x_1 = x.1, x_2 = x.2) |> 
+  glimpse()
+
+test <- as_tibble(mlbench.circle(200)) |> 
+  rename(x_1 = x.1, x_2 = x.2)
+
+data_trn |> ggplot(aes(x = x_1, y = x_2, color = classes)) +
+  geom_point(size = 2, alpha = .5)
+```
+
+### Logistic Regression
+
+Fit
+```{r u4-tour-2}
+fit_lr_bench <- 
+  logistic_reg() |> 
+  set_engine("glm") |> 
+  fit(classes ~ x_1 + x_2, data = data_trn)
+```
+
+Accuracy and Decision Boundary
+```{r u4-tour-3}
+accuracy_vec(test$classes, 
+             predict(fit_lr_bench, test)$.pred_class)
+
+p_train <- data_trn |> 
+  plot_decision_boundary(fit_lr_bench, x_names = c("x_1", "x_2"), y_name = "classes", n_points = 400)
+
+p_test <- test |> 
+  plot_decision_boundary(fit_lr_bench, x_names = c("x_1", "x_2"), y_name = "classes", n_points = 400)
+
+plot_grid(p_train, p_test, labels = list("Train", "Test"), hjust = -1.5)
+```
+
+
+### KNN with K = 5 (somewhat arbitrary default)
+
+Fit
+```{r u4-tour-4}
+fit_knn_bench <- 
+  nearest_neighbor() |> 
+  set_engine("kknn") |> 
+  set_mode("classification") |> 
+  fit(classes ~ x_1 + x_2, data = data_trn)
+```
+
+Accuracy and Decision Boundary
+```{r u4-tour-5}
+accuracy_vec(test$classes, 
+             predict(fit_knn_bench, test)$.pred_class)
+
+p_train <- data_trn |> 
+  plot_decision_boundary(fit_knn_bench, x_names = c("x_1", "x_2"), y_name = "classes", n_points = 400)
+
+p_test <- test |> 
+  plot_decision_boundary(fit_knn_bench, x_names = c("x_1", "x_2"), y_name = "classes", n_points = 400)
+
+plot_grid(p_train, p_test, labels = list("Train", "Test"), hjust = -1.5)
+```
+
+
+### Linear Discriminant Analysis
+
+Fit
+```{r u4-tour-6}
+fit_lda_bench <- 
+  discrim_linear() |> 
+  set_engine("MASS") |> 
+  fit(classes ~ x_1 + x_2, data = data_trn)
+```
+
+Accuracy and Decision Boundary
+```{r u4-tour-7}
+accuracy_vec(test$classes, 
+             predict(fit_lda_bench, test)$.pred_class)
+
+p_train <- data_trn |> 
+  plot_decision_boundary(fit_lda_bench, x_names = c("x_1", "x_2"), y_name = "classes", n_points = 400)
+
+p_test <- test |> 
+  plot_decision_boundary(fit_lda_bench, x_names = c("x_1", "x_2"), y_name = "classes", n_points = 400)
+
+plot_grid(p_train, p_test, labels = list("Train", "Test"), hjust = -1.5)
+```
+
+### Regularized Discrinant Analysis
+
+Letting `rda()` select optimal hyperparameter values
+
+Fit
+```{r u4-tour-8}
+fit_rda_bench <- 
+  discrim_regularized() |> 
+  set_engine("klaR") |>
+  fit(classes ~ x_1 + x_2, data = data_trn)
+```
+
+Accuracy and Decision Boundary
+```{r u4-tour-9}
+accuracy_vec(test$classes, 
+             predict(fit_rda_bench, test)$.pred_class)
+
+p_train <- data_trn |> 
+  plot_decision_boundary(fit_rda_bench, x_names = c("x_1", "x_2"), y_name = "classes", n_points = 400)
+
+p_test <- test |> 
+  plot_decision_boundary(fit_rda_bench, x_names = c("x_1", "x_2"), y_name = "classes", n_points = 400)
+
+plot_grid(p_train, p_test, labels = list("Train", "Test"), hjust = -1.5)
+```
+
+
+### Naive Bayes Classifier
+
+The Naïve Bayes classifier is a simple probabilistic classifier which is based on Bayes theorem
+
+But, we assume that the predictor variables are conditionally independent of one another given the response value
+
+- This algorithm can be fit with either `klaR` or `naivebayes` engines
+
+- There are many [tutorials](https://uc-r.github.io/naive_bayes) available on this classifier
+
+Fit
+```{r u4-tour-10}
+fit_bayes_bench <- 
+  naive_Bayes() |> 
+  set_engine("naivebayes") |>
+  fit(classes ~ x_1 + x_2, data = data_trn)
+```
+
+Accuracy and Decision Boundary
+```{r u4-tour-11}
+accuracy_vec(test$classes, 
+             predict(fit_bayes_bench, test)$.pred_class)
+
+p_train <- data_trn |> 
+  plot_decision_boundary(fit_bayes_bench, x_names = c("x_1", "x_2"), y_name = "classes", n_points = 400)
+
+p_test <- test |> 
+  plot_decision_boundary(fit_bayes_bench, x_names = c("x_1", "x_2"), y_name = "classes", n_points = 400)
+
+plot_grid(p_train, p_test, labels = list("Train", "Test"), hjust = -1.5)
+```
+
+
+### Random Forest
+
+  - Random Forest is a variant of decision trees
+  - It uses **bagging** which involves resampling the data to produce many trees and then aggregating across trees for the final classification
+  - We will discuss Random Forest in a later unit
+  - Here we fit it with defaults for its hyperparameters
+  
+Fit
+```{r u4-tour-12}
+fit_rf_bench <- 
+  rand_forest() |> 
+  set_engine("ranger") |> 
+  set_mode("classification") |> 
+  fit(classes ~ x_1 + x_2, data = data_trn)
+```
+
+Accuracy and Decision Boundary
+```{r u4-tour-13}
+accuracy_vec(test$classes, 
+             predict(fit_rf_bench, test)$.pred_class)
+
+p_train <- data_trn |> 
+  plot_decision_boundary(fit_rf_bench, x_names = c("x_1", "x_2"), y_name = "classes", n_points = 400)
+
+p_test <- test |> 
+  plot_decision_boundary(fit_rf_bench, x_names = c("x_1", "x_2"), y_name = "classes", n_points = 400)
+
+plot_grid(p_train, p_test, labels = list("Train", "Test"), hjust = -1.5)
+```
+
+
+### Neural networks
+
+It is easy to fit a [single layer neural network](https://parsnip.tidymodels.org/reference/mlp.html) 
+
+We do this below with varying number of hidden units and all other hyperparameters set to defaults
+
+#### Single Layer NN with 1 hidden unit:
+Fit
+```{r u4-tour-18}
+fit_nn1_bench <- 
+ mlp(hidden_units = 1) |> 
+  set_engine("nnet") |> 
+  set_mode("classification") |> 
+  fit(classes ~ x_1 + x_2, data = data_trn)
+```
+
+Accuracy and Decision Boundary
+```{r u4-tour-19}
+accuracy_vec(test$classes, 
+             predict(fit_nn1_bench, test)$.pred_class)
+
+p_train <- data_trn |> 
+  plot_decision_boundary(fit_nn1_bench, x_names = c("x_1", "x_2"), y_name = "classes", n_points = 400)
+
+p_test <- test |> 
+  plot_decision_boundary(fit_nn1_bench, x_names = c("x_1", "x_2"), y_name = "classes", n_points = 400)
+
+plot_grid(p_train, p_test, labels = list("Train", "Test"), hjust = -1.5)
+```
+
+#### Single Layer NN with 2 hidden units
+```{r u4-tour-20}
+fit_nn2_bench <- 
+ mlp(hidden_units = 2) |> 
+  set_engine("nnet") |> 
+  set_mode("classification") |> 
+  fit(classes ~ x_1 + x_2, data = data_trn)
+```
+
+Accuracy and Decision Boundary
+```{r u4-tour-21}
+accuracy_vec(test$classes, 
+             predict(fit_nn2_bench, test)$.pred_class)
+
+p_train <- data_trn |> 
+  plot_decision_boundary(fit_nn2_bench, x_names = c("x_1", "x_2"), y_name = "classes", n_points = 400)
+
+p_test <- test |> 
+  plot_decision_boundary(fit_nn2_bench, x_names = c("x_1", "x_2"), y_name = "classes", n_points = 400)
+
+plot_grid(p_train, p_test, labels = list("Train", "Test"), hjust = -1.5)
+```
+
+#### Single Layer NN with 5 hidden units
+```{r u4-tour-22}
+fit_nn5_bench <- 
+ mlp(hidden_units = 5) |> 
+  set_engine("nnet") |> 
+  set_mode("classification") |> 
+  fit(classes ~ x_1 + x_2, data = data_trn)
+```
+
+Accuracy and Decision Boundary
+```{r u4-tour-23}
+accuracy_vec(test$classes, 
+             predict(fit_nn5_bench, test)$.pred_class)
+
+p_train <- data_trn |> 
+  plot_decision_boundary(fit_nn5_bench, x_names = c("x_1", "x_2"), y_name = "classes", n_points = 400)
+
+p_test <- test |> 
+  plot_decision_boundary(fit_nn5_bench, x_names = c("x_1", "x_2"), y_name = "classes", n_points = 400)
+
+plot_grid(p_train, p_test, labels = list("Train", "Test"), hjust = -1.5)
+```
+
+
+## Discussion
+
+### And the winner is....
+
+```{r} 
+#| echo: false
+# knitr::include_graphics("figs/ames_winners.png")
+```
+
+- Top 3: 
+
+- Next 3:  
+
+- Everyone else: 
+
+
+### Other announcements
+
+- Updated use of discussion
+- Quiz performance
+- Feedback, captions, slack feedback
+- Dummy coding concepts (options for instruction)
+
+
+### Student Questions
+
+- Bayes classifier
+  - Could you explain this statement about the Bayes classifier?: Pr(Y=k|X=x0) for k=1:K 
+ 
+  - I really don't understand Bayes classifier after searching additional information. terminology to this concept is confusing.
+
+- Logistic Regression
+
+  - Logistic Regression and its figure
+
+- LDA/QDA
+  - It would be great if you could talk through the broad logic of what generative classifiers are doing (e.g., James pg 141-2). I feel like I sort of get it; instead of estimating distributions of classes conditioned on features, they're estimating distributions of features conditioned on classes, and then using Bayes' rule? but it would be helpful to talk through this in the context of an example.
+
+  - What is the difference between LDA and QDA? Comparison
+
+  - What makes QDA model more flexible? And why that makes less bias but more potential for overfitting in QDA?
+
+
+- Comparisons among algorithms
+  - I do not understand how logistic regression is different than linear discriminant analysis? It seems in LDA, the goal is to find an optimal line to classify on. However, isn't logistic regression effectively doing the same by trying to create a model that is most predictive? How is the boundary line different?
+  
+  - I think I understand when you would use a LDA versus QDA, but I would like to know more about when to choose the logistic regression. Are LDA and QDAs completely different from the logistic regression conceptually?
+
+  - We haven't talk about logistic regression yet in psych610. What are some advantages and disadvantages of logistic regression compared to other classification methods?
+  
+  - Could you please go over the differences between LDA/QDA and logistic regression. I understand these parametric models are intermediate models between logistic regression and knn, but I don't understand the advantage of using them over knn or logistic regression. 
+  
+- Categorical predictors
+  - Can knn classification deal with data having a 2+ category outcome variable?
+  
+  - Also, best practices for dummy coding or creating grouped levels or if this is just trial and error and what seems to make the most sense.
+  
+- Missing data
+  - We had a lot of missing data this week. I am curious about the best ways to impute this data, and whether or not that should differ between classification and regression models
+  
+  - How to select the right algorithm for missing data?
+
+- Generic modeling questions
+  - How do I figure out why my model is doing worse? How to think about this without visualization?
+
+  - I'm still a bit confused about what would take place in modeling EDA vs. model fitting and evaluation. For example, if I want to separate the Titanic variable cabin into cabin letter and number, would that be a step that takes place in recipes only? 
+
+  - How can we quickly decide which predictors to include in our model when we have so many predictors and multicollinearity issues may happen?
+  
+  - Can we extrapolate more classification questions from the data we already collected? For example, if you are collecting heart rate of a person, while exercising. Can you then create a new variable that says if the person was tired or not? 
+
+- Other questions
+  - In 610, we plotted predicted points along with our predicted data points along in our final graphs. Do you recommend plotting predicted points on our graphs for publication?
+
+  - Can you review the variable "beef" that you create in the "step_pca" function? How do the numeric variables get combined?
+
+  - use cases for random forest models 
+
+  - For all of these classifiers, will they work differently on large datasets with different types of data such as texts and images? If yes, which ones may work faster with large text data and large image data?   
