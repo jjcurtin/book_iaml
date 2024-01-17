@@ -1,0 +1,1940 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<script src="001_overview_files/libs/clipboard/clipboard.min.js"></script>
+<script src="001_overview_files/libs/quarto-html/tabby.min.js"></script>
+<script src="001_overview_files/libs/quarto-html/popper.min.js"></script>
+<script src="001_overview_files/libs/quarto-html/tippy.umd.min.js"></script>
+<link href="001_overview_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="001_overview_files/libs/quarto-html/light-border.css" rel="stylesheet">
+<link href="001_overview_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
+<link href="001_overview_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
+  <meta name="generator" content="quarto-1.3.450">
+
+  <meta name="author" content="John J. Curtin, PhD">
+  <title>Introduction to Applied Machine Learning</title>
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+  <link rel="stylesheet" href="001_overview_files/libs/revealjs/dist/reset.css">
+  <link rel="stylesheet" href="001_overview_files/libs/revealjs/dist/reveal.css">
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      { color: #003b4f; background-color: #f1f3f5; }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span { color: #003b4f; } /* Normal */
+    code span.al { color: #ad0000; } /* Alert */
+    code span.an { color: #5e5e5e; } /* Annotation */
+    code span.at { color: #657422; } /* Attribute */
+    code span.bn { color: #ad0000; } /* BaseN */
+    code span.bu { } /* BuiltIn */
+    code span.cf { color: #003b4f; } /* ControlFlow */
+    code span.ch { color: #20794d; } /* Char */
+    code span.cn { color: #8f5902; } /* Constant */
+    code span.co { color: #5e5e5e; } /* Comment */
+    code span.cv { color: #5e5e5e; font-style: italic; } /* CommentVar */
+    code span.do { color: #5e5e5e; font-style: italic; } /* Documentation */
+    code span.dt { color: #ad0000; } /* DataType */
+    code span.dv { color: #ad0000; } /* DecVal */
+    code span.er { color: #ad0000; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #ad0000; } /* Float */
+    code span.fu { color: #4758ab; } /* Function */
+    code span.im { color: #00769e; } /* Import */
+    code span.in { color: #5e5e5e; } /* Information */
+    code span.kw { color: #003b4f; } /* Keyword */
+    code span.op { color: #5e5e5e; } /* Operator */
+    code span.ot { color: #003b4f; } /* Other */
+    code span.pp { color: #ad0000; } /* Preprocessor */
+    code span.sc { color: #5e5e5e; } /* SpecialChar */
+    code span.ss { color: #20794d; } /* SpecialString */
+    code span.st { color: #20794d; } /* String */
+    code span.va { color: #111111; } /* Variable */
+    code span.vs { color: #20794d; } /* VerbatimString */
+    code span.wa { color: #5e5e5e; font-style: italic; } /* Warning */
+    /* CSS for citations */
+    div.csl-bib-body { }
+    div.csl-entry {
+      clear: both;
+    }
+    .hanging-indent div.csl-entry {
+      margin-left:2em;
+      text-indent:-2em;
+    }
+    div.csl-left-margin {
+      min-width:2em;
+      float:left;
+    }
+    div.csl-right-inline {
+      margin-left:2em;
+      padding-left:1em;
+    }
+    div.csl-indent {
+      margin-left: 2em;
+    }  </style>
+  <link rel="stylesheet" href="001_overview_files/libs/revealjs/dist/theme/quarto.css">
+  <link rel="stylesheet" href="slides.css">
+  <link href="001_overview_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.css" rel="stylesheet">
+  <link href="001_overview_files/libs/revealjs/plugin/reveal-menu/menu.css" rel="stylesheet">
+  <link href="001_overview_files/libs/revealjs/plugin/reveal-menu/quarto-menu.css" rel="stylesheet">
+  <link href="001_overview_files/libs/revealjs/plugin/quarto-support/footer.css" rel="stylesheet">
+  <style type="text/css">
+
+  .callout {
+    margin-top: 1em;
+    margin-bottom: 1em;  
+    border-radius: .25rem;
+  }
+
+  .callout.callout-style-simple { 
+    padding: 0em 0.5em;
+    border-left: solid #acacac .3rem;
+    border-right: solid 1px silver;
+    border-top: solid 1px silver;
+    border-bottom: solid 1px silver;
+    display: flex;
+  }
+
+  .callout.callout-style-default {
+    border-left: solid #acacac .3rem;
+    border-right: solid 1px silver;
+    border-top: solid 1px silver;
+    border-bottom: solid 1px silver;
+  }
+
+  .callout .callout-body-container {
+    flex-grow: 1;
+  }
+
+  .callout.callout-style-simple .callout-body {
+    font-size: 1rem;
+    font-weight: 400;
+  }
+
+  .callout.callout-style-default .callout-body {
+    font-size: 0.9rem;
+    font-weight: 400;
+  }
+
+  .callout.callout-titled.callout-style-simple .callout-body {
+    margin-top: 0.2em;
+  }
+
+  .callout:not(.callout-titled) .callout-body {
+      display: flex;
+  }
+
+  .callout:not(.no-icon).callout-titled.callout-style-simple .callout-content {
+    padding-left: 1.6em;
+  }
+
+  .callout.callout-titled .callout-header {
+    padding-top: 0.2em;
+    margin-bottom: -0.2em;
+  }
+
+  .callout.callout-titled .callout-title  p {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+    
+  .callout.callout-titled.callout-style-simple .callout-content  p {
+    margin-top: 0;
+  }
+
+  .callout.callout-titled.callout-style-default .callout-content  p {
+    margin-top: 0.7em;
+  }
+
+  .callout.callout-style-simple div.callout-title {
+    border-bottom: none;
+    font-size: .9rem;
+    font-weight: 600;
+    opacity: 75%;
+  }
+
+  .callout.callout-style-default  div.callout-title {
+    border-bottom: none;
+    font-weight: 600;
+    opacity: 85%;
+    font-size: 0.9rem;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  .callout.callout-style-default div.callout-content {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+  }
+
+  .callout.callout-style-simple .callout-icon::before {
+    height: 1rem;
+    width: 1rem;
+    display: inline-block;
+    content: "";
+    background-repeat: no-repeat;
+    background-size: 1rem 1rem;
+  }
+
+  .callout.callout-style-default .callout-icon::before {
+    height: 0.9rem;
+    width: 0.9rem;
+    display: inline-block;
+    content: "";
+    background-repeat: no-repeat;
+    background-size: 0.9rem 0.9rem;
+  }
+
+  .callout-title {
+    display: flex
+  }
+    
+  .callout-icon::before {
+    margin-top: 1rem;
+    padding-right: .5rem;
+  }
+
+  .callout.no-icon::before {
+    display: none !important;
+  }
+
+  .callout.callout-titled .callout-body > .callout-content > :last-child {
+    margin-bottom: 0.5rem;
+  }
+
+  .callout.callout-titled .callout-icon::before {
+    margin-top: .5rem;
+    padding-right: .5rem;
+  }
+
+  .callout:not(.callout-titled) .callout-icon::before {
+    margin-top: 1rem;
+    padding-right: .5rem;
+  }
+
+  /* Callout Types */
+
+  div.callout-note {
+    border-left-color: #4582ec !important;
+  }
+
+  div.callout-note .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAEU0lEQVRYCcVXTWhcVRQ+586kSUMMxkyaElstCto2SIhitS5Ek8xUKV2poatCcVHtUlFQk8mbaaziwpWgglJwVaquitBOfhQXFlqlzSJpFSpIYyXNjBNiTCck7x2/8/LeNDOZxDuEkgOXe++553zfefee+/OYLOXFk3+1LLrRdiO81yNqZ6K9cG0P3MeFaMIQjXssE8Z1JzLO9ls20MBZX7oG8w9GxB0goaPrW5aNMp1yOZIa7Wv6o2ykpLtmAPs/vrG14Z+6d4jpbSKuhdcSyq9wGMPXjonwmESXrriLzFGOdDBLB8Y6MNYBu0dRokSygMA/mrun8MGFN3behm6VVAwg4WR3i6FvYK1T7MHo9BK7ydH+1uurECoouk5MPRyVSBrBHMYwVobG2aOXM07sWrn5qgB60rc6mcwIDJtQrnrEr44kmy+UO9r0u9O5/YbkS9juQckLed3DyW2XV/qWBBB3ptvI8EUY3I9p/67OW+g967TNr3Sotn3IuVlfMLVnsBwH4fsnebJvyGm5GeIUA3jljERmrv49SizPYuq+z7c2H/jlGC+Ghhupn/hcapqmcudB9jwJ/3jvnvu6vu5lVzF1fXyZuZZ7U8nRmVzytvT+H3kilYvH09mLWrQdwFSsFEsxFVs5fK7A0g8gMZjbif4ACpKbjv7gNGaD8bUrlk8x+KRflttr22JEMRUbTUwwDQScyzPgedQHZT0xnx7ujw2jfVfExwYHwOsDTjLdJ2ebmeQIlJ7neo41s/DrsL3kl+W2lWvAga0tR3zueGr6GL78M3ifH0rGXrBC2aAR8uYcIA5gwV8zIE8onoh8u0Fca/ciF7j1uOzEnqcIm59sEXoGc0+z6+H45V1CvAvHcD7THztu669cnp+L0okAeIc6zjbM/24LgGM1gZk7jnRu1aQWoU9sfUOuhrmtaPIO3YY1KLLWZaEO5TKUbMY5zx8W9UJ6elpLwKXbsaZ4EFl7B4bMtDv0iRipKoDQT2sNQI9b1utXFdYisi+wzZ/ri/1m7QfDgEuvgUUEIJPq3DhX/5DWNqIXDOweC2wvIR90Oq3lDpdMIgD2r0dXvGdsEW5H6x6HLRJYU7C69VefO1x8Gde1ZFSJLfWS1jbCnhtOPxmpfv2LXOA2Xk2tvnwKKPFuZ/oRmwBwqRQDcKNeVQkYcOjtWVBuM/JuYw5b6isojIkYxyYAFn5K7ZBF10fea52y8QltAg6jnMqNHFBmGkQ1j+U43HMi2xMar1Nv0zGsf1s8nUsmUtPOOrbFIR8bHFDMB5zL13Gmr/kGlCkUzedTzzmzsaJXhYawnA3UmARpiYj5ooJZiUoxFRtK3X6pgNPv+IZVPcnwbOl6f+aBaO1CNvPW9n9LmCp01nuSaTRF2YxHqZ8DYQT6WsXT+RD6eUztwYLZ8rM+rcPxamv1VQzFUkzFXvkiVrySGQgJNvXHJAxiU3/NwiC03rSf05VBaPtu/Z7/B8Yn/w7eguloAAAAAElFTkSuQmCC');
+  }
+
+  div.callout-note.callout-style-default .callout-title {
+    background-color: #dae6fb
+  }
+
+  div.callout-important {
+    border-left-color: #d9534f !important;
+  }
+
+  div.callout-important .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAEKklEQVRYCcVXTWhcVRS+575MJym48A+hSRFr00ySRQhURRfd2HYjk2SSTokuBCkU2o0LoSKKraKIBTcuFCoidGFD08nkBzdREbpQ1EDNIv8qSGMFUboImMSZd4/f9zJv8ibJMC8xJQfO3HPPPef7zrvvvnvviIkpC9nsw0UttFunbUhpFzFtarSd6WJkStVMw5xyVqYTvkwfzuf/5FgtkVoB0729j1rjXwThS7Vio+Mo6DNnvLfahoZ+i/o32lULuJ3NNiz7q6+pyAUkJaFF6JwaM2lUJlV0MlnQn5aTRbEu0SEqHUa0A4AdiGuB1kFXRfVyg5d87+Dg4DL6m2TLAub60ilj7A1Ec4odSAc8X95sHh7+ZRPCFo6Fnp7HfU/fBng/hi10CjCnWnJjsxvDNxWw0NfV6Rv5GgP3I3jGWXumdTD/3cbEOP2ZbOZp69yniG3FQ9z1jD7bnBu9Fc2tKGC2q+uAJOQHBDRiZX1x36o7fWBs7J9ownbtO+n0/qWkvW7UPIfc37WgT6ZGR++EOJyeQDSb9UB+DZ1G6DdLDzyS+b/kBCYGsYgJbSQHuThGKRcw5xdeQf8YdNHsc6ePXrlSYMBuSIAFTGAtQo+VuALo4BX83N190NWZWbynBjhOHsmNfFWLeL6v+ynsA58zDvvAC8j5PkbOcXCMg2PZFk3q8MjI7WAG/Dp9AwP7jdGBOOQkAvlFUB+irtm16I1Zw9YBcpGTGXYmk3kQIC/Cds55l+iMI3jqhjAuaoe+am2Jw5GT3Nbz3CkE12NavmzN5+erJW7046n/CH1RO/RVa8lBLozXk9uqykkGAyRXLWlLv5jyp4RFsG5vGVzpDLnIjTWgnRy2Rr+tDKvRc7Y8AyZq10jj8DqXdnIRNtFZb+t/ZRtXcDiVnzpqx8mPcDWxgARUqx0W1QB9MeUZiNrV4qP+Ehc+BpNgATsTX8ozYKL2NtFYAHc84fG7ndxUPr+AR/iQSns7uSUufAymwDOb2+NjK27lEFocm/EE2WpyIy/Hi66MWuMKJn8RvxIcj87IM5Vh9663ziW36kR0HNenXuxmfaD8JC7tfKbrhFr7LiZCrMjrzTeGx+PmkosrkNzW94ObzwocJ7A1HokLolY+AvkTiD/q1H0cN48c5EL8Crkttsa/AXQVDmutfyku0E7jShx49XqV3MFK8IryDhYVbj7Sj2P2eBxwcXoe8T8idsKKPRcnZw1b+slFTubwUwhktrfnAt7J++jwQtLZcm3sr9LQrjRzz6cfMv9aLvgmnAGvpoaGLxM4mAEaLV7iAzQ3oU0IvD5x9ix3yF2RAAuYAOO2f7PEFWCXZ4C9Pb2UsgDeVnFSpbFK7/IWu7TPTvBqzbGdCHOJQSxiEjt6IyZmxQyEJHv6xyQsYk//moVFsN2zP6fRImjfq7/n/wFDguUQFNEwugAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-important.callout-style-default .callout-title {
+    background-color: #f7dddc
+  }
+
+  div.callout-warning {
+    border-left-color: #f0ad4e !important;
+  }
+
+  div.callout-warning .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAAETklEQVRYCeVWW2gcVRg+58yaTUnizqbipZeX4uWhBEniBaoUX1Ioze52t7sRq6APio9V9MEaoWlVsFasRq0gltaAPuxms8lu0gcviE/FFOstVbSIxgcv6SU7EZqmdc7v9+9mJtNks51NTUH84ed889/PP+cmxP+d5FIbMJmNbpREu4WUkiTtCicKny0l1pIKmBzovF2S+hIJHX8iEu3hZJ5lNZGqyRrGSIQpq15AzF28jgpeY6yk6GVdrfFqdrD6Iw+QlB8g0YS2g7dyQmXM/IDhBhT0UCiRf59lfqmmDvzRt6kByV/m4JjtzuaujMUM2c5Z2d6JdKrRb3K2q6mA+oYVz8JnDdKPmmNthzkAk/lN63sYPgevrguc72aZX/L9C6x09GYyxBgCX4NlvyGUHOKELlm5rXeR1kchuChJt4SSwyddZRXgvwMGvYo4QSlk3/zkHD8UHxwVJA6zjZZqP8v8kK8OWLnIZtLyCAJagYC4rTGW/9Pqj92N/c+LUaAj27movwbi19tk/whRCIE7Q9vyI6yvRpftAKVTdUjOW40X3h5OXsKCdmFcx0xlLJoSuQngnrJe7Kcjm4OMq9FlC7CMmScQANuNvjfP3PjGXDBaUQmbp296S5L4DrpbrHN1T87ZVEZVCzg1FF0Ft+dKrlLukI+/c9ENo+TvlTDbYFvuKPtQ9+l052rXrgKoWkDAFnvh0wTOmYn8R5f4k/jN/fZiCM1tQx9jQQ4ANhqG4hiL0qIFTGViG9DKB7GYzgubnpofgYRwO+DFjh0Zin2m4b/97EDkXkc+f6xYAPX0KK2I/7fUQuwzuwo/L3AkcjugPNixC8cHf0FyPjWlItmLxWw4Ou9YsQCr5fijMGoD/zpdRy95HRysyXA74MWOnscpO4j2y3HAVisw85hX5+AFBRSHt4ShfLFkIMXTqyKFc46xdzQM6XbAi702a7sy04J0+feReMFKp5q9esYLCqAZYw/k14E/xcLLsFElaornTuJB0svMuJINy8xkIYuL+xPAlWRceH6+HX7THJ0djLUom46zREu7tTkxwmf/FdOZ/sh6Q8qvEAiHpm4PJ4a/doJe0gH1t+aHRgCzOvBvJedEK5OFE5jpm4AGP2a8Dxe3gGJ/pAutug9Gp6he92CsSsWBaEcxGx0FHytmIpuqGkOpldqNYQK8cSoXvd+xLxXADw0kf6UkJNFtdo5MOgaLjiQOQHcn+A6h5NuL2s0qsC2LOM75PcF3yr5STuBSAcGG+meA14K/CI21HcS4LBT6tv0QAh8Dr5l93AhZzG5ZJ4VxAqdZUEl9z7WJ4aN+svMvwHHL21UKTd1mqvChH7/Za5xzXBBKrUcB0TQ+Ulgkfbi/H/YT5EptrGzsEK7tR1B7ln9BBwckYfMiuSqklSznIuoIIOM42MQO+QnduCoFCI0bpkzjCjddHPN/F+2Yu+sd9bKNpVwHhbS3LluK/0zgfwD0xYI5dXuzlQAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-warning.callout-style-default .callout-title {
+    background-color: #fcefdc
+  }
+
+  div.callout-tip {
+    border-left-color: #02b875 !important;
+  }
+
+  div.callout-tip .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAADr0lEQVRYCe1XTWgTQRj9ZjZV8a9SPIkKgj8I1bMHsUWrqYLVg4Ue6v9BwZOxSYsIerFao7UiUryIqJcqgtpimhbBXoSCVxUFe9CTiogUrUp2Pt+3aUI2u5vdNh4dmMzOzHvvezuz8xNFM0mjnbXaNu1MvFWRXkXEyE6aYOYJpdW4IXuA4r0fo8qqSMDBU0v1HJUgVieAXxzCsdE/YJTdFcVIZQNMyhruOMJKXYFoLfIfIvVIMWdsrd+Rpd86ZmyzzjJmLStqRn0v8lzkb4rVIXvnpScOJuAn2ACC65FkPzEdEy4TPWRLJ2h7z4cArXzzaOdKlbOvKKX25Wl00jSnrwVxAg3o4dRxhO13RBSdNvH0xSARv3adTXbBdTf64IWO2vH0LT+cv4GR1DJt+DUItaQogeBX/chhbTBxEiZ6gftlDNXTrvT7co4ub5A6gp9HIcHvzTa46OS5fBeP87Qm0fQkr4FsYgVQ7Qg+ZayaDg9jhg1GkWj8RG6lkeSacrrHgDaxdoBiZPg+NXV/KifMuB6//JmYH4CntVEHy/keA6x4h4CU5oFy8GzrBS18cLJMXcljAKB6INjWsRcuZBWVaS3GDrqB7rdapVIeA+isQ57Eev9eCqzqOa81CY05VLd6SamW2wA2H3SiTbnbSxmzfp7WtKZkqy4mdyAlGx7ennghYf8voqp9cLSgKdqNfa6RdRsAAkPwRuJZNbpByn+RrJi1RXTwdi8RQF6ymDwGMAtZ6TVE+4uoKh+MYkcLsT0Hk8eAienbiGdjJHZTpmNjlbFJNKDVAp2fJlYju6IreQxQ08UJDNYdoLSl6AadO+fFuCQqVMB1NJwPm69T04Wv5WhfcWyfXQB+wXRs1pt+nCknRa0LVzSA/2B+a9+zQJadb7IyyV24YAxKp2Jqs3emZTuNnKxsah+uabKbMk7CbTgJx/zIgQYErIeTKRQ9yD9wxVof5YolPHqaWo7TD6tJlh7jQnK5z2n3+fGdggIOx2kaa2YI9QWarc5Ce1ipNWMKeSG4DysFF52KBmTNMmn5HqCFkwy34rDg05gDwgH3bBi+sgFhN/e8QvRn8kbamCOhgrZ9GJhFDgfcMHzFb6BAtjKpFhzTjwv1KCVuxHvCbsSiEz4CANnj84cwHdFXAbAOJ4LTSAawGWFn5tDhLMYz6nWeU2wJfIhmIJBefcd/A5FWQWGgrWzyORZ3Q6HuV+Jf0Bj+BTX69fm1zWgK7By1YTXchFDORywnfQ7GpzOo6S+qECrsx2ifVQAAAABJRU5ErkJggg==');
+  }
+
+  div.callout-tip.callout-style-default .callout-title {
+    background-color: #ccf1e3
+  }
+
+  div.callout-caution {
+    border-left-color: #fd7e14 !important;
+  }
+
+  div.callout-caution .callout-icon::before {
+    background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAERlWElmTU0AKgAAAAgAAYdpAAQAAAABAAAAGgAAAAAAA6ABAAMAAAABAAEAAKACAAQAAAABAAAAIKADAAQAAAABAAAAIAAAAACshmLzAAACV0lEQVRYCdVWzWoUQRCuqp2ICBLJXgITZL1EfQDBW/bkzUMUD7klD+ATSHBEfAIfQO+iXsWDxJsHL96EHAwhgzlkg8nBg25XWb0zIb0zs9muYYWkoKeru+vn664fBqElyZNuyh167NXJ8Ut8McjbmEraKHkd7uAnAFku+VWdb3reSmRV8PKSLfZ0Gjn3a6Xlcq9YGb6tADjn+lUfTXtVmaZ1KwBIvFI11rRXlWlatwIAAv2asaa9mlB9wwygiDX26qaw1yYPzFXg2N1GgG0FMF8Oj+VIx7E/03lHx8UhvYyNZLN7BwSPgekXXLribw7w5/c8EF+DBK5idvDVYtEEwMeYefjjLAdEyQ3M9nfOkgnPTEkYU+sxMq0BxNR6jExrAI31H1rzvLEfRIdgcv1XEdj6QTQAS2wtstEALLG1yEZ3QhH6oDX7ExBSFEkFINXH98NTrme5IOaaA7kIfiu2L8A3qhH9zRbukdCqdsA98TdElyeMe5BI8Rs2xHRIsoTSSVFfCFCWGPn9XHb4cdobRIWABNf0add9jakDjQJpJ1bTXOJXnnRXHRf+dNL1ZV1MBRCXhMbaHqGI1JkKIL7+i8uffuP6wVQAzO7+qVEbF6NbS0LJureYcWXUUhH66nLR5rYmva+2tjRFtojkM2aD76HEGAD3tPtKM309FJg5j/K682ywcWJ3PASCcycH/22u+Bh7Aa0ehM2Fu4z0SAE81HF9RkB21c5bEn4Dzw+/qNOyXr3DCTQDMBOdhi4nAgiFDGCinIa2owCEChUwD8qzd03PG+qdW/4fDzjUMcE1ZpIAAAAASUVORK5CYII=');
+  }
+
+  div.callout-caution.callout-style-default .callout-title {
+    background-color: #ffe5d0
+  }
+
+  </style>
+  <style type="text/css">
+    .reveal div.sourceCode {
+      margin: 0;
+      overflow: auto;
+    }
+    .reveal div.hanging-indent {
+      margin-left: 1em;
+      text-indent: -1em;
+    }
+    .reveal .slide:not(.center) {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide.scrollable {
+      overflow-y: auto;
+    }
+    .reveal .footnotes {
+      height: 100%;
+      overflow-y: auto;
+    }
+    .reveal .slide .absolute {
+      position: absolute;
+      display: block;
+    }
+    .reveal .footnotes ol {
+      counter-reset: ol;
+      list-style-type: none; 
+      margin-left: 0;
+    }
+    .reveal .footnotes ol li:before {
+      counter-increment: ol;
+      content: counter(ol) ". "; 
+    }
+    .reveal .footnotes ol li > p:first-child {
+      display: inline-block;
+    }
+    .reveal .slide ul,
+    .reveal .slide ol {
+      margin-bottom: 0.5em;
+    }
+    .reveal .slide ul li,
+    .reveal .slide ol li {
+      margin-top: 0.4em;
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide ul[role="tablist"] li {
+      margin-bottom: 0;
+    }
+    .reveal .slide ul li > *:first-child,
+    .reveal .slide ol li > *:first-child {
+      margin-block-start: 0;
+    }
+    .reveal .slide ul li > *:last-child,
+    .reveal .slide ol li > *:last-child {
+      margin-block-end: 0;
+    }
+    .reveal .slide .columns:nth-child(3) {
+      margin-block-start: 0.8em;
+    }
+    .reveal blockquote {
+      box-shadow: none;
+    }
+    .reveal .tippy-content>* {
+      margin-top: 0.2em;
+      margin-bottom: 0.7em;
+    }
+    .reveal .tippy-content>*:last-child {
+      margin-bottom: 0.2em;
+    }
+    .reveal .slide > img.stretch.quarto-figure-center,
+    .reveal .slide > img.r-stretch.quarto-figure-center {
+      display: block;
+      margin-left: auto;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-left,
+    .reveal .slide > img.r-stretch.quarto-figure-left  {
+      display: block;
+      margin-left: 0;
+      margin-right: auto; 
+    }
+    .reveal .slide > img.stretch.quarto-figure-right,
+    .reveal .slide > img.r-stretch.quarto-figure-right  {
+      display: block;
+      margin-left: auto;
+      margin-right: 0; 
+    }
+  </style>
+</head>
+<body class="quarto-light">
+  <div class="reveal">
+    <div class="slides">
+
+<section id="title-slide" class="quarto-title-block center">
+  <h1 class="title">Introduction to Applied Machine Learning</h1>
+
+<div class="quarto-title-authors">
+<div class="quarto-title-author">
+<div class="quarto-title-author-name">
+John J. Curtin, PhD 
+</div>
+</div>
+</div>
+
+</section>
+<section>
+<section id="overview-of-machine-learning" class="title-slide slide level1 center">
+<h1>Overview of Machine Learning</h1>
+
+</section>
+<section id="overview-of-unit" class="slide level2">
+<h2>Overview of Unit</h2>
+<ul>
+<li><a href="syllabus.pdf">PSY 752 course syllabus</a></li>
+</ul>
+<p><strong>Learning Objectives</strong></p>
+<ul>
+<li>Understand uses for machine learning models</li>
+<li>Become familiar with key terminology (presented in bold throughout this unit)</li>
+<li>Understand differences between models
+<ul>
+<li>Supervised vs.&nbsp;unsupervised</li>
+<li>Regression vs.&nbsp;classification</li>
+<li>Options for statistical algorithms</li>
+<li>Features vs.&nbsp;predictors</li>
+</ul></li>
+<li>Relationships between:
+<ul>
+<li>Data generating processes</li>
+<li>Statistical algorithms</li>
+<li>Model flexibility</li>
+<li>Model interpretability</li>
+<li>Prediction vs.&nbsp;explanation</li>
+</ul></li>
+<li>Understand Bias-Variance Trade-off
+<ul>
+<li>Reducible and irreducible error</li>
+<li>What is bias and variance?</li>
+<li>What affects bias and variance?</li>
+<li>What is overfitting and how does it relate to bias, variance, and also p-hacking</li>
+<li>Use of training and test sets to assess bias and variance</li>
+</ul></li>
+</ul>
+<p><strong>Readings</strong></p>
+<ul>
+<li><span class="citation" data-cites="Yarkoni2017">Yarkoni and Westfall (<a href="#/references" role="doc-biblioref" onclick="">2017</a>)</span> <a href="pdfs/yarkoni_2017_choosing_prediction_over_explanation.pdf">paper</a></li>
+<li><span class="citation" data-cites="ISL">James et al. (<a href="#/references" role="doc-biblioref" onclick="">2023</a>)</span> <a href="pdfs/isl_2.pdf">Chapter 2, pp 15 - 42</a></li>
+</ul>
+<p><strong>Lecture &amp; Discussion Videos</strong></p>
+<ul>
+<li>NOT YET PUBLISHED!</li>
+<li><a href="">Lecture 1: Overview</a>; ~ ?? mins</li>
+<li><a href="">Lecture 2: Terminology</a>; ~ ?? mins</li>
+<li><a href="">Lecture 3: An Empirical Example</a>; ~ ?? mins</li>
+<li><a href="">Discussion</a></li>
+</ul>
+<p>Post questions/discuss readings or lectures in Slack</p>
+<p>The <a href="">unit quiz</a> is due by 8 pm on Wednesday January 24th</p>
+</section>
+<section id="an-introductory-framework-for-machine-learning" class="slide level2">
+<h2>An Introductory Framework for Machine Learning</h2>
+<p>Machine (Statistical) learning techniques have developed in parallel in statistics and computer science</p>
+<p>Techniques can be coarsely divided into supervised and unsupervised approaches</p>
+<ul>
+<li><p><strong>Supervised approaches</strong> involve models that predict an outcome using features</p></li>
+<li><p><strong>Unsupervised approaches</strong> involve finding structure (e.g., clusters, factors) among a set of variables without any specific outcome specified</p></li>
+<li><p>However supervised approaches often use unsupervised approaches in early stages as part of <strong>feature engineering</strong></p></li>
+<li><p>This course will focus primarily on supervised machine learning problems</p></li>
+</ul>
+<p>Examples of <strong>supervised approaches</strong> include:</p>
+<ol type="1">
+<li>Predicting relapse day-by-day among recovering patients with substance use disorders based on cellular communications and GPS.</li>
+<li>Screening someone as positive or negative for substance use disorder based on their Facebook activity</li>
+<li>Predicting the sale price of a house based on characteristics of the house and its neighborhood</li>
+</ol>
+<p>Examples of <strong>unsupervised approaches</strong> include:</p>
+<ol type="1">
+<li>Determining the factor structure of a set of personality items</li>
+<li>Identifying subgroups among patients with alcohol use disorder based on demographics, use history, addiction severity, and other patient characteristics</li>
+<li>Identifying the common topics present in customer reviews of some new product or app</li>
+</ol>
+</section>
+<section class="slide level2">
+
+<p>Supervised machine learning approaches can be categorized as either regression or classification techniques</p>
+<ul>
+<li><strong>Regression techniques</strong> involve numeric (quantitative) outcomes. Regression techniques are NOT limited to regression or the general linear model. There are many more types of statistical models that are appropriate for numeric outcomes.</li>
+<li><strong>Classification techniques</strong> involve nominal (categorical) outcomes.</li>
+<li>Most regression and classification techniques can handle categorical predictors</li>
+</ul>
+<p>Among the earlier supervised model examples, predicting sale price was a regression technique and screening individuals as positive or negative for substance use disorder was a classification technique</p>
+</section>
+<section id="more-details-on-supervised-techniques" class="slide level2">
+<h2>More Details on Supervised Techniques</h2>
+<p>For supervised machine learning problems, we assume <span class="math inline">\(Y\)</span> (outcome) is a function of some <strong>data generating process</strong> (DGP, <span class="math inline">\(f\)</span>) involving a set of Xs (features) plus the addition of random error (<span class="math inline">\(\epsilon\)</span>) that is independent of X and with mean of 0</p>
+<p><span class="math inline">\(Y = f(X) + \epsilon\)</span></p>
+
+<img data-src="figs/unit1_data_dgp.png" style="width:100.0%" class="r-stretch"><p><strong>Terminology sidebar</strong>: Throughout the course we will distinguish between the raw <strong>predictors</strong> available in a dataset and the <strong>features</strong> that are derived from those raw predictors through various transformations.</p>
+</section>
+<section class="slide level2">
+
+<p>We estimate <span class="math inline">\(f\)</span> (the DGP) for two main reasons: <strong>prediction</strong> and/or <strong>inference</strong> (i.e., explanation per Yarkoni and Westfall, 2017)</p>
+<p><span class="math inline">\(\hat{Y} = \hat{f}(X)\)</span></p>
+<p>For <strong>prediction</strong>, we are most interested in the accuracy of <span class="math inline">\(\hat{Y}\)</span> and typically treat <span class="math inline">\(\hat{f}\)</span> as a black box</p>
+<p>For <strong>inference</strong>, we are typically interested in the way that <span class="math inline">\(Y\)</span> is affected by <span class="math inline">\(X\)</span></p>
+<ul>
+<li>Which predictors are associated with <span class="math inline">\(Y\)</span>?</li>
+<li>What is the relationship between the outcome and the features associated with each predictor. Is the overall relationship between a predictor and Y positive, negative, dependent on other predictors? What is the shape of relationship (e.g., linear or more complex)?</li>
+<li>Does the model as a whole improve prediction beyond a null model (no features from predictors) or beyond a compact model?</li>
+<li>We care about good (low error) predictions even when we care about inference (we want small <span class="math inline">\(\epsilon\)</span>)
+<ul>
+<li>Parameter estimates from models that don’t predict well may be incorrect or at least imprecise</li>
+<li>They will also be tested with low power</li>
+</ul></li>
+</ul>
+</section>
+<section class="slide level2">
+
+<p>Model error includes both <strong>reducible</strong> and <strong>irreducible</strong> error.</p>
+<ul>
+<li>If we consider both <span class="math inline">\(X\)</span> and <span class="math inline">\(\hat{f}\)</span> to be fixed, then:</li>
+</ul>
+<p><span class="math inline">\(E(Y - \hat{Y})^2 = (f(X) + \epsilon - \hat{f}(X))^2\)</span></p>
+<p><span class="math inline">\(E(Y - \hat{Y})^2 = [f(X) - \hat{f}(X)]^2 + Var(\epsilon)\)</span></p>
+<ul>
+<li><span class="math inline">\([f(X) - \hat{f}(X)]^2\)</span> is reducible and <span class="math inline">\(Var(\epsilon)\)</span> is irreducible</li>
+<li>Irreducible error results from other important <span class="math inline">\(X\)</span> that we fail to measure and from measurement error in <span class="math inline">\(X\)</span> and <span class="math inline">\(Y\)</span></li>
+<li>Irreducible error serves as an (unknown) bounds for model accuracy (without collecting additional Xs)</li>
+<li>Reducible error results from a mismatch between <span class="math inline">\(\hat{f}\)</span> and the true <span class="math inline">\(f\)</span></li>
+</ul>
+<p>This course will focus on techniques to estimate <span class="math inline">\(f\)</span> with the goal of minimizing reducible error</p>
+</section>
+<section class="slide level2">
+
+<h3 id="how-do-we-estimate-f">How Do We Estimate <span class="math inline">\(f\)</span>?</h3>
+<p>To estimate <span class="math inline">\(f\)</span>:</p>
+<ul>
+<li><p>We need a sample of <span class="math inline">\(n\)</span> observations of <span class="math inline">\(Y\)</span> and <span class="math inline">\(X\)</span> that we will call our <strong>training</strong> set</p></li>
+<li><p>There are two types of statistical algorithms that we can use for <span class="math inline">\(\hat{f}\)</span>:</p>
+<ul>
+<li><strong>Parametric</strong> algorithms</li>
+<li><strong>Non-parametric</strong> algorithms</li>
+</ul></li>
+</ul>
+</section>
+<section class="slide level2">
+
+<p><strong>Parametric</strong> algorithms:</p>
+<ul>
+<li>First, make an assumption about the functional form or shape of <span class="math inline">\(f\)</span>.<br>
+</li>
+<li>For example, the general linear model assumes: <span class="math inline">\(f(X) = \beta_0 + \beta_1*X_1 + \beta_2*X2 + ... + \beta_p*X_p\)</span></li>
+<li>Next, a model using that algorithm is <strong>fit</strong> to the training set. In other words, the parameter estimates (e.g., <span class="math inline">\(\beta_0, \beta_1\)</span>) are derived to minimize some <strong>cost function</strong> (e.g., mean squared error for the linear model)</li>
+<li>Parametric algorithms reduce the problem of estimating <span class="math inline">\(f\)</span> down to one of only estimating some set of parameters for a chosen model</li>
+<li>Parametric algorithms often yield more interpretable models</li>
+<li>But they are often not very flexible. If you chose the wrong algorithm (shape for <span class="math inline">\(\hat{f}\)</span> that does not match <span class="math inline">\(f\)</span>) the model will not fit well in the training set (and more importantly not in the new <strong>test set</strong> either)</li>
+</ul>
+<p><strong>Terminology sidebar</strong>: A <strong>training set</strong> is a subset of your full dataset that is used to fit a model. In contrast, a <strong>validation set</strong> is a subset that has not been included in the training set and is used to select a best model from among competing model configurations. A <strong>test set</strong> is a third subset of the full dataset that has not been included in either the training or validation sets and is used for evaluating the performance of your fitted final/best model.</p>
+</section>
+<section class="slide level2">
+
+<p><strong>Non-parametric</strong> algorithms:</p>
+<ul>
+<li>Do not make any assumption about the form/shape of <span class="math inline">\(f\)</span></li>
+<li>Can fit well for a wide variety of forms/shapes for <span class="math inline">\(f\)</span></li>
+<li>This flexibility comes with costs
+<ul>
+<li>They generally require larger <code>n</code> in the training set than parametric algorithms to achieve comparable performance</li>
+<li>They may <strong>overfit</strong> the training set (low error in training set but much higher error in new validation or test sets)</li>
+<li>They are often less interpretable</li>
+</ul></li>
+</ul>
+</section>
+<section class="slide level2">
+
+<p>Generally:</p>
+<ul>
+<li>Flexibility and interpretability are inversely related</li>
+<li>Models need to be flexible enough to fit <span class="math inline">\(f\)</span> well</li>
+<li>Additional flexibility beyond this can produce overfitting</li>
+<li>Parametric algorithms are generally less flexible than non-parametric algorithms</li>
+<li>Parametric algorithms can become more flexible by increasing the number of features (<span class="math inline">\(p\)</span> from 610/710; e.g., using more predictors, more complex, non-linear forms to when deriving features from predictors)</li>
+<li>Parametric algorithms can be made less flexible through <strong>regularization</strong>. There are techniques to make some non-parametric algorithms less flexible as well</li>
+<li>You want the sweet spot for prediction. You may want even less flexible for inference in increase interpretability.</li>
+</ul>
+
+<img data-src="figs/unit1_flex_interpret.png" width="600" class="r-stretch"></section>
+<section class="slide level2">
+
+<h3 id="how-do-we-assess-model-performance">How Do We Assess Model Performance?</h3>
+<p>There is no universally best statistical algorithm</p>
+<ul>
+<li><p>Depends on the true <span class="math inline">\(f\)</span> and your goal (prediction or inference)</p></li>
+<li><p>We often compare multiple statistical algorithms (various parametric and non-parametric options) and model configurations more generally (combinations of different algorithms with different sets of features)</p></li>
+<li><p>When comparing models/configurations, we need to both <strong>fit</strong> these models and then <strong>select</strong> the best one</p></li>
+</ul>
+</section>
+<section class="slide level2">
+
+<p><strong>Best</strong> needs to be defined with respect to some <strong>performance metric</strong> in new (<strong>validation or test set</strong>) data</p>
+<ul>
+<li>There are many performance metrics you might use</li>
+<li><strong>Root Mean squared error (RMSE)</strong> is common for regression problems</li>
+<li><strong>Accuracy</strong> is common for classification problems</li>
+</ul>
+<p>We will learn many other performance metrics in a later unit</p>
+</section>
+<section class="slide level2">
+
+<p>Two types of performance problems are typical</p>
+<ol type="1">
+<li>Models are <strong>underfit</strong> if they don’t adequately represent the true <span class="math inline">\(f\)</span>, typically because they have oversimplied the relationship (e.g., linear function fit to quadratic DGP, missing key interaction terms)
+<ul>
+<li>This models will yield <strong>biased</strong> predictions. In other words, they will systematically either under-predict or over-predict <span class="math inline">\(Y\)</span> in some regions of the function.</li>
+<li>Biased models will perform poorly in both training and test sets</li>
+</ul></li>
+<li>Models are <strong>overfit</strong> if they are too flexible and begin to fit the noise in the training set.
+<ul>
+<li>These models will perform well (too well actually) in the training set but poorly in test or validation sets</li>
+<li>They will show high <strong>variance</strong> such that the model and its predictions change drastically depending on the training set where it is fit</li>
+</ul></li>
+</ol>
+</section>
+<section class="slide level2">
+
+<p>More generally, these problems and their consequences for model performance are largely inversely related</p>
+<ul>
+<li>This is known as the <strong>Bias-Variance trade-off</strong></li>
+<li>We previously discussed reducible and irreducible error
+<ul>
+<li>Reducible error can be parsed into components due to bias and variance</li>
+<li>Goal is to minimize the sum of bias and variance error (i.e., the reducible error overall)</li>
+<li>We will often trade off a little bias if it provides a big reduction in variance</li>
+</ul></li>
+</ul>
+</section>
+<section id="key-terminology-in-context" class="slide level2">
+<h2>Key Terminology in Context</h2>
+<p>Machine learning has emerged in parallel from developments in statistics and computer science. As a result, there is a lot of terminology and often multiple terms used for the same concept. This is not my fault! However, to help us avoid confusion, I will try to use one set of terms. In the following paragraphs, I identify these key terms in context (along with other synonymous terms used by others) and highlight them in <strong>bold</strong>.</p>
+<p>There are two broad approaches in machine learning - <strong>unsupervised</strong> and <strong>supervised</strong> approaches. This course focuses primarily on developing supervised models.</p>
+</section>
+<section class="slide level2">
+
+<p>Developing a supervised machine learning model to <strong>predict</strong> or <strong>explain</strong> an <strong>outcome</strong> (also called DV, label, output) typically entails:</p>
+<ol type="1">
+<li>Fitting models with multiple candidate model configurations</li>
+<li>Assessing each model and selecting a best configuration</li>
+<li>Evaluating how well a model with that best configuration will perform with new observations.</li>
+</ol>
+</section>
+<section class="slide level2">
+
+<p><strong>Candidate model configurations</strong> can vary with respect to the <strong>statistical algorithm</strong> used. Statistical algorithms can be coarsely categorized as parametric or non-parametric. But we will mostly focus on a more granular description of the specific algorithm itself (e.g., linear model, generalized linear model, multi-level linear model, elastic net, LASSO, ridge regression, neural network, KNN, random forest).</p>
+<p>The set of candidate model configurations often includes variations of the same statistical algorithm with different <strong>hyperparameter</strong> (also called tuning parameter) values that control aspects of the algorithm’s operation. For example, the hyperparameter lambda controls the degree of regularization in penalized regression algorithms such as LASSO, ridge and elastic net. We will learn more about hyperparameters and their effects later in this course.</p>
+<p>The set of candidate model configurations can vary with respect to the <strong>features</strong> that are included. A recipe describes how to transform raw data for <strong>predictors</strong> (also called IVs) into features (also called regressors, inputs) that are included in the <strong>feature matrix</strong> (also called design matrix, model matrix). This process of transforming predictors into features in a feature matrix is called <strong>feature engineering</strong>.</p>
+<p>Crossing variation on statistical algorithms, hyperparameter values, and alternative sets of features can increase the number of candidate model configurations dramatically; developing a machine learning model can easily involve fitting thousands of model configurations. In most implementations of machine learning, the number of candidate model configurations nearly ensures that some fitted models will <strong>overfit</strong> the dataset in which they are developed such that they capitalize on noise that is unique to the dataset in which they were fit. For this reason, model configurations are assessed and selected on the basis of their relative performance for new data (observations that were not involved in the fitting process).</p>
+</section>
+<section class="slide level2">
+
+<p>We have ONE full dataset but we use <strong>resampling techniques</strong> to form subsets of that dataset to enable us to assess models’ performance in new data. <strong>Cross-validation</strong> and <strong>bootstrapping</strong> are both examples of classes of resampling techniques that we will learn in this course. Broadly, resampling techniques create multiple subsets of data random samples that consist of subsets of the full dataset. These different subsets can be used for <strong>model fitting</strong>, <strong>model selection</strong>, and <strong>model evaluation</strong>.</p>
+<p><strong>Training sets</strong> are subsets that are used for <strong>model fitting</strong> (also called <strong>model training</strong>). During model fitting, models with each candidate model configuration are fit to the data in the training set. For example, during fitting, model parameters are estimated for regression algorithms, and weights are established for neural network algorithms. Some non-parametric algorithms, like k-nearest neighbors, do not estimate parameters but simply “memorize” the training sets for subsequent predictions.</p>
+<p><strong>Validation sets</strong> are subsets that are used for <strong>model selection</strong> (or, more accurately, for model configuration selection). During model selection, each (fitted) model — one for every candidate model configuration — is used to make predictions for observations in a validation set that, importantly, does not overlap with the model’s training set. On the basis of each model’s performance in the validation set, the relatively best model configuration (i.e., the configuration of the model that performs best relative to all other model configurations) is identified and selected. If you have only one model configuration, validation set(s) are not needed because there is no need to select among model configurations.</p>
+<p><strong>Test sets</strong> are subsets that are used for <strong>model evaluation</strong>. Generally, a model with the previously identified best configuration is re-fit to all available data other than the test set. This fitted model is used to predict observations in the test set to estimate how well this model is expected to perform for new observations.</p>
+</section>
+<section id="an-example-of-underfitting-overfitting-and-the-bias-variance-trade-off" class="slide level2">
+<h2>An Example of Underfitting, Overfitting and the Bias-Variance Trade-off</h2>
+<h3 id="overview-of-example">Overview of Example</h3>
+<p>The concepts of underfitting vs.&nbsp;overfitting and the bias-variance trade-off are critical to understand</p>
+<ul>
+<li><p>It is also important to understand how model flexibility can affect both the bias and variance of that model’s performance</p></li>
+<li><p>It can help to make these abstract concepts concrete by exploring real models that are fit in actual data</p></li>
+<li><p>We will conduct a very simple simulation to demonstrate these concepts</p></li>
+</ul>
+<p>The code in this example is secondary to understanding the concepts of underfittinng, overfitting, bias, variance, and the bias-variance trade-off</p>
+<ul>
+<li>We will not display much of it so that you can maintain focus on the concepts</li>
+<li>You will have plenty of time to learn the underlying</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<p>When modeling, our goal is typically to approximate the <strong>data generating process (DGP)</strong> as close as possible, but in the real world we never know the true DGP.</p>
+<p>A key advantage of many simulations is that we do know the DGP because we define it ourselves.</p>
+<ul>
+<li>For example, in this simulation, we know that y is a cubic function of x and noise (random error).</li>
+<li>In fact, we know the exact equation for calculating y as a function of x.<br>
+</li>
+<li><span class="math inline">\(y = 1100 - 4.0 * x - 0.4 * x^2 + 0.1 * (x - h)^3 + noise\)</span>, where:
+<ul>
+<li><code>b0 = 1100</code></li>
+<li><code>b1 = -4.0</code></li>
+<li><code>b2 = -0.4</code></li>
+<li><code>b3 = 0.1</code></li>
+<li><code>h = -20.0</code></li>
+<li>noise has <code>mean = 0</code> and <code>sd = 150</code></li>
+</ul></li>
+</ul>
+</section>
+<section class="slide level2">
+
+<p>We will attempt to model this cubic DGP with three different model configurations</p>
+<ul>
+<li>A <strong>simple linear model</strong> that uses only x as a feature</li>
+<li>A (20th order) <strong>polynomial linear model</strong> that uses 20 polynomials of x as features</li>
+<li>A (20th order) <strong>polynomial LASSO model</strong> that uses the same 20 polynomials of x as features but “regularizes” to remove unimportant features from the model</li>
+</ul>
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>If the DGP for y is a cubic function of x, what do we know about the expected bias for our three candidate model configurations in this example?</strong></p>
+</div>
+<div class="callout-content">
+<div class="cell">
+<details>
+<summary>Show Answer</summary>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb1-1"><a href="#cb1-1"></a>The simple linear model will underfit the true DGP and therefore it will be biased b/c </span>
+<span id="cb1-2"><a href="#cb1-2"></a>it can only represent y as a linear function of x.  </span>
+<span id="cb1-3"><a href="#cb1-3"></a></span>
+<span id="cb1-4"><a href="#cb1-4"></a>The two polynomial models will be generally unbiased b/c they have x represented </span>
+<span id="cb1-5"><a href="#cb1-5"></a>with 20th order polynomials.  </span>
+<span id="cb1-6"><a href="#cb1-6"></a></span>
+<span id="cb1-7"><a href="#cb1-7"></a>LASSO will be slightly biased due to regularization but more on that in a later unit</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+<h3 id="stimulation-steps">Stimulation Steps</h3>
+<p>With that introduction complete, lets start our simulation of the bias-variance trade-off</p>
+<ol type="1">
+<li>We get four random samples of <strong>training</strong> data to fit models</li>
+</ol>
+<ul>
+<li><p>In other words, we are simulating four separate studies where the researcher in each study is trying to develop a prediction model for y using a sample of training data</p></li>
+<li><p>Here are plots of these four simulated training sets with a dotted line for the data generating process (DGP)</p></li>
+</ul>
+<div class="cell">
+<div class="cell-output-display">
+<p><img data-src="001_overview_files/figure-revealjs/u1-ex1-9-1.png" width="960"></p>
+</div>
+<div class="cell-output-display">
+<p><img data-src="001_overview_files/figure-revealjs/u1-ex1-9-2.png" width="960"></p>
+</div>
+<div class="cell-output-display">
+<p><img data-src="001_overview_files/figure-revealjs/u1-ex1-9-3.png" width="960"></p>
+</div>
+<div class="cell-output-display">
+<p><img data-src="001_overview_files/figure-revealjs/u1-ex1-9-4.png" width="960"></p>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+<ol start="2" type="1">
+<li>We get one more large random sample (N = 5000) with the same DGP to use as a test set to evaluate all the models that will be fit in the training sample across all of the simulations.</li>
+</ol>
+
+<img data-src="001_overview_files/figure-revealjs/u1-ex1-11-1.png" width="960" class="r-stretch"></section>
+<section class="slide level2">
+
+<ol start="3" type="1">
+<li><p>We fit the three model configurations in each of the four simulated training sets</p></li>
+<li><p>We use the resulting models to make predictions for observations in the same training set in which they were fit</p></li>
+</ol>
+<div class="cell">
+<div class="cell-output-display">
+<p><img data-src="001_overview_files/figure-revealjs/u1-ex1-12-1.png" width="960"></p>
+</div>
+<div class="cell-output-display">
+<p><img data-src="001_overview_files/figure-revealjs/u1-ex1-12-2.png" width="960"></p>
+</div>
+<div class="cell-output-display">
+<p><img data-src="001_overview_files/figure-revealjs/u1-ex1-12-3.png" width="960"></p>
+</div>
+<div class="cell-output-display">
+<p><img data-src="001_overview_files/figure-revealjs/u1-ex1-12-4.png" width="960"></p>
+</div>
+</div>
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Look in any training set. Can you see evidence of bias for any model configuration?</strong></p>
+</div>
+<div class="callout-content">
+<div class="cell">
+<details>
+<summary>Show Answer</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb2-1"><a href="#cb2-1"></a>The simple linear model is clearly biased.  It systemically underestimates Y in </span>
+<span id="cb2-2"><a href="#cb2-2"></a>some portions of the X distribution and overestimates Y in other portions of the </span>
+<span id="cb2-3"><a href="#cb2-3"></a>X distribution.  This is true across training sets.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Can you see any evidence of overfitting for any model configuration?</strong></p>
+</div>
+<div class="callout-content">
+<div class="cell">
+<details>
+<summary>Show Answer</summary>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb3-1"><a href="#cb3-1"></a>The polynomial linear model appears to overfit the data in the training set.  In </span>
+<span id="cb3-2"><a href="#cb3-2"></a>other words, it seems to follow both the signal/DGP and the noise.  However, you</span>
+<span id="cb3-3"><a href="#cb3-3"></a>can't be certain of this with only one training set and without knowing the DGP.  </span>
+<span id="cb3-4"><a href="#cb3-4"></a>It is possible that the wiggles in the prediction line represent the real DGP.  </span>
+<span id="cb3-5"><a href="#cb3-5"></a>You will need a test set to be certain about the degree of overfitting.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+<ol start="5" type="1">
+<li>We use these same models (3 model configurations fit to 4 different training sets) to make predictions for new observations in the test set</li>
+</ol>
+<ul>
+<li><p>Remember that the <strong>test set has NEW observations of x and y</strong> that weren’t used for fitting any of the models.</p></li>
+<li><p>Lets look at each model configurations performance in test separately</p></li>
+</ul>
+</section>
+<section class="slide level2">
+
+<ul>
+<li>Here are predictions from the four <strong>simple linear models</strong> (fit in each of the four training sets) in the <strong>test set</strong></li>
+</ul>
+
+<img data-src="001_overview_files/figure-revealjs/u1-ex1-15-1.png" width="960" class="r-stretch"><div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Can you see evidence of bias for the simple linear models?</strong></p>
+</div>
+<div class="callout-content">
+<div class="cell">
+<details>
+<summary>Show Answer</summary>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb4-1"><a href="#cb4-1"></a>Yes, consistent with what we saw in the training sets, the simple linear model</span>
+<span id="cb4-2"><a href="#cb4-2"></a>systematically overestimates Y in some places and underestimates it in others.  </span>
+<span id="cb4-3"><a href="#cb4-3"></a>The DGP is clearly NOT linear but this simple model can only make linear predictions.</span>
+<span id="cb4-4"><a href="#cb4-4"></a>It is a fairly biased model that underfits the true DGP.  This bias will make a </span>
+<span id="cb4-5"><a href="#cb4-5"></a>large contribution to the reducible error of the model</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>How much variance across the simple linear models is present?</strong></p>
+</div>
+<div class="callout-content">
+<div class="cell">
+<details>
+<summary>Show Answer</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb5-1"><a href="#cb5-1"></a>There is not much variance in the prediction lines across the models that were </span>
+<span id="cb5-2"><a href="#cb5-2"></a>fit to different training sets.  The slopes are very close across models and the</span>
+<span id="cb5-3"><a href="#cb5-3"></a>intercepts only vary by a small amount.   The simple linear model configuration </span>
+<span id="cb5-4"><a href="#cb5-4"></a>does not appear to have high variance and model variance will not contribute much</span>
+<span id="cb5-5"><a href="#cb5-5"></a>to its reducible error.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+<ul>
+<li>Here are predictions from the four <strong>polynomial linear models</strong> in the <strong>test set</strong></li>
+</ul>
+
+<img data-src="001_overview_files/figure-revealjs/u1-ex1-16b-1.png" width="600" class="r-stretch"><div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>How much variance across the simple linear models is present?</strong></p>
+</div>
+<div class="callout-content">
+<div class="cell">
+<details>
+<summary>Show Answer</summary>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb6-1"><a href="#cb6-1"></a>There is not much variance in the prediction lines across the models that were </span>
+<span id="cb6-2"><a href="#cb6-2"></a>fit to different training sets.  The slopes are very close across models and the</span>
+<span id="cb6-3"><a href="#cb6-3"></a>intercepts only vary by a small amount.   The simple linear model configuration </span>
+<span id="cb6-4"><a href="#cb6-4"></a>does not appear to have high variance and model variance will not contribute much</span>
+<span id="cb6-5"><a href="#cb6-5"></a>to its reducible error.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Are they systematically biased?</strong></p>
+</div>
+<div class="callout-content">
+<div class="cell">
+<details>
+<summary>Show Answer</summary>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb7-1"><a href="#cb7-1"></a>There is not much systematic bias.  The overall function is generally cubic as </span>
+<span id="cb7-2"><a href="#cb7-2"></a>is the DGP. Bias will not contribute much to the model's reducible error.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>How does the variance of these models compare to the variance of the simple linear models?</strong></p>
+</div>
+<div class="callout-content">
+<div class="cell">
+<details>
+<summary>Show Answer</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb8-1"><a href="#cb8-1"></a>There is much higher model variance for this polynomial linear model relative to </span>
+<span id="cb8-2"><a href="#cb8-2"></a>the simple linear model. Although all four models generally predict Y as a cubic</span>
+<span id="cb8-3"><a href="#cb8-3"></a>function of X, there is also a non-systematic wiggle that is different for each </span>
+<span id="cb8-4"><a href="#cb8-4"></a>of the models.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>How does this demonstrate the connection between model overfitting and model variance?</strong></p>
+</div>
+<div class="callout-content">
+<div class="cell">
+<details>
+<summary>Show Answer</summary>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb9-1"><a href="#cb9-1"></a>Model variance is a result of overfitting to the training set.  If a model fits </span>
+<span id="cb9-2"><a href="#cb9-2"></a>noise in its training set, that noise will be different in every dataset.  Therefore,</span>
+<span id="cb9-3"><a href="#cb9-3"></a>you end up with different models depending on the training set in which they are </span>
+<span id="cb9-4"><a href="#cb9-4"></a>fit.  And none of those models will do well with new data as you can see in this</span>
+<span id="cb9-5"><a href="#cb9-5"></a>test set because noise is random and different in each dataset.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+<ul>
+<li>Here are predictions from the four <strong>polynomial LASSO models</strong> in the <strong>test set</strong></li>
+</ul>
+
+<img data-src="001_overview_files/figure-revealjs/u1-ex1-16c-1.png" width="600" class="r-stretch"><div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>How does their bias compare to the simple and polynomial linear models?</strong></p>
+</div>
+<div class="callout-content">
+<div class="cell">
+<details>
+<summary>Show Answer</summary>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb10-1"><a href="#cb10-1"></a>It has low bias much like the polynomial linear model.  It is able to capture </span>
+<span id="cb10-2"><a href="#cb10-2"></a>the true cubic DGP fairly well.  The regularization process slightly reduced the</span>
+<span id="cb10-3"><a href="#cb10-3"></a>magnitude of the cubic (the prediction line is a little straighter than it should</span>
+<span id="cb10-4"><a href="#cb10-4"></a>                        be) but not by much.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>How does their variance compare to the simple and polynomial linear models?</strong></p>
+</div>
+<div class="callout-content">
+<div class="cell">
+<details>
+<summary>Show Answer</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb11-1"><a href="#cb11-1"></a>It has low variance, much like the simple linear model.  All four models, fit in</span>
+<span id="cb11-2"><a href="#cb11-2"></a>different training sets resulted in very similar prediction lines.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+<ol start="6" type="1">
+<li>Now we will <strong>quantify</strong> the performance of these models in training and test sets with the <strong>root mean square error</strong> performance metric. This is the standard deviation of the error when comparing the predicted values for y to the actual values (ground truth) for y.</li>
+</ol>
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>What do we expect about RMSE for the three models in train and test?</strong></p>
+</div>
+<div class="callout-content">
+<div class="cell">
+<details>
+<summary>Show Answer</summary>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb12-1"><a href="#cb12-1"></a>The **simple linear model** is underfit to the TRUE DGP.  Therfore it is </span>
+<span id="cb12-2"><a href="#cb12-2"></a>systematically biased everywhere it is use and won’t even fit train for this reason.</span>
+<span id="cb12-3"><a href="#cb12-3"></a>However, it’s not very flexible so it won’t be overfit to the noise in train and</span>
+<span id="cb12-4"><a href="#cb12-4"></a>therefore should fit comparably in test.  The **polynomial linear model** won't </span>
+<span id="cb12-5"><a href="#cb12-5"></a>be biased at all given that the DGP is polynomial.  However, it is overly flexible</span>
+<span id="cb12-6"><a href="#cb12-6"></a>(20th order) and so will substantially overfit the training data such that it </span>
+<span id="cb12-7"><a href="#cb12-7"></a>will show high variance and its performance will be poor in test.  The </span>
+<span id="cb12-8"><a href="#cb12-8"></a>**polynomial LASSO** will be the sweet spot in bias-variance trade-off.  It has </span>
+<span id="cb12-9"><a href="#cb12-9"></a>a little bias but not much.  However, it is not as flexible due to regularization</span>
+<span id="cb12-10"><a href="#cb12-10"></a>by lambda so it won’t be overfit to its training set.  Therefore, it should do </span>
+<span id="cb12-11"><a href="#cb12-11"></a>well in the test set.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+<p>To better understand this:</p>
+<ul>
+<li>Compare RMSE across the three model configurations within the training sets (turquoise line)</li>
+<li>Compare how RMSE changes for each model configuration across its training set and the test set</li>
+<li>Compare RMSE across the three model configurations within the test set (red line)?</li>
+<li>Specifically compare the performance of simple linear model (least flexible) with the polynomial linear model (most flexible)</li>
+</ul>
+
+<img data-src="001_overview_files/figure-revealjs/u1-ex1-17-1.png" width="960" class="r-stretch"></section>
+<section class="slide level2">
+
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Would these observations about bias and variance of these three model configurations always be the same regardless of the DGP?</strong></p>
+</div>
+<div class="callout-content">
+<div class="cell">
+<details>
+<summary>Show Answer</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb13-1"><a href="#cb13-1"></a>No.  A model configuration needs to be flexible enough and/or well designed to </span>
+<span id="cb13-2"><a href="#cb13-2"></a>represent the DGP for the data that you are modeling.   The two polynomial models</span>
+<span id="cb13-3"><a href="#cb13-3"></a>in this example were each able to represent a cubic DGP.  The simple linear model</span>
+<span id="cb13-4"><a href="#cb13-4"></a>was not.  The polynomial linear model was too flexible for a cubic given that it </span>
+<span id="cb13-5"><a href="#cb13-5"></a>had 20 polynomials of X.  Therefore, it was overfit to its training set and had </span>
+<span id="cb13-6"><a href="#cb13-6"></a>high variance.  However, if the DGP was a different shape, the story would be </span>
+<span id="cb13-7"><a href="#cb13-7"></a>different.  If the DGP was linear the simple linear model would not have been </span>
+<span id="cb13-8"><a href="#cb13-8"></a>biased and would have performed best. If this DGP was some other form (step function),</span>
+<span id="cb13-9"><a href="#cb13-9"></a>it may be that none of the models would work well.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="discussion---tuesdaythursday" class="slide level2">
+<h2>Discussion - Tuesday/Thursday</h2>
+<h3 id="course-overview">Course Overview</h3>
+<ol type="1">
+<li><p>Introductions (preferred name, pronouns, program/department and year)</p></li>
+<li><p>Structure of course</p>
+<ul>
+<li>Same flow each week
+<ul>
+<li><p>Week starts on Thursdays at 12:15 pm</p></li>
+<li><p>Assignments include:</p>
+<ul>
+<li>Pre-recorded lectures</li>
+<li>Web book material</li>
+<li>Readings (<span class="citation" data-cites="ISL">James et al. (<a href="#/references" role="doc-biblioref" onclick="">2023</a>)</span> and other sources; All free)</li>
+<li>Application assignment</li>
+</ul></li>
+<li><p>Asychronous discussion and questions on Slack</p></li>
+<li><p>Lab section on Tuesdays at 11:00 am - address previous week’s code</p></li>
+<li><p>Quiz and application assignments due Wednesdays at 8 pm</p></li>
+<li><p>Wrap-up discussion and conceptual questions on Thursdays at 11 am. Not a lecture</p></li>
+</ul></li>
+<li>Self-paced (except for due dates and discussion)</li>
+<li>Quizzes used to encourage and assess reading. Also to guide discussion.</li>
+<li>Workload similar to 610/710</li>
+<li>Office hours
+<ul>
+<li>John - Thursdays, 1 – 2 pm</li>
+<li>Michelle - Wednesdays, 10 - 11 am</li>
+<li>Kendra - Mondays, 2:30 - 3:30 pm</li>
+<li>Personal appointments &amp; Slack</li>
+</ul></li>
+</ul></li>
+<li><p>The web book</p>
+<ul>
+<li>Primary source for all course materials</li>
+<li>Organized by units (with syllabus at front)</li>
+<li>Links to pre-recorded lectures, readings, and quiz</li>
+<li>Provides primary source for code examples (all you need for this course)</li>
+<li>Lecture follows book</li>
+</ul></li>
+<li><p>Course as guided learning</p>
+<ul>
+<li>Concepts in lectures and readings</li>
+<li>Applications in web book and application assignment</li>
+<li>Discussion section is discussion/questions (not pre-planned lecture)</li>
+<li>Slack CAN be a good source for discussion and questions as well</li>
+<li>Grades are secondary (quizzes, application assignments, exams)</li>
+</ul></li>
+<li><p>Why these tools?</p>
+<ul>
+<li><code>Quarto</code>
+<ul>
+<li>Scientific publishing system (reproducible code, with output, presentations, papers)</li>
+<li>Tool for collaboration</li>
+<li>Interactive with static product (render to html or pdf)</li>
+<li>Application assignments &amp; web book</li>
+</ul></li>
+<li><code>tidyverse</code>?
+<ul>
+<li>The tidyverse is an opinionated collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures</li>
+<li>Unmatched for data wrangling, EDA, and data visualization</li>
+</ul></li>
+<li><code>tidymodels</code>?
+<ul>
+<li>Consistent interface to hundreds of statistical algorithms</li>
+<li>Under VERY active development</li>
+<li>Well-supported and documented (<a href="https://www.tidymodels.org/">tidymodels.org</a>)</li>
+<li>Be careful with other web documentation (often out of date)</li>
+</ul></li>
+</ul></li>
+<li><p>Why me?</p>
+<ul>
+<li>Primary tools in our research program</li>
+<li>Model for progression from 610/710</li>
+<li>Can do AND can collaborate with CS and expert data scientists</li>
+</ul></li>
+<li><p>Environment</p>
+<ul>
+<li>Safe and respectful</li>
+<li>VERY encouraging of questions, discussion, and tangents</li>
+<li>Have fun</li>
+<li><a href="https://jjcurtin.github.io/book_iaml/#accommodations-polices">Accomodations</a> and <a href="https://jjcurtin.github.io/book_iaml/#complaints">Complaints</a></li>
+</ul></li>
+<li><p>ChatGPT</p>
+<ul>
+<li>Yay! May develop into an amazing tool in your workflow</li>
+<li>Use as tool (like Stack Overflow) for applications (application assignments, application questions on exams)</li>
+<li>Check carefully - it can be wrong even when it looks right</li>
+<li>Do NOT use for conceptual questions (quizzes, conceptual exam questions). This type of info needs to be in your head to be effective data scientist.</li>
+</ul></li>
+<li><p>Academic Integrity</p>
+<ul>
+<li>Do not cheat! Only you lose.</li>
+<li>No collaboration with classmates, peers, previous students on anything graded (including application assignments)</li>
+<li>All cheating reported to Department and Dean of Students. If application assignment or quizzes, zero on all of them because I can’t trust them. If exam, zero on exam.</li>
+</ul></li>
+</ol>
+<h3 id="association-vs.-prediction">Association vs.&nbsp;Prediction</h3>
+<ul>
+<li>::: {.callout-important collapse=“false”} ## What is the difference between association vs.&nbsp;prediction?</li>
+</ul>
+<div class="cell">
+<details>
+<summary>Show Answer</summary>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb14-1"><a href="#cb14-1"></a>**Association** quantifies the relationship between variables within a sample </span>
+<span id="cb14-2"><a href="#cb14-2"></a>(predictors-outcome).  **Prediction** requires using an established model to </span>
+<span id="cb14-3"><a href="#cb14-3"></a>predict (future?) outcomes for **new** ("out-of-sample, "held-out") participants.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>:::</p>
+<ul>
+<li><p>Much research in psychology demonstrates association but calls it prediction!</p></li>
+<li><p>Association (sometimes substantially) overestimates the predictive strength of our models</p>
+<ul>
+<li>Coefficients are derived to mimimize SSE (or maximize R<sup>2</sup>)</li>
+<li>R<sup>2</sup> from GLM (using one sample) indexes how well on average any GLM that is fit to a sample will account for variance in that sample when specific coefficients are estimated in the same sample they are evaluated</li>
+<li>R<sup>2</sup> does NOT tell you how well a specific GLM (including its coefficients) will work with new data for <strong>prediction</strong></li>
+<li>R<sup>2</sup> itself is positively biased even as estimate of how well a sample specific GLM will predict in that sample (vs.&nbsp;adjusted R<sup>2</sup> and other corrections)</li>
+</ul></li>
+</ul>
+<h3 id="prediction-vs.-explanation">Prediction vs.&nbsp;Explanation</h3>
+<ul>
+<li><p><span class="red">Examples of valuable prediction without explanation?</span></p></li>
+<li><p><span class="red">Can you have explanation without prediction?</span></p></li>
+<li><p>Prediction models can provide insight or tests of explanatory theories (e.g., do causes actually predict in new data; variable importance)</p></li>
+<li><p>Goal of scientific psychology is to understand human behavior. It involves both <strong>explaining</strong> behavior (i.e., identifying causes) and <strong>predicting</strong> (yet to be observed) behaviors.</p>
+<ul>
+<li>We overemphasize explanatory goals in this department, IMO</li>
+</ul></li>
+</ul>
+<h3 id="data-generating-process">Data Generating Process</h3>
+<ul>
+<li><span class="math inline">\(Y = f(X) + \epsilon\)</span></li>
+<li>both function and Xs are generally unknown</li>
+</ul>
+<h3 id="bias-overfitting-and-variance">Bias, Overfitting, and Variance</h3>
+<ul>
+<li>What are they and how are they related?</li>
+</ul>
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Describe problem of p-hacking with respect to overfitting?</strong></p>
+</div>
+<div class="callout-content">
+<div class="cell">
+<details>
+<summary>Show Answer</summary>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb15-1"><a href="#cb15-1"></a>When you p-hack, you are overfitting the training set (your sample).  You try out</span>
+<span id="cb15-2"><a href="#cb15-2"></a>many, many different model configurations and choose the one you like best rather</span>
+<span id="cb15-3"><a href="#cb15-3"></a>than what works well in new data.  This model likely capitalizes on noise in </span>
+<span id="cb15-4"><a href="#cb15-4"></a>your sample.  It won't fit well in another sample.  In other words, your conclusions</span>
+<span id="cb15-5"><a href="#cb15-5"></a>are not linked to the true DGP and would be different if you used a different </span>
+<span id="cb15-6"><a href="#cb15-6"></a>sample.  In a different vein, your significance test is wrong.  The SE does not </span>
+<span id="cb15-7"><a href="#cb15-7"></a>reflect the model variance that resulted from testing many different configurations</span>
+<span id="cb15-8"><a href="#cb15-8"></a>b/c your final model didn't "know" about the other models.  Statistically invalid</span>
+<span id="cb15-9"><a href="#cb15-9"></a>conclusion!</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+<h3 id="cross-validation">Cross Validation</h3>
+<ul>
+<li><span class="red">What is it?</span></li>
+<li><span class="red">How are replication and cross-validation different?</span></li>
+</ul>
+<h3 id="basic-framework-and-terminology">Basic framework and terminology</h3>
+<ul>
+<li><p><span class="red">Supervised vs.&nbsp;unsupervised machine learning?</span></p></li>
+<li><p><span class="red">Supervised regression vs classification?</span></p></li>
+</ul>
+</section>
+<section class="slide level2">
+
+<ul>
+<li><span class="red">What is a data generating process?</span>
+<ul>
+<li><span class="math inline">\(Y = f(X) + \epsilon\)</span></li>
+<li>Both function and Xs are generally unknown</li>
+<li><span class="math inline">\(\hat{Y} = \hat{f}(X)\)</span></li>
+</ul></li>
+<li><span class="red">Why do we estimate the data generating process?</span></li>
+</ul>
+</section>
+<section class="slide level2">
+
+<p>Reducible vs.&nbsp;Irreducible error?</p>
+<ul>
+<li>Our predictions will have error</li>
+<li>You learned to estimate parameters in the GLM to minimize error in 610</li>
+<li>But error remained non-zero (in your sample and more importantly with same model in new samples) unless you perfectly estimated the DGP</li>
+<li>That error can be divided into two sources</li>
+<li><strong>Irreducible error</strong> comes from measurement error in X, Y and missing X because predictors (causes) not measured.
+<ul>
+<li>Irreducible without collecting new predictors and/or with new measures</li>
+<li>It places a ceiling on the performance of the best model you can develop with your available data</li>
+</ul></li>
+<li><strong>Reducible error</strong> comes from mismatch between <span class="math inline">\(\hat{f}(X)\)</span> and the true <span class="math inline">\(f(X)\)</span>.
+<ul>
+<li>We can reduce this without new data.<br>
+</li>
+<li>Just need better model (<span class="math inline">\(\hat{f}(X)\)</span>).<br>
+</li>
+<li>You didn’t consider this (much) in 610 because you were limited to one statistical algorithm (GLM) AND it didn’t have hyperparameters.</li>
+<li>You did reduce error by coding predictors (feature engineering) differently (interactions <span class="math inline">\(X1*X2\)</span>, polynomial terms <span class="math inline">\(X^2\)</span>, power transformations of X) This course will teach you methods to decrease reducible error (and validly estimate total error of that best model)</li>
+</ul></li>
+</ul>
+</section>
+<section class="slide level2">
+
+<ul>
+<li><span class="red">What are the <strong>three general steps</strong> by which we estimate and evaluate the data generating process with a sample of data? Lets use all this vocabulary!</span>
+<ul>
+<li>Candidate model configurations
+<ul>
+<li>Statistical algorithms</li>
+<li>Hyperparameters</li>
+<li>Features (vs.&nbsp;predictors?), feature matrix, feature engineering, recipe (tidymodels specific)</li>
+</ul></li>
+<li>Model fitting (training), selection, and evaluation</li>
+<li>Resampling techniques
+<ul>
+<li>cross validation techniques (k-fold)</li>
+<li>boostrapping</li>
+</ul></li>
+<li>Training, validation, and test sets (terms vary in literature!)</li>
+</ul></li>
+</ul>
+<h3 id="bias-variance-tradeoff">Bias-variance tradeoff</h3>
+<ul>
+<li><p>What is underfitting, overfitting, bias, and variance?</p></li>
+<li><p>Bias and variance are general concepts to understand during any estimation process</p>
+<ul>
+<li>Estimate mean, median, standard deviation</li>
+<li>Parameter estimates in GLM</li>
+<li>Estimate DGP - <span class="math inline">\(\hat{Y} = \hat{f}(X)\)</span></li>
+</ul></li>
+</ul>
+</section>
+<section class="slide level2">
+
+<p>Useful conceptual examples of bias-variance</p>
+<ul>
+<li>Example 1: Darts from <span class="citation" data-cites="Yarkoni2017">Yarkoni and Westfall (<a href="#/references" role="doc-biblioref" onclick="">2017</a>)</span></li>
+</ul>
+
+<img data-src="figs/unit1_dartboard.png" width="600" class="r-stretch"><ul>
+<li>Example 2: Models (e.g.&nbsp;many scales made by Acme Co.) to measure my weight</li>
+</ul>
+<h4 id="bias">Bias</h4>
+<p>Biased models are generally less complex models (i.e., underfit) than the data-generating process for your outcome</p>
+<ul>
+<li><p>Biased models lead to errors in prediction because the model will systematically over- or under-predict outcomes (scores or probabilities) for specific values of predictor(s) (bad for prediction goals!)</p></li>
+<li><p>Parameter estimates from biased models may over or under-estimate the true effect of a predictor (bad for explanatory goals!)</p></li>
+</ul>
+</section>
+<section class="slide level2">
+
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Are GLMs biased models?</strong></p>
+</div>
+<div class="callout-content">
+<div class="cell">
+<details>
+<summary>Show Answer</summary>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb16-1"><a href="#cb16-1"></a>GLM parameter estimates are BLUE - best **linear** unbiased estimators. Parameter</span>
+<span id="cb16-2"><a href="#cb16-2"></a>estimates from any sample are unbiased estimates of the linear model coefficients</span>
+<span id="cb16-3"><a href="#cb16-3"></a>for population model but if DGP is not linear, this linear model will produce </span>
+<span id="cb16-4"><a href="#cb16-4"></a>biased predictions and have biased parameter estimates.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+<p>Bias <strong>seems</strong> like a bad thing.</p>
+<ul>
+<li><p>Both bias (due to underfitting) and variance (due to overfitting) are sources of (reducible) prediction errors (and imprecise/inaccurate parameter estimates). They are also often inversely related (i.e., the trade-off).</p></li>
+<li><p>A model configuration needs to be flexible enough to represent the true DGP.</p>
+<ul>
+<li>Any more flexibility will lead to overfitting.<br>
+</li>
+<li>Any less flexibility will lead to underfitting.</li>
+</ul></li>
+<li><p>Ideally, if your model configuration is perfectly matched to the DGP, it will have very low bias and very low variance (assuming sufficiently large N)</p></li>
+<li><p>The world is complex. In many instances,</p>
+<ul>
+<li>We can’t perfectly represent the DGP</li>
+<li>We trade off a little bias for big reduction in variance to produce the most accurate predictions (and stable parameter estimates across samples for explanatory goals)</li>
+<li>Or we trade off a little variance (slightly more flexible model) to get a big reduction in bias</li>
+<li>Either way, we get models that predict well and may be useful for explanatory goals</li>
+</ul></li>
+</ul>
+<h4 id="overfitting---variance">Overfitting - Variance</h4>
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Consider example of p = n - 1 in general linear model. What happens in this situation? How is this related to overfitting and model flexibility?</strong></p>
+</div>
+<div class="callout-content">
+<div class="cell">
+<details>
+<summary>Show Answer</summary>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb17-1"><a href="#cb17-1"></a>The  model will perfectly fit the sample data even when there is no relationship</span>
+<span id="cb17-2"><a href="#cb17-2"></a>between the predictors and the outcome.  e.g., Any two points can be fit perfectly</span>
+<span id="cb17-3"><a href="#cb17-3"></a>with one predictor (line), any three points can be fit perfectly with two predictors</span>
+<span id="cb17-4"><a href="#cb17-4"></a>(plane).  This model will NOT predict well in new data.  This model is overfit </span>
+<span id="cb17-5"><a href="#cb17-5"></a>because n-1 predictors is too flexible for the linear model. You will fit the </span>
+<span id="cb17-6"><a href="#cb17-6"></a>noise in the training data.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+<p>Factors that increase overfitting</p>
+<ul>
+<li>Small N</li>
+<li>Complex models (e.g, many predictors, p relative to n, non-parametric models)</li>
+<li>Weak effects of predictors (lots of noise available to overfit)</li>
+<li>Correlated predictors (for some algorithms like the GLM)</li>
+<li>Choosing between many model configurations (e.g.&nbsp;different predictors or predictor sets, transformations, types of statistical models) - lets return to this when we consider p-hacking</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<p>You might have noticed that many of the above factors contribute to the standard error of a parameter estimate/model coefficient from the GLM</p>
+<ul>
+<li>Small N</li>
+<li>Big p</li>
+<li>Small <span class="math inline">\(R^2\)</span> (weak effects)</li>
+<li>Correlated predictors</li>
+</ul>
+<p>The standard error increases as model overfitting increases due to these factors</p>
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Explain the link between model variance/overfitting, standard errors, and sampling distributions?</strong></p>
+</div>
+<div class="callout-content">
+<div class="cell">
+<details>
+<summary>Show Answer</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb18-1"><a href="#cb18-1"></a>All parameter estimates have a sampling distribution.  This is the distribution </span>
+<span id="cb18-2"><a href="#cb18-2"></a>of estimates that you would get if you repeatedly fit the same model to new samples.</span>
+<span id="cb18-3"><a href="#cb18-3"></a>When a model is overfit, that means that aspects of the model (its parameter </span>
+<span id="cb18-4"><a href="#cb18-4"></a>estimates, its predictions) will vary greatly from sample to sample.  This is </span>
+<span id="cb18-5"><a href="#cb18-5"></a>represented by a large standard error (the SD of the sampling distribution) for </span>
+<span id="cb18-6"><a href="#cb18-6"></a>the model's parameter estimates.  It also means that the predictions you will make</span>
+<span id="cb18-7"><a href="#cb18-7"></a>in new data will be very different depending on the sample that was used to </span>
+<span id="cb18-8"><a href="#cb18-8"></a>estimate the parameters.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level2">
+
+<div class="callout callout-important callout-titled callout-style-default">
+<div class="callout-body">
+<div class="callout-title">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<p><strong>Describe problem of p-hacking with respect to overfitting?</strong></p>
+</div>
+<div class="callout-content">
+<div class="cell">
+<details>
+<summary>Show Answer</summary>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb19-1"><a href="#cb19-1"></a>When you p-hack, you are overfitting the training set (your sample).  You try out</span>
+<span id="cb19-2"><a href="#cb19-2"></a>many, many different model configurations and choose the one you like best rather</span>
+<span id="cb19-3"><a href="#cb19-3"></a>than what works well in new data.  This model likely capitalizes on noise in your</span>
+<span id="cb19-4"><a href="#cb19-4"></a>sample.  It won't fit well in another sample.  In other words, your conclusions </span>
+<span id="cb19-5"><a href="#cb19-5"></a>are not linked to the true DGP and would be different if you used a different sample.</span>
+<span id="cb19-6"><a href="#cb19-6"></a>In a different vein, your significance test is wrong.  The SE does not reflect </span>
+<span id="cb19-7"><a href="#cb19-7"></a>the model variance that resulted from testing many different configurations b/c </span>
+<span id="cb19-8"><a href="#cb19-8"></a>your final model didn't "know" about the other models.  Statistically invalid </span>
+<span id="cb19-9"><a href="#cb19-9"></a>conclusion!</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="slide level2 smaller scrollable" id="references">
+
+<p>Parameter estimates from an overfit model are specific to the sample within which they were trained and are not true for other samples or the population as a whole</p>
+<ul>
+<li><p>Parameter estimates from overfit models have big (TRUE) SE and so they may be VERY different in other samples</p>
+<ul>
+<li>Though if the overfitting is due to fitting many models, it won’t be reflected in the SE from any one model because each model doesn’t know the other models exist! p-hacking!!</li>
+</ul></li>
+<li><p>With traditional (one-sample) statistics, this can lead us to incorrect conclusions about the effect of predictors associated with these parameter estimates (bad for explanatory goals!).</p></li>
+<li><p>If the parameter estimates are very different sample to sample (and different from the true population parameters), this means the model will predict poorly in new samples (bad for prediction goals!). We fix this by using resampling to evaluate model performance.</p></li>
+</ul>
+<div class="footer footer-default">
+
+</div>
+<div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-ISL" class="csl-entry" role="listitem">
+James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2023. <em>An <span>Introduction</span> to <span>Statistical Learning</span>: With <span>Applications</span> in <span>R</span></em>. 2nd ed. Springer <span>Texts</span> in <span>Statistics</span>. <span>New York</span>: <span>Springer-Verlag</span>.
+</div>
+<div id="ref-Yarkoni2017" class="csl-entry" role="listitem">
+Yarkoni, Tal, and Jacob Westfall. 2017. <span>“Choosing <span>Prediction Over Explanation</span> in <span>Psychology</span>: <span>Lessons From Machine Learning</span>.”</span> <em>Perspectives on Psychological Science</em> 12 (6): 1100–1122.
+</div>
+</div>
+</section></section>
+    </div>
+  </div>
+
+  <script>window.backupDefine = window.define; window.define = undefined;</script>
+  <script src="001_overview_files/libs/revealjs/dist/reveal.js"></script>
+  <!-- reveal.js plugins -->
+  <script src="001_overview_files/libs/revealjs/plugin/quarto-line-highlight/line-highlight.js"></script>
+  <script src="001_overview_files/libs/revealjs/plugin/pdf-export/pdfexport.js"></script>
+  <script src="001_overview_files/libs/revealjs/plugin/reveal-menu/menu.js"></script>
+  <script src="001_overview_files/libs/revealjs/plugin/reveal-menu/quarto-menu.js"></script>
+  <script src="001_overview_files/libs/revealjs/plugin/quarto-support/support.js"></script>
+  
+
+  <script src="001_overview_files/libs/revealjs/plugin/notes/notes.js"></script>
+  <script src="001_overview_files/libs/revealjs/plugin/search/search.js"></script>
+  <script src="001_overview_files/libs/revealjs/plugin/zoom/zoom.js"></script>
+  <script src="001_overview_files/libs/revealjs/plugin/math/math.js"></script>
+  <script>window.define = window.backupDefine; window.backupDefine = undefined;</script>
+
+  <script>
+
+      // Full list of configuration options available at:
+      // https://revealjs.com/config/
+      Reveal.initialize({
+'controlsAuto': true,
+'previewLinksAuto': false,
+'smaller': false,
+'pdfSeparateFragments': false,
+'autoAnimateEasing': "ease",
+'autoAnimateDuration': 1,
+'autoAnimateUnmatched': true,
+'menu': {"side":"left","useTextContentForMissingTitles":true,"markers":false,"loadIcons":false,"custom":[{"title":"Tools","icon":"<i class=\"fas fa-gear\"></i>","content":"<ul class=\"slide-menu-items\">\n<li class=\"slide-tool-item active\" data-item=\"0\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.fullscreen(event)\"><kbd>f</kbd> Fullscreen</a></li>\n<li class=\"slide-tool-item\" data-item=\"1\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.speakerMode(event)\"><kbd>s</kbd> Speaker View</a></li>\n<li class=\"slide-tool-item\" data-item=\"2\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.overview(event)\"><kbd>o</kbd> Slide Overview</a></li>\n<li class=\"slide-tool-item\" data-item=\"3\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.togglePdfExport(event)\"><kbd>e</kbd> PDF Export Mode</a></li>\n<li class=\"slide-tool-item\" data-item=\"4\"><a href=\"#\" onclick=\"RevealMenuToolHandlers.keyboardHelp(event)\"><kbd>?</kbd> Keyboard Help</a></li>\n</ul>"}],"openButton":true},
+'smaller': false,
+ 
+        // Display controls in the bottom right corner
+        controls: false,
+
+        // Help the user learn the controls by providing hints, for example by
+        // bouncing the down arrow when they first encounter a vertical slide
+        controlsTutorial: false,
+
+        // Determines where controls appear, "edges" or "bottom-right"
+        controlsLayout: 'edges',
+
+        // Visibility rule for backwards navigation arrows; "faded", "hidden"
+        // or "visible"
+        controlsBackArrows: 'faded',
+
+        // Display a presentation progress bar
+        progress: true,
+
+        // Display the page number of the current slide
+        slideNumber: false,
+
+        // 'all', 'print', or 'speaker'
+        showSlideNumber: 'all',
+
+        // Add the current slide number to the URL hash so that reloading the
+        // page/copying the URL will return you to the same slide
+        hash: true,
+
+        // Start with 1 for the hash rather than 0
+        hashOneBasedIndex: false,
+
+        // Flags if we should monitor the hash and change slides accordingly
+        respondToHashChanges: true,
+
+        // Push each slide change to the browser history
+        history: true,
+
+        // Enable keyboard shortcuts for navigation
+        keyboard: true,
+
+        // Enable the slide overview mode
+        overview: true,
+
+        // Disables the default reveal.js slide layout (scaling and centering)
+        // so that you can use custom CSS layout
+        disableLayout: false,
+
+        // Vertical centering of slides
+        center: false,
+
+        // Enables touch navigation on devices with touch input
+        touch: true,
+
+        // Loop the presentation
+        loop: false,
+
+        // Change the presentation direction to be RTL
+        rtl: false,
+
+        // see https://revealjs.com/vertical-slides/#navigation-mode
+        navigationMode: 'linear',
+
+        // Randomizes the order of slides each time the presentation loads
+        shuffle: false,
+
+        // Turns fragments on and off globally
+        fragments: true,
+
+        // Flags whether to include the current fragment in the URL,
+        // so that reloading brings you to the same fragment position
+        fragmentInURL: false,
+
+        // Flags if the presentation is running in an embedded mode,
+        // i.e. contained within a limited portion of the screen
+        embedded: false,
+
+        // Flags if we should show a help overlay when the questionmark
+        // key is pressed
+        help: true,
+
+        // Flags if it should be possible to pause the presentation (blackout)
+        pause: true,
+
+        // Flags if speaker notes should be visible to all viewers
+        showNotes: false,
+
+        // Global override for autoplaying embedded media (null/true/false)
+        autoPlayMedia: null,
+
+        // Global override for preloading lazy-loaded iframes (null/true/false)
+        preloadIframes: null,
+
+        // Number of milliseconds between automatically proceeding to the
+        // next slide, disabled when set to 0, this value can be overwritten
+        // by using a data-autoslide attribute on your slides
+        autoSlide: 0,
+
+        // Stop auto-sliding after user input
+        autoSlideStoppable: true,
+
+        // Use this method for navigation when auto-sliding
+        autoSlideMethod: null,
+
+        // Specify the average time in seconds that you think you will spend
+        // presenting each slide. This is used to show a pacing timer in the
+        // speaker view
+        defaultTiming: null,
+
+        // Enable slide navigation via mouse wheel
+        mouseWheel: false,
+
+        // The display mode that will be used to show slides
+        display: 'block',
+
+        // Hide cursor if inactive
+        hideInactiveCursor: true,
+
+        // Time before the cursor is hidden (in ms)
+        hideCursorTime: 5000,
+
+        // Opens links in an iframe preview overlay
+        previewLinks: false,
+
+        // Transition style (none/fade/slide/convex/concave/zoom)
+        transition: 'none',
+
+        // Transition speed (default/fast/slow)
+        transitionSpeed: 'default',
+
+        // Transition style for full page slide backgrounds
+        // (none/fade/slide/convex/concave/zoom)
+        backgroundTransition: 'none',
+
+        // Number of slides away from the current that are visible
+        viewDistance: 3,
+
+        // Number of slides away from the current that are visible on mobile
+        // devices. It is advisable to set this to a lower number than
+        // viewDistance in order to save resources.
+        mobileViewDistance: 2,
+
+        // The "normal" size of the presentation, aspect ratio will be preserved
+        // when the presentation is scaled to fit different resolutions. Can be
+        // specified using percentage units.
+        width: 1050,
+
+        height: 700,
+
+        // Factor of the display size that should remain empty around the content
+        margin: 0.1,
+
+        math: {
+          mathjax: 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.0/MathJax.js',
+          config: 'TeX-AMS_HTML-full',
+          tex2jax: {
+            inlineMath: [['\\(','\\)']],
+            displayMath: [['\\[','\\]']],
+            balanceBraces: true,
+            processEscapes: false,
+            processRefs: true,
+            processEnvironments: true,
+            preview: 'TeX',
+            skipTags: ['script','noscript','style','textarea','pre','code'],
+            ignoreClass: 'tex2jax_ignore',
+            processClass: 'tex2jax_process'
+          },
+        },
+
+        // reveal.js plugins
+        plugins: [QuartoLineHighlight, PdfExport, RevealMenu, QuartoSupport,
+
+          RevealMath,
+          RevealNotes,
+          RevealSearch,
+          RevealZoom
+        ]
+      });
+    </script>
+    
+    <script>
+      // htmlwidgets need to know to resize themselves when slides are shown/hidden.
+      // Fire the "slideenter" event (handled by htmlwidgets.js) when the current
+      // slide changes (different for each slide format).
+      (function () {
+        // dispatch for htmlwidgets
+        function fireSlideEnter() {
+          const event = window.document.createEvent("Event");
+          event.initEvent("slideenter", true, true);
+          window.document.dispatchEvent(event);
+        }
+
+        function fireSlideChanged(previousSlide, currentSlide) {
+          fireSlideEnter();
+
+          // dispatch for shiny
+          if (window.jQuery) {
+            if (previousSlide) {
+              window.jQuery(previousSlide).trigger("hidden");
+            }
+            if (currentSlide) {
+              window.jQuery(currentSlide).trigger("shown");
+            }
+          }
+        }
+
+        // hookup for slidy
+        if (window.w3c_slidy) {
+          window.w3c_slidy.add_observer(function (slide_num) {
+            // slide_num starts at position 1
+            fireSlideChanged(null, w3c_slidy.slides[slide_num - 1]);
+          });
+        }
+
+      })();
+    </script>
+
+    <script id="quarto-html-after-body" type="application/javascript">
+    window.document.addEventListener("DOMContentLoaded", function (event) {
+      const toggleBodyColorMode = (bsSheetEl) => {
+        const mode = bsSheetEl.getAttribute("data-mode");
+        const bodyEl = window.document.querySelector("body");
+        if (mode === "dark") {
+          bodyEl.classList.add("quarto-dark");
+          bodyEl.classList.remove("quarto-light");
+        } else {
+          bodyEl.classList.add("quarto-light");
+          bodyEl.classList.remove("quarto-dark");
+        }
+      }
+      const toggleBodyColorPrimary = () => {
+        const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+        if (bsSheetEl) {
+          toggleBodyColorMode(bsSheetEl);
+        }
+      }
+      toggleBodyColorPrimary();  
+      const tabsets =  window.document.querySelectorAll(".panel-tabset-tabby")
+      tabsets.forEach(function(tabset) {
+        const tabby = new Tabby('#' + tabset.id);
+      });
+      const isCodeAnnotation = (el) => {
+        for (const clz of el.classList) {
+          if (clz.startsWith('code-annotation-')) {                     
+            return true;
+          }
+        }
+        return false;
+      }
+      const clipboard = new window.ClipboardJS('.code-copy-button', {
+        text: function(trigger) {
+          const codeEl = trigger.previousElementSibling.cloneNode(true);
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+        }
+      });
+      clipboard.on('success', function(e) {
+        // button target
+        const button = e.trigger;
+        // don't keep focus
+        button.blur();
+        // flash "checked"
+        button.classList.add('code-copy-button-checked');
+        var currentTitle = button.getAttribute("title");
+        button.setAttribute("title", "Copied!");
+        let tooltip;
+        if (window.bootstrap) {
+          button.setAttribute("data-bs-toggle", "tooltip");
+          button.setAttribute("data-bs-placement", "left");
+          button.setAttribute("data-bs-title", "Copied!");
+          tooltip = new bootstrap.Tooltip(button, 
+            { trigger: "manual", 
+              customClass: "code-copy-button-tooltip",
+              offset: [0, -8]});
+          tooltip.show();    
+        }
+        setTimeout(function() {
+          if (tooltip) {
+            tooltip.hide();
+            button.removeAttribute("data-bs-title");
+            button.removeAttribute("data-bs-toggle");
+            button.removeAttribute("data-bs-placement");
+          }
+          button.setAttribute("title", currentTitle);
+          button.classList.remove('code-copy-button-checked');
+        }, 1000);
+        // clear code selection
+        e.clearSelection();
+      });
+      function tippyHover(el, contentFn) {
+        const config = {
+          allowHTML: true,
+          content: contentFn,
+          maxWidth: 500,
+          delay: 100,
+          arrow: false,
+          appendTo: function(el) {
+              return el.closest('section.slide') || el.parentElement;
+          },
+          interactive: true,
+          interactiveBorder: 10,
+          theme: 'light-border',
+          placement: 'bottom-start'
+        };
+          config['offset'] = [0,0];
+          config['maxWidth'] = 700;
+        window.tippy(el, config); 
+      }
+      const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+      for (var i=0; i<noterefs.length; i++) {
+        const ref = noterefs[i];
+        tippyHover(ref, function() {
+          // use id or data attribute instead here
+          let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+          try { href = new URL(href).hash; } catch {}
+          const id = href.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          return note.innerHTML;
+        });
+      }
+      const findCites = (el) => {
+        const parentEl = el.parentElement;
+        if (parentEl) {
+          const cites = parentEl.dataset.cites;
+          if (cites) {
+            return {
+              el,
+              cites: cites.split(' ')
+            };
+          } else {
+            return findCites(el.parentElement)
+          }
+        } else {
+          return undefined;
+        }
+      };
+      var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+      for (var i=0; i<bibliorefs.length; i++) {
+        const ref = bibliorefs[i];
+        const citeInfo = findCites(ref);
+        if (citeInfo) {
+          tippyHover(citeInfo.el, function() {
+            var popup = window.document.createElement('div');
+            citeInfo.cites.forEach(function(cite) {
+              var citeDiv = window.document.createElement('div');
+              citeDiv.classList.add('hanging-indent');
+              citeDiv.classList.add('csl-entry');
+              var biblioDiv = window.document.getElementById('ref-' + cite);
+              if (biblioDiv) {
+                citeDiv.innerHTML = biblioDiv.innerHTML;
+              }
+              popup.appendChild(citeDiv);
+            });
+            return popup.innerHTML;
+          });
+        }
+      }
+    });
+    </script>
+    
+
+</body></html>
