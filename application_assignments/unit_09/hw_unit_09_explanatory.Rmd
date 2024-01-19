@@ -1,0 +1,268 @@
+---
+title: 'Unit 8 (Model Comparisons & Explanatory Goals)'
+author: "Your name here"
+date: "`r lubridate::today()`"
+output: 
+  html_document:
+    toc: true 
+    toc_depth: 4
+editor_options: 
+  chunk_output_type: console
+---
+
+## Assignment overview
+
+To begin, download the following from the course web book (Unit 9):
+
+* One RMarkdown (.Rmd) file: hw_unit_9_explanatory.Rmd
+
+* admissions_full.csv (data for this assignment)
+
+
+The data for this week's assignment have information about admissions to a masters program. 
+
+The data will be cleaned using code included for you below, and you don't need to do any modeling EDA to keep the assignment from getting too long! We have described the specific steps you'll take to implement the recipes.
+
+In this assignment, you will practice comparing models to determine the importance of a focal variable. In particular, you will be determining whether GRE score matters for gaining admission to graduate school. You will then use the Bayesian approach to evaluate the effect of that focal variable. 
+
+Like previous weeks, **some components of the assignment will take a little longer**. You will not need to do any hyperparameter tuning this week in order to help reduce that run time. Remember that setting up parallel processing will dramatically reduce your run times. You can also use fewer bootstraps or permutation tests as you're testing your code. 
+
+Your assignment is due Wednesday at 5:00 PM. Let's get started!
+
+## Setup
+
+### Load packages 
+
+```{r}
+library(tidymodels) # for modeling
+library(tidyverse) # for general data wrangling
+library(kableExtra) # for displaying formatted tables w/ kbl()
+library(skimr) # for skim()
+library(cowplot) # for plot_grid() and theme_half_open()
+library(doParallel)
+```
+
+### Create file path object
+
+Remeber to use the here() library
+```{r}
+library(here)
+path_hw_unit_9 <- "homework/unit_9"
+```
+
+### Source functions script
+
+```{r}
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_modeling.R?raw=true")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/print_kbl.R?raw=true") #because this is not in fun_modeling right now
+```
+
+### Set plotting theme
+```{r}
+theme_set(theme_half_open())
+```
+
+### Set up parallel processing
+
+Strongly recommended! If you only have 2 cores on your machine, remove the if (n_core > 2) {} statement and bracketing and use both cores. It's probably still worth it to use 2 cores instead of 1! That statement just helps keep one core "available" for other tasks you're doing, but it's not necessary. 
+```{r}
+
+```
+
+### Read in data
+
+Read in the admissions_cln.csv data file using this code to clean and glimpse it.
+```{r}
+data_all <- read_csv(here(path_hw_unit_9, "admissions.csv"),
+                     col_types = cols()) %>% 
+  clean_names(case = "snake") %>% 
+  rename(statement_quality = sop, letter_quality = lor,
+         research_experience = research, id = serial_no) %>% 
+  mutate(across(where(is.character), tidy_responses)) %>% 
+  mutate(across(where(is.character), as_factor)) %>% 
+  glimpse()
+```
+
+## Set up splits
+
+### Divide data into train and test
+
+Hold out 25% of the data as a test set for evaluation. Stratify on admitted. 
+```{r}
+set.seed(12345)
+```
+
+### Make cross-validation splits
+
+Split data_trn into repeated k-fold cross-validation splits using 10 repeats, 10 folds, and stratifying on admitted. You do not need to set a new seed.
+```{r}
+splits <- 
+```
+
+## Build recipes
+
+Follow the instructions below to build two recipes from your training data: one for a "full" model (contains all predictors), and one for a compact model (contains all predictors except the focal variable, GRE score).
+
+### Recipe 1: Full model
+
+Follow these steps in your recipe. **Use your own judgment about the correct order of steps!** These are an UNORDERED list of the things you should include. 
+
+* Regress the outcome on all variables
+
+* Create dummy coded features for categorical predictors
+
+* Handle missing data for both categorical and numeric predictors where needed
+
+* If needed, include a step to handle novel levels of categorical features
+
+* Remove near-zero variance features
+
+* Remove the id variable
+
+```{r}
+rec_full <- NA
+```
+
+### Recipe 2: Compact model
+
+Because your recipe for the compact model will only differ from your recipe for the full model by one step (removing a variable), you can start with rec_full. Then add a step (after a pipe) that will remove the focal variable, GRE score.
+
+```{r}
+rec_compact <- rec_full
+```
+
+## Fit models
+
+### Fit the full model
+
+Use rec_full and splits to fit GLMs across folds. Use accuracy as your metric.
+```{r}
+fits_full <- NA
+```
+
+Print the mean accuracy across the 100 held-out folds.
+```{r}
+
+```
+
+### Fit the compact model
+
+Use rec_compact and splits to fit GLMs across folds. Use accuracy as your metric.
+```{r}
+fits_compact <- NA
+```
+
+Print the mean accuracy across the 100 held-out folds.
+```{r}
+
+```
+
+
+## Model comparison with the Bayesian approach
+You will now compare your models using the Bayesian parameter estimation
+
+### Gather performance estimates
+
+First, make a dataframe containing the 100 performance estimates from held out folds for your full and compact model
+```{r}
+
+
+```
+
+
+### Posterior probabilities
+
+Next, derive the posterior probabilites for the accuracy of each of these two models
+```{r}
+
+
+```
+
+### Graph positerior probabilities
+
+Display your posterior probabilities using both a density plot and a histogram. Choose plots that would be the most useful to display your results to a collaborator.
+```{r}
+
+
+```
+
+### Determine if the full model is more accurate
+
+Calculate the probability that the full model is more accurate than the compact model. Type out a summary of what you find that includes:
+
+* Your interpretation of what the mean increase in accuracy and 95% HDI values represent
+
+* Your conclusion if the full model is meaningfully better than your compact model and why
+
+```{r}
+
+
+```
+
+
+## Feature importance
+
+You will now look at feature importance in your full model using Shapely Values.
+
+### Prep data
+Get your data ready for use with the iml package. Do the following:
+
+* Create a feature matrix of your full model 
+
+* Pull out your raw features and outcome to be utilized in calculating feature importance
+
+* Define a predictor function so we can make predictions from our model using the iml package
+```{r}
+
+
+
+```
+
+### Calculate Shapely Values for a single participant
+
+First, we will look at shapely values for a single participant. For this example, lets look at the last participant in our data set. Do the following:
+
+* Print the raw feature values for the last participant. (Be sure to do this in a way that will print your output in your knit document)
+
+* Generate Shapely Values for this participant and output the raw results
+
+* Use ggplot to plot the Shapely Values for this participant
+
+* Type out your interpretation of what the top shapely value means
+
+```{r}
+
+
+```
+
+
+### Calculate mean absolute Shapely Values across all participants
+
+Now we will look at feature importance across all participants. Include the following steps (and make sure each step prints to your knit document):
+
+* Calculate Shapely Values for each observation and glimpse() the resulting tibble
+
+* Plot the mean absolute Shapely Values across all participants
+
+* Write a brief description of your top take-aways from this plot
+
+```{r}
+
+
+```
+
+## Interactions
+
+Lastly, you will explore interactions among all features in your full model. 
+*Generate a plot (using ggplot) of the total variance across all the (two-way) interactions a feature can have with other features 
+
+* Generate a plot displaying we all specific two-way interactions individually for our target GRE score feature
+
+* Type out a brief summary of what you notice about the plots
+
+```{r}
+
+
+
+```
+
