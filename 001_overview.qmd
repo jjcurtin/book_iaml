@@ -138,19 +138,20 @@ For **inference**, we are typically interested in the way that $Y$ is affected b
 
 Model error includes both **reducible** and **irreducible** error.  
 
-- If we consider both $X$ and $\hat{f}$ to be fixed, then:
+If we consider both $X$ and $\hat{f}$ to be fixed, then:
 
   - $E(Y - \hat{Y})^2 = (f(X) + \epsilon - \hat{f}(X))^2$
-
   - $E(Y - \hat{Y})^2 = [f(X) - \hat{f}(X)]^2 + Var(\epsilon)$
+  
+$Var(\epsilon)$ is irreducible
 
-- $[f(X) - \hat{f}(X)]^2$ is reducible and $Var(\epsilon)$ is irreducible
 - Irreducible error results from other important $X$ that we fail to measure and from measurement error in $X$ and $Y$
 - Irreducible error serves as an (unknown) bounds for model accuracy (without collecting additional Xs)
+
+$[f(X) - \hat{f}(X)]^2$ is reducible 
+
 - Reducible error results from a mismatch between $\hat{f}$ and the true $f$
-
-
-This course will focus on techniques to estimate $f$ with the goal of minimizing reducible error
+- This course will focus on techniques to estimate $f$ with the goal of minimizing reducible error
 
 -----
 
@@ -183,8 +184,8 @@ This course will focus on techniques to estimate $f$ with the goal of minimizing
 - Do not make any assumption about the form/shape of $f$
 - Can fit well for a wide variety of forms/shapes for $f$
 - This flexibility comes with costs
-  - They generally require larger `n` in the training set than parametric algorithms to achieve comparable performance
-  - They may **overfit** the training set (low error in training set but much higher error in new validation or test sets)
+  - They generally require larger $N$ in the training set than parametric algorithms to achieve comparable performance
+  - They may **overfit** the training set.  This happens when they begin to fit the noise in the training set.  This will yield low error in training set but much higher error in new validation or test sets.
   - They are often less interpretable
 
 -----
@@ -209,9 +210,7 @@ Generally:
 There is no universally best statistical algorithm
 
 - Depends on the true $f$ and your goal (prediction or inference)
-
 - We often compare multiple statistical algorithms (various parametric and non-parametric options) and model configurations more generally (combinations of different algorithms with different sets of features)
-
 - When comparing models/configurations, we need to both **fit** these models and then **select** the best one
 
 -----
@@ -245,7 +244,9 @@ More generally, these problems and their consequences for model performance are 
   - Reducible error can be parsed into components due to bias and variance
   - Goal is to minimize the sum of bias and variance error (i.e., the reducible error overall)
   - We will often trade off a little bias if it provides a big reduction in variance
-  
+
+But before we dive further into the Bias-Variance trade-off, lets review some key terminology that we will use throughout this course.  
+
 -----
 
 ## Key Terminology in Context
@@ -254,7 +255,6 @@ Machine learning has emerged in parallel from developments in statistics and com
 In the following paragraphs, I identify these key terms in context (along with other synonymous terms used by others) and highlight them in **bold**.
 
 - There are two broad approaches in machine learning - **unsupervised** and **supervised** approaches.  
-
 - This course focuses primarily on developing supervised models.
 
 -----
