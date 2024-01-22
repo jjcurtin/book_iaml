@@ -1,0 +1,164 @@
+---
+title: "Homework Unit 2: EDA Modeling"
+author: "Your name here"
+date: "`r lubridate::today()`"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+Welcome to the second half of the Unit 2 EDA homework. We are glad you are here. As will become the standard, please enter your first and last name at the top of this document in the same way you did on the other part of this assignment.
+
+Now that you've cleaned the data, it is time to start your modeling exploratory data analysis (EDA). Keep in mind that cleaning/ EDA is an iterative process -- you may uncover additional data errors at this stage that should be subsequently corrected in your cleaning script. Its worth the effort to keep these scripts separate to avoid accidentally gleaning information that might inappropriately guide transformations or other feature engineering from outside of your training data.
+
+Run this code chunk to load all packages you will need for this assignment.
+```{r packages, messages = FALSE, warning = FALSE}
+# set up packages
+library(tidymodels) # for modeling
+library(purrr)  # for iteration using map() and walk() variants
+library(kableExtra) # for displaying formatted tables w/ kbl()
+library(janitor)  # for clean_names(), tabyl()
+library(skimr) # for skim()
+library(tidyverse) # for general data wrangling
+library(corrplot) #for bivariate correlations
+library(cowplot) # for plot_grid(), theme_half_open()
+theme_set(theme_half_open())
+
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_modeling.R?raw=true")
+``` 
+
+## 1 Set up and load data
+
+### 1.1 Paths and source files
+
+In the chunk below, set path_data to the location of your cleaned data files.  
+```{r path, messages = FALSE, warning = FALSE}
+library(here)
+path_data <- "homework/unit_2"
+
+```
+
+
+### 1.2 Load data
+Load the cleaned training data and do some visual inspection to get oriented.
+```{r load-data}
+
+```
+
+
+## 2 Preparing the feature matrix
+
+### 2.1 Predictor class
+
+Use `recipe()` to predict `sale_price` from all predictor variables in our training data. Reclass any predictors that may be better represented as ordered or unordered factors.
+
+```{r reclass-predictors}
+
+```
+
+### 2.2 Make a feature matrix
+
+Now use `make_features()` function to `prep()` and `bake()` the recipe using the training data.
+
+```{r make-feature-matrix} 
+
+```
+
+## 3 Overall summary 
+
+Now we will use our baked training set (the feature matrix we made above) to look for potential relationships, outliers, and other characteristics of our data to guide our feature engineering.
+
+Use the appropriate `skim()` function to orient you to your freshly baked training set. As will be the practice in these homeworks, comment on anything noteworthy below the code chunk.
+
+```{r overall-summary}
+
+```
+**Overall summary notes:** 
+*Type your notes here*
+
+## 4 Univariate Distributions
+
+### 4.1 Numeric variables
+
+First examine the univariate distributions of your numeric variables. Use `map()` to iterate through all numeric variables and create a `plot_grid` in a single piped chain. Describe what you discover about your data, commenting specifically on the affordances of the plot method you chose.
+
+```{r univariate-numeric}
+
+```
+**Numeric univariate notes:**
+*Type your notes here* 
+
+
+### 4.2 Categorical variables
+
+Now examine univariate distributions of your categorical variables. Use `map()` to iterate through all categorical variables and display them together using `plot_grid()`. Comment below on what stands out to you from these plots. Document the questions that arise from inspecting the data in this way.
+
+```{r univariate-cat}
+
+```
+**Univariate categorical variable notes:** 
+*Type your notes here* 
+
+## 5. Bivariate Relationships
+
+### 5.1 Numeric variables
+
+Examine the relationship between numeric predictors and the outcome variable `sale_price`. You can use `map()` again to complete these in a single pipe -- just make sure to specify `sale_price` as your `y` value. (Remember that the plot functions from `fun_modeling.R` expect variable strings as input!)
+
+What relationships appear promising to you? Do you have any ideas about unexpected distributional shapes? Try looking at transformations, filtering the data, or other methods that come to mind.
+```{r bivariate-num}
+
+```
+**Bivariate relationship notes:** 
+*Type your notes here* 
+
+
+### 5.2 Correlations
+
+Convert any ordinal predictors to numeric, `select()` down to numeric variables, and plot all variable correlations with `sale_price`. What correlations stand out to you?
+```{r correlations}
+
+```
+**Correlation notes:**
+*Type your notes here* 
+
+### 5.3 Categorical variables
+
+Now choose the best plot(s) to visualize the relationship between your categorical predictors and `sale_price()`. What relationships stand out to you? 
+```{r bivariate-cat}
+
+```
+**Categorical bivariate notes:** 
+*Type your notes here* 
+
+### 5.4 Guided categorical exploration
+
+`ms_sub_class` is a mysterious variable -- take a closer look at it's relationship with `sale_price`. Be sure that you are examining both the variable distribution as well as the relationship with `sale_price`. You may also find it helpful to consult the data dictionary to see what types of homes the numeric codes represent. 
+
+Do some types of homes generally sell for more than others? Is there anything surprising to you? (You may find it useful to order your `ms_sub_class` factor based on the values of `sale_price`)
+```{r cat-explore}
+
+```
+**Guided categorical exploration notes:** 
+*Type your notes here* 
+
+
+### 5.5 Categorical/categorical relationships
+
+Use this space to examine how the relationship between `ms_sub_class` and `sale_price` might be related to another categorical variable in our data. You may choose any categorical variable that you think might help you better understand `ms_sub_class`. Are you noticing any patterns across levels?
+```{r cat-cat}
+
+```
+**Cat/Cat Notes:** 
+*Type your notes here* 
+
+## 6 Save, knit, pause
+### Save
+Save this `.Rmd` file with your last name at the end (e.g. `hw_unit_2_modeling_santana.Rmd`).
+
+### Knit
+Knit the file to html and upload your knit html file to Canvas. 
+
+### Pause
+Pause for a moment. Feel good about what you've done. You have completed your first IAML assignment. This is important and we are proud of you.
+

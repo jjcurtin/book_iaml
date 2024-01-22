@@ -1,0 +1,272 @@
+---
+title: 'Unit 6 (Penalization & Regularization)'
+author: "Your name here"
+date: "`r lubridate::today()`"
+output: 
+  html_document:
+    toc: true 
+    toc_depth: 4
+editor_options: 
+  chunk_output_type: console
+---
+
+## Assignment overview
+
+To begin, download the following from the course web book (Unit 6):
+
+* One RMarkdown (.Rmd) file: hw_unit_6_regularization.Rmd
+
+* ames_full_cln.csv (data for this assignment)
+
+* If you are interested, the full data dictionary is also available
+
+The data for this week's assignment are the Ames housing price data you've seen in class and worked with in previous homework assignments. However, this week you're working with all 81 variables. 
+
+The data are already cleaned (i.e., variable names tidied, levels of categorical variables tidied, "none" put in for missing values where indicated in the data dictionary), and you don't need to do any modeling EDA because we're describing for you the specific steps to implement in the  recipe. Of course you **normally** would do modeling EDA before fitting any models, but we're trying to keep the assignment from getting too long!
+
+In this assignment, you will practice tuning and comparing regularized models using resampling methods. Like last week, **tuning models will take a little longer**. We've kept the active coding component of the assignment to a reasonable length, but the run time may be a little longer, so please try to plan for this! Remember that setting up parallel processing will dramatically reduce your run times.
+
+Your assignment is due Wednesday at 5:00 PM. Let's get started!
+
+## Setup
+
+### Load packages 
+
+```{r load_packages}
+library(tidymodels) # for modeling
+library(tidyverse) # for general data wrangling
+library(kableExtra) # for displaying formatted tables w/ kbl()
+library(skimr) # for skim()
+library(cowplot) # for plot_grid() and theme_half_open()
+library(doParallel)
+```
+
+### Source functions script
+
+```{r source_custom_functions}
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_modeling.R?raw=true")
+```
+
+### Set plotting theme
+
+```{r set_theme}
+theme_set(theme_half_open())
+```
+
+### Create file path object
+
+Use `here` and a relative path for your data.  Make sure your iaml project is open.
+**Note:** Set path_hw_unit_5 to where YOUR hw unit 5 files are saved
+```{r path}
+
+```
+
+### Set up parallel processing
+
+Strongly recommended! If you only have 2 cores on your machine, remove the if (n_core > 2) {} statement and bracketing and use both cores. It's probably still worth it to use 2 cores instead of 1! That statement just helps keep one core "available" for other tasks you're doing, but it's not necessary. 
+```{r set_parallel}
+
+```
+
+### Read in data
+
+Read in the ames_full_cln.csv data file & glimpse it
+```{r read_data}
+
+```
+
+## Set up splits
+
+### Set seed
+
+```{r set_seed}
+set.seed(03071994)
+```
+
+### Divide data into train and test
+
+Hold out 25% of the data as a test set for evaluation using the initial_split() function. Stratify on sale_price. 
+```{r initial_split}
+
+```
+
+### Make splits
+
+For parts 2 and 3, you'll need splits within data_trn. Setup bootstrapping splits using 100 times and stratifying on sale_price. You do not need to set a new seed.
+```{r split_boot}
+splits_boot <- NA
+```
+
+## Build recipe
+
+You will build one recipe that can be used across the three model fits/tunes that you do. Please follow these instructions to build your recipe:
+
+* Regress the outcome sale_price on all predictors using data_trn
+
+* Turn all character variables into factors (remember to use helpful selectors like where(is.character) to make this easy)
+
+* Use step_modeimpute() to impute the mode for any missing values in those factor variables
+
+* Apply dummy coding
+
+* Use step_novel() to handle any new levels of categorical variables that arent present in your training data (but might appear in test)
+
+* Use step_medianimpute() to impute the median for any missing values in numeric variables
+
+* Apply Yeo-Johnson transformations to all numeric variables (except the outcome) with step_YeoJohnson()
+
+* Normalize all numeric variables with step_normalize() (necessary for regularized models)
+
+* Handle the ID variable (pid) with step_rm() or update_role()
+
+```{r recipe}
+rec <- NA
+```
+
+## Part 1: Fitting an OLS linear regression
+
+### Fit a regression model in the full training set
+
+No resampling is needed because there are no hyperparameters or model configurations we're considering.
+```{r fit_linear}
+fit_linear <- NA
+```
+
+### Get RMSE in train & test using rmse_vec()
+
+Error in data_trn:
+```{r linear_err_trn}
+
+```
+
+Error in data_test:
+```{r linear_err_test}
+
+```
+
+How does performance compare in training and test? Type your response between the asterisks.
+
+*Type your response here*
+
+## Part 2: Fitting a LASSO regression
+
+### Set up a hyperparameter grid
+
+In the LASSO, the mixture hyperparameter (alpha) will be set to 1, but we'll need to tune the penalty hyperparameter (lambda). 
+```{r grid_penalty}
+grid_penalty <- expand_grid(penalty = exp(seq(-4, 4, length.out = 25)))
+```
+
+### Tune a LASSO regression
+
+Use linear_reg(), set_engine("glmnet"), and tune_grid() to tune your LASSO model.
+```{r tune_lasso}
+fits_lasso <- NA
+```
+
+### Plot performance in the validation sets by hyperparameter
+
+Use the plot_hyperparameters() function in fun_modeling.R or your own code.
+```{r plot_lasso}
+
+```
+
+### Fit your best configuration in data_trn
+
+Use your best configuration (i.e., your best lambda value) to fit a model in the full training set (data_trn) using select_best().
+```{r fit_lasso}
+fit_lasso <- NA
+```
+
+### Examine parameter estimates
+
+```{r parameter_lasso}
+
+```
+
+How many features were retained (i.e., parameter estimates not dropped to zero) in this model? How does this compare to the OLS linear regression? Type your response between the asterisks.
+
+*Type your response here*
+
+### Get RMSE in train & test using rmse_vec()
+
+Error in data_trn:
+```{r lasso_err_trn}
+
+```
+
+Error in data_test:
+```{r lasso_err_test}
+
+```
+
+How does performance compare in training and test for LASSO? Type your response between the asterisks.
+
+*Type your response here*
+
+## Part 3: Fitting an Elastic Net regression
+
+### Set up a hyperparameter grid
+
+Now we'll need to tune both the mixture hyperparameter (alpha) and the penalty hyperparameter (lambda). 
+```{r grid_glmnet}
+grid_glmnet <- expand_grid(penalty = exp(seq(-4, 4, length.out = 25)),
+                           mixture = seq(0, 1, length.out = 6))
+```
+
+### Tune a LASSO regression
+
+Use linear_reg(), set_engine("glmnet"), and tune_grid() to tune your LASSO model.
+```{r tune_glmnet}
+fits_glmnet <- NA
+```
+
+### Plot performance in the validation sets by hyperparameter
+
+Use the plot_hyperparameters() function or your own code.
+```{r plot_glmnet}
+
+```
+
+### Fit your best configuration in data_trn
+
+Use your best configuration (i.e., your best combination of alpha & lambda values) to fit a model in the full training set (data_trn) using select_best().
+```{r fit_glmnet}
+fit_glmnet <- NA
+```
+
+### Examine parameter estimates
+
+```{r parameter_glmnet}
+
+```
+
+How many features were retained (i.e., parameter estimates not dropped to zero) in this model? How does this compare to the LASSO? Type your response between the asterisks.
+
+*Type your response here*
+
+### Get RMSE in train & test using rmse_vec()
+
+Error in data_trn:
+```{r glmnet_err_trn}
+
+```
+
+Error in data_test:
+```{r glmnet_err_test}
+
+```
+
+How does performance compare in training and test for the glmnet? Type your response between the asterisks.
+
+*Type your response here*
+
+Looking back across the OLS linear regression, the LASSO regression, and the elastic net regression, what comparisons can you make about performance in training, performance in test, evidence of overfitting, etc.? Which model configuration would you select and why? Type your response between the asterisks.
+
+*Type your response here*
+
+## Save & knit
+
+Save this .Rmd file with your last name at the end (e.g., hw_unit_6_regularization_fronk). Make sure you changed "Your name here" at the top of the file to be your own name. Knit the file to .html, and upload the knit file to Canvas. 
+
+**Way to go!!**

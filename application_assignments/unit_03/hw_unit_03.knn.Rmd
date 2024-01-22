@@ -1,0 +1,305 @@
+---
+title: "Homework Unit 3: KNN"
+author: "Your name here"
+date: "`r lubridate::today()`"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+Welcome to the KNN portion of your Unit 3 homework! Make sure to enter your first and last name at the top of this document in the usual place.
+
+This homework aligns with **Unit 3 Exploratory Introduction to Regression Models** in the course web book, where you can download all materials required for this assignment:
+
+**Two RMarkdown files (`hw_unit_3_glm.Rmd` and `hw_unit_3_knn.Rmd`):** 
+We will have separate files for fitting `glm` and `knn` models for this homework. The order in which you complete these does not matter; both contain all instructions needed for the assignment.
+
+**`ames_train_cln.csv`**:
+The `.csv` file containing the cleaned training data to be used for this assignment.
+
+**`ames_val_cln.csv`**:
+The `.csv` file containing the cleaned validation data to be used for this assignment.
+
+**`ames_test_cln.csv`**:
+The `.csv` file containing the cleaned test data to be used for this assignment. sale_price has been removed from this file.
+
+**`ames_data_dictionary.pdf`:**
+The data dictionary describing variables contained in the data set.
+
+**`fun_modeling.R`:**
+A script containing functions written by John that are demoed in the course text.
+
+## **General Instructions** 
+The goal of this assignment is to create the best regression model you can to predict housing sale prices in the Ames data set. To build this model, you will have all variables used by John in the unit 2 & 3 web book to demo EDA and Regression Models, as well as all variables that you performed EDA on yourself in the unit 2 homework assignment.
+
+An extraordinary graduate student combined the EDA cleaning steps from the assignment and web book data to provide you with three data files (training, validation, and test) containing all cleaned variables that you need for this assignment.
+
+Using `ames_train_cln` as your starting point, your job is to use simple feature engineering techniques (e.g. selecting among variables, transforming variables, coding categorical variables, adding interactions) to iteratively train and compare multiple `glm` and `knn` models. **This is the script for training `knn` models.** You do not need to perform any additional cleaning EDA, but you may continue to add on to your homework 2 EDA modeling script as you consider different feature engineering approaches. You do not need to turn in any additional modeling EDA code you complete.
+
+At the end of this assignment, you will select your best performing model across all `glm` and `knn` models you fit. You will use `ames_test_cln` *only once* at the end of the assignment to generate your best model's predictions of `sale_price` in the held out test set. The TAs will assess everyone's predictions on the held-out set to determine the best fitting model in the class.  **The winner gets a real high five from John in front of the whole class and... a FREE LUNCH!!**
+
+Lets get started.
+
+## 0 **Set up and load data**
+
+### 0.1  Load required packages and source
+```{r packages}
+library(tidymodels) # for modeling
+library(tidyverse) # for general data wrangling
+library(purrr)  # for iteration using map() and walk() variants
+library(kableExtra) # for displaying formatted tables w/ kbl()
+library(skimr) # for skim()
+
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_modeling.R?raw=true")
+
+```
+
+### 0.2 Paths
+
+Use `here` and relative path for your data.  Make sure your iaml project is open
+```{r path}
+library(here)
+path_data <- "homework/unit_3"
+```
+
+### 0.3 Load data
+
+Load the cleaned training, validation, and test data files. **Please load your data using the filenames provided**.
+```{r load-data}
+data_trn <- 
+  
+data_val <- 
+  
+data_test <- 
+```
+
+### 0.4 Create tracking tibble
+
+Create a tibble to track the validation errors across the various model configurations you will fit.
+```{r}
+error_val <- tibble(model = character(), rmse_val = numeric()) %>% 
+  glimpse()
+```
+
+
+## **KNN Model building instructions**
+
+You may consider as many KNN model configurations as you wish, but there are a few rules:
+
+* All models must predict **raw** `sale_price` (e.g. do not transform the outcome variable)
+
+* You must build a minimum of 3 models
+
+* At least one model must include two or more range corrected numeric predictors
+
+* At least one model must include a categorical predictor with more than two levels
+
+* At least one model must include a categorical variable with levels that have been modified during feature engineering (NOT including dummy coding)
+
+* At least one model should vary values of *k*
+
+Your models may include as many other predictors as you would like (e.g. your model satisfying the 2 numeric predictors requirement may also include categorical variables, more than 2 numeric variables, etc.) so be as creative as you'd like!
+
+
+## **KNN 1**
+
+List out which required model components you are including for your first model (delete ones that do not apply):
+*2+ numeric predictors*
+*Categorical > 2 levels*
+*Modified categorical*
+*Varied `k`*
+
+### 1.1 Set up recipe
+
+Informed by EDA from your modeling EDA script, create a recipe for your first model.
+```{r recipe-1}
+```
+
+### 1.2 Training feature matrix
+
+Use `make_features()` to generate the feature matrix of the training data.
+```{r features-train-1}
+```
+
+### 1.3 Fit your model
+
+Fit a `knn` model predicting raw `sale_price` from your training feature matrix.
+```{r fit-model-1}
+```
+
+### 1.4 Validation feature matrix
+
+Use `make_features()` to generate the feature matrix of the validation data that we will use to assess your model.
+```{r features-val-1}
+```
+
+### 1.5 Assess your model
+
+Use `rmse_vec()` to calculate the validation error (RMSE) of your model. Add this value to your validation error tracking tibble.
+```{r assess-mod-1}
+```
+
+### 1.6 Visualize performance
+
+Visualize the relationship between raw and predicted sale price in your validation set using the `plot_truth()` function.
+```{r vis-mod-1}
+```
+
+## **KNN 2**
+
+List out which required model components you are including for your next model (delete ones that do not apply):
+*2+ numeric predictors*
+*Categorical > 2 levels*
+*Modified categorical*
+*Varied `k`*
+
+### 2.1 Set up recipe
+
+Informed by EDA from your modeling EDA script, create a recipe for your next model.
+```{r recipe-2}
+```
+
+### 2.2 Training feature matrix
+
+Use the `make_features()` function to generate the feature matrix of the training data.
+```{r features-train-2}
+```
+
+### 2.3 Fit your model
+
+Fit a `knn` model predicting raw `sale_price` from your training feature matrix.
+```{r fit-model-2}
+```
+
+### 2.4 Validation feature matrix
+
+Use `make_features()` to generate the feature matrix of the validation data that we will use to assess your model.
+```{r features-val-2}
+```
+
+### 2.5 Assess your model
+
+Use the `rmse_vec()` function to calculate the validation error (RMSE) of your model. Add this value to your validation error tracking tibble.
+```{r assess-mod-2}
+```
+
+### 2.6 Visualize performance
+
+Visualize the relationship between raw and predicted `sale_price` in your validation set using `plot_truth()`.
+```{r vis-mod-2}
+```
+
+## **KNN 3**
+
+List out which required model components you are including for your next model (delete ones that do not apply):
+*2+ numeric predictors*
+*Categorical > 2 levels*
+*Modified categorical*
+*Varied `k`*
+
+### 3.1 Set up recipe
+
+Informed by EDA from your modeling EDA script, create a recipe for your next model.
+```{r recipe-3}
+```
+
+### 3.2 Training feature matrix
+
+Use `make_features()` to generate the feature matrix of the training data.
+```{r features-train-3}
+```
+
+### 3.3 Fit your model
+
+Fit a `knn` model predicting raw `sale_price` from your training feature matrix.
+```{r fit-model-3}
+```
+
+### 3.4 Validation feature matrix
+
+Use `make_features()` to generate the feature matrix of the validation data that we will use to assess your model.
+```{r features-val-3}
+```
+
+### 3.5 Assess your model
+Use `rmse_vec()` to calculate the validation error (RMSE) of your model. Add this value to your validation error tracking tibble.
+```{r assess-mod-3}
+```
+
+### 3.6 Visualize performance
+Visualize the relationship between raw and predicted `sale_price` in your validation set using `plot_truth()`.
+```{r vis-mod-3}
+```
+
+## 4 **Additional configurations**
+
+Create as many code chunks as you would like below to test additional linear model configurations. Record your models' performance in your validation error tracking tibble.
+
+```{r additional-lms}
+```
+
+
+
+## 5 **Predictions**
+This section is for generating predictions for your best model in the held out test set. **You should only generate predictions for ONE model out of all `glm` and `knn` models you fit across both homework `.Rmd` files.** The TAs will use these predictions to generate your ONE estimate of model performance in the held out data.
+
+### 5.1 Assign best model
+
+If your **best** model is a `knn` from this script, edit the following objects in the code chunk below:
+
+* Rename your model as `best_model`.
+
+* Copy and paste the recipe for your best model (created from the training data) to assign to `best_rec` below.
+
+* Type your last name between the quotation marks of last_name (e.g. "santana") for file naming.
+
+If your best model is a `glm`, don't edit anything in the next two code chunks and skip to section 6.
+```{r assign-best}
+
+best_model <- NA
+
+best_rec <- NA
+
+last_name <- ""
+
+```
+
+### 5.2 Generate test predictions
+
+Run this code chunk to save out your best model's predictions of raw `sale_price` in the held-out test set. Look over your predictions to confirm your model generated valid predictions for each test observation.
+(If you left `best_model` as NA above, no file will be saved out)
+
+```{pred-test}
+
+if (!all(is.na(best_model))){
+
+ # Make test set features with the best recipe
+  feat_test <- best_rec %>% 
+    make_features(data_trn, data_test) 
+  
+ # Generate predictions made by the best model
+  test_preds <- data_test %>% 
+    mutate(sale_price = predict(best_model, feat_test)) %>% 
+    select(pid, sale_price) #pid is the id variable to match predictions
+  
+  # Save predictions as a csv file with your last name in the file name
+   write_csv(test_preds, file.path(path_data,str_c("test_preds_",last_name,".csv")))
+}
+```
+
+
+## **6 Save, knit, upload, and remember**
+
+### 6.1 Save
+Save this `.Rmd` file with your last name at the end (e.g. `hw_unit_3_knn_santana.Rmd`)
+
+### 6.2 Knit
+Knit the file to html and upload your knit html file to Canvas. 
+
+### 6.3 Upload
+Upload your saved `test_preds_(lastname).csv` (if you created it in this script) to Canvas. We will assess everyones predictions in the test set. **The winner gets a high five from John in front of the whole class as well as a free lunch!!!**
+
+### 6.4 Remember...there's more
+Don't forget to complete the `glm` portion of this assignment (`hw_unit_3_glm.Rmd`) as well.
+
+**~ ~ ~ You are indeed a machine learning star - and we are proud of you for it ~ ~ ~**

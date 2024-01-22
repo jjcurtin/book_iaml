@@ -1,0 +1,39 @@
+---
+title: "Keras on Windows"
+output: html_document
+date: "2023-04-03"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Overview
+Follow the steps below to install keras in R as well as the backend software that lets you use keras in R. Take a little extra time to get things working in R before the start of the unit so you can start on the homework once it is released.
+
+## Install keras package in R
+1. Open RStudio.
+
+2. Run `install.packages("keras")`
+
+3. Once installed, run `library(keras)`.
+
+4. In order to run keras you then need to install the backend. Run `install_keras()`. You will be prompted to install a software called Miniconda. It is a distribution of the python language and a number of libraries, including tensorflow and keras - all of which we need to run ANNs. If you are comfortable installing this software, select Yes/Y. This installation process may take a few minutes, and will result in about 6GB of disk space used.
+
+5. Restart your R session (Session > Restart R)
+
+## Test for install
+6. Run `library(keras)` command again to load the package.
+
+7. Run `backend()`. It should return something like `Module(tensorflow_core.keras.backend)` or `Module(keras.api._v2.keras.backend)`. If it doesn't, or if it provides a warning or error that suggests that tensorflow was not installed, reach out to the instructors.
+
+## Common problems
+The most common problem with getting keras/tensorflow to run in R (assuming you've followed the steps above) has to do with keras using the correct distribution of python on your computer (which typically results from having more than one distribution of python on your machine). You'll be alerted to this by an error message that tells you that keras/tensorflow isn't installed on your computer (even though you installed it above). This can be solved with the function `keras::use_condaenv()`, where the obligatory argument of this function is a path to the miniconda environment you created in step 4. Alternatively, you can use `keras::use_python()` where instead you provide the path to the specific version of python _within_ the miniconda installed in step 4. The challenge is finding the path to put as the first argument to either of these functions. If this comes up and you need help, reach out to the instructors.
+
+## Trying it out
+Feel free to test out your new library with the tutorial for MNIST [here](https://cran.r-project.org/web/packages/keras/vignettes/index.html), or follow along with Lecture 6 in the Unit 11 lectures. Note that if you use the vignette linked above, it is not in `tidymodels`, so the code looks different than what you'll see in the homework, but would still be worthwhile (especially because it shows you output that looks like what you would see in `python`).
+
+## Remember
+If you run into trouble above, reach out on Slack. We will hold a special session with the group to focus on installation if need be. Likewise, you can reach out to the tutorial author mcooperborkenhagen@fsu.edu for support.
+
+
