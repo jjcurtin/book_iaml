@@ -50,9 +50,11 @@ Notes: You can adjust the playback speed of the videos to meet your needs.  Clos
 
 - [Lecture 1: An Introductory Framework](https://mediaspace.wisc.edu/media/iaml_1-1/1_pii1hb1q) ~ 9 mins
 - [Lecture 2: More Details on Supervised Techniques](https://mediaspace.wisc.edu/media/iaml_1-2/1_5e1iz7aa) ~ 23 mins
-- [Lecture 3: Key Terminology in Context]()
+- [Lecture 3: Key Terminology in Context](https://mediaspace.wisc.edu/media/iaml+1-3/1_3ebheuao) ~ 11 mins
 - [Lecture 4: An Example of Bias-Variance Tradeoff]()
-- [Discussion]()
+
+- [Discussion 1]()
+- [Discussion 2]()
 
 ### Quiz and Application Assignment
 
@@ -350,7 +352,6 @@ The code in this example is secondary to understanding the concepts of underfitt
 - We will not display much of it so that you can maintain focus on the concepts
 - You will have plenty of time to learn the underlying 
 
-
 -----
 
 When modeling, our goal is typically to approximate the **data generating process (DGP)** as close as possible, but in the real world we never know the true DGP. 
@@ -375,7 +376,6 @@ We will attempt to model this cubic DGP with three different model configuration
 - A (20th order) **polynomial linear model** that uses 20 polynomials of $X$ as features
 - A (20th order) **polynomial LASSO model** that uses the same 20 polynomials of $X$ as features but "regularizes" to remove unimportant features from the model
 
------
 
 ::: {.callout-important collapse="false"}
 ### Question: If the DGP for y is a cubic function of x, what do we know about the expected bias for our three candidate model configurations in this example?
@@ -561,11 +561,10 @@ add_preds_test <- function(model_list, model_name, trains, test){
 
 With that introduction complete, lets start our simulation of the bias-variance trade-off
 
-1. We get four random samples of **training** data to fit models  
+1.  Lets simulate four separate research teams, each working to estimate the DGP for Y
 
-- In other words, we are simulating four separate studies where the researcher in each study is trying to develop a prediction model for Y using a sample of training data  
-
-- Here are plots of these four simulated training sets with a dotted line for the data generating process (DGP)
+- Each team will get their own random sample of **training** data (N = 100) to fit models  
+- Here are plots of these four simulated training sets (one for each team) with a dotted line for the data generating process (DGP)
 
 ```{r u1-ex1-9}
 #| echo: false
@@ -590,7 +589,10 @@ walk2(trains$df, titles, ~ plot_data(data = .x,
 
 -----
 
-2. We get one more large random sample (N = 5000) with the same DGP to use as a test set to evaluate all the models that will be fit in the training sample across all of the simulations.
+2. We get one more large random sample (N = 5000) with the same DGP to use as a test set to evaluate all the models that will be fit in the separate training sets across the four teams.  
+
+- We will let each team use this same test set to keep things simple
+- The key is that the test set contains new observations not present in any of the training sets
 
 ```{r u1-ex1-11}
 #| echo: false
@@ -605,9 +607,9 @@ plot_data(data = test,
 
 -----
 
-3. We fit the three model configurations in each of the four simulated training sets
+3. Each of the four teams fit their three model configurations in their training sets
 
-4. We use the resulting models to make predictions for observations in the same training set in which they were fit
+4. They use the resulting models to make predictions for observations in the same training set in which they were fit
 
 
 ```{r u1-ex1-12}
@@ -648,7 +650,7 @@ walk2(trains$df, titles,
 #| code-summary: "Show Answer"
 The simple linear model is clearly biased.  It systemically underestimates Y in 
 some portions of the X distribution and overestimates Y in other portions of the 
-X distribution.  This is true across training sets.
+X distribution.  This is true across training sets for all teams.
 ```
 :::
 
@@ -659,27 +661,26 @@ X distribution.  This is true across training sets.
 #| code-fold: true
 #| code-summary: "Show Answer"
 The polynomial linear model appears to overfit the data in the training set.  In 
-other words, it seems to follow both the signal/DGP and the noise.  However, you
-can't be certain of this with only one training set and without knowing the DGP.  
-It is possible that the wiggles in the prediction line represent the real DGP.  
-You will need a test set to be certain about the degree of overfitting.
+other words, it seems to follow both the signal/DGP and the noise.  However, in practice
+none of the teams could not be certain of this with only their training set.  It is
+possible that the wiggles in the prediction line represent the real DGP.   They need
+to look at the model's performance in the test set to be certain about the degree of
+overfitting.  (Of course, we know because these are simulated data and we know the DGP.)
 ```
 :::
 
-
 -----
 
-5. We use these same models (3 model configurations fit to 4 different training sets) 
-to make predictions for new observations in the test set
+5.  Now the teams use their 3 trained models to make predictions for new observations in the test set
   
   - Remember that the **test set has NEW observations of X and Y** that weren’t used 
 for fitting any of the models. 
 
-  - Lets look at each model configurations performance in test separately
+  - Lets look at each model configuration's performance in test separately
 
 -----
 
-- Here are predictions from the four **simple linear models** (fit in each of the four training sets) in the **test set**
+- Here are predictions from the four **simple linear models** (fit in the training sets for each team) in the **test set**
 
 ```{r u1-ex1-15}
 #| echo: false
@@ -718,7 +719,6 @@ large contribution to the reducible error of the model
 :::
 
 
-
 ::: {.callout-important collapse="false"}
 ### Question: How much variance across the simple linear models is present?
 ```{html}
@@ -726,17 +726,17 @@ large contribution to the reducible error of the model
 #| code-fold: true
 #| code-summary: "Show Answer"
 There is not much variance in the prediction lines across the models that were 
-fit to different training sets.  The slopes are very close across models and the
-intercepts only vary by a small amount.   The simple linear model configuration 
-does not appear to have high variance and model variance will not contribute much
-to its reducible error.
+fit by different teams in different training sets.  The slopes are very close across
+the different team's models and the intercepts only vary by a small amount.   
+The simple linear model configuration does not appear to have high variance (across teams) 
+and therefore model variance will not contribute much to its reducible error.
 ```
 :::
 
 
 -----
 
-- Here are predictions from the four **polynomial linear models** in the **test set**
+- Here are predictions from the **polynomial linear models** from the four teams in the **test set**
 
 ```{r u1-ex1-16b}
 #| echo: false
@@ -757,8 +757,9 @@ plot_data(data = test,
 #| echo: true
 #| code-fold: true
 #| code-summary: "Show Answer"
-There is not much systematic bias.  The overall function is generally cubic as 
-is the DGP. Bias will not contribute much to the model's reducible error.
+There is not much systematic bias.  The overall function is generally cubic for 
+all four teams  - just like the DGP. Bias will not contribute much to the model's 
+reducible error.
 ```
 :::
 
@@ -772,10 +773,9 @@ is the DGP. Bias will not contribute much to the model's reducible error.
 There is much higher model variance for this polynomial linear model relative to 
 the simple linear model. Although all four models generally predict Y as a cubic
 function of X, there is also a non-systematic wiggle that is different for each 
-of the models.
+team's models.
 ```
 :::
-
 
 
 ::: {.callout-important collapse="false"}
@@ -784,10 +784,10 @@ of the models.
 #| echo: true
 #| code-fold: true
 #| code-summary: "Show Answer"
-Model variance is a result of overfitting to the training set.  If a model fits 
-noise in its training set, that noise will be different in every dataset.  Therefore,
-you end up with different models depending on the training set in which they are 
-fit.  And none of those models will do well with new data as you can see in this
+Model variance (across teams) is a result of overfitting to the training set.  
+If a model fits noise in its training set, that noise will be different in every dataset.
+Therefore, you end up with different models depending on the training set in which they 
+are fit.  And none of those models will do well with new data as you can see in this
 test set because noise is random and different in each dataset.
 ```
 :::
@@ -795,7 +795,7 @@ test set because noise is random and different in each dataset.
 
 -----
 
-- Here are predictions from the four **polynomial LASSO models** in the **test set**
+- Here are predictions from the **polynomial LASSO models** from each team in the **test set**
 
 ```{r  u1-ex1-16c}
 #| echo: false
@@ -816,8 +816,8 @@ plot_data(data = test,
 #| echo: true
 #| code-fold: true
 #| code-summary: "Show Answer"
-It has low bias much like the polynomial linear model.  It is able to capture 
-the true cubic DGP fairly well.  The regularization process slightly reduced the
+The LASSO models have low bias much like the polynomial linear model. They are able 
+to capture the true cubic DGP fairly well.  The regularization process slightly reduced the
 magnitude of the cubic (the prediction line is a little straighter than it should be),
 but not by much.
 ```
@@ -830,9 +830,10 @@ but not by much.
 #| echo: true
 #| code-fold: true
 #| code-summary: "Show Answer"
-All four LASSO models, fit in different training sets, resulted in very similar prediction lines.  
-Therefore, these LASSO models have low variance, much like the simple linear model. 
-In contrast, the LASSO model variance is clearly lower than the polynomimal model.
+All four LASSO models, fit in different training sets, resulted in very similar 
+prediction lines. Therefore, these LASSO models have low variance, much like the simple linear model. 
+In contrast, the LASSO model variance is clearly lower than the more flexible 
+polynomimal model.
 ```
 :::
 
@@ -847,9 +848,9 @@ In contrast, the LASSO model variance is clearly lower than the polynomimal mode
 #| code-fold: true
 #| code-summary: "Show Answer"
 The simple linear model is underfit to the TRUE DGP.  Therfore it is 
-systematically biased everywhere it is use and won’t even fit train for this reason.
-However, it’s not very flexible so it won’t be overfit to the noise in train and
-therefore should fit comparably in test.  
+systematically biased everywhere it is used.  It won't fit well in train or test 
+for this reason.  However, it’s not very flexible so it won’t be overfit to the noise 
+in train and therefore should fit comparably in train and test.  
 
 The polynomial linear model will not be biased at all given that the DGP is polynomial.  
 However, it is overly flexible (20th order) and so will substantially overfit the 

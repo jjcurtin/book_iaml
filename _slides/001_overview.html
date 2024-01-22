@@ -453,11 +453,12 @@
 <h3 id="lecture-discussion-videos">Lecture &amp; Discussion Videos</h3>
 <p>Notes: You can adjust the playback speed of the videos to meet your needs. Closed captioning is also available for all videos.</p>
 <ul>
-<li><a href="https://mediaspace.wisc.edu/media/iaml_1-1/1_pii1hb1q">Lecture 1: An Introductory Framework</a> ~ 9 mins</li>
-<li><a href="https://mediaspace.wisc.edu/media/iaml_1-2/1_5e1iz7aa">Lecture 2: More Details on Supervised Techniques</a> ~ 23 mins</li>
-<li><a href="">Lecture 3: Key Terminology in Context</a></li>
-<li><a href="">Lecture 4: An Example of Bias-Variance Tradeoff</a></li>
-<li><a href="">Discussion</a></li>
+<li><p><a href="https://mediaspace.wisc.edu/media/iaml_1-1/1_pii1hb1q">Lecture 1: An Introductory Framework</a> ~ 9 mins</p></li>
+<li><p><a href="https://mediaspace.wisc.edu/media/iaml_1-2/1_5e1iz7aa">Lecture 2: More Details on Supervised Techniques</a> ~ 23 mins</p></li>
+<li><p><a href="https://mediaspace.wisc.edu/media/iaml+1-3/1_3ebheuao">Lecture 3: Key Terminology in Context</a> ~ 11 mins</p></li>
+<li><p><a href="">Lecture 4: An Example of Bias-Variance Tradeoff</a></p></li>
+<li><p><a href="">Discussion 1</a></p></li>
+<li><p><a href="">Discussion 2</a></p></li>
 </ul>
 <h3 id="quiz-and-application-assignment">Quiz and Application Assignment</h3>
 <ul>
@@ -780,9 +781,6 @@
 <li>A (20th order) <strong>polynomial linear model</strong> that uses 20 polynomials of <span class="math inline">\(X\)</span> as features</li>
 <li>A (20th order) <strong>polynomial LASSO model</strong> that uses the same 20 polynomials of <span class="math inline">\(X\)</span> as features but “regularizes” to remove unimportant features from the model</li>
 </ul>
-</section>
-<section class="slide level2">
-
 <div class="callout callout-important no-icon callout-captioned callout-style-default">
 <div class="callout-body">
 <div class="callout-caption">
@@ -825,11 +823,12 @@
 <h3 id="stimulation-steps">Stimulation Steps</h3>
 <p>With that introduction complete, lets start our simulation of the bias-variance trade-off</p>
 <ol type="1">
-<li>We get four random samples of <strong>training</strong> data to fit models</li>
+<li>Lets simulate four separate research teams, each working to estimate the DGP for Y</li>
 </ol>
 <ul>
-<li><p>In other words, we are simulating four separate studies where the researcher in each study is trying to develop a prediction model for Y using a sample of training data</p></li>
-<li><p>Here are plots of these four simulated training sets with a dotted line for the data generating process (DGP)</p></li>
+<li>Each team will get their own random sample of <strong>training</strong> data (N = 100) to fit models<br>
+</li>
+<li>Here are plots of these four simulated training sets (one for each team) with a dotted line for the data generating process (DGP)</li>
 </ul>
 <div class="cell quarto-layout-panel">
 <div class="quarto-layout-row quarto-layout-valign-top">
@@ -853,15 +852,19 @@
 <section class="slide level2">
 
 <ol start="2" type="1">
-<li>We get one more large random sample (N = 5000) with the same DGP to use as a test set to evaluate all the models that will be fit in the training sample across all of the simulations.</li>
+<li>We get one more large random sample (N = 5000) with the same DGP to use as a test set to evaluate all the models that will be fit in the separate training sets across the four teams.</li>
 </ol>
+<ul>
+<li>We will let each team use this same test set to keep things simple</li>
+<li>The key is that the test set contains new observations not present in any of the training sets</li>
+</ul>
 
 <img data-src="001_overview_files/figure-revealjs/u1-ex1-11-1.png" width="960" class="r-stretch"></section>
 <section class="slide level2">
 
 <ol start="3" type="1">
-<li><p>We fit the three model configurations in each of the four simulated training sets</p></li>
-<li><p>We use the resulting models to make predictions for observations in the same training set in which they were fit</p></li>
+<li><p>Each of the four teams fit their three model configurations in their training sets</p></li>
+<li><p>They use the resulting models to make predictions for observations in the same training set in which they were fit</p></li>
 </ol>
 <div class="cell quarto-layout-panel">
 <div class="quarto-layout-row quarto-layout-valign-top">
@@ -892,7 +895,7 @@
 <summary>Show Answer</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb2-1"><a href="#cb2-1"></a>The simple linear model is clearly biased.  It systemically underestimates Y in </span>
 <span id="cb2-2"><a href="#cb2-2"></a>some portions of the X distribution and overestimates Y in other portions of the </span>
-<span id="cb2-3"><a href="#cb2-3"></a>X distribution.  This is true across training sets.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-3"><a href="#cb2-3"></a>X distribution.  This is true across training sets for all teams.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -908,10 +911,11 @@
 <details>
 <summary>Show Answer</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb3-1"><a href="#cb3-1"></a>The polynomial linear model appears to overfit the data in the training set.  In </span>
-<span id="cb3-2"><a href="#cb3-2"></a>other words, it seems to follow both the signal/DGP and the noise.  However, you</span>
-<span id="cb3-3"><a href="#cb3-3"></a>can't be certain of this with only one training set and without knowing the DGP.  </span>
-<span id="cb3-4"><a href="#cb3-4"></a>It is possible that the wiggles in the prediction line represent the real DGP.  </span>
-<span id="cb3-5"><a href="#cb3-5"></a>You will need a test set to be certain about the degree of overfitting.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-2"><a href="#cb3-2"></a>other words, it seems to follow both the signal/DGP and the noise.  However, in practice</span>
+<span id="cb3-3"><a href="#cb3-3"></a>none of the teams could not be certain of this with only their training set.  It is</span>
+<span id="cb3-4"><a href="#cb3-4"></a>possible that the wiggles in the prediction line represent the real DGP.   They need</span>
+<span id="cb3-5"><a href="#cb3-5"></a>to look at the model's performance in the test set to be certain about the degree of</span>
+<span id="cb3-6"><a href="#cb3-6"></a>overfitting.  (Of course, we know because these are simulated data and we know the DGP.)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -921,17 +925,17 @@
 <section class="slide level2">
 
 <ol start="5" type="1">
-<li>We use these same models (3 model configurations fit to 4 different training sets) to make predictions for new observations in the test set</li>
+<li>Now the teams use their 3 trained models to make predictions for new observations in the test set</li>
 </ol>
 <ul>
 <li><p>Remember that the <strong>test set has NEW observations of X and Y</strong> that weren’t used for fitting any of the models.</p></li>
-<li><p>Lets look at each model configurations performance in test separately</p></li>
+<li><p>Lets look at each model configuration’s performance in test separately</p></li>
 </ul>
 </section>
 <section class="slide level2">
 
 <ul>
-<li>Here are predictions from the four <strong>simple linear models</strong> (fit in each of the four training sets) in the <strong>test set</strong></li>
+<li>Here are predictions from the four <strong>simple linear models</strong> (fit in the training sets for each team) in the <strong>test set</strong></li>
 </ul>
 <div class="cell">
 <div class="cell-output-display">
@@ -967,10 +971,10 @@
 <details>
 <summary>Show Answer</summary>
 <div class="sourceCode cell-code" id="cb5"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb5-1"><a href="#cb5-1"></a>There is not much variance in the prediction lines across the models that were </span>
-<span id="cb5-2"><a href="#cb5-2"></a>fit to different training sets.  The slopes are very close across models and the</span>
-<span id="cb5-3"><a href="#cb5-3"></a>intercepts only vary by a small amount.   The simple linear model configuration </span>
-<span id="cb5-4"><a href="#cb5-4"></a>does not appear to have high variance and model variance will not contribute much</span>
-<span id="cb5-5"><a href="#cb5-5"></a>to its reducible error.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb5-2"><a href="#cb5-2"></a>fit by different teams in different training sets.  The slopes are very close across</span>
+<span id="cb5-3"><a href="#cb5-3"></a>the different team's models and the intercepts only vary by a small amount.   </span>
+<span id="cb5-4"><a href="#cb5-4"></a>The simple linear model configuration does not appear to have high variance (across teams) </span>
+<span id="cb5-5"><a href="#cb5-5"></a>and therefore model variance will not contribute much to its reducible error.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -980,7 +984,7 @@
 <section class="slide level2">
 
 <ul>
-<li>Here are predictions from the four <strong>polynomial linear models</strong> in the <strong>test set</strong></li>
+<li>Here are predictions from the <strong>polynomial linear models</strong> from the four teams in the <strong>test set</strong></li>
 </ul>
 <div class="cell">
 <div class="cell-output-display">
@@ -996,8 +1000,9 @@
 <div class="cell">
 <details>
 <summary>Show Answer</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb6-1"><a href="#cb6-1"></a>There is not much systematic bias.  The overall function is generally cubic as </span>
-<span id="cb6-2"><a href="#cb6-2"></a>is the DGP. Bias will not contribute much to the model's reducible error.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb6-1"><a href="#cb6-1"></a>There is not much systematic bias.  The overall function is generally cubic for </span>
+<span id="cb6-2"><a href="#cb6-2"></a>all four teams  - just like the DGP. Bias will not contribute much to the model's </span>
+<span id="cb6-3"><a href="#cb6-3"></a>reducible error.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -1015,7 +1020,7 @@
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb7-1"><a href="#cb7-1"></a>There is much higher model variance for this polynomial linear model relative to </span>
 <span id="cb7-2"><a href="#cb7-2"></a>the simple linear model. Although all four models generally predict Y as a cubic</span>
 <span id="cb7-3"><a href="#cb7-3"></a>function of X, there is also a non-systematic wiggle that is different for each </span>
-<span id="cb7-4"><a href="#cb7-4"></a>of the models.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb7-4"><a href="#cb7-4"></a>team's models.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -1030,10 +1035,10 @@
 <div class="cell">
 <details>
 <summary>Show Answer</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb8-1"><a href="#cb8-1"></a>Model variance is a result of overfitting to the training set.  If a model fits </span>
-<span id="cb8-2"><a href="#cb8-2"></a>noise in its training set, that noise will be different in every dataset.  Therefore,</span>
-<span id="cb8-3"><a href="#cb8-3"></a>you end up with different models depending on the training set in which they are </span>
-<span id="cb8-4"><a href="#cb8-4"></a>fit.  And none of those models will do well with new data as you can see in this</span>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb8-1"><a href="#cb8-1"></a>Model variance (across teams) is a result of overfitting to the training set.  </span>
+<span id="cb8-2"><a href="#cb8-2"></a>If a model fits noise in its training set, that noise will be different in every dataset.</span>
+<span id="cb8-3"><a href="#cb8-3"></a>Therefore, you end up with different models depending on the training set in which they </span>
+<span id="cb8-4"><a href="#cb8-4"></a>are fit.  And none of those models will do well with new data as you can see in this</span>
 <span id="cb8-5"><a href="#cb8-5"></a>test set because noise is random and different in each dataset.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
@@ -1044,7 +1049,7 @@
 <section class="slide level2">
 
 <ul>
-<li>Here are predictions from the four <strong>polynomial LASSO models</strong> in the <strong>test set</strong></li>
+<li>Here are predictions from the <strong>polynomial LASSO models</strong> from each team in the <strong>test set</strong></li>
 </ul>
 <div class="cell">
 <div class="cell-output-display">
@@ -1060,8 +1065,8 @@
 <div class="cell">
 <details>
 <summary>Show Answer</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb9-1"><a href="#cb9-1"></a>It has low bias much like the polynomial linear model.  It is able to capture </span>
-<span id="cb9-2"><a href="#cb9-2"></a>the true cubic DGP fairly well.  The regularization process slightly reduced the</span>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb9-1"><a href="#cb9-1"></a>The LASSO models have low bias much like the polynomial linear model. They are able </span>
+<span id="cb9-2"><a href="#cb9-2"></a>to capture the true cubic DGP fairly well.  The regularization process slightly reduced the</span>
 <span id="cb9-3"><a href="#cb9-3"></a>magnitude of the cubic (the prediction line is a little straighter than it should be),</span>
 <span id="cb9-4"><a href="#cb9-4"></a>but not by much.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -1078,9 +1083,10 @@
 <div class="cell">
 <details>
 <summary>Show Answer</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb10-1"><a href="#cb10-1"></a>All four LASSO models, fit in different training sets, resulted in very similar prediction lines.  </span>
-<span id="cb10-2"><a href="#cb10-2"></a>Therefore, these LASSO models have low variance, much like the simple linear model. </span>
-<span id="cb10-3"><a href="#cb10-3"></a>In contrast, the LASSO model variance is clearly lower than the polynomimal model.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb10-1"><a href="#cb10-1"></a>All four LASSO models, fit in different training sets, resulted in very similar </span>
+<span id="cb10-2"><a href="#cb10-2"></a>prediction lines. Therefore, these LASSO models have low variance, much like the simple linear model. </span>
+<span id="cb10-3"><a href="#cb10-3"></a>In contrast, the LASSO model variance is clearly lower than the more flexible </span>
+<span id="cb10-4"><a href="#cb10-4"></a>polynomimal model.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -1102,9 +1108,9 @@
 <details>
 <summary>Show Answer</summary>
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb11-1"><a href="#cb11-1"></a>The simple linear model is underfit to the TRUE DGP.  Therfore it is </span>
-<span id="cb11-2"><a href="#cb11-2"></a>systematically biased everywhere it is use and won’t even fit train for this reason.</span>
-<span id="cb11-3"><a href="#cb11-3"></a>However, it’s not very flexible so it won’t be overfit to the noise in train and</span>
-<span id="cb11-4"><a href="#cb11-4"></a>therefore should fit comparably in test.  </span>
+<span id="cb11-2"><a href="#cb11-2"></a>systematically biased everywhere it is used.  It won't fit well in train or test </span>
+<span id="cb11-3"><a href="#cb11-3"></a>for this reason.  However, it’s not very flexible so it won’t be overfit to the noise </span>
+<span id="cb11-4"><a href="#cb11-4"></a>in train and therefore should fit comparably in train and test.  </span>
 <span id="cb11-5"><a href="#cb11-5"></a></span>
 <span id="cb11-6"><a href="#cb11-6"></a>The polynomial linear model will not be biased at all given that the DGP is polynomial.  </span>
 <span id="cb11-7"><a href="#cb11-7"></a>However, it is overly flexible (20th order) and so will substantially overfit the </span>
