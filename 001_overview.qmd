@@ -261,34 +261,58 @@ Machine learning has emerged in parallel from developments in statistics and com
 - As a result, there is a lot of terminology and often multiple terms used for the same concept.  This is not my fault!  
 - I will try to use one set of terms, but you need to be familiar with other terms you will encounter
 
+-----
+
+When developing a supervised machine learning model to **predict** or **explain** an **outcome** (also called DV, label, output):
+
+- Our goal is for the model to match as close as possible (given the limits due to **irreducible error**) the true data generating process for Y.
+- We typically consider multiple (often many) **candidate model configurations** to achieve this goal.
 
 -----
 
-Developing a supervised machine learning model to **predict** or **explain** an **outcome** (also called DV, label, output) typically entails:
-
-1. Fitting models with multiple candidate model configurations (in **training set(s)**)
-2. Assessing each model and selecting a best configuration (in **validation set(s)**)
-3. Evaluating how well a model with that best configuration will perform with new observations (in **test sets(s)**)
-
------
-
-**Candidate model configurations** can vary with respect to 
+**Candidate model configurations** can vary with respect to:
 
 - the **statistical algorithm** used
 - the algorithm's **hyperparameters**
 - the **features** used in the model to predict the outcome
 
-**Statistical algorithms** can be coarsely categorized as parametric or non-parametric.  But we will mostly focus on a more granular description of the specific algorithm itself (e.g., linear model, generalized linear model, elastic net, LASSO, ridge regression, neural network, KNN, random forest).
+-----
 
-The set of candidate model configurations often includes variations of the same statistical algorithm with different **hyperparameter** (also called tuning parameter) values that control aspects of the algorithm’s operation. For example, the hyperparameter lambda controls the degree of regularization in penalized regression algorithms such as LASSO, ridge and elastic net. We will learn more about hyperparameters and their effects later in this course.
+**Statistical algorithms** can be coarsely categorized as parametric or non-parametric.  
 
-The set of candidate model configurations can vary with respect to the **features** that are included.  A recipe describes how to transform raw data for **predictors** (also called IVs) into features (also called regressors, inputs) that are included in the **feature matrix** (also called design matrix, model matrix).  This process of transforming predictors into features in a feature matrix is called **feature engineering**.
+But we will mostly focus on a more granular description of the specific algorithm itself 
 
-Crossing variation on statistical algorithms, hyperparameter values, and alternative sets of features can increase the number of candidate model configurations dramatically; developing a machine learning model can easily involve fitting thousands of model configurations.  In most implementations of machine learning, the number of candidate model configurations nearly ensures that some fitted models will **overfit** the dataset in which they are developed such that they capitalize on noise that is unique to the dataset in which they were fit.  For this reason, model configurations are assessed and selected on the basis of their relative performance for new data (observations that were not involved in the fitting process). 
+Examples of specific statistical algorithms we will learn in this course include the linear model, generalized linear model, elastic net, LASSO, ridge regression, neural networks, KNN, random forest.
 
 -----
 
-We have ONE full dataset but we use **resampling techniques** to form subsets of that dataset to enable us to assess models’ performance in new data.  **Cross-validation** and **bootstrapping** are both examples of classes of resampling techniques that we will learn in this course.
+The set of candidate model configurations often includes variations of the same statistical algorithm with different **hyperparameter** (also called tuning parameter) values that control aspects of the algorithm’s operation. 
+
+- Examples include $k$ in the KNN algorithm and $lambda$ in LASSO, Ridge and Elastic Net algorithms.
+- We will learn more about hyperparameters and their effects later in this course.
+
+-----
+
+The set of candidate model configurations can vary with respect to the **features** that are included.  
+
+- A recipe describes how to transform raw data for **predictors** (also called IVs) into features (also called regressors, inputs) that are included in the **feature matrix** (also called design matrix, model matrix).  
+- This process of transforming predictors into features in a feature matrix is called **feature engineering**.
+
+-----
+
+Crossing variation on statistical algorithms, hyperparameter values, and alternative sets of features can increase the number of candidate model configurations dramatically
+
+- developing a machine learning model can easily involve fitting thousands of model configurations.  
+
+- In most implementations of machine learning, the number of candidate model configurations nearly ensures that some fitted models will **overfit** the dataset in which they are developed such that they capitalize on noise that is unique to the dataset in which they were fit.  
+- For this reason, model configurations are assessed and selected on the basis of their relative performance for new data (observations that were not involved in the fitting process). 
+
+-----
+
+We have ONE full dataset but we use **resampling techniques** to form subsets of that dataset to enable us to assess models’ performance in new data.  
+
+**Cross-validation** and **bootstrapping** are both examples of classes of resampling techniques that we will learn in this course.
+
 Broadly, resampling techniques create multiple subsets that consist of random samples of the full dataset. These different subsets can be used for **model fitting**, **model selection**, and **model evaluation**.  
 
 - **Training sets** are subsets that are used for **model fitting** (also called **model training**). During model fitting, models with each candidate model configuration are fit to the data in the training set. For example, during fitting, model parameters are estimated for regression algorithms, and weights are established for neural network algorithms. Some non-parametric algorithms, like k-nearest neighbors, do not estimate parameters but simply “memorize” the training sets for subsequent predictions.
@@ -297,6 +321,17 @@ Broadly, resampling techniques create multiple subsets that consist of random sa
 
 - **Test sets** are subsets that are used for **model evaluation**.  Generally, a model with the previously identified best configuration is re-fit to all available data other than the test set.  This fitted model is used to predict observations in the test set to estimate how well this model is expected to perform for new observations.  
 
+-----
+
+There are three broad steps to develop and evaluate a machine learning model:
+
+1. Fitting models with multiple candidate model configurations (in **training set(s)**)
+
+2. Assessing each model to select the best configuration (in **validation set(s)**)
+
+3. Evaluating how well a model with that best configuration will perform with new observations (in **test sets(s)**)
+
+-----
 
 ## An Example of the Bias-Variance Trade-off 
 
