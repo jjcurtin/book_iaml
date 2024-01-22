@@ -940,6 +940,8 @@ it may be that none of the models would work well.
 
 1. Introductions (preferred name, pronouns, program/department and year)
 
+-----
+
 2. Structure of course
     - Same flow each week
       - Week starts on Thursdays at 12:15 pm
@@ -962,12 +964,16 @@ it may be that none of the models would work well.
       - Kendra - Mondays, 2:30 - 3:30 pm 
       - Personal appointments & Slack
 
+-----
+
 3. The web book
     - Primary source for all course materials
     - Organized by units (with syllabus at front)
     - Links to pre-recorded lectures, readings, and quiz
     - Provides primary source for code examples (all you need for this course)
     - Lecture follows book
+
+-----
 
 4. Course as guided learning
     - Concepts in lectures and readings
@@ -976,12 +982,14 @@ it may be that none of the models would work well.
     - Slack CAN be a good source for discussion and questions as well
     - Grades are secondary (quizzes, application assignments, exams)
 
+-----
+
 5. Why these tools?
     - `Quarto`
       - Scientific publishing system (reproducible code, with output, presentations, papers)
       - Tool for collaboration
       - Interactive with static product (render to html or pdf)
-      - Application assignments & web book 
+      - Application assignments, web book, and slides
     - `tidyverse`?
       - The tidyverse is an opinionated collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures
       - Unmatched for data wrangling, EDA, and data visualization
@@ -990,18 +998,24 @@ it may be that none of the models would work well.
       - Under VERY active development 
       - Well-supported and documented ([tidymodels.org](https://www.tidymodels.org/))
       - Be careful with other web documentation (often out of date)
-    
+
+-----    
+
 6. Why me?
     - Primary tools in our research program
     - Model for progression from 610/710
     - Can do AND can collaborate with CS and expert data scientists
+
+-----
 
 7. Environment
     - Safe and respectful
     - VERY encouraging of questions, discussion, and tangents
     - Have fun
     - [Accomodations](https://jjcurtin.github.io/book_iaml/#accommodations-polices) and [Complaints](https://jjcurtin.github.io/book_iaml/#complaints)
-    
+
+-----    
+
 8. ChatGPT
     - Yay!  May develop into an amazing tool in your workflow
     - Use as tool (like Stack Overflow) for applications (application assignments, application questions on exams)
@@ -1013,30 +1027,33 @@ it may be that none of the models would work well.
     - No collaboration with classmates, peers, previous students on anything graded (including application assignments)
     - All cheating reported to Department and Dean of Students.  If application assignment or quizzes, zero on all of them because I can't trust them.  If exam, zero on exam.
     
-    
+-----
+
 ### Association vs. Prediction
 
 ::: {.callout-important collapse="false"}
-### Question: What is the difference between association vs. prediction?
+#### Question: What is the difference between association vs. prediction?
 ```{html}
 #| echo: true
 #| code-fold: true
 #| code-summary: "Show Answer"
-**Association** quantifies the relationship between variables within a sample 
-(predictors-outcome).  **Prediction** requires using an established model to 
-predict (future?) outcomes for **new** ("out-of-sample, "held-out") participants.
+Association quantifies the relationship between variables within a sample 
+(predictors-outcome).  Prediction requires using an established model to 
+predict (future?) outcomes for new ("out-of-sample, "held-out") participants.
 ```
 :::
 
+-----
 
 - Much research in psychology demonstrates association but calls it prediction!
 
 - Association (sometimes substantially) overestimates the predictive strength of our models
-  - Coefficients are derived to mimimize SSE (or maximize R^2^)
-  - R^2^ from GLM (using one sample) indexes how well on average any GLM that is fit to a sample will account for variance in that sample when specific coefficients are estimated in the same sample they are evaluated
-  - R^2^ does NOT tell you how well a specific GLM (including its coefficients) will work with new data for **prediction**
-  - R^2^ itself is positively biased even as estimate of how well a sample specific GLM will predict in that sample (vs. adjusted R^2^ and other corrections)
+  - Coefficients are derived to mimimize SSE (or maximize $R^2$)
+  - $R^2$ from GLM (using one sample) indexes how well on average any GLM that is fit to a sample will account for variance in that sample when specific coefficients are estimated in the same sample they are evaluated
+  - $R^2$ does NOT tell you how well a specific GLM (including its coefficients) will work with new data for **prediction**
+  - $R^2$ itself is positively biased even as estimate of how well a sample specific GLM will predict in that sample (vs. adjusted $R^2$ and other corrections)
 
+-----
 
 ### Prediction vs. Explanation
 
@@ -1047,39 +1064,11 @@ predict (future?) outcomes for **new** ("out-of-sample, "held-out") participants
 - Goal of scientific psychology is to understand human behavior.  It involves both **explaining** behavior (i.e., identifying causes) and **predicting** (yet to be observed) behaviors.
   - We overemphasize explanatory goals in this department, IMO
 
-### Data Generating Process
+- Machine learning is well positioned for prediction, but also for explanation
 
-- $Y = f(X) + \epsilon$
-- both function and Xs are generally unknown
+-----
 
-### Bias, Overfitting, and Variance
-
-- What are they and how are they related?
-
-::: {.callout-important collapse="false"}
-### Question: Describe problem of p-hacking with respect to overfitting?
-```{html}
-#| echo: true
-#| code-fold: true
-#| code-summary: "Show Answer"
-When you p-hack, you are overfitting the training set (your sample).  You try out
-many, many different model configurations and choose the one you like best rather
-than what works well in new data.  This model likely capitalizes on noise in 
-your sample.  It won't fit well in another sample.  In other words, your conclusions
-are not linked to the true DGP and would be different if you used a different 
-sample.  In a different vein, your significance test is wrong.  The SE does not 
-reflect the model variance that resulted from testing many different configurations
-b/c your final model didn't "know" about the other models.  Statistically invalid
-conclusion!
-```
-:::
-
-### Cross Validation
-
-- [What is it?]{.red}
-- [How are replication and cross-validation different?]{.red}
-
-### Basic framework and terminology
+### Basic framework and terminology for machine learning
 
 - [Supervised vs. unsupervised machine learning?]{.red}
 
@@ -1087,13 +1076,23 @@ conclusion!
 
 -----
 
-- [What is a data generating process?]{.red}
-   - $Y = f(X) + \epsilon$
-   - Both function and Xs are generally unknown
-   - $\hat{Y} = \hat{f}(X)$
+### Data Generating Process
+
+[What is a data generating process?]{.red}
+
+- $Y = f(X) + \epsilon$
+- both function and Xs are generally unknown
+- $\hat{Y} = \hat{f}(X)$
 
 
-- [Why do we estimate the data generating process?]{.red}
+[Why do we estimate the data generating process?]{.red}
+
+-----
+
+### Cross Validation
+
+- [What is it and why do we do it?]{.red}
+- [How are replication and cross-validation different?]{.red}
 
 -----
 
@@ -1115,7 +1114,8 @@ Reducible vs. Irreducible error?
 
 -----
 
-- [What are the **three general steps** by which we estimate and evaluate the data generating process with a sample of data?  Lets use all this vocabulary!]{.red}
+[What are the **three general steps** by which we estimate and evaluate the data generating process with a sample of data?  Lets use all this vocabulary!]{.red}
+
    - Candidate model configurations
       - Statistical algorithms
       - Hyperparameters
@@ -1123,31 +1123,34 @@ Reducible vs. Irreducible error?
    - Model fitting (training), selection, and evaluation
    - Resampling techniques
       - cross validation techniques (k-fold)
-      - boostrapping
+      - boostrapping for cross validation
    - Training, validation, and test sets (terms vary in literature!)
-
-
-### Bias-variance tradeoff
-
-- What is underfitting, overfitting, bias, and variance?
-
-- Bias and variance are general concepts to understand during any estimation process
-   - Estimate mean, median, standard deviation
-   - Parameter estimates in GLM
-   - Estimate DGP - $\hat{Y} = \hat{f}(X)$
 
 -----
 
-Useful conceptual examples of bias-variance
+### Bias-variance tradeoff
 
-  - Example 1: Darts from @Yarkoni2017
+[What is underfitting, overfitting, bias, and variance?]{.red}
+
+Bias and variance are general concepts to understand during any estimation process
+
+  - Estimate mean, median, standard deviation
+  - Parameter estimates in GLM
+  - Estimate DGP - $\hat{Y} = \hat{f}(X)$
+
+-----
+
+Conceptual example of bias-variance: Darts from @Yarkoni2017
   
 ![](figs/unit1_dartboard.png){height=400px}
 
-  - Example 2: Models (e.g. many scales made by Acme Co.) to measure my weight
+-----
 
+Second Conceptual Example: Models (e.g. many scales made by Acme Co.) to measure my weight
 
-#### Bias
+-----
+
+### Bias - A deeper dive
 
 Biased models are generally less complex models (i.e., underfit) than the data-generating process for your outcome
 
@@ -1158,7 +1161,7 @@ Biased models are generally less complex models (i.e., underfit) than the data-g
 -----
 
 ::: {.callout-important collapse="false"}
-### Question: Are GLMs biased models?
+#### Question: Are GLMs biased models?
 ```{html}
 #| echo: true
 #| code-fold: true
@@ -1169,7 +1172,6 @@ for population model but if DGP is not linear, this linear model will produce
 biased predictions and have biased parameter estimates.
 ```
 :::
-
 
 -----
 
@@ -1190,11 +1192,12 @@ Bias **seems** like a bad thing.
   - Or we trade off a little variance (slightly more flexible model) to get a big reduction in bias
   - Either way, we get models that predict well and may be useful for explanatory goals
 
+-----
 
-#### Overfitting - Variance
+### Variance - A deeper dive
 
 ::: {.callout-important collapse="false"}
-## Consider example of p = n - 1 in general linear model.  What happens in this situation?  How is this related to overfitting and model flexibility?
+#### Question: Consider example of p = n - 1 in general linear model.  What happens in this situation?  How is this related to overfitting and model flexibility?
 ```{html}
 #| echo: true
 #| code-fold: true
@@ -1207,6 +1210,8 @@ because n-1 predictors is too flexible for the linear model. You will fit the
 noise in the training data.
 ```
 :::
+
+-----
 
 Factors that increase overfitting
 
@@ -1227,8 +1232,10 @@ You might have noticed that many of the above factors contribute to the standard
 
 The standard error increases as model overfitting increases due to these factors
 
+-----
+
 ::: {.callout-important collapse="false"}
-## Explain the link between model variance/overfitting, standard errors, and sampling distributions?
+#### Question: Explain the link between model variance/overfitting, standard errors, and sampling distributions?
 ```{html}
 #| echo: true
 #| code-fold: true
@@ -1244,11 +1251,10 @@ estimate the parameters.
 ```
 :::
 
-
 -----
 
 ::: {.callout-important collapse="false"}
-## Describe problem of p-hacking with respect to overfitting?
+#### Question: Describe problem of p-hacking with respect to overfitting?
 ```{html}
 #| echo: true
 #| code-fold: true
@@ -1276,3 +1282,5 @@ Parameter estimates from an overfit model are specific to the sample within whic
 - With traditional (one-sample) statistics, this can lead us to incorrect conclusions about the effect of predictors associated with these parameter estimates (bad for explanatory goals!).
 
 - If the parameter estimates are very different sample to sample (and different from the true population parameters), this means the model will predict poorly in new samples (bad for prediction goals!).  We fix this by using resampling to evaluate model performance.
+
+-----
