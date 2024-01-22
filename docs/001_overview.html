@@ -429,11 +429,12 @@ div.csl-indent {
 <h3 data-number="1.1.3" class="anchored" data-anchor-id="lecture-discussion-videos"><span class="header-section-number">1.1.3</span> Lecture &amp; Discussion Videos</h3>
 <p>Notes: You can adjust the playback speed of the videos to meet your needs. Closed captioning is also available for all videos.</p>
 <ul>
-<li><a href="https://mediaspace.wisc.edu/media/iaml_1-1/1_pii1hb1q">Lecture 1: An Introductory Framework</a> ~ 9 mins</li>
-<li><a href="https://mediaspace.wisc.edu/media/iaml_1-2/1_5e1iz7aa">Lecture 2: More Details on Supervised Techniques</a> ~ 23 mins</li>
-<li><a href="">Lecture 3: Key Terminology in Context</a></li>
-<li><a href="">Lecture 4: An Example of Bias-Variance Tradeoff</a></li>
-<li><a href="">Discussion</a></li>
+<li><p><a href="https://mediaspace.wisc.edu/media/iaml_1-1/1_pii1hb1q">Lecture 1: An Introductory Framework</a> ~ 9 mins</p></li>
+<li><p><a href="https://mediaspace.wisc.edu/media/iaml_1-2/1_5e1iz7aa">Lecture 2: More Details on Supervised Techniques</a> ~ 23 mins</p></li>
+<li><p><a href="https://mediaspace.wisc.edu/media/iaml+1-3/1_3ebheuao">Lecture 3: Key Terminology in Context</a> ~ 11 mins</p></li>
+<li><p><a href="https://mediaspace.wisc.edu/media/iaml+1-4/1_ocn8pqi6">Lecture 4: An Example of Bias-Variance Tradeoff</a> ~ 27 mins</p></li>
+<li><p><a href="">Discussion 1</a></p></li>
+<li><p><a href="">Discussion 2</a></p></li>
 </ul>
 </section>
 <section id="quiz-and-application-assignment" class="level3" data-number="1.1.4">
@@ -617,38 +618,72 @@ div.csl-indent {
 </section>
 <section id="key-terminology-in-context" class="level2" data-number="1.4">
 <h2 data-number="1.4" class="anchored" data-anchor-id="key-terminology-in-context"><span class="header-section-number">1.4</span> Key Terminology in Context</h2>
-<p>Machine learning has emerged in parallel from developments in statistics and computer science. As a result, there is a lot of terminology and often multiple terms used for the same concept. This is not my fault! However, to help us avoid confusion, I will try to use one set of terms.<br>
-In the following paragraphs, I identify these key terms in context (along with other synonymous terms used by others) and highlight them in <strong>bold</strong>.</p>
+<p>In the following pages:</p>
 <ul>
-<li>There are two broad approaches in machine learning - <strong>unsupervised</strong> and <strong>supervised</strong> approaches.<br>
+<li>We will present the broad steps for developing and evaluating machine learning models</li>
+<li>We will situate key terms in this context (along with other synonymous terms used by others) and highlight them in <strong>bold</strong>.</li>
+</ul>
+<p>Machine learning has emerged in parallel from developments in statistics and computer science.</p>
+<ul>
+<li>As a result, there is a lot of terminology and often multiple terms used for the same concept. This is not my fault!<br>
 </li>
-<li>This course focuses primarily on developing supervised models.</li>
+<li>I will try to use one set of terms, but you need to be familiar with other terms you will encounter</li>
 </ul>
 <hr>
-<p>Developing a supervised machine learning model to <strong>predict</strong> or <strong>explain</strong> an <strong>outcome</strong> (also called DV, label, output) typically entails:</p>
-<ol type="1">
-<li>Fitting models with multiple candidate model configurations (in <strong>training set(s)</strong>)</li>
-<li>Assessing each model and selecting a best configuration (in <strong>validation set(s)</strong>)</li>
-<li>Evaluating how well a model with that best configuration will perform with new observations (in <strong>test sets(s)</strong>)</li>
-</ol>
+<p>When developing a supervised machine learning model to <strong>predict</strong> or <strong>explain</strong> an <strong>outcome</strong> (also called DV, label, output):</p>
+<ul>
+<li>Our goal is for the model to match as close as possible (given the limits due to <strong>irreducible error</strong>) the true data generating process for Y.</li>
+<li>We typically consider multiple (often many) <strong>candidate model configurations</strong> to achieve this goal.</li>
+</ul>
 <hr>
-<p><strong>Candidate model configurations</strong> can vary with respect to</p>
+<p><strong>Candidate model configurations</strong> can vary with respect to:</p>
 <ul>
 <li>the <strong>statistical algorithm</strong> used</li>
 <li>the algorithm’s <strong>hyperparameters</strong></li>
 <li>the <strong>features</strong> used in the model to predict the outcome</li>
 </ul>
-<p><strong>Statistical algorithms</strong> can be coarsely categorized as parametric or non-parametric. But we will mostly focus on a more granular description of the specific algorithm itself (e.g., linear model, generalized linear model, elastic net, LASSO, ridge regression, neural network, KNN, random forest).</p>
-<p>The set of candidate model configurations often includes variations of the same statistical algorithm with different <strong>hyperparameter</strong> (also called tuning parameter) values that control aspects of the algorithm’s operation. For example, the hyperparameter lambda controls the degree of regularization in penalized regression algorithms such as LASSO, ridge and elastic net. We will learn more about hyperparameters and their effects later in this course.</p>
-<p>The set of candidate model configurations can vary with respect to the <strong>features</strong> that are included. A recipe describes how to transform raw data for <strong>predictors</strong> (also called IVs) into features (also called regressors, inputs) that are included in the <strong>feature matrix</strong> (also called design matrix, model matrix). This process of transforming predictors into features in a feature matrix is called <strong>feature engineering</strong>.</p>
-<p>Crossing variation on statistical algorithms, hyperparameter values, and alternative sets of features can increase the number of candidate model configurations dramatically; developing a machine learning model can easily involve fitting thousands of model configurations. In most implementations of machine learning, the number of candidate model configurations nearly ensures that some fitted models will <strong>overfit</strong> the dataset in which they are developed such that they capitalize on noise that is unique to the dataset in which they were fit. For this reason, model configurations are assessed and selected on the basis of their relative performance for new data (observations that were not involved in the fitting process).</p>
 <hr>
-<p>We have ONE full dataset but we use <strong>resampling techniques</strong> to form subsets of that dataset to enable us to assess models’ performance in new data. <strong>Cross-validation</strong> and <strong>bootstrapping</strong> are both examples of classes of resampling techniques that we will learn in this course. Broadly, resampling techniques create multiple subsets that consist of random samples of the full dataset. These different subsets can be used for <strong>model fitting</strong>, <strong>model selection</strong>, and <strong>model evaluation</strong>.</p>
+<p><strong>Statistical algorithms</strong> can be coarsely categorized as parametric or non-parametric.</p>
+<p>But we will mostly focus on a more granular description of the specific algorithm itself</p>
+<p>Examples of specific statistical algorithms we will learn in this course include the linear model, generalized linear model, elastic net, LASSO, ridge regression, neural networks, KNN, random forest.</p>
+<hr>
+<p>The set of candidate model configurations often includes variations of the same statistical algorithm with different <strong>hyperparameter</strong> (also called tuning parameter) values that control aspects of the algorithm’s operation.</p>
+<ul>
+<li>Examples include <span class="math inline">\(k\)</span> in the KNN algorithm and <span class="math inline">\(lambda\)</span> in LASSO, Ridge and Elastic Net algorithms.</li>
+<li>We will learn more about hyperparameters and their effects later in this course.</li>
+</ul>
+<hr>
+<p>The set of candidate model configurations can vary with respect to the <strong>features</strong> that are included.</p>
+<ul>
+<li>A recipe describes how to transform raw data for <strong>predictors</strong> (also called IVs) into features (also called regressors, inputs) that are included in the <strong>feature matrix</strong> (also called design matrix, model matrix).<br>
+</li>
+<li>This process of transforming predictors into features in a feature matrix is called <strong>feature engineering</strong>.</li>
+</ul>
+<hr>
+<p>Crossing variation on statistical algorithms, hyperparameter values, and alternative sets of features can increase the number of candidate model configurations dramatically</p>
+<ul>
+<li><p>developing a machine learning model can easily involve fitting thousands of model configurations.</p></li>
+<li><p>In most implementations of machine learning, the number of candidate model configurations nearly ensures that some fitted models will <strong>overfit</strong> the dataset in which they are developed such that they capitalize on noise that is unique to the dataset in which they were fit.<br>
+</p></li>
+<li><p>For this reason, model configurations are assessed and selected on the basis of their relative performance for new data (observations that were not involved in the fitting process).</p></li>
+</ul>
+<hr>
+<p>We have ONE full dataset but we use <strong>resampling techniques</strong> to form subsets of that dataset to enable us to assess models’ performance in new data.</p>
+<p><strong>Cross-validation</strong> and <strong>bootstrapping</strong> are both examples of classes of resampling techniques that we will learn in this course.</p>
+<p>Broadly, resampling techniques create multiple subsets that consist of random samples of the full dataset. These different subsets can be used for <strong>model fitting</strong>, <strong>model selection</strong>, and <strong>model evaluation</strong>.</p>
 <ul>
 <li><p><strong>Training sets</strong> are subsets that are used for <strong>model fitting</strong> (also called <strong>model training</strong>). During model fitting, models with each candidate model configuration are fit to the data in the training set. For example, during fitting, model parameters are estimated for regression algorithms, and weights are established for neural network algorithms. Some non-parametric algorithms, like k-nearest neighbors, do not estimate parameters but simply “memorize” the training sets for subsequent predictions.</p></li>
 <li><p><strong>Validation sets</strong> are subsets that are used for <strong>model selection</strong> (or, more accurately, for model configuration selection). During model selection, each (fitted) model — one for every candidate model configuration — is used to make predictions for observations in a validation set that, importantly, does not overlap with the model’s training set. On the basis of each model’s performance in the validation set, the relatively best model configuration (i.e., the configuration of the model that performs best relative to all other model configurations) is identified and selected. If you have only one model configuration, validation set(s) are not needed because there is no need to select among model configurations.</p></li>
 <li><p><strong>Test sets</strong> are subsets that are used for <strong>model evaluation</strong>. Generally, a model with the previously identified best configuration is re-fit to all available data other than the test set. This fitted model is used to predict observations in the test set to estimate how well this model is expected to perform for new observations.</p></li>
 </ul>
+<hr>
+<p>There are three broad steps to develop and evaluate a machine learning model:</p>
+<ol type="1">
+<li><p>Fitting models with multiple candidate model configurations (in <strong>training set(s)</strong>)</p></li>
+<li><p>Assessing each model to select the best configuration (in <strong>validation set(s)</strong>)</p></li>
+<li><p>Evaluating how well a model with that best configuration will perform with new observations (in <strong>test sets(s)</strong>)</p></li>
+</ol>
+<hr>
 </section>
 <section id="an-example-of-the-bias-variance-trade-off" class="level2" data-number="1.5">
 <h2 data-number="1.5" class="anchored" data-anchor-id="an-example-of-the-bias-variance-trade-off"><span class="header-section-number">1.5</span> An Example of the Bias-Variance Trade-off</h2>
@@ -689,7 +724,6 @@ In the following paragraphs, I identify these key terms in context (along with o
 <li>A (20th order) <strong>polynomial linear model</strong> that uses 20 polynomials of <span class="math inline">\(X\)</span> as features</li>
 <li>A (20th order) <strong>polynomial LASSO model</strong> that uses the same 20 polynomials of <span class="math inline">\(X\)</span> as features but “regularizes” to remove unimportant features from the model</li>
 </ul>
-<hr>
 <div class="callout callout-style-default callout-important callout-titled">
 <div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -723,11 +757,12 @@ Question: If the DGP for y is a cubic function of x, what do we know about the e
 <h3 data-number="1.5.2" class="anchored" data-anchor-id="stimulation-steps"><span class="header-section-number">1.5.2</span> Stimulation Steps</h3>
 <p>With that introduction complete, lets start our simulation of the bias-variance trade-off</p>
 <ol type="1">
-<li>We get four random samples of <strong>training</strong> data to fit models</li>
+<li>Lets simulate four separate research teams, each working to estimate the DGP for Y</li>
 </ol>
 <ul>
-<li><p>In other words, we are simulating four separate studies where the researcher in each study is trying to develop a prediction model for Y using a sample of training data</p></li>
-<li><p>Here are plots of these four simulated training sets with a dotted line for the data generating process (DGP)</p></li>
+<li>Each team will get their own random sample of <strong>training</strong> data (N = 100) to fit models<br>
+</li>
+<li>Here are plots of these four simulated training sets (one for each team) with a dotted line for the data generating process (DGP)</li>
 </ul>
 <div>
 <div class="cell-output cell-output-stderr">
@@ -755,8 +790,12 @@ Question: If the DGP for y is a cubic function of x, what do we know about the e
 </div>
 <hr>
 <ol start="2" type="1">
-<li>We get one more large random sample (N = 5000) with the same DGP to use as a test set to evaluate all the models that will be fit in the training sample across all of the simulations.</li>
+<li>We get one more large random sample (N = 5000) with the same DGP to use as a test set to evaluate all the models that will be fit in the separate training sets across the four teams.</li>
 </ol>
+<ul>
+<li>We will let each team use this same test set to keep things simple</li>
+<li>The key is that the test set contains new observations not present in any of the training sets</li>
+</ul>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="001_overview_files/figure-html/u1-ex1-11-1.png" class="img-fluid" width="672"></p>
@@ -764,8 +803,8 @@ Question: If the DGP for y is a cubic function of x, what do we know about the e
 </div>
 <hr>
 <ol start="3" type="1">
-<li><p>We fit the three model configurations in each of the four simulated training sets</p></li>
-<li><p>We use the resulting models to make predictions for observations in the same training set in which they were fit</p></li>
+<li><p>Each of the four teams fit their three model configurations in their training sets</p></li>
+<li><p>They use the resulting models to make predictions for observations in the same training set in which they were fit</p></li>
 </ol>
 <div class="cell quarto-layout-panel">
 <div class="quarto-layout-row quarto-layout-valign-top">
@@ -802,7 +841,7 @@ Question: Can you see evidence of bias for any model configuration? Look in any 
 <summary>Show Answer</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>The simple linear model is clearly biased.  It systemically underestimates Y in </span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>some portions of the X distribution and overestimates Y in other portions of the </span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>X distribution.  This is true across training sets.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>X distribution.  This is true across training sets for all teams.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -824,10 +863,11 @@ Question: Can you see any evidence of overfitting for any model configuration?
 <details>
 <summary>Show Answer</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>The polynomial linear model appears to overfit the data in the training set.  In </span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>other words, it seems to follow both the signal/DGP and the noise.  However, you</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>can't be certain of this with only one training set and without knowing the DGP.  </span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>It is possible that the wiggles in the prediction line represent the real DGP.  </span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>You will need a test set to be certain about the degree of overfitting.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>other words, it seems to follow both the signal/DGP and the noise.  However, in practice</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>none of the teams could not be certain of this with only their training set.  It is</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>possible that the wiggles in the prediction line represent the real DGP.   They need</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>to look at the model's performance in the test set to be certain about the degree of</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>overfitting.  (Of course, we know because these are simulated data and we know the DGP.)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -835,15 +875,15 @@ Question: Can you see any evidence of overfitting for any model configuration?
 </div>
 <hr>
 <ol start="5" type="1">
-<li>We use these same models (3 model configurations fit to 4 different training sets) to make predictions for new observations in the test set</li>
+<li>Now the teams use their 3 trained models to make predictions for new observations in the test set</li>
 </ol>
 <ul>
 <li><p>Remember that the <strong>test set has NEW observations of X and Y</strong> that weren’t used for fitting any of the models.</p></li>
-<li><p>Lets look at each model configurations performance in test separately</p></li>
+<li><p>Lets look at each model configuration’s performance in test separately</p></li>
 </ul>
 <hr>
 <ul>
-<li>Here are predictions from the four <strong>simple linear models</strong> (fit in each of the four training sets) in the <strong>test set</strong></li>
+<li>Here are predictions from the four <strong>simple linear models</strong> (fit in the training sets for each team) in the <strong>test set</strong></li>
 </ul>
 <div class="cell">
 <div class="cell-output-display">
@@ -891,10 +931,10 @@ Question: How much variance across the simple linear models is present?
 <details>
 <summary>Show Answer</summary>
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>There is not much variance in the prediction lines across the models that were </span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>fit to different training sets.  The slopes are very close across models and the</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>intercepts only vary by a small amount.   The simple linear model configuration </span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>does not appear to have high variance and model variance will not contribute much</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>to its reducible error.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>fit by different teams in different training sets.  The slopes are very close across</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>the different team's models and the intercepts only vary by a small amount.   </span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>The simple linear model configuration does not appear to have high variance (across teams) </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>and therefore model variance will not contribute much to its reducible error.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -902,7 +942,7 @@ Question: How much variance across the simple linear models is present?
 </div>
 <hr>
 <ul>
-<li>Here are predictions from the four <strong>polynomial linear models</strong> in the <strong>test set</strong></li>
+<li>Here are predictions from the <strong>polynomial linear models</strong> from the four teams in the <strong>test set</strong></li>
 </ul>
 <div class="cell">
 <div class="cell-output cell-output-stderr">
@@ -927,8 +967,9 @@ Question: Are these polynomial models systematically biased?
 <div class="cell">
 <details>
 <summary>Show Answer</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>There is not much systematic bias.  The overall function is generally cubic as </span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>is the DGP. Bias will not contribute much to the model's reducible error.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>There is not much systematic bias.  The overall function is generally cubic for </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>all four teams  - just like the DGP. Bias will not contribute much to the model's </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>reducible error.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -952,7 +993,7 @@ Question: How does the variance of these polynomial models compare to the varian
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>There is much higher model variance for this polynomial linear model relative to </span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>the simple linear model. Although all four models generally predict Y as a cubic</span>
 <span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>function of X, there is also a non-systematic wiggle that is different for each </span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>of the models.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>team's models.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -973,10 +1014,10 @@ Question: How does this demonstrate the connection between model overfitting and
 <div class="cell">
 <details>
 <summary>Show Answer</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>Model variance is a result of overfitting to the training set.  If a model fits </span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>noise in its training set, that noise will be different in every dataset.  Therefore,</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>you end up with different models depending on the training set in which they are </span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>fit.  And none of those models will do well with new data as you can see in this</span>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>Model variance (across teams) is a result of overfitting to the training set.  </span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>If a model fits noise in its training set, that noise will be different in every dataset.</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>Therefore, you end up with different models depending on the training set in which they </span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>are fit.  And none of those models will do well with new data as you can see in this</span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>test set because noise is random and different in each dataset.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
@@ -985,7 +1026,7 @@ Question: How does this demonstrate the connection between model overfitting and
 </div>
 <hr>
 <ul>
-<li>Here are predictions from the four <strong>polynomial LASSO models</strong> in the <strong>test set</strong></li>
+<li>Here are predictions from the <strong>polynomial LASSO models</strong> from each team in the <strong>test set</strong></li>
 </ul>
 <div class="cell">
 <div class="cell-output-display">
@@ -1007,8 +1048,8 @@ Question: How does their bias compare to the simple and polynomial linear models
 <div class="cell">
 <details>
 <summary>Show Answer</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>It has low bias much like the polynomial linear model.  It is able to capture </span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>the true cubic DGP fairly well.  The regularization process slightly reduced the</span>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>The LASSO models have low bias much like the polynomial linear model. They are able </span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>to capture the true cubic DGP fairly well.  The regularization process slightly reduced the</span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>magnitude of the cubic (the prediction line is a little straighter than it should be),</span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>but not by much.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -1031,9 +1072,10 @@ Question: How does their variance compare to the simple and polynomial linear mo
 <div class="cell">
 <details>
 <summary>Show Answer</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>All four LASSO models, fit in different training sets, resulted in very similar prediction lines.  </span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>Therefore, these LASSO models have low variance, much like the simple linear model. </span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>In contrast, the LASSO model variance is clearly lower than the polynomimal model.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>All four LASSO models, fit in different training sets, resulted in very similar </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>prediction lines. Therefore, these LASSO models have low variance, much like the simple linear model. </span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>In contrast, the LASSO model variance is clearly lower than the more flexible </span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>polynomimal model.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -1059,9 +1101,9 @@ Question: What do we expect about RMSE for the three models in train and test?
 <details>
 <summary>Show Answer</summary>
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>The simple linear model is underfit to the TRUE DGP.  Therfore it is </span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>systematically biased everywhere it is use and won’t even fit train for this reason.</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>However, it’s not very flexible so it won’t be overfit to the noise in train and</span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>therefore should fit comparably in test.  </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>systematically biased everywhere it is used.  It won't fit well in train or test </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>for this reason.  However, it’s not very flexible so it won’t be overfit to the noise </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>in train and therefore should fit comparably in train and test.  </span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>The polynomial linear model will not be biased at all given that the DGP is polynomial.  </span>
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>However, it is overly flexible (20th order) and so will substantially overfit the </span>
