@@ -906,15 +906,13 @@ rmse_test <- test %>%
 
 bind_rows(rmse_test, rmse_train) %>% 
   group_by(model, set) %>% 
-  summarize(rmse = mean(rmse)) %>% 
-  ungroup() %>% 
+  summarize(rmse = mean(rmse), .groups = "drop") %>% 
   mutate(model = factor(model, levels = c("pred_lm1", "pred_lasso20", "pred_lm20"), 
                         labels = c("Simple LM", "Poly LASSO", "Poly LM"),ordered = TRUE)) %>% 
   ggplot() +
-    geom_line(aes(x = model, y = rmse, group = set, color = set), size = 1.25) +
+    geom_line(aes(x = model, y = rmse, group = set, color = set), linewidth = 1.25) +
     ggtitle("Root Mean Square Error by Model Configuration and Set")
 ```
-
 -----
 
 ::: {.callout-important collapse="false"}
