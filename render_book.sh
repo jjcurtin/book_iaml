@@ -1,1 +1,1 @@
-mv _quarto_book.yml _quarto.yml
+cp _quarto_book.yml _quarto.yml
