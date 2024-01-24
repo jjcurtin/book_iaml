@@ -260,14 +260,12 @@ devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plot
 -----
 
 Finally, we tune our environment a bit more by setting plot themes and print options that we prefer
-
 ```{r}
 theme_set(theme_classic())
 options(tibble.width = Inf, tibble.print_max = Inf)
 ```
 
 And we set a relative path to our data.  This assumes you are using an RStudio project with the path to the data relative to that project file.  I've provided more detail [elsewhere](https://jjcurtin.github.io/book_dwvt/file_and_path_management.html) on best practices for managing files and paths.
-
 ```{r}
 path_data <- "data"
 ```
@@ -1215,7 +1213,8 @@ Again, we prefer visualizations but summary statistics are also available
 
 -----
 
-### Scatterplots for Numeric Variables (Bivariate)
+
+### Scatterplots
 
 Scatterplots are the preferred visualization when both variables are numeric
 
@@ -1291,7 +1290,7 @@ data_trn |>
 
 -----
 
-Can make scatterplots for ordinal variables as well
+Can make scatterplots for ordered factors as well
 
 - But other (perhaps better) options also exist for this combination of variable classes.
 - Use `as.numeric()` to allow for lm and LOWESS lines on otherwise categorical variable
@@ -1343,18 +1342,19 @@ data_trn |> plot_hexbin("gr_liv_area", "sale_price")
 
 -----
 
-### Correlations for Numeric Variables (Bivariate) 
+##### Correlations & Plots
 
 Correlations are useful summary statistics for numeric variables
 
-- Some statistical algorithms are sensitive to high correlations among features (multi-collinearity)
-- At best, highly correlated features add unnecessary flexibility and can lead to overfitting
+Some statistical algorithms are sensitive to high correlations among features (multi-collinearity)
+
+At best, highly correlated features add unnecessary flexibility and can lead to overfitting
 
 We can visualize correlations among predictors/features using `corrplot.mixed()` from `corrplot` package
 
 - Best for numeric variables
-- Can include ordinal or two-level nominal variables if transformed to numeric
-- Can include nominal variables with > 2 levels if first transformed appropriately (e.g., dummy features, not demonstrated yet)
+- Can include ordered categorical or two level unordered categorical variables if transformed to numeric
+- Can include unordered categorical variables with > 2 levels if first transformed appropriately (e.g., dummy features, not demonstrated yet)
 - Works best with relatively small set of variables
 - Need to consider how to handle missing values
 
@@ -1372,12 +1372,14 @@ data_trn |>
 
 -----
 
-### Grouped Box + Violin Plots for Mixed Categorical and Numeric (Bivariate)
+#### Categorical and Numeric
+
+##### Grouped Box + Violin Plots
 
 A grouped version of the combined box and violin plot is our preferred visualization for relationship between categorical and numeric variables (included in `fun_plots.r`)
 
 - Often best when feature is categorical and outcome is numeric but can reverse
-- Can use with nominal or ordinal categorical variable
+- Can use with ordered or unordered categorical variable
 - @RDS also describes use of grouped frequency polygons for this combination of variable classes
 
 
@@ -1401,7 +1403,7 @@ plot_grouped_box_violin <- function(df, x, y){
 
 Here is the relationship between `overall_qual` and `sale_price`
 
-- Tend to prefer this over the scatterplot (with `as.numeric()`) for ordinal variables
+- Tend to prefer this over the scatterplot (with `as.numeric()`) for ordered categorical variables
 - Increasing spread of `sale_price` at higher levels of `overall_qual` is clearer in this plot
 
 ```{r u2-modeling-29}
@@ -1410,7 +1412,7 @@ data_trn |> plot_grouped_box_violin("overall_qual", "sale_price")
 
 -----
 
-Here is a box + violin with a nominal variable
+Here is a box + violin with an unordered categorical variable
 
 - More variation and skew in `sale_price` for one family homes (additional features, moderators?)
 - Position of townhouse (interior vs. exterior) seems to matter (don't collapse?)
@@ -1421,7 +1423,7 @@ data_trn |> plot_grouped_box_violin("bldg_type", "sale_price")
 
 -----
 
-When we have a categorical predictor and a numeric outcome, we often want to see both the relationship between the variables AND the variability on the categorical variable alone.   We like this combined plot enough when doing EDA to provide a specific function (included in `fun_plots.r`)!  It is our go to for understanding the potential effect of a categorical predictor
+When we have a categorical predictor (ordered or unordered) and a numeric outcome, we often want to see both the relationship between the variables AND the variability on the categorical variable alone.   We like this combined plot enough when doing EDA to provide a specific function (included in `fun_plots.r`)!  It is our go to for understanding the potential effect of a categorical predictor
 
 ```{r  u2-modeling-31}
 #| eval: false
@@ -1464,7 +1466,9 @@ data_trn |> plot_categorical("bldg_type", "sale_price") |>
 
 -----
 
-### Stacked Barplots for Categorical Variables (Bivariate)
+#### Both Categorical
+
+##### Stacked Barplots
 
 Stacked Barplots:
 
@@ -1527,7 +1531,7 @@ data_trn |> plot_grouped_barplot_percent("bldg_type", "lot_config")
 
 -----
 
-### Tile Plot for Ordinal Variables (Bivariate)
+##### Tile Plot
 
 Tile plots may be useful if both categorical variables are ordered
 
@@ -1542,10 +1546,6 @@ plot_tile <- function(df, x, y){
 }
 ```
 
------
-
-`overall_qual` by `garage_qual`
-
 ```{r u2-modeling-38}
 data_trn |> plot_tile("overall_qual", "garage_qual")
 ```
@@ -1553,7 +1553,6 @@ data_trn |> plot_tile("overall_qual", "garage_qual")
 -----
 
 You might also consider a scatterplot with jitter in this instance
-
 ```{r u2-modeling-39}
 data_trn |> 
   mutate(overall_qual = jitter(as.numeric(overall_qual)),
@@ -1563,13 +1562,13 @@ data_trn |>
 
 -----
 
-### Two-way Tables for Categorical Variables (Bivariate)
+##### Two-way Tables
 
-Two-way tables are sometimes a useful summary statistic for two categorical variables.  We can use `tabyl()` from the janitor package for this or our variant of it, `tab2()`
+Two-way tables are sometimes a useful summary statistic for two categorical variables.  We can use `tabyl()` from the janitor package for this
 
 For example, the relationship between `bldg_type` and `lot_config`
 ```{r u2-modeling-40}
-data_trn |> tab2(bldg_type, lot_config)
+data_trn |> janitor::tabyl(bldg_type, lot_config)
 ```
 
 -----
@@ -1588,7 +1587,6 @@ Recipes are used for feature engineering in `tidymodels` using the [`recipes`](h
 - Recipes use only information from the training set in all feature engineering
 - Consider example of standardizing `x1` for a feature in train vs. validation and test.  Must use mean and sd from TRAIN to standardize `x1` in train, validate, and test.  VERY IMPORTANT.
 
------
 
 We use recipes in a two step process - `prep()` and `bake()`
   
