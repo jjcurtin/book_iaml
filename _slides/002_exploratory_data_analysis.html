@@ -374,6 +374,9 @@
 </ul></li>
 <li>Introductory use of recipes for feature engineering</li>
 </ul>
+</section>
+<section class="slide level2">
+
 <h3 id="readings">Readings</h3>
 <p>[NOTE: These are short chapters. You are reading to understand the framework of visualizing data in R. Don’t feel like you have to memorize the details. These are reference materials that you can turn back to when you need to write code!]</p>
 <ul>
@@ -391,6 +394,9 @@
 <li><p><a href="">Discussion</a></p></li>
 </ul>
 <p>Post questions or discuss readings or lectures in Slack</p>
+</section>
+<section class="slide level2">
+
 <h3 id="application-assignment">Application Assignment</h3>
 <ul>
 <li><a href="https://dionysus.psych.wisc.edu/iaml/homework/unit_2/ames_raw_class.csv">data</a></li>
@@ -400,24 +406,29 @@
 <li><a href="%22https://github.com/jjcurtin/lab_support/blob/main/fun_modeling.R?raw=true%22">fun_modeling.R</a></li>
 <li>solutions: <a href="https://dionysus.psych.wisc.edu/iaml/homework/unit_2/key_unit_2_cleaning.html">knit cleaning EDA</a>; <a href="https://dionysus.psych.wisc.edu/iaml/homework/unit_2/key_unit_2_modeling.html">knit modeling EDA</a></li>
 </ul>
-<p>Submit the <a href="">application assignment</a> and <a href="https://canvas.wisc.edu/courses/395546/quizzes/514049">unit quiz</a> by 8 pm on Wednesday, January 31st</p>
+<p>Submit the <a href="">application assignment</a> by 8 pm on Wednesday, January 31st</p>
+<h3 id="quiz">Quiz</h3>
+<p>Submit the <a href="https://canvas.wisc.edu/courses/395546/quizzes/514049">unit quiz</a> by 8 pm on Wednesday, January 31st</p>
 </section>
 <section id="overview-of-exploratory-data-analysis" class="slide level2">
 <h2>Overview of Exploratory Data Analysis</h2>
 <h3 id="stages-of-data-analysis-and-model-development">Stages of Data Analysis and Model Development</h3>
 <p>These are the main stages of data analysis for machine learning and the data that are used</p>
 <ol type="1">
-<li><p>EDA: Cleaning (full dataset)</p></li>
-<li><p>EDA: Split data into training, validation and test set(s)</p></li>
-<li><p>EDA: Modeling (training sets)</p></li>
-<li><p>Model Building: Feature engineering (training sets)</p></li>
-<li><p>Model Building: Fit many models configurations (training set)</p></li>
-<li><p>Model Building: Evaluate many models configurations (validation sets)</p></li>
-<li><p>Final Model Evaluation: Select final/best model configuration (validation sets)</p></li>
-<li><p>Final Model Evaluation: Fit best model configuration (use both training and validation sets)</p></li>
-<li><p>Final Model Evaluation: Evaluate final model configuration (test sets)</p></li>
-<li><p>Final Model Evaluation: Fit best model configuration to ALL data (training, validation, and test sets) if you plan to use it for applications.</p></li>
+<li>EDA: Cleaning (full dataset)</li>
+<li>EDA: Split data into training, validation and test set(s)</li>
+<li>EDA: Modeling (training sets)</li>
+<li>Model Building: Feature engineering (training sets)</li>
+<li>Model Building: Fit many models configurations (training set)</li>
+<li>Model Building: Evaluate many models configurations (validation sets)</li>
+<li>Final Model Evaluation: Select final/best model configuration (validation sets)</li>
+<li>Final Model Evaluation: Fit best model configuration (use both training and validation sets)</li>
+<li>Final Model Evaluation: Evaluate final model configuration (test sets)</li>
+<li>Final Model Evaluation: Fit best model configuration to ALL data (training, validation, and test sets) if you plan to use it for applications.</li>
 </ol>
+</section>
+<section class="slide level2">
+
 <p>The earlier stages are highly iterative:</p>
 <ul>
 <li>You may iterate some through EDA stages 1-3 if you find further errors to clean in stage 3 [<strong>But make sure you resplit into the same sets</strong>]</li>
@@ -430,6 +441,9 @@
 <li>Any more than this is essentially equivalent to p-hacking in traditional analyses</li>
 <li>Step 10 only happens if you plan to use the model in some application</li>
 </ul>
+</section>
+<section class="slide level2">
+
 <h3 id="data-file-formats">Data file formats</h3>
 <p>We generally store data as CSV [comma-separated value] files</p>
 <ul>
@@ -442,13 +456,29 @@
 <ul>
 <li>We <strong>may</strong> consider binary (.rds) format for very big files because read/write can be slow for csv files.<br>
 </li>
-<li>Binary file format provides a modest additional protection for sensitive data (which we also don’t share)</li>
+<li>Binary file format provides a very modest additional protection for sensitive data (which we also don’t share)</li>
 <li>use <code>read_rds()</code> and <code>write_rds()</code></li>
 </ul>
 <p>See <a href="https://r4ds.hadley.nz/data-import">chapter 7 - Data Import</a> in <span class="citation" data-cites="RDS">Wickham, Çetinkaya-Rundel, and Grolemund (<a href="#/discussion-topics" role="doc-biblioref" onclick="">2023</a>)</span> for more details and advanced techniques for importing data using <code>read_csv()</code></p>
+</section>
+<section class="slide level2">
+
 <h3 id="classing-variables">Classing Variables</h3>
-<p>We store and class variables in R based on their data type.</p>
-<p>For <strong>nominal</strong> variables:</p>
+<p>We store and class variables in R based on their data type (level of measurement).</p>
+<ul>
+<li>See Wikipedia definitions for <a href="https://en.wikipedia.org/wiki/Level_of_measurement">levels of measurement</a> for a bit more precision that we will provide here.</li>
+</ul>
+<p>Coarsely, there are four levels:</p>
+<ul>
+<li>nominal: qualitative categories, no inherent order (e.g., marital status, sex, car color)</li>
+<li>ordinal: qualitative categories (sometimes uses number), inherent order but not equidistant spacing (e.g., Likert scale; education level)</li>
+<li>interval and ratio (generally treated the same in social sciences): quantitative scores, ordered, equidistant spacing. Ratio has true 0. (e.g., temperature in Celsius vs.&nbsp;Kelvin scales)</li>
+</ul>
+<p>We generally refer to nominal and ordinal variables as categorical and interval/ratio as quantitative or numeric</p>
+</section>
+<section class="slide level2">
+
+<p>For <strong>nominal</strong> variables</p>
 <ul>
 <li>We store (in csv files) these variables as character class with descriptive text labels for the levels
 <ul>
@@ -462,6 +492,9 @@
 <li>The order of levels may also matter for factor predictors (e.g., <code>step_dummy()</code> uses first level as reference).</li>
 </ul></li>
 </ul>
+</section>
+<section class="slide level2">
+
 <p>For <strong>ordinal</strong> variables:</p>
 <ul>
 <li>We store (in csv files) these variables as character class with descriptive text labels for the levels
@@ -481,31 +514,21 @@
 <li>Treat as an interval variable using <code>step_ordinalscore()</code></li>
 </ul></li>
 </ul>
+<p>Similar EDA approaches are used with both nominal and ordinal variable</p>
+<p>Ordinal variables may show non-linear relations b/c they may not be evenly spaced. In these instances, we can use feature engineering approaches that are also used for nominal variables</p>
+</section>
+<section class="slide level2">
+
 <p>For <strong>interval and ratio</strong> variables:</p>
 <ul>
 <li>We store these variables as numeric</li>
 <li>We class these variables as numeric (either integer or double - let R decide) during the read and clean stage (They are typically already in this class when read in)</li>
 </ul>
+<p>Similar EDA approaches are used with both interval and ratio variables</p>
+<p>Similar feature engineering approaches are used with both</p>
 </section>
 <section class="slide level2">
 
-<p>We will refer to both nominal and ordinal variables as categorical variables</p>
-<ul>
-<li>They are stored as character</li>
-<li>They are classed as factors</li>
-<li>They include a limited number of unique responses</li>
-<li>We can indicate the order of the levels</li>
-<li>Similar EDA approaches are used with both</li>
-<li>Ordinal variables may show non-linear relations b/c they may not be evenly spaced. In these instances, we can use feature engineering approaches that are also used for nominal variables</li>
-</ul>
-<p>We will often refer to interval and ratio variables as numeric variables</p>
-<ul>
-<li>The are stored as numeric</li>
-<li>They are classed with one of two numeric data types</li>
-<li>They have many (infinite?) unique responses</li>
-<li>Similar EDA approaches are used with both</li>
-<li>Similar feature engineering approaches are used with both</li>
-</ul>
 <h3 id="data-dictionaries">Data Dictionaries</h3>
 <p>You should always make a data dictionary for use with your data files.</p>
 <ul>
@@ -519,6 +542,9 @@
 <li>can be provided to others when you share your data (data are not generally useful to others without a data dictionary)</li>
 </ul>
 <p>We will see a variety of data dictionaries throughout the course. Many are not great as you will learn.</p>
+</section>
+<section class="slide level2">
+
 <h3 id="the-ames-housing-prices-dataset">The Ames Housing Prices Dataset</h3>
 <p>We will use the Ames Housing Prices dataset as a running example this unit (and some future units and application assignments as well)</p>
 <ul>
@@ -533,11 +559,19 @@
 
 <p>First, lets set up our environment with functions from important packages. I strongly recommend reviewing our recommendations for best practices regarding <a href="https://jjcurtin.github.io/book_dwvt/conflicts.html">managing function conflicts</a> now. It will save you a lot of headaches in the future.</p>
 <ul>
-<li>First we set a conflicts policy that will produce errors if we have unanticipated conflicts.</li>
-<li>We next source a library of functions that we use for common tasks in machine learning. This includes a function (<code>tidymodels_conflictRules()</code>) that sets conflict rules to allow us to attach <code>tidymodels</code> functions without conflicts with <code>tidyverse</code> functions. You can <a href="https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true">review</a> that function to see what it does (search for that function name at the link)</li>
+<li>We set a conflicts policy that will produce errors if we have unanticipated conflicts.</li>
+<li>We source a library of functions that we use for common tasks in machine learning.
+<ul>
+<li>This includes a function (<code>tidymodels_conflictRules()</code>) that sets conflict rules to allow us to attach <code>tidymodels</code> functions without conflicts with <code>tidyverse</code> functions.<br>
+</li>
+<li>You can <a href="https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true">review</a> that function to see what it does (search for that function name at the link)</li>
+</ul></li>
 <li>Then we use that function</li>
 </ul>
-<p>Now we load packages for functions that we will use regularly. There are five things to note RE best practices</p>
+</section>
+<section class="slide level2">
+
+<p>Next we load packages for functions that we will use regularly. There are five things to note RE best practices</p>
 <ol type="1">
 <li>If we will use a lot of functions from a package (e.g., <code>tidyverse</code>, <code>tidymodels</code>), we attach the full package</li>
 <li>If we will use only several functions from a package (but plan to use them repeatedly), we use the <code>include.only</code> parameter to just attach those functions.</li>
@@ -545,9 +579,24 @@
 <li>If a package has a function that conflicts with our primary packages and we don’t plan to use that function, we load the package but exclude the function. If we really needed it, we can call it with its namespace as per option 3 above.</li>
 <li>Pay attention to conflicts that were allowed to make sure you understand and accept them. (I left the package messages and warnings in the book this time to see them. I will hide them to avoid cluttering book in later units but you should always review them.)</li>
 </ol>
-<p>Then we source (from github) two other libraries of functions that we use commonly for exploratory data analyses. You should review these function scripts to see how I’ve written this code.</p>
-<p>Finally, we tune our environment a bit more by setting plot themes and print options</p>
+<ol type="1">
+<li>As an alternative, we could have skipped loading the package and instead called the function as <code>janitor::clean_names()</code></li>
+<li>Same is true for <code>cowplot</code> package</li>
+<li>When loading <code>kableExtra</code> (which we use often), you will always need to exclude <code>groups_rows()</code> to prevent a conflict with <code>dplyr</code> package in the tidyverse</li>
+<li>Loading tidymodels will produce conflicts unless you source and call my function <code>tidymodels_conflictRules()</code> (see above)</li>
+</ol>
+</section>
+<section class="slide level2">
+
+<p>We will also source (from github) two other libraries of functions that we use commonly for exploratory data analyses. You should review these function scripts (<a href="https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true">fun_eda.R</a>; <a href="https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true">fun_plots.R</a> to see the code for these functions.</p>
+</section>
+<section class="slide level2">
+
+<p>Finally, we tune our environment a bit more by setting plot themes and print options that we prefer</p>
 <p>And we set a relative path to our data. This assumes you are using an RStudio project with the path to the data relative to that project file. I’ve provided more detail <a href="https://jjcurtin.github.io/book_dwvt/file_and_path_management.html">elsewhere</a> on best practices for managing files and paths.</p>
+</section>
+<section class="slide level2">
+
 <p>Here is a quick glimpse of the subset of observations we will work with in Units 2-3 and the first two application assignments. Note that we re-class all character variables as unordered factors for now</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
@@ -672,15 +721,9 @@ $ `Lot Config`   &lt;fct&gt; Corner, Inside, Corner, Inside, Inside, Inside, Ins
 $ `Bldg Type`    &lt;fct&gt; 1Fam, 1Fam, 1Fam, 1Fam, TwnhsE, TwnhsE, TwnhsE, 1Fam, 1…</code></pre>
 </div>
 </div>
-<p><strong>Coding Sidebar</strong>:</p>
-<ul>
-<li>Notice the non-standard variable names that include spaces.<br>
-</li>
-<li>We use the back-ticks around the variable names to allow us reference those variables.<br>
-</li>
-<li>We will fix this during the cleaning process.</li>
-<li>Never use spaces in variable names when setting up your own data!!! (More on this in a moment…)</li>
-</ul>
+<ol type="1">
+<li>Notice that the dataset used non-standard variable names that include spaces. We need to use back-ticks around the variable names to allow us reference those variables. We will fix this during the cleaning process and you should never use spaces in variable names when setting up your own data!!!</li>
+</ol>
 </section>
 <section id="exploratory-data-analysis-for-data-cleaning" class="slide level2">
 <h2>Exploratory Data Analysis for Data Cleaning</h2>
@@ -689,17 +732,20 @@ $ `Bldg Type`    &lt;fct&gt; 1Fam, 1Fam, 1Fam, 1Fam, TwnhsE, TwnhsE, TwnhsE, 1Fa
 <li><p>We prefer to use the richer set of functions available in the tidyverse (and <code>dplyr</code> and <code>purrr</code> packages in particular).</p></li>
 <li><p>We will reserve the use of recipes for feature engineering only when we are building features for models that we will fit in our training sets and evaluation in our validation and test sets.</p></li>
 </ul>
+</section>
+<section class="slide level2">
+
 <h3 id="data-leakage-issues">Data Leakage Issues</h3>
-<p>Data leakage refers to a mistake made by the creator of a machine learning model in which they accidentally share information between their training set and held-out validation or test sets</p>
+<p>Data leakage refers to a mistake made by the developer of a machine learning model in which they accidentally share information between their training set and held-out validation or test sets</p>
 <ul>
 <li><p>Training sets are used to fit models with different configurations</p></li>
 <li><p>Validation sets are used to select the best model among those with different configurations (not needed if you only have one configuration)</p></li>
 <li><p>Test sets are used to evaluate a best model</p></li>
-<li><p>When splitting data-sets into training, validation and test sets, the goal is to ensure that no data (or information more broadly) are shared between the three</p>
+<li><p>When splitting data-sets into training, validation and test sets, the goal is to ensure that no data (or information more broadly) are shared between the three sets</p>
 <ul>
 <li>No data or information from test should influence either fitting or selecting models</li>
 <li>Test should only be used once to evaluate a best/final model</li>
-<li>Train and validation set also must be segregated (although validation sets may be used to evaluate many models)</li>
+<li>Train and validation set also must be segregated (although validation sets may be used to evaluate many model configurations)</li>
 <li>Information necessary for transformations and other feature engineering (e.g., means/sds for centering/scaling, procedures for missing data imputation) must all be based only on training data.</li>
 <li>Data leakage is common if you are not careful.</li>
 </ul></li>
@@ -708,8 +754,11 @@ $ `Bldg Type`    &lt;fct&gt; 1Fam, 1Fam, 1Fam, 1Fam, TwnhsE, TwnhsE, TwnhsE, 1Fa
 <ul>
 <li>We risk overfitting</li>
 <li>This is essentially the equivalent of p-hacking in traditional analyses</li>
-<li>Will report too optimistic performance estimate, which could have harmful real-world consequences.</li>
+<li>Our estimate of model performance will be too optimistic, which could have harmful real-world consequences.</li>
 </ul>
+</section>
+<section class="slide level2">
+
 <h3 id="tidy-variable-names">Tidy variable names</h3>
 <p>Use snake case for variable names</p>
 <ul>
@@ -723,6 +772,9 @@ $ `Bldg Type`    &lt;fct&gt; 1Fam, 1Fam, 1Fam, 1Fam, TwnhsE, TwnhsE, TwnhsE, 1Fa
  [6] "garage_cars"  "garage_qual"  "ms_zoning"    "lot_config"   "bldg_type"   </code></pre>
 </div>
 </div>
+</section>
+<section class="slide level2">
+
 <h3 id="explore-variable-classes">Explore variable classes</h3>
 <p>At this point, variables should be classed as either numeric or factor</p>
 <ul>
@@ -751,9 +803,12 @@ $ lot_config   &lt;fct&gt; Corner, Inside, Corner, Inside, Inside, Inside, Insid
 $ bldg_type    &lt;fct&gt; 1Fam, 1Fam, 1Fam, 1Fam, TwnhsE, TwnhsE, TwnhsE, 1Fam, 1Fa…</code></pre>
 </div>
 </div>
-<p><code>overall_qual</code> is ordinal.<br>
-- We should convert it to a factor and confirm the levels are ordered properly.<br>
+<p><code>overall_qual</code> is ordinal - <code>read_csv()</code> thought was numeric by the levels are coded using numbers - We should convert it to a factor and confirm the levels are ordered properly.<br>
 - The data dictionary indicates that valid values range from 1 - 10.</p>
+</section>
+<section class="slide level2">
+
+<p>Here is the code to re-class it</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 1,955
@@ -771,9 +826,12 @@ $ bldg_type    &lt;fct&gt; 1Fam, 1Fam, 1Fam, 1Fam, TwnhsE, TwnhsE, TwnhsE, 1Fam,
 </div>
 </div>
 <ol type="1">
-<li>It is always best to explicitly set the levels of an ordinal factor in the order you prefer. It is not necessary here because <code>overall_qual</code> was numeric and therefore sorts in the expected order. However, if it had been numbers stores as characters, it could sort incorrectly (e.g., 1, 10, 2, 3, …). And obviously if the orders levels were names, the order would have to be specified.</li>
+<li>It is always best to explicitly set the levels of an ordinal factor in the order you prefer. It is not necessary here because <code>overall_qual</code> was numeric and therefore sorts in the expected order. However, if it had been numbers stored as characters, it could sort incorrectly (e.g., 1, 10, 2, 3, …). And obviously if the orders levels were names, the order would have to be specified.</li>
 <li>We indicate the levels here.</li>
 </ol>
+</section>
+<section class="slide level2">
+
 <h3 id="skimming-the-data">Skimming the data</h3>
 <p><code>skim()</code> from the <code>skimr</code> package is a wonderful and customizable function for summary statistics</p>
 <ul>
@@ -1110,6 +1168,9 @@ garage_cars
 </table>
 </div>
 </div>
+</section>
+<section class="slide level2">
+
 <p><strong>Coding sidebar 1:</strong></p>
 <ul>
 <li>Write functions whenever you will repeat code often. You can now reuse <code>skim_some()</code></li>
@@ -1131,6 +1192,9 @@ garage_cars
 </li>
 <li>You can save your own scripts in a local file and load them into your workspace using <code>source()</code> or you can make your own github repo so you can begin to share your code with others!</li>
 </ul>
+</section>
+<section class="slide level2">
+
 <h3 id="missing-data---all-variables">Missing Data - All variables</h3>
 <p><code>skim_some()</code> provides us with missing data counts and complete data proportions for each variable</p>
 <div class="cell">
@@ -1455,15 +1519,19 @@ garage_cars
 </section>
 <section class="slide level2">
 
-<p>View full observation for missing value</p>
+<p>You likely should view the full observation for missing values</p>
+<p>We will show you a few methods to do this in your rendered output</p>
 <ul>
-<li><code>print()</code> will print only 20 rows and number of columns that will display for width of page
+<li><code>print()</code> will print only 20 rows and the number of columns that will display for width of page
 <ul>
 <li>Set <code>options()</code> if you will do a lot of printing and want full dataframe printed</li>
 </ul></li>
-<li>Use <code>kbl()</code> from <code>kableExtra</code> package for formatted tables</li>
-<li>Use <code>View()</code> interactively in R Studio</li>
+<li>Use <code>kbl()</code> from <code>kableExtra</code> package for formatted tables (two methods below)</li>
 </ul>
+<p>Don’t forget that you can also use <code>View()</code> interactively in R Studio</p>
+</section>
+<section class="slide level2">
+
 <p><strong>Option 1 (Simple)</strong>: Use print() with <code>options()</code></p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
@@ -1473,10 +1541,8 @@ garage_cars
 1     150909        1828     9060       1923            5          NA
   garage_qual ms_zoning lot_config bldg_type
   &lt;fct&gt;       &lt;fct&gt;     &lt;fct&gt;      &lt;fct&gt;    
-1 &lt;NA&gt;        RM        Inside     1Fam     </code></pre>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 109 × 10
+1 &lt;NA&gt;        RM        Inside     1Fam     
+# A tibble: 109 × 10
     sale_price gr_liv_area lot_area year_built overall_qual garage_cars
          &lt;dbl&gt;       &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt;
   1     115000         864    10500       1971            4           0
@@ -1701,6 +1767,9 @@ garage_cars
 109 &lt;NA&gt;        RM        Inside     Twnhs    </code></pre>
 </div>
 </div>
+<ol type="1">
+<li>This sets print to print all rows and columns. Note that we set these options at the start of the unit b.c. we like to see our full tibbles. If we want only a subset of the first (or last) rows, we use <code>head()</code> or <code>tail()</code></li>
+</ol>
 </section>
 <section class="slide level2">
 
@@ -1718,1340 +1787,7 @@ garage_cars
 </section>
 <section class="slide level2">
 
-<div class="cell">
-<div class="cell-output-display">
-<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:500px; overflow-x: scroll; width:100%; ">
-<table class="table table-striped table-condensed" data-quarto-postprocess="true" style="margin-left: auto; margin-right: auto;">
-<thead>
-<tr class="header">
-<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">sale_price</th>
-<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">gr_liv_area</th>
-<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">lot_area</th>
-<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">year_built</th>
-<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">overall_qual</th>
-<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">garage_cars</th>
-<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">garage_qual</th>
-<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">ms_zoning</th>
-<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">lot_config</th>
-<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">bldg_type</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td style="text-align: right;">115000</td>
-<td style="text-align: right;">864</td>
-<td style="text-align: right;">10500</td>
-<td style="text-align: right;">1971</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">FR2</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">128950</td>
-<td style="text-align: right;">1225</td>
-<td style="text-align: right;">9320</td>
-<td style="text-align: right;">1959</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">84900</td>
-<td style="text-align: right;">1728</td>
-<td style="text-align: right;">13260</td>
-<td style="text-align: right;">1962</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">Duplex</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">116500</td>
-<td style="text-align: right;">858</td>
-<td style="text-align: right;">7207</td>
-<td style="text-align: right;">1958</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">76500</td>
-<td style="text-align: right;">1306</td>
-<td style="text-align: right;">5350</td>
-<td style="text-align: right;">1940</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">76500</td>
-<td style="text-align: right;">2256</td>
-<td style="text-align: right;">9045</td>
-<td style="text-align: right;">1910</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">2fmCon</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">159900</td>
-<td style="text-align: right;">1560</td>
-<td style="text-align: right;">12900</td>
-<td style="text-align: right;">1912</td>
-<td style="text-align: right;">6</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">55000</td>
-<td style="text-align: right;">1092</td>
-<td style="text-align: right;">5600</td>
-<td style="text-align: right;">1930</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">2fmCon</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">93369</td>
-<td style="text-align: right;">1884</td>
-<td style="text-align: right;">6449</td>
-<td style="text-align: right;">1907</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">C (all)</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">94000</td>
-<td style="text-align: right;">1020</td>
-<td style="text-align: right;">6342</td>
-<td style="text-align: right;">1875</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">136000</td>
-<td style="text-align: right;">1832</td>
-<td style="text-align: right;">10773</td>
-<td style="text-align: right;">1967</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">Duplex</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">100000</td>
-<td style="text-align: right;">1664</td>
-<td style="text-align: right;">9825</td>
-<td style="text-align: right;">1965</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">Duplex</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">90000</td>
-<td style="text-align: right;">960</td>
-<td style="text-align: right;">6410</td>
-<td style="text-align: right;">1958</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">100000</td>
-<td style="text-align: right;">1666</td>
-<td style="text-align: right;">9839</td>
-<td style="text-align: right;">1931</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">139000</td>
-<td style="text-align: right;">1824</td>
-<td style="text-align: right;">9400</td>
-<td style="text-align: right;">1971</td>
-<td style="text-align: right;">6</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Corner</td>
-<td style="text-align: right;">Duplex</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">76000</td>
-<td style="text-align: right;">1092</td>
-<td style="text-align: right;">1476</td>
-<td style="text-align: right;">1970</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">Twnhs</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">75500</td>
-<td style="text-align: right;">630</td>
-<td style="text-align: right;">1491</td>
-<td style="text-align: right;">1972</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">TwnhsE</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">88250</td>
-<td style="text-align: right;">1092</td>
-<td style="text-align: right;">1900</td>
-<td style="text-align: right;">1970</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">TwnhsE</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">136000</td>
-<td style="text-align: right;">1792</td>
-<td style="text-align: right;">9000</td>
-<td style="text-align: right;">1974</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">FR2</td>
-<td style="text-align: right;">Duplex</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">142000</td>
-<td style="text-align: right;">1114</td>
-<td style="text-align: right;">13072</td>
-<td style="text-align: right;">2004</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">82500</td>
-<td style="text-align: right;">708</td>
-<td style="text-align: right;">5330</td>
-<td style="text-align: right;">1940</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">129000</td>
-<td style="text-align: right;">1464</td>
-<td style="text-align: right;">9900</td>
-<td style="text-align: right;">1910</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Corner</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">94550</td>
-<td style="text-align: right;">1701</td>
-<td style="text-align: right;">7627</td>
-<td style="text-align: right;">1920</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Corner</td>
-<td style="text-align: right;">2fmCon</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">103000</td>
-<td style="text-align: right;">1447</td>
-<td style="text-align: right;">10134</td>
-<td style="text-align: right;">1910</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">37900</td>
-<td style="text-align: right;">968</td>
-<td style="text-align: right;">5925</td>
-<td style="text-align: right;">1910</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">113000</td>
-<td style="text-align: right;">1452</td>
-<td style="text-align: right;">4456</td>
-<td style="text-align: right;">1920</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">2fmCon</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">58500</td>
-<td style="text-align: right;">816</td>
-<td style="text-align: right;">3300</td>
-<td style="text-align: right;">1910</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">C (all)</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">34900</td>
-<td style="text-align: right;">720</td>
-<td style="text-align: right;">7879</td>
-<td style="text-align: right;">1920</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">C (all)</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">60000</td>
-<td style="text-align: right;">800</td>
-<td style="text-align: right;">6120</td>
-<td style="text-align: right;">1936</td>
-<td style="text-align: right;">2</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">62500</td>
-<td style="text-align: right;">2128</td>
-<td style="text-align: right;">3000</td>
-<td style="text-align: right;">1922</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">Duplex</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">97500</td>
-<td style="text-align: right;">1864</td>
-<td style="text-align: right;">5852</td>
-<td style="text-align: right;">1902</td>
-<td style="text-align: right;">7</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Corner</td>
-<td style="text-align: right;">2fmCon</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">70000</td>
-<td style="text-align: right;">892</td>
-<td style="text-align: right;">5160</td>
-<td style="text-align: right;">1923</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">179000</td>
-<td style="text-align: right;">1200</td>
-<td style="text-align: right;">10800</td>
-<td style="text-align: right;">1987</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">Duplex</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">179000</td>
-<td style="text-align: right;">1200</td>
-<td style="text-align: right;">10800</td>
-<td style="text-align: right;">1987</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">Duplex</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">61000</td>
-<td style="text-align: right;">904</td>
-<td style="text-align: right;">10020</td>
-<td style="text-align: right;">1922</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">118000</td>
-<td style="text-align: right;">698</td>
-<td style="text-align: right;">9405</td>
-<td style="text-align: right;">1947</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">99900</td>
-<td style="text-align: right;">864</td>
-<td style="text-align: right;">4060</td>
-<td style="text-align: right;">1922</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Corner</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">119900</td>
-<td style="text-align: right;">1678</td>
-<td style="text-align: right;">10926</td>
-<td style="text-align: right;">1959</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">Duplex</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">112000</td>
-<td style="text-align: right;">833</td>
-<td style="text-align: right;">8780</td>
-<td style="text-align: right;">1985</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Corner</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">141000</td>
-<td style="text-align: right;">1080</td>
-<td style="text-align: right;">7500</td>
-<td style="text-align: right;">2004</td>
-<td style="text-align: right;">7</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">106250</td>
-<td style="text-align: right;">1294</td>
-<td style="text-align: right;">10800</td>
-<td style="text-align: right;">1900</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">2fmCon</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">130000</td>
-<td style="text-align: right;">1800</td>
-<td style="text-align: right;">8513</td>
-<td style="text-align: right;">1961</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Corner</td>
-<td style="text-align: right;">Duplex</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">120000</td>
-<td style="text-align: right;">1027</td>
-<td style="text-align: right;">5400</td>
-<td style="text-align: right;">1920</td>
-<td style="text-align: right;">7</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">95000</td>
-<td style="text-align: right;">1080</td>
-<td style="text-align: right;">5914</td>
-<td style="text-align: right;">1890</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">65000</td>
-<td style="text-align: right;">1588</td>
-<td style="text-align: right;">12205</td>
-<td style="text-align: right;">1949</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">129400</td>
-<td style="text-align: right;">1540</td>
-<td style="text-align: right;">6000</td>
-<td style="text-align: right;">1905</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Corner</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">160000</td>
-<td style="text-align: right;">1984</td>
-<td style="text-align: right;">8094</td>
-<td style="text-align: right;">1910</td>
-<td style="text-align: right;">6</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">2fmCon</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">89500</td>
-<td style="text-align: right;">1406</td>
-<td style="text-align: right;">7920</td>
-<td style="text-align: right;">1920</td>
-<td style="text-align: right;">6</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">79900</td>
-<td style="text-align: right;">1198</td>
-<td style="text-align: right;">5586</td>
-<td style="text-align: right;">1920</td>
-<td style="text-align: right;">6</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">82375</td>
-<td style="text-align: right;">1344</td>
-<td style="text-align: right;">10320</td>
-<td style="text-align: right;">1915</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">2fmCon</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">127500</td>
-<td style="text-align: right;">1355</td>
-<td style="text-align: right;">10106</td>
-<td style="text-align: right;">1940</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">2fmCon</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">80000</td>
-<td style="text-align: right;">1006</td>
-<td style="text-align: right;">9000</td>
-<td style="text-align: right;">1959</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">260000</td>
-<td style="text-align: right;">1518</td>
-<td style="text-align: right;">19550</td>
-<td style="text-align: right;">1940</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">99600</td>
-<td style="text-align: right;">864</td>
-<td style="text-align: right;">9350</td>
-<td style="text-align: right;">1975</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">Duplex</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">107500</td>
-<td style="text-align: right;">1347</td>
-<td style="text-align: right;">7000</td>
-<td style="text-align: right;">1910</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">2fmCon</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">79000</td>
-<td style="text-align: right;">1096</td>
-<td style="text-align: right;">9600</td>
-<td style="text-align: right;">1924</td>
-<td style="text-align: right;">6</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Corner</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">85000</td>
-<td style="text-align: right;">796</td>
-<td style="text-align: right;">8777</td>
-<td style="text-align: right;">1910</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">145900</td>
-<td style="text-align: right;">2200</td>
-<td style="text-align: right;">8777</td>
-<td style="text-align: right;">1900</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">Duplex</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">82000</td>
-<td style="text-align: right;">1152</td>
-<td style="text-align: right;">6040</td>
-<td style="text-align: right;">1955</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">Duplex</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">82000</td>
-<td style="text-align: right;">1152</td>
-<td style="text-align: right;">6012</td>
-<td style="text-align: right;">1955</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Corner</td>
-<td style="text-align: right;">Duplex</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">118000</td>
-<td style="text-align: right;">1440</td>
-<td style="text-align: right;">12108</td>
-<td style="text-align: right;">1955</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">Duplex</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">82500</td>
-<td style="text-align: right;">1152</td>
-<td style="text-align: right;">6845</td>
-<td style="text-align: right;">1955</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">Duplex</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">91900</td>
-<td style="text-align: right;">784</td>
-<td style="text-align: right;">6931</td>
-<td style="text-align: right;">1955</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">2fmCon</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">120000</td>
-<td style="text-align: right;">1053</td>
-<td style="text-align: right;">12180</td>
-<td style="text-align: right;">1938</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">96000</td>
-<td style="text-align: right;">1137</td>
-<td style="text-align: right;">8050</td>
-<td style="text-align: right;">1947</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">98000</td>
-<td style="text-align: right;">864</td>
-<td style="text-align: right;">5604</td>
-<td style="text-align: right;">1925</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">67000</td>
-<td style="text-align: right;">864</td>
-<td style="text-align: right;">8248</td>
-<td style="text-align: right;">1914</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">135900</td>
-<td style="text-align: right;">1716</td>
-<td style="text-align: right;">5687</td>
-<td style="text-align: right;">1912</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">2fmCon</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">119000</td>
-<td style="text-align: right;">1200</td>
-<td style="text-align: right;">8155</td>
-<td style="text-align: right;">1930</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">81000</td>
-<td style="text-align: right;">630</td>
-<td style="text-align: right;">1890</td>
-<td style="text-align: right;">1972</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">Twnhs</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">146000</td>
-<td style="text-align: right;">1100</td>
-<td style="text-align: right;">7500</td>
-<td style="text-align: right;">2006</td>
-<td style="text-align: right;">6</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">64000</td>
-<td style="text-align: right;">670</td>
-<td style="text-align: right;">3500</td>
-<td style="text-align: right;">1945</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">103200</td>
-<td style="text-align: right;">882</td>
-<td style="text-align: right;">5500</td>
-<td style="text-align: right;">1956</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">148000</td>
-<td style="text-align: right;">1534</td>
-<td style="text-align: right;">10800</td>
-<td style="text-align: right;">1895</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">110500</td>
-<td style="text-align: right;">866</td>
-<td style="text-align: right;">3880</td>
-<td style="text-align: right;">1945</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">127000</td>
-<td style="text-align: right;">1355</td>
-<td style="text-align: right;">6882</td>
-<td style="text-align: right;">1914</td>
-<td style="text-align: right;">6</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">200500</td>
-<td style="text-align: right;">3086</td>
-<td style="text-align: right;">18030</td>
-<td style="text-align: right;">1946</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">150000</td>
-<td style="text-align: right;">1440</td>
-<td style="text-align: right;">7711</td>
-<td style="text-align: right;">1977</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">Duplex</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">86000</td>
-<td style="text-align: right;">605</td>
-<td style="text-align: right;">9098</td>
-<td style="text-align: right;">1920</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">123600</td>
-<td style="text-align: right;">990</td>
-<td style="text-align: right;">8070</td>
-<td style="text-align: right;">1994</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">98500</td>
-<td style="text-align: right;">1195</td>
-<td style="text-align: right;">8741</td>
-<td style="text-align: right;">1946</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">Duplex</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">79000</td>
-<td style="text-align: right;">774</td>
-<td style="text-align: right;">4270</td>
-<td style="text-align: right;">1931</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RH</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">200000</td>
-<td style="text-align: right;">3395</td>
-<td style="text-align: right;">10896</td>
-<td style="text-align: right;">1914</td>
-<td style="text-align: right;">6</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RH</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">2fmCon</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">150000</td>
-<td style="text-align: right;">2592</td>
-<td style="text-align: right;">10890</td>
-<td style="text-align: right;">1923</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">Duplex</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">115000</td>
-<td style="text-align: right;">1517</td>
-<td style="text-align: right;">8500</td>
-<td style="text-align: right;">1919</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Corner</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">150909</td>
-<td style="text-align: right;">1828</td>
-<td style="text-align: right;">9060</td>
-<td style="text-align: right;">1923</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">119600</td>
-<td style="text-align: right;">1991</td>
-<td style="text-align: right;">8250</td>
-<td style="text-align: right;">1895</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">C (all)</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">2fmCon</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">147000</td>
-<td style="text-align: right;">1120</td>
-<td style="text-align: right;">8402</td>
-<td style="text-align: right;">2007</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">93900</td>
-<td style="text-align: right;">1092</td>
-<td style="text-align: right;">1495</td>
-<td style="text-align: right;">1970</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">TwnhsE</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">84500</td>
-<td style="text-align: right;">630</td>
-<td style="text-align: right;">1936</td>
-<td style="text-align: right;">1970</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">Twnhs</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">139500</td>
-<td style="text-align: right;">1142</td>
-<td style="text-align: right;">7733</td>
-<td style="text-align: right;">2005</td>
-<td style="text-align: right;">6</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">132000</td>
-<td style="text-align: right;">1131</td>
-<td style="text-align: right;">13072</td>
-<td style="text-align: right;">2005</td>
-<td style="text-align: right;">6</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">85500</td>
-<td style="text-align: right;">869</td>
-<td style="text-align: right;">5900</td>
-<td style="text-align: right;">1923</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">135000</td>
-<td style="text-align: right;">1192</td>
-<td style="text-align: right;">10800</td>
-<td style="text-align: right;">1949</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">119000</td>
-<td style="text-align: right;">1556</td>
-<td style="text-align: right;">8512</td>
-<td style="text-align: right;">1960</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Corner</td>
-<td style="text-align: right;">Duplex</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">124000</td>
-<td style="text-align: right;">1025</td>
-<td style="text-align: right;">7000</td>
-<td style="text-align: right;">1962</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">2fmCon</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">64500</td>
-<td style="text-align: right;">1020</td>
-<td style="text-align: right;">4761</td>
-<td style="text-align: right;">1918</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">C (all)</td>
-<td style="text-align: right;">Corner</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">100000</td>
-<td style="text-align: right;">788</td>
-<td style="text-align: right;">7446</td>
-<td style="text-align: right;">1941</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Corner</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">80500</td>
-<td style="text-align: right;">912</td>
-<td style="text-align: right;">6240</td>
-<td style="text-align: right;">1947</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">72000</td>
-<td style="text-align: right;">819</td>
-<td style="text-align: right;">9000</td>
-<td style="text-align: right;">1919</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">117250</td>
-<td style="text-align: right;">914</td>
-<td style="text-align: right;">8050</td>
-<td style="text-align: right;">2002</td>
-<td style="text-align: right;">6</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">81000</td>
-<td style="text-align: right;">1184</td>
-<td style="text-align: right;">8410</td>
-<td style="text-align: right;">1910</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">FR2</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">83000</td>
-<td style="text-align: right;">1414</td>
-<td style="text-align: right;">8248</td>
-<td style="text-align: right;">1922</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">102000</td>
-<td style="text-align: right;">1522</td>
-<td style="text-align: right;">6000</td>
-<td style="text-align: right;">1926</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RL</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">72000</td>
-<td style="text-align: right;">672</td>
-<td style="text-align: right;">8534</td>
-<td style="text-align: right;">1925</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">115000</td>
-<td style="text-align: right;">1396</td>
-<td style="text-align: right;">9000</td>
-<td style="text-align: right;">1951</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">C (all)</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">2fmCon</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">78000</td>
-<td style="text-align: right;">936</td>
-<td style="text-align: right;">8520</td>
-<td style="text-align: right;">1916</td>
-<td style="text-align: right;">3</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">C (all)</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">1Fam</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">92000</td>
-<td style="text-align: right;">630</td>
-<td style="text-align: right;">1533</td>
-<td style="text-align: right;">1970</td>
-<td style="text-align: right;">5</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">Twnhs</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">90500</td>
-<td style="text-align: right;">1092</td>
-<td style="text-align: right;">1936</td>
-<td style="text-align: right;">1970</td>
-<td style="text-align: right;">4</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">NA</td>
-<td style="text-align: right;">RM</td>
-<td style="text-align: right;">Inside</td>
-<td style="text-align: right;">Twnhs</td>
-</tr>
-</tbody>
-</table>
-</div>
-
-</div>
-</div>
-<p><strong>Option 3 (Most advanced)</strong>: Line by line kable table. You can make this as complicated and customized as you like. This is a simple example of options</p>
+<p>Let’s use this function to see its output</p>
 <div class="cell">
 <div class="cell-output-display">
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:500px; overflow-x: scroll; width:100%; ">
@@ -4397,6 +3133,1343 @@ garage_cars
 </section>
 <section class="slide level2">
 
+<p><strong>Option 3 (Most advanced)</strong>: Line by line kable table. You can make this as complicated and customized as you like. We use kable (and kableExtra) for publication quality tables. This is a simple example of options</p>
+<div class="cell">
+<div class="cell-output-display">
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:500px; overflow-x: scroll; width:100%; ">
+<table class="table table-striped table-condensed" data-quarto-postprocess="true" style="margin-left: auto; margin-right: auto;">
+<thead>
+<tr class="header">
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">sale_price</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">gr_liv_area</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">lot_area</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">year_built</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">overall_qual</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">garage_cars</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">garage_qual</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">ms_zoning</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">lot_config</th>
+<th data-quarto-table-cell-role="th" style="text-align: right; position: sticky; top: 0; background-color: #FFFFFF;">bldg_type</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: right;">115000</td>
+<td style="text-align: right;">864</td>
+<td style="text-align: right;">10500</td>
+<td style="text-align: right;">1971</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">FR2</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">128950</td>
+<td style="text-align: right;">1225</td>
+<td style="text-align: right;">9320</td>
+<td style="text-align: right;">1959</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">84900</td>
+<td style="text-align: right;">1728</td>
+<td style="text-align: right;">13260</td>
+<td style="text-align: right;">1962</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">Duplex</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">116500</td>
+<td style="text-align: right;">858</td>
+<td style="text-align: right;">7207</td>
+<td style="text-align: right;">1958</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">76500</td>
+<td style="text-align: right;">1306</td>
+<td style="text-align: right;">5350</td>
+<td style="text-align: right;">1940</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">76500</td>
+<td style="text-align: right;">2256</td>
+<td style="text-align: right;">9045</td>
+<td style="text-align: right;">1910</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">2fmCon</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">159900</td>
+<td style="text-align: right;">1560</td>
+<td style="text-align: right;">12900</td>
+<td style="text-align: right;">1912</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">55000</td>
+<td style="text-align: right;">1092</td>
+<td style="text-align: right;">5600</td>
+<td style="text-align: right;">1930</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">2fmCon</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">93369</td>
+<td style="text-align: right;">1884</td>
+<td style="text-align: right;">6449</td>
+<td style="text-align: right;">1907</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">C (all)</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">94000</td>
+<td style="text-align: right;">1020</td>
+<td style="text-align: right;">6342</td>
+<td style="text-align: right;">1875</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">136000</td>
+<td style="text-align: right;">1832</td>
+<td style="text-align: right;">10773</td>
+<td style="text-align: right;">1967</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">Duplex</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">100000</td>
+<td style="text-align: right;">1664</td>
+<td style="text-align: right;">9825</td>
+<td style="text-align: right;">1965</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">Duplex</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">90000</td>
+<td style="text-align: right;">960</td>
+<td style="text-align: right;">6410</td>
+<td style="text-align: right;">1958</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">100000</td>
+<td style="text-align: right;">1666</td>
+<td style="text-align: right;">9839</td>
+<td style="text-align: right;">1931</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">139000</td>
+<td style="text-align: right;">1824</td>
+<td style="text-align: right;">9400</td>
+<td style="text-align: right;">1971</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Corner</td>
+<td style="text-align: right;">Duplex</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">76000</td>
+<td style="text-align: right;">1092</td>
+<td style="text-align: right;">1476</td>
+<td style="text-align: right;">1970</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">Twnhs</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">75500</td>
+<td style="text-align: right;">630</td>
+<td style="text-align: right;">1491</td>
+<td style="text-align: right;">1972</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">TwnhsE</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">88250</td>
+<td style="text-align: right;">1092</td>
+<td style="text-align: right;">1900</td>
+<td style="text-align: right;">1970</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">TwnhsE</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">136000</td>
+<td style="text-align: right;">1792</td>
+<td style="text-align: right;">9000</td>
+<td style="text-align: right;">1974</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">FR2</td>
+<td style="text-align: right;">Duplex</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">142000</td>
+<td style="text-align: right;">1114</td>
+<td style="text-align: right;">13072</td>
+<td style="text-align: right;">2004</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">82500</td>
+<td style="text-align: right;">708</td>
+<td style="text-align: right;">5330</td>
+<td style="text-align: right;">1940</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">129000</td>
+<td style="text-align: right;">1464</td>
+<td style="text-align: right;">9900</td>
+<td style="text-align: right;">1910</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Corner</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">94550</td>
+<td style="text-align: right;">1701</td>
+<td style="text-align: right;">7627</td>
+<td style="text-align: right;">1920</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Corner</td>
+<td style="text-align: right;">2fmCon</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">103000</td>
+<td style="text-align: right;">1447</td>
+<td style="text-align: right;">10134</td>
+<td style="text-align: right;">1910</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">37900</td>
+<td style="text-align: right;">968</td>
+<td style="text-align: right;">5925</td>
+<td style="text-align: right;">1910</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">113000</td>
+<td style="text-align: right;">1452</td>
+<td style="text-align: right;">4456</td>
+<td style="text-align: right;">1920</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">2fmCon</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">58500</td>
+<td style="text-align: right;">816</td>
+<td style="text-align: right;">3300</td>
+<td style="text-align: right;">1910</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">C (all)</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">34900</td>
+<td style="text-align: right;">720</td>
+<td style="text-align: right;">7879</td>
+<td style="text-align: right;">1920</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">C (all)</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">60000</td>
+<td style="text-align: right;">800</td>
+<td style="text-align: right;">6120</td>
+<td style="text-align: right;">1936</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">62500</td>
+<td style="text-align: right;">2128</td>
+<td style="text-align: right;">3000</td>
+<td style="text-align: right;">1922</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">Duplex</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">97500</td>
+<td style="text-align: right;">1864</td>
+<td style="text-align: right;">5852</td>
+<td style="text-align: right;">1902</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Corner</td>
+<td style="text-align: right;">2fmCon</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">70000</td>
+<td style="text-align: right;">892</td>
+<td style="text-align: right;">5160</td>
+<td style="text-align: right;">1923</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">179000</td>
+<td style="text-align: right;">1200</td>
+<td style="text-align: right;">10800</td>
+<td style="text-align: right;">1987</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">Duplex</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">179000</td>
+<td style="text-align: right;">1200</td>
+<td style="text-align: right;">10800</td>
+<td style="text-align: right;">1987</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">Duplex</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">61000</td>
+<td style="text-align: right;">904</td>
+<td style="text-align: right;">10020</td>
+<td style="text-align: right;">1922</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">118000</td>
+<td style="text-align: right;">698</td>
+<td style="text-align: right;">9405</td>
+<td style="text-align: right;">1947</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">99900</td>
+<td style="text-align: right;">864</td>
+<td style="text-align: right;">4060</td>
+<td style="text-align: right;">1922</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Corner</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">119900</td>
+<td style="text-align: right;">1678</td>
+<td style="text-align: right;">10926</td>
+<td style="text-align: right;">1959</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">Duplex</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">112000</td>
+<td style="text-align: right;">833</td>
+<td style="text-align: right;">8780</td>
+<td style="text-align: right;">1985</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Corner</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">141000</td>
+<td style="text-align: right;">1080</td>
+<td style="text-align: right;">7500</td>
+<td style="text-align: right;">2004</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">106250</td>
+<td style="text-align: right;">1294</td>
+<td style="text-align: right;">10800</td>
+<td style="text-align: right;">1900</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">2fmCon</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">130000</td>
+<td style="text-align: right;">1800</td>
+<td style="text-align: right;">8513</td>
+<td style="text-align: right;">1961</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Corner</td>
+<td style="text-align: right;">Duplex</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">120000</td>
+<td style="text-align: right;">1027</td>
+<td style="text-align: right;">5400</td>
+<td style="text-align: right;">1920</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">95000</td>
+<td style="text-align: right;">1080</td>
+<td style="text-align: right;">5914</td>
+<td style="text-align: right;">1890</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">65000</td>
+<td style="text-align: right;">1588</td>
+<td style="text-align: right;">12205</td>
+<td style="text-align: right;">1949</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">129400</td>
+<td style="text-align: right;">1540</td>
+<td style="text-align: right;">6000</td>
+<td style="text-align: right;">1905</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Corner</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">160000</td>
+<td style="text-align: right;">1984</td>
+<td style="text-align: right;">8094</td>
+<td style="text-align: right;">1910</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">2fmCon</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">89500</td>
+<td style="text-align: right;">1406</td>
+<td style="text-align: right;">7920</td>
+<td style="text-align: right;">1920</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">79900</td>
+<td style="text-align: right;">1198</td>
+<td style="text-align: right;">5586</td>
+<td style="text-align: right;">1920</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">82375</td>
+<td style="text-align: right;">1344</td>
+<td style="text-align: right;">10320</td>
+<td style="text-align: right;">1915</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">2fmCon</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">127500</td>
+<td style="text-align: right;">1355</td>
+<td style="text-align: right;">10106</td>
+<td style="text-align: right;">1940</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">2fmCon</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">80000</td>
+<td style="text-align: right;">1006</td>
+<td style="text-align: right;">9000</td>
+<td style="text-align: right;">1959</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">260000</td>
+<td style="text-align: right;">1518</td>
+<td style="text-align: right;">19550</td>
+<td style="text-align: right;">1940</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">99600</td>
+<td style="text-align: right;">864</td>
+<td style="text-align: right;">9350</td>
+<td style="text-align: right;">1975</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">Duplex</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">107500</td>
+<td style="text-align: right;">1347</td>
+<td style="text-align: right;">7000</td>
+<td style="text-align: right;">1910</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">2fmCon</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">79000</td>
+<td style="text-align: right;">1096</td>
+<td style="text-align: right;">9600</td>
+<td style="text-align: right;">1924</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Corner</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">85000</td>
+<td style="text-align: right;">796</td>
+<td style="text-align: right;">8777</td>
+<td style="text-align: right;">1910</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">145900</td>
+<td style="text-align: right;">2200</td>
+<td style="text-align: right;">8777</td>
+<td style="text-align: right;">1900</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">Duplex</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">82000</td>
+<td style="text-align: right;">1152</td>
+<td style="text-align: right;">6040</td>
+<td style="text-align: right;">1955</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">Duplex</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">82000</td>
+<td style="text-align: right;">1152</td>
+<td style="text-align: right;">6012</td>
+<td style="text-align: right;">1955</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Corner</td>
+<td style="text-align: right;">Duplex</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">118000</td>
+<td style="text-align: right;">1440</td>
+<td style="text-align: right;">12108</td>
+<td style="text-align: right;">1955</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">Duplex</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">82500</td>
+<td style="text-align: right;">1152</td>
+<td style="text-align: right;">6845</td>
+<td style="text-align: right;">1955</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">Duplex</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">91900</td>
+<td style="text-align: right;">784</td>
+<td style="text-align: right;">6931</td>
+<td style="text-align: right;">1955</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">2fmCon</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">120000</td>
+<td style="text-align: right;">1053</td>
+<td style="text-align: right;">12180</td>
+<td style="text-align: right;">1938</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">96000</td>
+<td style="text-align: right;">1137</td>
+<td style="text-align: right;">8050</td>
+<td style="text-align: right;">1947</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">98000</td>
+<td style="text-align: right;">864</td>
+<td style="text-align: right;">5604</td>
+<td style="text-align: right;">1925</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">67000</td>
+<td style="text-align: right;">864</td>
+<td style="text-align: right;">8248</td>
+<td style="text-align: right;">1914</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">135900</td>
+<td style="text-align: right;">1716</td>
+<td style="text-align: right;">5687</td>
+<td style="text-align: right;">1912</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">2fmCon</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">119000</td>
+<td style="text-align: right;">1200</td>
+<td style="text-align: right;">8155</td>
+<td style="text-align: right;">1930</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">81000</td>
+<td style="text-align: right;">630</td>
+<td style="text-align: right;">1890</td>
+<td style="text-align: right;">1972</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">Twnhs</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">146000</td>
+<td style="text-align: right;">1100</td>
+<td style="text-align: right;">7500</td>
+<td style="text-align: right;">2006</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">64000</td>
+<td style="text-align: right;">670</td>
+<td style="text-align: right;">3500</td>
+<td style="text-align: right;">1945</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">103200</td>
+<td style="text-align: right;">882</td>
+<td style="text-align: right;">5500</td>
+<td style="text-align: right;">1956</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">148000</td>
+<td style="text-align: right;">1534</td>
+<td style="text-align: right;">10800</td>
+<td style="text-align: right;">1895</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">110500</td>
+<td style="text-align: right;">866</td>
+<td style="text-align: right;">3880</td>
+<td style="text-align: right;">1945</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">127000</td>
+<td style="text-align: right;">1355</td>
+<td style="text-align: right;">6882</td>
+<td style="text-align: right;">1914</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">200500</td>
+<td style="text-align: right;">3086</td>
+<td style="text-align: right;">18030</td>
+<td style="text-align: right;">1946</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">150000</td>
+<td style="text-align: right;">1440</td>
+<td style="text-align: right;">7711</td>
+<td style="text-align: right;">1977</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">Duplex</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">86000</td>
+<td style="text-align: right;">605</td>
+<td style="text-align: right;">9098</td>
+<td style="text-align: right;">1920</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">123600</td>
+<td style="text-align: right;">990</td>
+<td style="text-align: right;">8070</td>
+<td style="text-align: right;">1994</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">98500</td>
+<td style="text-align: right;">1195</td>
+<td style="text-align: right;">8741</td>
+<td style="text-align: right;">1946</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">Duplex</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">79000</td>
+<td style="text-align: right;">774</td>
+<td style="text-align: right;">4270</td>
+<td style="text-align: right;">1931</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RH</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">200000</td>
+<td style="text-align: right;">3395</td>
+<td style="text-align: right;">10896</td>
+<td style="text-align: right;">1914</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RH</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">2fmCon</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">150000</td>
+<td style="text-align: right;">2592</td>
+<td style="text-align: right;">10890</td>
+<td style="text-align: right;">1923</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">Duplex</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">115000</td>
+<td style="text-align: right;">1517</td>
+<td style="text-align: right;">8500</td>
+<td style="text-align: right;">1919</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Corner</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">150909</td>
+<td style="text-align: right;">1828</td>
+<td style="text-align: right;">9060</td>
+<td style="text-align: right;">1923</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">119600</td>
+<td style="text-align: right;">1991</td>
+<td style="text-align: right;">8250</td>
+<td style="text-align: right;">1895</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">C (all)</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">2fmCon</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">147000</td>
+<td style="text-align: right;">1120</td>
+<td style="text-align: right;">8402</td>
+<td style="text-align: right;">2007</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">93900</td>
+<td style="text-align: right;">1092</td>
+<td style="text-align: right;">1495</td>
+<td style="text-align: right;">1970</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">TwnhsE</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">84500</td>
+<td style="text-align: right;">630</td>
+<td style="text-align: right;">1936</td>
+<td style="text-align: right;">1970</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">Twnhs</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">139500</td>
+<td style="text-align: right;">1142</td>
+<td style="text-align: right;">7733</td>
+<td style="text-align: right;">2005</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">132000</td>
+<td style="text-align: right;">1131</td>
+<td style="text-align: right;">13072</td>
+<td style="text-align: right;">2005</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">85500</td>
+<td style="text-align: right;">869</td>
+<td style="text-align: right;">5900</td>
+<td style="text-align: right;">1923</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">135000</td>
+<td style="text-align: right;">1192</td>
+<td style="text-align: right;">10800</td>
+<td style="text-align: right;">1949</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">119000</td>
+<td style="text-align: right;">1556</td>
+<td style="text-align: right;">8512</td>
+<td style="text-align: right;">1960</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Corner</td>
+<td style="text-align: right;">Duplex</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">124000</td>
+<td style="text-align: right;">1025</td>
+<td style="text-align: right;">7000</td>
+<td style="text-align: right;">1962</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">2fmCon</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">64500</td>
+<td style="text-align: right;">1020</td>
+<td style="text-align: right;">4761</td>
+<td style="text-align: right;">1918</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">C (all)</td>
+<td style="text-align: right;">Corner</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">100000</td>
+<td style="text-align: right;">788</td>
+<td style="text-align: right;">7446</td>
+<td style="text-align: right;">1941</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Corner</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">80500</td>
+<td style="text-align: right;">912</td>
+<td style="text-align: right;">6240</td>
+<td style="text-align: right;">1947</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">72000</td>
+<td style="text-align: right;">819</td>
+<td style="text-align: right;">9000</td>
+<td style="text-align: right;">1919</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">117250</td>
+<td style="text-align: right;">914</td>
+<td style="text-align: right;">8050</td>
+<td style="text-align: right;">2002</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">81000</td>
+<td style="text-align: right;">1184</td>
+<td style="text-align: right;">8410</td>
+<td style="text-align: right;">1910</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">FR2</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">83000</td>
+<td style="text-align: right;">1414</td>
+<td style="text-align: right;">8248</td>
+<td style="text-align: right;">1922</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">102000</td>
+<td style="text-align: right;">1522</td>
+<td style="text-align: right;">6000</td>
+<td style="text-align: right;">1926</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RL</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">72000</td>
+<td style="text-align: right;">672</td>
+<td style="text-align: right;">8534</td>
+<td style="text-align: right;">1925</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">115000</td>
+<td style="text-align: right;">1396</td>
+<td style="text-align: right;">9000</td>
+<td style="text-align: right;">1951</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">C (all)</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">2fmCon</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">78000</td>
+<td style="text-align: right;">936</td>
+<td style="text-align: right;">8520</td>
+<td style="text-align: right;">1916</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">C (all)</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">1Fam</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">92000</td>
+<td style="text-align: right;">630</td>
+<td style="text-align: right;">1533</td>
+<td style="text-align: right;">1970</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">Twnhs</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">90500</td>
+<td style="text-align: right;">1092</td>
+<td style="text-align: right;">1936</td>
+<td style="text-align: right;">1970</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">NA</td>
+<td style="text-align: right;">RM</td>
+<td style="text-align: right;">Inside</td>
+<td style="text-align: right;">Twnhs</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+</div>
+</div>
+</section>
+<section class="slide level2">
+
 <p>In this instance, if we consult our <a href="data/ames_data_dictionary.pdf">data dictionary</a>, we see that <code>NA</code> for <code>garage_qual</code> should be coded as “no garage”. We will correct this in our data set.</p>
 <p>This is a pretty poor choice on the part of the researchers who created the dataset because it becomes impossible to distinguish between <code>NA</code> that means no garage vs.&nbsp;true NA for the variable. In fact, if you later do really careful EDA on the full data set with all variables, you will see this problem likely exists in this dataset</p>
 <p>Anyway, let’s correct all the <code>NA</code> for <code>garage_qual</code> to “no_garage” using <code>mutate()</code></p>
@@ -4433,17 +4506,22 @@ garage_cars
 <li>Pass that into <code>fct_relevel()</code>. See <code>?fct_relevel</code> for other ways to adjust the levels of a factor.</li>
 <li>Confirm that the levels are now correct</li>
 </ol>
+</section>
+<section class="slide level2">
+
 <h3 id="explore-minmax-response-for-numeric-variables">Explore Min/Max Response for Numeric Variables</h3>
 <p>We should explore mins and maxes for all numeric variables to detect out of valid range numeric responses</p>
-<p>Could also do this for ordinal variables that are coded with numbers</p>
+<ul>
+<li>Could also do this for ordinal variables that are coded with numbers
 <ul>
 <li>e.g., <code>overall_qual</code> (1-10) vs.&nbsp;<code>garage_qual</code> (no_garage, Po, Fa, TA, Gd, Ex)</li>
-<li>This is only a temporary mutation of <code>overall_qual</code> for this check</li>
-</ul>
-<p>We can use <code>skim_some()</code> again</p>
+</ul></li>
+<li>This is only a temporary mutation of <code>overall_qual</code> for this check. We don’t assign to new df to an object</li>
+<li>We can use <code>skim_some()</code> again
 <ul>
 <li>p0 = min</li>
 <li>p100 = max</li>
+</ul></li>
 </ul>
 <div class="cell">
 <div class="cell-output-display">
@@ -4764,6 +4842,9 @@ garage_cars
 </table>
 </div>
 </div>
+</section>
+<section class="slide level2">
+
 <h3 id="explore-all-responses-for-categorical-variables">Explore All Responses for Categorical Variables</h3>
 <p>We should explore all unique responses for nominal variables</p>
 <p>Might also do this for ordinal variables that are coded with labels vs.&nbsp;numbers.</p>
@@ -4777,12 +4858,15 @@ garage_cars
 </div>
 <p><strong>Coding sidebar</strong>:</p>
 <ul>
-<li>Above, we demonstrate the use of an anonymous function (<code>\(column) print(levels(column))</code>), which is a function we use once that we don’t bother to assign a name (since we won’t reuse it). We often use anonymous functions when using the functions from the <code>purrr</code> package (e.g., <code>map()</code>, <code>walk()</code>)</li>
+<li>On the previous page, we demonstrated the use of an anonymous function (<code>\(column) print(levels(column))</code>), which is a function we use once that we don’t bother to assign a name (since we won’t reuse it). We often use anonymous functions when using the functions from the <code>purrr</code> package (e.g., <code>map()</code>, <code>walk()</code>)</li>
 <li>We use <code>walk()</code> from the <code>purrr</code> package to apply our anonymous function to all columns of the data frame at once</li>
 <li>Just copy this code for now</li>
 <li>We will see simpler uses later that will help you understand iteration with <code>purrr</code> functions</li>
 <li>See the chapter on <a href="https://r4ds.hadley.nz/iteration">iteration</a> in <em>R for Data Science (2e)</em> for more info on <code>map()</code> and <code>walk()</code></li>
 </ul>
+</section>
+<section class="slide level2">
+
 <h3 id="tidy-responses-for-categorical-variables">Tidy Responses for Categorical Variables</h3>
 <p>Feature engineering with nominal and ordinal variables typically involves</p>
 <ul>
@@ -4798,6 +4882,9 @@ garage_cars
 <li>This uses regular expressions (regex), which will will learn about in a later unit on text processing.</li>
 <li>You could expand this cleaning function if you encounter other issues that need to be cleaned in the factor levels.</li>
 </ul>
+</section>
+<section class="slide level2">
+
 <p>Let’s use the function</p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
@@ -4815,7 +4902,9 @@ $ lot_config   &lt;fct&gt; corner, inside, corner, inside, inside, inside, insid
 $ bldg_type    &lt;fct&gt; 1fam, 1fam, 1fam, 1fam, twnhse, twnhse, twnhse, 1fam, 1fa…</code></pre>
 </div>
 </div>
-<p><strong>Coding sidebar</strong>: See <a href="https://tidyselect.r-lib.org/reference/language.html">more details</a> on the tidy selection helpers like <code>all_of()</code> and <code>where()</code></p>
+<ol type="1">
+<li>We use the tidy selection helper function to limit our mutate to only factors. See <a href="https://tidyselect.r-lib.org/reference/language.html">more details</a> on the tidy selection helpers like <code>all_of()</code> and <code>where()</code></li>
+</ol>
 </section>
 <section class="slide level2">
 
@@ -4840,6 +4929,9 @@ $ bldg_type    &lt;fct&gt; 1fam, 1fam, 1fam, 1fam, twnhse, twnhse, twnhse, 1fam,
 <li>Note that I did not need to list all levels in the recode. Only the levels I wanted to change.</li>
 </ol>
 <p>The full dataset is now clean!</p>
+</section>
+<section class="slide level2">
+
 <h3 id="trainvalidatetest-splits">Train/Validate/Test Splits</h3>
 <p>The final task we typically do as part of the data preparation process is to split the full dataset into training, validation and test sets.</p>
 <ul>
@@ -4885,7 +4977,7 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, town_inside, town_end, dup
 </div>
 </div>
 <ol type="1">
-<li><code>analysis()</code> pulls out the training set from our split of <code>data_all</code></li>
+<li><code>analysis()</code> pulls out the training set from our splits of <code>data_all</code></li>
 </ol>
 </section>
 <section class="slide level2">
@@ -4914,16 +5006,17 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, one_fam, town_end, one_fam
 </div>
 </div>
 <ol type="1">
-<li><code>assessment()</code> pulls out the validation set from our split of <code>data_all</code></li>
+<li><code>assessment()</code> pulls out the validation set from our splits of <code>data_all</code></li>
 </ol>
 </section>
 <section id="exploratory-data-analysis-for-modeling" class="slide level2">
 <h2>Exploratory Data Analysis for Modeling</h2>
 <p>Now let’s begin our Modeling EDA</p>
-<p>We prefer to write separate scripts for Cleaning vs, Modeling EDA (but not displayed here)</p>
+<p>We prefer to write separate scripts for Cleaning vs.&nbsp;Modeling EDA (but not displayed here)</p>
 <ul>
 <li>This keeps these two processes separate in our minds</li>
 <li>Cleaning EDA is done with full dataset but Modeling EDA is only done with a training set - NEVER use validation or test set</li>
+<li>You will use two separate scripts for the application assignment for this unit</li>
 </ul>
 </section>
 <section class="slide level2">
@@ -4932,7 +5025,7 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, one_fam, town_end, one_fam
 <p>Now that we are done cleaning the data, we should start to fully class our variables for how we will use them for modeling EDA and modeling more generally.</p>
 <ul>
 <li>Numeric predictors are classes as numeric (int or double)</li>
-<li>categorical predictors are classed as unordered or ordered factors.</li>
+<li>categorical predictors are classed as factors.</li>
 </ul>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
@@ -5007,6 +5100,9 @@ $ lot_config   &lt;fct&gt; inside, corner, fr2, fr2, inside, inside, inside, ins
 $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, town_inside, town_end, duplex,…</code></pre>
 </div>
 </div>
+<ol type="1">
+<li>Using our new function!</li>
+</ol>
 </section>
 <section class="slide level2">
 
@@ -5023,6 +5119,9 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, town_inside, town_end, dup
 <li>Identify outliers and consider how to handle when model building</li>
 <li>Consider how to handle imputation for missing data (if any)</li>
 </ul>
+</section>
+<section class="slide level2">
+
 <h3 id="overall-summary-of-feature-matrix">Overall Summary of Feature Matrix</h3>
 <p>Before we dig into individual variables and their distributions and relationships with the outcome, it’s nice to start with a big picture of the dataset</p>
 <ul>
@@ -5031,6 +5130,10 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, town_inside, town_end, dup
 <li>and remove histogram b/c we don’t find that small histogram useful</li>
 <li>included in <code>fun_eda.R</code> on github</li>
 </ul>
+</section>
+<section class="slide level2">
+
+<p>Careful review of this output provides a great orientation to our data</p>
 <div class="cell">
 <div class="cell-output-display">
 
@@ -5461,7 +5564,9 @@ garage_cars
 </table>
 </div>
 </div>
-<p>Careful review of this output provides a great orientation to our data</p>
+</section>
+<section class="slide level2">
+
 <h3 id="univariate-distributions">Univariate Distributions</h3>
 <p>Exploration of univariate distributions are useful to</p>
 <ul>
@@ -5470,10 +5575,17 @@ garage_cars
 <li>Can identify univariate outliers (valid but disconnected from distribution so not detected in cleaning)</li>
 </ul>
 <p>We generally select different visualizations and summary statistics for categorical vs.&nbsp;numeric variables</p>
-<h4 id="categorical-variables">Categorical Variables</h4>
-<h5 id="barplots">Barplots</h5>
+<h3 id="barplots-for-categorical-variables-univariate">Barplots for Categorical Variables (Univariate)</h3>
 <p>The primary visualization for categorical variables is the bar plot</p>
-<p>Define and customize it within a function for repeated use. We share this and all the remaining plots used in this unit in <code>fun_plot.R</code>. Source it to use them without having to re-code each time</p>
+<ul>
+<li>We use it for both nominal and ordinal variables</li>
+<li>Define and customize it within a function for repeated use.<br>
+</li>
+<li>We share this and all the remaining plots used in this unit in <code>fun_plot.R</code>. Source it to use them without having to re-code each time</li>
+</ul>
+</section>
+<section class="slide level2">
+
 <p><strong>Coding sidebar</strong>: When defining functions, generally put data as first argument so you can pipe in data using tidy pipelines</p>
 <p>There are pros and cons to writing functions that accept variable names that are quoted vs.&nbsp;unquoted</p>
 <ul>
@@ -5504,25 +5616,27 @@ garage_cars
 
 <p><strong>Coding sidebar</strong>:</p>
 <p>We can make all of our plots iteratively using <code>map()</code> from the `purrr package.</p>
-<div class="cell">
-<div class="cell-output-display">
-<p><img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-4-1.png" width="960"></p>
-</div>
-</div>
-<ol type="1">
+
+<img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-4-1.png" width="960" class="r-stretch"><ol type="1">
 <li>Select only the factor columns</li>
 <li>Get their names as strings (that is why we use quoted variables in these plot functions</li>
 <li>Use <code>map()</code> to iterative <code>plot_bar()</code> over every column. (see <a href="https://r4ds.hadley.nz/iteration.html">iteration</a> in <span class="citation" data-cites="RDS">Wickham, Çetinkaya-Rundel, and Grolemund (<a href="#/discussion-topics" role="doc-biblioref" onclick="">2023</a>)</span>)</li>
 <li>Use <code>plot_grid()</code> from <code>cowplot</code> package to display the list of plots in a grid</li>
 </ol>
-<h5 id="tables">Tables</h5>
+</section>
+<section class="slide level2">
+
+<h3 id="tables-for-categorical-variables-univariate">Tables for Categorical Variables (Univariate)</h3>
 <p>We tend to prefer visualizations vs.&nbsp;summary statistics for EDA. However, tables can be useful.</p>
 <p>Here is a function that was described in <span class="citation" data-cites="RDS">Wickham, Çetinkaya-Rundel, and Grolemund (<a href="#/discussion-topics" role="doc-biblioref" onclick="">2023</a>)</span> that we like because</p>
 <ul>
-<li>Includes counts and proportions</li>
-<li>Includes NA as a category</li>
+<li>It includes counts and proportions</li>
+<li>It includes NA as a category</li>
 </ul>
 <p>We have included it in <code>fun_eda.R</code> for your use.</p>
+</section>
+<section class="slide level2">
+
 <p>Tables can be used to identify responses that have very low frequency and to think about the need to handle missing values</p>
 <ul>
 <li>See <code>ms_zoning</code></li>
@@ -5543,7 +5657,7 @@ garage_cars
 </div>
 </div>
 <ul>
-<li>or maybe sorted</li>
+<li>We could also view the table sorted if we prefer</li>
 </ul>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
@@ -5559,14 +5673,15 @@ garage_cars
 7 indus         1 0.000683</code></pre>
 </div>
 </div>
-<p>but could see this with plot as well</p>
-<div class="cell">
-<div class="cell-output-display">
-<p><img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-6-1.png" width="960"></p>
-</div>
-</div>
-<h4 id="numeric-variables">Numeric Variables</h4>
-<h5 id="histograms">Histograms</h5>
+</section>
+<section class="slide level2">
+
+<p>but could see all this detail with plot as well</p>
+
+<img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-6-1.png" width="960" class="r-stretch"></section>
+<section class="slide level2">
+
+<h3 id="histograms-for-numeric-variables-univariate">Histograms for Numeric Variables (Univariate)</h3>
 <p>Histograms are a useful/common visualization for numeric variables</p>
 <p>Let’s define a histogram function (included in <code>fun_plots.r</code>)</p>
 <ul>
@@ -5574,29 +5689,35 @@ garage_cars
 <li>Somewhat dependent on n (my default here is based on this training set)</li>
 <li>This is one of the limitations of histograms</li>
 </ul>
+</section>
+<section class="slide level2">
+
 <p>Let’s look at <code>sale_price</code></p>
 <ul>
 <li>It is positively skewed</li>
 <li>May suggest units (dollars) are not interval in nature (makes sense)</li>
 <li>Could cause problems for some algorithms (e.g., lm) when features are normal</li>
 </ul>
-<div class="cell">
-<div class="cell-output-display">
-<p><img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-9-1.png" width="960"></p>
-</div>
-</div>
-<h5 id="smoothed-frequency-polygons">Smoothed Frequency Polygons</h5>
+
+<img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-9-1.png" width="960" class="r-stretch"></section>
+<section class="slide level2">
+
+<h3 id="smoothed-frequency-polygons-for-numeric-variables-univariate">Smoothed Frequency Polygons for Numeric Variables (Univariate)</h3>
 <p>Frequency polygons are also commonly used</p>
-<p>Define a frequency polygon function and use it (included in <code>fun_plots.r</code>)</p>
+<ul>
+<li>Define a frequency polygon function and use it (included in <code>fun_plots.r</code>)</li>
+</ul>
+</section>
+<section class="slide level2">
+
 <ul>
 <li>Bins may matter again</li>
 </ul>
-<div class="cell">
-<div class="cell-output-display">
-<p><img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-11-1.png" width="960"></p>
-</div>
-</div>
-<h5 id="simple-boxplots">Simple Boxplots</h5>
+
+<img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-11-1.png" width="960" class="r-stretch"></section>
+<section class="slide level2">
+
+<h3 id="simple-boxplots-for-numeric-variables-univariate">Simple Boxplots for Numeric Variables (Univariate)</h3>
 <p>Boxplots display</p>
 <ul>
 <li>Median as line</li>
@@ -5605,12 +5726,15 @@ garage_cars
 <li>Outliers outside of 1.5 * IQR</li>
 </ul>
 <p>Define a boxplot function and use it (included in <code>fun_plots.r</code>)</p>
-<div class="cell">
-<div class="cell-output-display">
-<p><img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-13-1.png" width="960"></p>
-</div>
-</div>
-<h5 id="combined-boxplot-and-violin-plots">Combined Boxplot and Violin Plots</h5>
+</section>
+<section class="slide level2">
+
+<p>Here is the plot for <code>sale_price</code></p>
+
+<img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-13-1.png" width="960" class="r-stretch"></section>
+<section class="slide level2">
+
+<h3 id="combined-boxplot-and-violin-plots-for-numeric-variables-univariate">Combined Boxplot and Violin Plots for Numeric Variables (Univariate)</h3>
 <p>The combination of a boxplot and violin plot is particularly useful</p>
 <ul>
 <li>This is our favorite</li>
@@ -5619,16 +5743,15 @@ garage_cars
 <li>Can also clearly see the tails</li>
 </ul>
 <p>Define a combined plot (included in <code>fun_plots.r</code>)</p>
+</section>
+<section class="slide level2">
+
 <p>Here is the plot for <code>sale_price</code></p>
 <ul>
 <li>In this instance, the skew is NOT due to only a few outliers</li>
 </ul>
-<div class="cell">
-<div class="cell-output-display">
-<p><img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-15-1.png" width="960"></p>
-</div>
-</div>
-</section>
+
+<img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-15-1.png" width="960" class="r-stretch"></section>
 <section class="slide level2">
 
 <p><strong>Coding sidebar</strong>:</p>
@@ -5639,7 +5762,10 @@ garage_cars
 <img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-16-1.png" width="960" class="r-stretch"><ol type="1">
 <li>Now select numeric rather than factor but otherwise same as previous example</li>
 </ol>
-<h5 id="summary-statistics">Summary Statistics</h5>
+</section>
+<section class="slide level2">
+
+<h3 id="summary-statistics-for-numeric-variables-univariate">Summary Statistics for Numeric Variables (Univariate)</h3>
 <p><code>skim_all()</code> provided all the summary statistics you likely needed for numeric variables</p>
 <ul>
 <li>mean &amp; median (p50)</li>
@@ -5966,8 +6092,10 @@ garage_cars
 <li>Are there any bivariate (model) outliers</li>
 </ul>
 <p>Again, we prefer visualizations but summary statistics are also available</p>
-<h4 id="both-numeric">Both Numeric</h4>
-<h5 id="scatterplots">Scatterplots</h5>
+</section>
+<section class="slide level2">
+
+<h3 id="scatterplots-for-numeric-variables-bivariate">Scatterplots for Numeric Variables (Bivariate)</h3>
 <p>Scatterplots are the preferred visualization when both variables are numeric</p>
 <p>Define a scatterplot function (included in <code>fun_plots.r</code>)</p>
 <ul>
@@ -6021,7 +6149,7 @@ garage_cars
 </section>
 <section class="slide level2">
 
-<p>Can make scatterplots for ordered factors as well</p>
+<p>Can make scatterplots for ordinal variables as well</p>
 <ul>
 <li>But other (perhaps better) options also exist for this combination of variable classes.</li>
 <li>Use <code>as.numeric()</code> to allow for lm and LOWESS lines on otherwise categorical variable</li>
@@ -6041,50 +6169,58 @@ garage_cars
 <li>Continue to use lm and LOWESS lines</li>
 <li>This dataset doesn’t have much of an overplotting problem but…..</li>
 </ul>
+</section>
+<section class="slide level2">
+
+<p><code>sale_price</code> by <code>gr_liv_area</code></p>
 
 <img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-26-1.png" width="960" class="r-stretch"></section>
 <section class="slide level2">
 
-<h5 id="correlations-plots">Correlations &amp; Plots</h5>
+<h3 id="correlations-for-numeric-variables-bivariate">Correlations for Numeric Variables (Bivariate)</h3>
 <p>Correlations are useful summary statistics for numeric variables</p>
-<p>Some statistical algorithms are sensitive to high correlations among features (multi-collinearity)</p>
-<p>At best, highly correlated features add unnecessary flexibility and can lead to overfitting</p>
+<ul>
+<li>Some statistical algorithms are sensitive to high correlations among features (multi-collinearity)</li>
+<li>At best, highly correlated features add unnecessary flexibility and can lead to overfitting</li>
+</ul>
 <p>We can visualize correlations among predictors/features using <code>corrplot.mixed()</code> from <code>corrplot</code> package</p>
 <ul>
 <li>Best for numeric variables</li>
-<li>Can include ordered categorical or two level unordered categorical variables if transformed to numeric</li>
-<li>Can include unordered categorical variables with &gt; 2 levels if first transformed appropriately (e.g., dummy features, not demonstrated yet)</li>
+<li>Can include ordinal or two-level nominal variables if transformed to numeric</li>
+<li>Can include nominal variables with &gt; 2 levels if first transformed appropriately (e.g., dummy features, not demonstrated yet)</li>
 <li>Works best with relatively small set of variables</li>
 <li>Need to consider how to handle missing values</li>
 </ul>
-<div class="cell">
-<div class="cell-output-display">
-<p><img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-27-1.png" width="960"></p>
-</div>
-</div>
-<p><strong>coding sidebar</strong> Note use of namespace (<code>corrplot::corrplot.mixed()</code>) to call this function from corrplot</p>
-<h4 id="categorical-and-numeric">Categorical and Numeric</h4>
-<h5 id="grouped-box-violin-plots">Grouped Box + Violin Plots</h5>
-<p>A grouped version of the combined box and violin plot is our preferred visualization for relationship between categorical and numeric variables (included in <code>fun_plots.r</code>)</p>
-<ul>
-<li>Often best when feature is categorical and outcome is numeric but can reverse</li>
-<li>Can use with ordered or unordered categorical variable</li>
-<li><span class="citation" data-cites="RDS">Wickham, Çetinkaya-Rundel, and Grolemund (<a href="#/discussion-topics" role="doc-biblioref" onclick="">2023</a>)</span> also describes use of grouped frequency polygons for this combination of variable classes</li>
-</ul>
-<p>Here is the relationship between <code>overall_qual</code> and <code>sale_price</code></p>
-<ul>
-<li>Tend to prefer this over the scatterplot (with <code>as.numeric()</code>) for ordered categorical variables</li>
-<li>Increasing spread of <code>sale_price</code> at higher levels of <code>overall_qual</code> is clearer in this plot</li>
-</ul>
-<div class="cell">
-<div class="cell-output-display">
-<p><img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-29-1.png" width="960"></p>
-</div>
-</div>
 </section>
 <section class="slide level2">
 
-<p>Here is a box + violin with an unordered categorical variable</p>
+
+<img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-27-1.png" width="960" class="r-stretch"><ol type="1">
+<li>Note use of namespace (<code>corrplot::corrplot.mixed()</code>) to call this function from <code>corrplot</code> package</li>
+</ol>
+</section>
+<section class="slide level2">
+
+<h3 id="grouped-box-violin-plots-for-mixed-categorical-and-numeric-bivariate">Grouped Box + Violin Plots for Mixed Categorical and Numeric (Bivariate)</h3>
+<p>A grouped version of the combined box and violin plot is our preferred visualization for relationship between categorical and numeric variables (included in <code>fun_plots.r</code>)</p>
+<ul>
+<li>Often best when feature is categorical and outcome is numeric but can reverse</li>
+<li>Can use with nominal or ordinal categorical variable</li>
+<li><span class="citation" data-cites="RDS">Wickham, Çetinkaya-Rundel, and Grolemund (<a href="#/discussion-topics" role="doc-biblioref" onclick="">2023</a>)</span> also describes use of grouped frequency polygons for this combination of variable classes</li>
+</ul>
+</section>
+<section class="slide level2">
+
+<p>Here is the relationship between <code>overall_qual</code> and <code>sale_price</code></p>
+<ul>
+<li>Tend to prefer this over the scatterplot (with <code>as.numeric()</code>) for ordinal variables</li>
+<li>Increasing spread of <code>sale_price</code> at higher levels of <code>overall_qual</code> is clearer in this plot</li>
+</ul>
+
+<img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-29-1.png" width="960" class="r-stretch"></section>
+<section class="slide level2">
+
+<p>Here is a box + violin with a nominal variable</p>
 <ul>
 <li>More variation and skew in <code>sale_price</code> for one family homes (additional features, moderators?)</li>
 <li>Position of townhouse (interior vs.&nbsp;exterior) seems to matter (don’t collapse?)</li>
@@ -6093,10 +6229,16 @@ garage_cars
 <img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-30-1.png" width="960" class="r-stretch"></section>
 <section class="slide level2">
 
-<p>When we have a categorical predictor (ordered or unordered) and a numeric outcome, we often want to see both the relationship between the variables AND the variability on the categorical variable alone. We like this combined plot enough when doing EDA to provide a specific function (included in <code>fun_plots.r</code>)! It is our go to for understanding the potential effect of a categorical predictor</p>
+<p>When we have a categorical predictor and a numeric outcome, we often want to see both the relationship between the variables AND the variability on the categorical variable alone. We like this combined plot enough when doing EDA to provide a specific function (included in <code>fun_plots.r</code>)! It is our go to for understanding the potential effect of a categorical predictor</p>
+</section>
+<section class="slide level2">
 
-<img data-src="002_exploratory_data_analysis_files/figure-revealjs/unnamed-chunk-17-1.png" width="960" class="r-stretch"><h4 id="both-categorical">Both Categorical</h4>
-<h5 id="stacked-barplots">Stacked Barplots</h5>
+<p><code>sale_price</code> by <code>bldg_type</code></p>
+
+<img data-src="002_exploratory_data_analysis_files/figure-revealjs/unnamed-chunk-17-1.png" width="960" class="r-stretch"></section>
+<section class="slide level2">
+
+<h3 id="stacked-barplots-for-categorical-variables-bivariate">Stacked Barplots for Categorical Variables (Bivariate)</h3>
 <p>Stacked Barplots:</p>
 <ul>
 <li>Can be useful with both ordered and unordered categorical variables</li>
@@ -6135,20 +6277,26 @@ garage_cars
 <p><img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-36-1.png" width="960"></p>
 </div>
 </div>
-<h5 id="tile-plot">Tile Plot</h5>
-<p>Tile plots may be useful if both categorical variables are ordered</p>
-<div class="cell">
-<div class="cell-output-display">
-<p><img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-38-1.png" width="960"></p>
-</div>
-</div>
 </section>
+<section class="slide level2">
+
+<h3 id="tile-plot-for-ordinal-variables-bivariate">Tile Plot for Ordinal Variables (Bivariate)</h3>
+<p>Tile plots may be useful if both categorical variables are ordered</p>
+</section>
+<section class="slide level2">
+
+<p><code>overall_qual</code> by <code>garage_qual</code></p>
+
+<img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-38-1.png" width="960" class="r-stretch"></section>
 <section class="slide level2">
 
 <p>You might also consider a scatterplot with jitter in this instance</p>
 
-<img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-39-1.png" width="960" class="r-stretch"><h5 id="two-way-tables">Two-way Tables</h5>
-<p>Two-way tables are sometimes a useful summary statistic for two categorical variables. We can use <code>tabyl()</code> from the janitor package for this</p>
+<img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-39-1.png" width="960" class="r-stretch"></section>
+<section class="slide level2">
+
+<h3 id="two-way-tables-for-categorical-variables-bivariate">Two-way Tables for Categorical Variables (Bivariate)</h3>
+<p>Two-way tables are sometimes a useful summary statistic for two categorical variables. We can use <code>tabyl()</code> from the janitor package for this or our variant of it, <code>tab2()</code></p>
 <p>For example, the relationship between <code>bldg_type</code> and <code>lot_config</code></p>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
@@ -6177,6 +6325,9 @@ garage_cars
 <li>Recipes use only information from the training set in all feature engineering</li>
 <li>Consider example of standardizing <code>x1</code> for a feature in train vs.&nbsp;validation and test. Must use mean and sd from TRAIN to standardize <code>x1</code> in train, validate, and test. VERY IMPORTANT.</li>
 </ul>
+</section>
+<section class="slide level2">
+
 <p>We use recipes in a two step process - <code>prep()</code> and <code>bake()</code></p>
 <ul>
 <li>“Prepping” a recipe involves calculating any statistics needed for the transformations that will be applied to engineer features (e.g., mean and standard deviation to normalize a numeric variable).
@@ -6191,6 +6342,9 @@ garage_cars
 <li>Whereas we only prep a recipe with training data, we can use a prepped recipe to bake features from any dataset (training, validation, or test).</li>
 </ul></li>
 </ul>
+</section>
+<section class="slide level2">
+
 <p>We will work with recipes extensively when model building starting in unit 3</p>
 <p>For now, we will only use the recipe to indicate roles as a gentle introduction.</p>
 <p>We will expand on this recipe in unit 3</p>
@@ -6282,7 +6436,10 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, town_inside, town_end, dup
 </section>
 <section class="slide level2">
 
-<p>Finally, we should generally at least glimpse (and typically do some more EDA) on our features to make sure our recipe is doing what we expect.</p>
+<p>Finally, we should generally at least glimpse and/or skim (and typically do some more EDA) on our features to make sure our recipe is doing what we expect.</p>
+<ul>
+<li>glimpse</li>
+</ul>
 <div class="cell">
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 1,465
@@ -6298,6 +6455,14 @@ $ lot_config   &lt;fct&gt; inside, corner, fr2, fr2, inside, inside, inside, ins
 $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, town_inside, town_end, duplex,…
 $ sale_price   &lt;dbl&gt; 105000, 126000, 115000, 120000, 99500, 112000, 122000, 12…</code></pre>
 </div>
+</div>
+</section>
+<section class="slide level2">
+
+<ul>
+<li>skim</li>
+</ul>
+<div class="cell">
 <div class="cell-output-display">
 
 <table style="width: auto;" class="table table-condensed">
@@ -6727,6 +6892,9 @@ sale_price
 </table>
 </div>
 </div>
+</section>
+<section class="slide level2">
+
 <p>We can now use our features from training to train models, but that will take place in the next unit!</p>
 <p>We could also use the prepped recipe to bake validation or test data to evaluate trained models. That too will happen in the next unit!</p>
 </section>
