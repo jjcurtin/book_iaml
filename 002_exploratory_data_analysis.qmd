@@ -96,6 +96,8 @@ You will NOT iterate back to earlier stages after you select a final model confi
 
 -----
 
+## Best Practices and Other Recommendations
+
 ### Data file formats
 
 We generally store data as CSV [comma-separated value] files
@@ -211,6 +213,7 @@ sale price of the homes.
 
 -----
 
+### Packages and Conflicts
 First, lets set up our environment with functions from important packages.  I strongly recommend reviewing our recommendations for best practices regarding [managing function conflicts](https://jjcurtin.github.io/book_dwvt/conflicts.html) now. It will save you a lot of headaches in the future.
 
 - We set a conflicts policy that will produce errors if we have unanticipated conflicts.
@@ -251,6 +254,7 @@ library(tidymodels) # <4>
 
 -----
 
+### Source and Other Environment Settings
 We will also source (from github) two other libraries of functions that we use commonly for exploratory data analyses.  You should review these function scripts ([fun_eda.R](https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true); [fun_plots.R](https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true) to see the code for these functions. 
 ```{r}
 #| message: false
@@ -274,8 +278,10 @@ path_data <- "data"
 
 -----
 
-Here is a quick glimpse of the subset of observations we will work with in Units 2-3 and the first two application assignments.  Note that we re-class all character variables as unordered factors for now
+### Read and Glimpse Dataframe
+Lets read in the data and glimpse the subset of observations we will work with in Units 2-3 and the first two application assignments.  
 
+Note that we re-class all character variables as factors
 
 ```{r u2-overview-2}
 data_all <- read_csv(here::here(path_data, "ames_raw_class.csv"),   # <1>
@@ -300,6 +306,10 @@ Dataset Notes:
 - This full dataset has 81 variables.  For the lecture examples in units 2-3 we will only use a subset of the predictors
 
 - You will use different predictors in the next two application assignments
+
+-----
+
+Here we select the variables we will use for lecture
 
 ```{r  u2-overview-3}
 data_all <- data_all |> 
@@ -388,6 +398,7 @@ data_all |> glimpse()
 ```
 
 `overall_qual` is ordinal
+
 - `read_csv()` thought was numeric by the levels are coded using numbers
 - We should convert it to a factor and confirm the levels are ordered properly.  
 - The data dictionary indicates that valid values range from 1 - 10.
@@ -488,9 +499,6 @@ Don't forget that you can also use `View()` interactively in R Studio
 options(tibble.width = Inf, tibble.print_max = Inf) # <1>
 
 data_all |> filter(is.na(garage_cars)) |> 
-  print()
-
-data_all |> filter(is.na(garage_qual)) |> 
   print()
 ```
 1. This sets print to print all rows and columns.  Note that we set these options at the start of the unit b.c. we like to see our full tibbles.  If we want only a subset of the first (or last) rows, we use `head()` or `tail()`
