@@ -11,8 +11,8 @@ Welcome to your first homework assignment! Please enter your first and last name
 
 Everything you need to complete this assignment can be downloaded from the course web book. This includes:
 
-**Two RMarkdown files (hw_unit_2_cleaning.Rmd and hw_unit_2_modeling.Rmd):** 
-To complete this homework (and the other homeworks) type all responses directly into these Rmarkdown files. To learn more about working in Rmarkdown files, see the R Markdown chapter of R for Data Science.
+**Two markdown files (hw_unit_2_cleaning.Rmd and hw_unit_2_modeling.Rmd):** 
+To complete this homework (and the other homeworks) type all responses directly into these Quarto markdown files. To learn more about Quarto working in markdown files, see the Quarto chapter of R for Data Science 2E and [help on markdown]9https://quarto.org/docs/authoring/markdown-basics.html) on the Quarto website
 
 **ames_raw_class.csv**:
 The `.csv` file containing the data set to be used in this assignment.
@@ -22,23 +22,28 @@ The data dictionary describing variables contained in the data set.
 
 Some code chunks, like the `packages` chunk below, will be pre-filled with code for you to run. Other code chunks will be empty with text instructions above them describing code for you to fill in.
 
-Run this code chunk to load all packages you will need for this assignment.
-```{r packages, messages = FALSE, warning = FALSE}
-# set up packages
-library(tidymodels) # for modeling
-library(purrr)  # for iteration using map() and walk() variants
-library(kableExtra) # for displaying formatted tables w/ kbl()
-library(janitor)  # for clean_names(), tabyl()
-library(skimr) # for skim()
-library(tidyverse) # for general data wrangling
+This code chunk will set up conflict policies to reduce errors associated with function conflicts
+```{r}
+options(conflicts.policy = "depends.ok")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+tidymodels_conflictRules()
 ```
 
-You may also use **fun_modeling.R:**
-A script containing functions written by John that are demoed in the course text.  This script is
-available on Github in a repository that John shares.  You can download the current version directly from GitHub  using the code below (note that you may need to install the `devtools` package if you haven't done this previously).
+Run this code chunk to load all packages you will need for this assignment.
+```{r packages}
+#| message: false
+#| warning: false
+library(janitor, include.only = "clean_names")
+library(kableExtra, exclude = "group_rows")library(kableExtra) # for displaying formatted tables w/ kbl()
+library(tidyverse) # for general data wrangling
+library(tidymodels) # for modeling
+```
+
+You may also use the EDA and plotting functions that John shares on his `lab_support` repo.  You can source those directly from Github with the code below (note that you may need to install the `devtools` package if you haven't done this previously).
 
 ```{r}
-devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_modeling.R?raw=true")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
 ``` 
 
 ## 1 Set up and load data
@@ -56,9 +61,10 @@ Note that other mathematical elements in RMarkdown are by convention surrounded 
 
 For example: 2^2 + 4 = 8$
 
-Make sure you have your iaml project open in RStudio.  When you run `library(here)` it will set your root path to be inside of the iaml folder.   Assuming you have a subfolder called homework and a folder within that folder called `unit_2`, `path_data` will work as set.  If you have some other organization, you will need to modify `path_data` to reflect that folder structure.
-```{r path, messages = FALSE, warning = FALSE}
-library(here)
+Make sure you have your iaml project open in RStudio.  When you call `here::here()` it will set your root path to be inside of the iaml folder.   Assuming you have a subfolder called homework and a folder within that folder called `unit_2`, `path_data` will work as set.  If you have some other organization, you will need to modify `path_data` to reflect that folder structure.
+```{r path}
+#| warning: false
+#| message: false
 path_data <- "homework/unit_2"
 ```
 
@@ -90,13 +96,16 @@ This script should only contain EDA steps necessary for cleaning the full datase
 
 ### 2.1 Variable classes
 Confirm that all variables are read in as the expected class. Below the code chunk, type some observations you have about the observed variable classes compared to descriptions in the data dictionary. Make any appropriate adjustments to variable class below using `mutate()`, `as.character()`, or `as.numeric()`.
+
+
+<!--UPDATE TO DISCUSS CLASSING CATEGORICAL AS FACTOR-->
 ```{r clean-class}
 
 ```
 **Variable class notes:**
 *Enter your notes here*
 
-Type your text observation between the two single asterisks (`*`) above. Asterisks are a way to format text in Rmarkdown files that is displayed once the completed file is "knit" to a pdf or html format. Surrounding text with **two asterisks per side** creates **bold** text, while surrounding text with *one asterisk per side* creates *italicized* text. Italicizing makes your text responses a little easier for us to find while grading homework, and we are grateful to you for using it.
+Type your text observation between the two single asterisks (`*`) above. Asterisks are a way to format text in markdown files that is displayed once the completed file is "knit" to a pdf or html format. Surrounding text with **two asterisks per side** creates **bold** text, while surrounding text with *one asterisk per side* creates *italicized* text. Italicizing makes your text responses a little easier for us to find while grading homework, and we are grateful to you for using it.
 
 ### 2.2 Missing data
 Use an appropriate technique to review missing data at this stage. Clearly document missing data ("missingness") across each variable in the dataset. For variables with high missingness, write code that allows you to visually inspect all observations of missing data (for each such variable). Using information from related variables and the data dictionary to guide you, speculate (in prose) why data may be missing. Clean variables with high missingness using `mutate()` and `replace_na()`.
@@ -120,6 +129,10 @@ Explore `min` and `max` values for numeric variables, recording notes on any obs
 *Enter your notes here*
 
 ### 2.4 Categorical variables
+
+<!-- no longer need print_responses now that we use factors.  just use levels() and maybe print().  See book-->
+<!-- can tidy levels with tidy_responses() funtion-->
+<!--don use recode() use fct_recode().  See book-->
 Use `walk2()` and the `print_responses()` function to print the levels of each categorical variable. Convert all responses to snake_case and check to make sure all levels converted properly. If needed, correct any response levels with conversion errors using `mutate()` and `recode()`. Document your observations for categorical levels.
 
 ```{r clean-categorical}
@@ -151,7 +164,7 @@ Save out your cleaned train and validation sets as csv files and name them `hw_u
 ## 4 Save and knit 
 
 ### 4.1 Save
-Save this `.Rmd` file with your last name at the end (e.g. `hw_unit_2_Santana.Rmd`)
+Save this `.qmd` file with your last name at the end (e.g. `hw_unit_2_marji.qmd`)
 
 ### 4.2 Knit
-Click the "Knit" button next to the blue yarn ball (with needle) at the top of your screen to knit the file to html. Upload this knit html file to Canvas to submit the first part of the assignment. Take care not to rest on your laurels: you have a 2nd part to do (but we are proud of your for getting this far!).
+Click the "render" button at the top of your screen to render the file to html. Upload this html file to Canvas to submit the first part of the assignment. Take care not to rest on your laurels: you have a 2nd part to do (but we are proud of your for getting this far!).
