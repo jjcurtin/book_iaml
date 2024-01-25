@@ -11,30 +11,27 @@ editor_options:
   chunk_output_type: console
 ---
 
+## General Instructions 
 Welcome to the GLM portion of your Unit_3 homework! Please enter your first and last name at the top of this document where it says "Your name here".
 
 This homework aligns with **Unit 3 Exploratory Introduction to Regression Models** in the course web book, where you can download all materials required for this assignment:
 
-**Two RMarkdown files (`hw_unit_3_glm.Rmd` and `hw_unit_3_knn.Rmd`):** 
+**Two Markdown files (`hw_unit_3_glm.qmd` and `hw_unit_3_knn.qmd`):** 
 We will have separate files for fitting glm and knn models for this homework. The order you complete these in does not matter; both contain all instructions needed for the assignment.
 
-**`ames_train_cln.csv`**:
+- **`ames_train_cln.csv`**:
 The `.csv` file containing the cleaned training data to be used for this assignment.
 
-**`ames_val_cln.csv`**:
+- **`ames_val_cln.csv`**:
 The `.csv` file containing the cleaned validation data to be used for this assignment.
 
-**`ames_test_cln.csv`**:
+- **`ames_test_cln.csv`**:
 The `.csv` file containing the cleaned test data to be used for this assignment. `sale_price` has been removed from this file.
 
-**`ames_data_dictionary.pdf`:**
+- **`ames_data_dictionary.pdf`:**
 The data dictionary describing variables contained in the data set.
 
-**`fun_modeling.R`:**
-A script containing functions written by John that are demoed in the course text.
-
-
-## **General Instructions** 
+-----
 
 The goal of this assignment is to create the best regression model you can to predict housing sale prices in the Ames data set. To build this model, you will have all variables used by John in the unit 2 & 3 web book to demo EDA and Regression Models, as well as all variables that you performed EDA on yourself in the unit 2 homework assignment.
 
@@ -50,19 +47,16 @@ Lets get started!
 
 ### 0.1 Handle conflicts
 ```{r conflict_policy}
-#| include: false
-options(conflicts.policy = "depends.ok")
-devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
-tidymodels_conflictRules()
+
 ```
 
 ### 0.2 Load required packages and source
 ```{r packages_source}
-#| message: false
-library(tidyverse) 
-library(tidymodels)
-# feel free to add any additional packages you might need
+```
 
+Source any function scripts (John's or yours)
+```{r}
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plot.R?raw=true")
 devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
 ```
 
@@ -70,23 +64,21 @@ devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.
 ```{r settings}
 #| include: false
 theme_set(theme_classic())
-options(tibble.width = Inf,
-        pillar.bold = TRUE,
-        dplyr.print_max=Inf)
+options(tibble.width = Inf, dplyr.print_max=Inf)
 ```
 
 ### 0.4 Paths
 
-Use `here` and relative path for your data.  Make sure your iaml project is open
 
 ```{r path}
-library(here)
-path_data <- "homework/unit_3"
+path_data <- "homework/unit_03"
 ```
 
 ### 0.5 Load data
 
 Load the cleaned training, validation, and test data files. **Please load your data using the filenames provided above**
+
+Use `here::here()` and relative path for your data.  Make sure your iaml project is open
 ```{r load-data}
 data_trn <- 
 data_val <- 
@@ -100,28 +92,22 @@ Create a tibble to track the validation errors across various model configuratio
 
 ```
 
-
-
-## **GLM Model building instructions**
+## GLM Model building instructions
 
 You may consider as many GLM configurations as you wish, but there are a few rules:
 
-* All models must predict **raw** sale_price (e.g. do not transform the outcome variable)
+* All models must eventually predict **raw** sale_price (advanced hint: you may want to transform the outcome, but then if you do, make sure you transform the predictions back to raw $ when you submit model predictions; and if that doesnt make sense, don't worry about it.  Just work with raw dollars!)
 
 * You must build a minimum of 3 models
-
 * At least one model must include a transformation of a numeric predictor
-
 * At least one model must include a categorical predictor with more than two levels
-
 * At least one model must include a categorical variable with levels that have been modified during feature engineering (NOT including dummy coding or simple transformation to numeric)
-
 * At least one model must include an interaction
 
 Your models may include as many other predictors as you would like (e.g. your model satisfying the transformed numeric predictor requirement may also include categorical variables, numeric predictors without transformations, etc.). Be as creative as you'd like!
 
 
-## **GLM 1**
+## GLM 1
 
 List out which required model components you are including for your first model (delete ones that do not apply):
 *Transformed numeric predictor*
@@ -139,16 +125,20 @@ Informed by EDA from your modeling EDA script, create a recipe for your first mo
 
 Use the `prep()` function to prep your recipe
 ```{r features-prep-1}
+
+rec_prep <- 
+  
 ```
 
 
-Use the `bake()` function to generate the feature matrix of the training data.
+Use the `bake()` function to generate the feature matrix of the training data using `rec_prep`
 ```{r features-bake-1}
+
 ```
 
 ### 1.3 Fit your model
 
-Fit a linear model predicting raw sale_price from your training feature matrix
+Fit a linear model predicting `sale_price` from your training feature matrix
 ```{r fit-model-1}
 ```
 
@@ -170,7 +160,7 @@ Visualize the relationship between raw and predicted sale price in your validati
 ```{r vis-mod-1}
 ```
 
-## **GLM 2**
+## GLM 2
 
 List out which required model components you are including for your next model (delete ones that do not apply):
 *Transformed numeric predictor*
@@ -220,7 +210,7 @@ Visualize the relationship between raw and predicted sale price in your validati
 ```{r vis-mod-2}
 ```
 
-## **GLM 3**
+## GLM 3
 
 List out which required model components you are including for your next model (delete ones that do not apply):
 *Transformed numeric predictor*
@@ -270,7 +260,7 @@ Visualize the relationship between raw and predicted sale price in your validati
 ```{r vis-mod-3}
 ```
 
-## 4 **Additional configurations**
+## 4 Additional configurations
 
 Create as many code chunks as you would like below to test additional linear model configurations. Record your models' performance in your validation error tracking tibble.
 
@@ -279,9 +269,9 @@ Create as many code chunks as you would like below to test additional linear mod
 ```
 
 
-## 5 **Predictions**
+## 5 Predictions
 
-This section is for generating predictions for your best model in the held out test set. **You  should only generate predictions for ONE model out of all `glm` and `knn` models you fit across both homework `.Rmd` files.** The TAs will use these predictions to generate your ONE estimate of model performance in the held out data. (Remember the stakes, people.)
+This section is for generating predictions for your best model in the held out test set. **You  should only generate predictions for ONE model out of all `glm` and `knn` models you fit across both homework `.qmd` files.** The TAs will use these predictions to generate your ONE estimate of model performance in the held out data. (Remember the stakes, people.)
 
 ### 5.1 Assign best model
 
@@ -329,7 +319,7 @@ if (!all(is.na(best_model))){
 ## **6 Save, knit, upload, and remember**
 
 ### 6.1 Save
-Save this `.Rmd` file with your last name at the end (e.g. `hw_unit_3_glm_santana.Rmd`)
+Save this `.qmd` file with your last name at the end (e.g. `hw_unit_3_glm_santana.qmd`)
 
 ### 6.2 Knit
 Knit the file to html and upload your knit html file to Canvas.
