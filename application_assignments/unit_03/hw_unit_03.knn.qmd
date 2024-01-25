@@ -2,7 +2,11 @@
 title: "Homework Unit 3: KNN"
 author: "Your name here"
 date: "`r lubridate::today()`"
-output: html_document
+format: 
+  html: 
+    embed-resources: true
+    toc: true 
+    toc_depth: 4
 editor_options: 
   chunk_output_type: console
 ---
@@ -40,46 +44,60 @@ At the end of this assignment, you will select your best performing model across
 
 Lets get started.
 
-## 0 **Set up and load data**
+## 0 **Set up**
 
-### 0.1  Load required packages and source
-```{r packages}
-library(tidymodels) # for modeling
-library(tidyverse) # for general data wrangling
-library(purrr)  # for iteration using map() and walk() variants
-library(kableExtra) # for displaying formatted tables w/ kbl()
-library(skimr) # for skim()
-
-devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_modeling.R?raw=true")
-
+### 0.1 Handle conflicts
+```{r conflict_policy}
+#| include: false
+options(conflicts.policy = "depends.ok")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+tidymodels_conflictRules()
 ```
 
-### 0.2 Paths
+### 0.2 Load required packages and source
+```{r packages_source}
+#| message: false
+library(tidyverse) 
+library(tidymodels)
+# feel free to add any additional packages you might need
+
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+```
+
+### 0.3 Specify other global settings
+```{r settings}
+#| include: false
+theme_set(theme_classic())
+options(tibble.width = Inf,
+        pillar.bold = TRUE,
+        dplyr.print_max=Inf)
+```
+
+### 0.4 Paths
 
 Use `here` and relative path for your data.  Make sure your iaml project is open
+
 ```{r path}
 library(here)
 path_data <- "homework/unit_3"
 ```
 
-### 0.3 Load data
+### 0.5 Load data
 
-Load the cleaned training, validation, and test data files. **Please load your data using the filenames provided**.
+Load the cleaned training, validation, and test data files. **Please load your data using the filenames provided above**
 ```{r load-data}
 data_trn <- 
-  
 data_val <- 
-  
 data_test <- 
 ```
 
-### 0.4 Create tracking tibble
+### 0.6 Create tracking tibble
 
-Create a tibble to track the validation errors across the various model configurations you will fit.
+Create a tibble to track the validation errors across various model configurations.
 ```{r}
-error_val <- tibble(model = character(), rmse_val = numeric()) %>% 
-  glimpse()
+
 ```
+
 
 
 ## **KNN Model building instructions**
@@ -117,9 +135,15 @@ Informed by EDA from your modeling EDA script, create a recipe for your first mo
 
 ### 1.2 Training feature matrix
 
-Use `make_features()` to generate the feature matrix of the training data.
-```{r features-train-1}
+Use the `prep()` function to prep your recipe
+```{r features-prep-1}
 ```
+
+
+Use the `bake()` function to generate the feature matrix of the training data.
+```{r features-bake-1}
+```
+`
 
 ### 1.3 Fit your model
 
@@ -129,7 +153,7 @@ Fit a `knn` model predicting raw `sale_price` from your training feature matrix.
 
 ### 1.4 Validation feature matrix
 
-Use `make_features()` to generate the feature matrix of the validation data that we will use to assess your model.
+Use `bake()` to generate the feature matrix of the validation data that we will use to assess your model.
 ```{r features-val-1}
 ```
 
@@ -161,9 +185,15 @@ Informed by EDA from your modeling EDA script, create a recipe for your next mod
 
 ### 2.2 Training feature matrix
 
-Use the `make_features()` function to generate the feature matrix of the training data.
-```{r features-train-2}
+Use the `prep()` function to prep your recipe
+```{r features-prep-2}
 ```
+
+
+Use the `bake()` function to generate the feature matrix of the training data.
+```{r features-bake-2}
+```
+
 
 ### 2.3 Fit your model
 
@@ -173,7 +203,7 @@ Fit a `knn` model predicting raw `sale_price` from your training feature matrix.
 
 ### 2.4 Validation feature matrix
 
-Use `make_features()` to generate the feature matrix of the validation data that we will use to assess your model.
+Use `bake()` to generate the feature matrix of the validation data that we will use to assess your model.
 ```{r features-val-2}
 ```
 
@@ -205,9 +235,15 @@ Informed by EDA from your modeling EDA script, create a recipe for your next mod
 
 ### 3.2 Training feature matrix
 
-Use `make_features()` to generate the feature matrix of the training data.
-```{r features-train-3}
+Use the `prep()` function to prep your recipe
+```{r features-prep-3}
 ```
+
+
+Use the `bake()` function to generate the feature matrix of the training data.
+```{r features-bake-3}
+```
+
 
 ### 3.3 Fit your model
 
@@ -217,7 +253,7 @@ Fit a `knn` model predicting raw `sale_price` from your training feature matrix.
 
 ### 3.4 Validation feature matrix
 
-Use `make_features()` to generate the feature matrix of the validation data that we will use to assess your model.
+Use `bake()` to generate the feature matrix of the validation data that we will use to assess your model.
 ```{r features-val-3}
 ```
 
@@ -273,13 +309,16 @@ Run this code chunk to save out your best model's predictions of raw `sale_price
 
 if (!all(is.na(best_model))){
 
- # Make test set features with the best recipe
-  feat_test <- best_rec %>% 
-    make_features(data_trn, data_test) 
+  # Make test set features with the best recipe
+  rec_prep <- best_rec |> 
+    prep(training = data_trn)
+  
+  feat_test <- rec_prep |> 
+    bake(new_data = data_test)
   
  # Generate predictions made by the best model
-  test_preds <- data_test %>% 
-    mutate(sale_price = predict(best_model, feat_test)) %>% 
+  test_preds <- data_test |> 
+    mutate(sale_price = predict(best_model, feat_test)) |> 
     select(pid, sale_price) #pid is the id variable to match predictions
   
   # Save predictions as a csv file with your last name in the file name
