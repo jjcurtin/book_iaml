@@ -39,8 +39,8 @@ editor_options:
 - [Lecture 2: Best Practices and Other Recommendations](https://mediaspace.wisc.edu/media/iaml+2-2/1_nxtr5uda) ~ 27 mins
 - [Lecture 3: EDA for Data Cleaning](https://mediaspace.wisc.edu/media/iaml+2-3/1_xorv88kj) ~ 41 mins
 - [Lecture 4: EDA for Modeling - Univariate](https://mediaspace.wisc.edu/media/iaml+2-4/1_f6hm842y) ~ 24 mins
-- [Lecture 5: EDA for Modeling - Bivariate]()
-- [Lecture 6: Working with Recipes]()
+- [Lecture 5: EDA for Modeling - Bivariate](https://mediaspace.wisc.edu/media/iaml+2-5/1_y1gydyw4) ~ 20 mins
+- [Lecture 6: Working with Recipes]() ~ 13 mins
 \
 \
 - [Discussion]()
@@ -1343,10 +1343,9 @@ At best, highly correlated features add unnecessary flexibility and can lead to 
 We can visualize correlations among predictors/features using `corrplot.mixed()` from `corrplot` package
 
 - Best for numeric variables
-- Can include ordered categorical or two level unordered categorical variables if transformed to numeric
-- Can include unordered categorical variables with > 2 levels if first transformed appropriately (e.g., dummy features, not demonstrated yet)
+- Can include ordinal or two level nominal variables if transformed to numeric
+- Can include nominal variables with > 2 levels if first transformed appropriately (e.g., dummy features, not demonstrated yet)
 - Works best with relatively small set of variables
-- Need to consider how to handle missing values
 
 -----
 
@@ -1367,7 +1366,7 @@ data_trn |>
 A grouped version of the combined box and violin plot is our preferred visualization for relationship between categorical and numeric variables (included in `fun_plots.r`)
 
 - Often best when feature is categorical and outcome is numeric but can reverse
-- Can use with ordered or unordered categorical variable
+- Can use with both nominal and ordinal categorical variable
 - @RDS also describes use of grouped frequency polygons for this combination of variable classes
 
 
@@ -1391,7 +1390,7 @@ plot_grouped_box_violin <- function(df, x, y){
 
 Here is the relationship between `overall_qual` and `sale_price`
 
-- Tend to prefer this over the scatterplot (with `as.numeric()`) for ordered categorical variables
+- Tend to prefer this over the scatterplot (with `as.numeric()`) for ordinal variables
 - Increasing spread of `sale_price` at higher levels of `overall_qual` is clearer in this plot
 
 ```{r u2-modeling-29}
@@ -1400,7 +1399,7 @@ data_trn |> plot_grouped_box_violin("overall_qual", "sale_price")
 
 -----
 
-Here is a grouped box + violin with an unordered categorical variable
+Here is a grouped box + violin with a nominal variable
 
 - More variation and skew in `sale_price` for one family homes (additional features, moderators?)
 - Position of townhouse (interior vs. exterior) seems to matter (don't collapse?)
@@ -1411,7 +1410,7 @@ data_trn |> plot_grouped_box_violin("bldg_type", "sale_price")
 
 -----
 
-When we have a categorical predictor (ordered or unordered) and a numeric outcome, we often want to see both the relationship between the variables AND the variability on the categorical variable alone.   
+When we have a categorical predictor and a numeric outcome, we often want to see both the relationship between the variables AND the variability on the categorical variable alone.   
 
 We like this combined plot enough when doing EDA to provide a specific function (included in `fun_plots.r`)!  
 
@@ -1463,7 +1462,7 @@ data_trn |> plot_categorical("bldg_type", "sale_price") |>
 
 Stacked Barplots:
 
-- Can be useful with both ordered and unordered categorical variables
+- Can be useful with both nominal and ordinal variables
 - Can create with either raw counts or percentages.  
   - Displays different perspective (particularly with uneven distributions across levels)
   - Depends on your question
@@ -1524,7 +1523,7 @@ data_trn |> plot_grouped_barplot_percent("bldg_type", "lot_config")
 
 ### Tile Plot for Ordered Categorical (Bivariate)
 
-Tile plots may be useful if both categorical variables are ordered
+Tile plots may be useful if both categorical variables are ordinal 
 
 ```{r u2-modeling-37}
 #| eval: false
@@ -1580,6 +1579,7 @@ Recipes are used for feature engineering in `tidymodels` using the [`recipes`](h
 - Recipes use only information from the training set in all feature engineering
 - Consider example of standardizing `x1` for a feature in train vs. validation and test.  Must use mean and sd from TRAIN to standardize `x1` in train, validate, and test.  VERY IMPORTANT.
 
+-----
 
 We use recipes in a two step process - `prep()` and `bake()`
   
@@ -1625,11 +1625,12 @@ Recipes are used in Modeling scripts (which is a third type of script after clea
 Recipes can be used to indicate the outcome and predictors that will be used in the model
 
 - Can use `.` to indicate all predictors
-  - Currently, our preferred method with some exceptions
+  - Currently, our preferred method for larger data sets
   - We can exclude some predictors later by changing their role, removing them with a later recipe step ($step\_rm()$), or specifying a more precise formula when we fit the model
   - See [Roles in Recipes](https://recipes.tidymodels.org/articles/Roles.html) for more info
 
-- Can use specific names of predictors along with $+$ if only a few predictors
+- Can use specific names of predictors along with $+$
+  - This is our preferred method when we have a smaller set of predictors (We will show you both approaches)
   - e.g., `sale_price ~ lot_area + year_built + overall_qual`
 
 - Do NOT indicate interactions here
@@ -1651,6 +1652,7 @@ summary(rec)
 Let's make a feature matrix from the training set
 
 There are two discrete (and important) steps
+
  - `prep()`
  - `bake()`
 
