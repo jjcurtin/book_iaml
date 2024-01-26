@@ -4475,11 +4475,6 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, one_fam, town_end, one_fam
 </ul>
 <hr>
 <p>Lets re-load (and glimpse) our training set to pretend we are at the start of a new script.</p>
-<p>Now that we are done cleaning the data, we should start to fully class our variables for how we will use them for modeling EDA and modeling more generally.</p>
-<ul>
-<li>Numeric predictors are classes as numeric (int or double)</li>
-<li>categorical predictors are classed as factors.</li>
-</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a> data_trn <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(path_data, <span class="st">"ames_clean_class_trn.csv"</span>)) <span class="sc">|&gt;</span> </span>
 <span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -4508,29 +4503,26 @@ $ lot_config   &lt;chr&gt; "inside", "corner", "fr2", "fr2", "inside", "inside",
 $ bldg_type    &lt;chr&gt; "one_fam", "one_fam", "one_fam", "town_inside", "town_end…</code></pre>
 </div>
 </div>
-<p>Opps:</p>
+<hr>
+<p>We have some work to do (again)</p>
 <ul>
-<li>Notice that <code>overall_qual</code> is back to being classed as numeric (dbl).
-<ul>
-<li>This is because <code>read_csv()</code> guesses the type for each column and we used only numbers for this ordinal categorical variable.<br>
+<li>Notice that <code>overall_qual</code> is back to being classed as numeric (dbl).<br>
 </li>
-</ul></li>
 <li>Notice that your factors are back to character
 <ul>
 <li>This is because csv files don’t save anything other than the values (labels for factors). They are the cleaned labels though!</li>
 </ul></li>
-<li>You should class all variables using the same approach as before (often just a copy/paste). My preferred way is via mutates</li>
+<li>You should class all variables using the same approach as before (often just a copy/paste).</li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="annotated-cell-31"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-31-1"><a href="#annotated-cell-31-1" aria-hidden="true" tabindex="-1"></a> data_trn <span class="ot">&lt;-</span> </span>
 <span id="annotated-cell-31-2"><a href="#annotated-cell-31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(path_data, <span class="st">"ames_clean_class_trn.csv"</span>), </span>
 <a class="code-annotation-anchor" data-target-cell="annotated-cell-31" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-31-3" class="code-annotation-target"><a href="#annotated-cell-31-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">col_types =</span> <span class="fu">cols</span>()) <span class="sc">|&gt;</span></span>
 <a class="code-annotation-anchor" data-target-cell="annotated-cell-31" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-31-4" class="code-annotation-target"><a href="#annotated-cell-31-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.character), factor)) <span class="sc">|&gt;</span></span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-31" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-31-5" class="code-annotation-target"><a href="#annotated-cell-31-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">factor</span>(overall_qual),</span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-31" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-31-6" class="code-annotation-target"><a href="#annotated-cell-31-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">overall_qual =</span> <span class="fu">fct_relevel</span>(overall_qual, <span class="fu">as.character</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>)),</span>
-<span id="annotated-cell-31-7"><a href="#annotated-cell-31-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">garage_qual =</span> <span class="fu">fct_relevel</span>(garage_qual, <span class="fu">c</span>(<span class="st">"no_garage"</span>, <span class="st">"po"</span>, <span class="st">"fa"</span>, </span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-31" data-target-annotation="5" onclick="event.preventDefault();">5</a><span id="annotated-cell-31-8" class="code-annotation-target"><a href="#annotated-cell-31-8" aria-hidden="true" tabindex="-1"></a>                                                  <span class="st">"ta"</span>, <span class="st">"gd"</span>, <span class="st">"ex"</span>))) <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-31-9"><a href="#annotated-cell-31-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-31" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-31-5" class="code-annotation-target"><a href="#annotated-cell-31-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">factor</span>(overall_qual, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>),</span>
+<span id="annotated-cell-31-6"><a href="#annotated-cell-31-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">garage_qual =</span> <span class="fu">fct_relevel</span>(garage_qual, <span class="fu">c</span>(<span class="st">"no_garage"</span>, <span class="st">"po"</span>, <span class="st">"fa"</span>, </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-31" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-31-7" class="code-annotation-target"><a href="#annotated-cell-31-7" aria-hidden="true" tabindex="-1"></a>                                                  <span class="st">"ta"</span>, <span class="st">"gd"</span>, <span class="st">"ex"</span>))) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-31-8"><a href="#annotated-cell-31-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-31" data-target-annotation="1">1</dt>
@@ -4547,11 +4539,7 @@ $ bldg_type    &lt;chr&gt; "one_fam", "one_fam", "one_fam", "town_inside", "town
 </dd>
 <dt data-target-cell="annotated-cell-31" data-target-annotation="4">4</dt>
 <dd>
-<span data-code-annotation="4" data-code-cell="annotated-cell-31" data-code-lines="6">use <code>mutate()</code> with <code>fct_relevel()</code> to explicitly set levels of an ordered factor</span>
-</dd>
-<dt data-target-cell="annotated-cell-31" data-target-annotation="5">5</dt>
-<dd>
-<span data-code-annotation="5" data-code-cell="annotated-cell-31" data-code-lines="8">notice the warning about the unknown level. Always explore warnings! In this instance, its fine. There were only two observations with ex and neither ended up in the training split. Still best to include this level to note it exists!</span>
+<span data-code-annotation="4" data-code-cell="annotated-cell-31" data-code-lines="7">use <code>mutate()</code> with <code>fct_relevel()</code> to explicitly set levels of an ordered factor. Also notice the warning about the unknown level. Always explore warnings! In this instance, its fine. There were only two observations with ex and neither ended up in the training split. Still best to include this level to note it exists!</span>
 </dd>
 </dl>
 </div>
@@ -4577,23 +4565,24 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, town_inside, town_end, dup
 <span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">|&gt;</span></span>
 <span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.character), factor)) <span class="sc">|&gt;</span> </span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">factor</span>(overall_qual), </span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">overall_qual =</span> <span class="fu">fct_relevel</span>(overall_qual, <span class="fu">as.character</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>)), </span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">garage_qual =</span> <span class="fu">fct_relevel</span>(garage_qual, <span class="fu">c</span>(<span class="st">"no_garage"</span>, <span class="st">"po"</span>, <span class="st">"fa"</span>, </span>
-<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>                                                    <span class="st">"ta"</span>, <span class="st">"gd"</span>, <span class="st">"ex"</span>)))</span>
-<span id="cb34-9"><a href="#cb34-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">factor</span>(overall_qual, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>), </span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">garage_qual =</span> <span class="fu">fct_relevel</span>(garage_qual, <span class="fu">c</span>(<span class="st">"no_garage"</span>, <span class="st">"po"</span>, <span class="st">"fa"</span>, </span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>                                                    <span class="st">"ta"</span>, <span class="st">"gd"</span>, <span class="st">"ex"</span>)))</span>
+<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Now we can use it every time we read in one of the Ames datasets</p>
+<hr>
+<p>Now we can use this function every time we read in one of the Ames datasets</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="annotated-cell-33"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-33-1"><a href="#annotated-cell-33-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="ot">&lt;-</span> </span>
-<span id="annotated-cell-33-2"><a href="#annotated-cell-33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(path_data, <span class="st">"ames_clean_class_trn.csv"</span>), <span class="at">col_types =</span> <span class="fu">cols</span>()) <span class="sc">|&gt;</span> </span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-33" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-33-3" class="code-annotation-target"><a href="#annotated-cell-33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class_ames</span>() <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-33-4"><a href="#annotated-cell-33-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="annotated-cell-33-2"><a href="#annotated-cell-33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(path_data, <span class="st">"ames_clean_class_trn.csv"</span>), </span>
+<span id="annotated-cell-33-3"><a href="#annotated-cell-33-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">col_types =</span> <span class="fu">cols</span>()) <span class="sc">|&gt;</span> </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-33" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-33-4" class="code-annotation-target"><a href="#annotated-cell-33-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class_ames</span>() <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-33-5"><a href="#annotated-cell-33-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-33" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-annotation="1" data-code-cell="annotated-cell-33" data-code-lines="3">Using our new function!</span>
+<span data-code-annotation="1" data-code-cell="annotated-cell-33" data-code-lines="4">Using our new function!</span>
 </dd>
 </dl>
 </div>
