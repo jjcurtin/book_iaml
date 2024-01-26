@@ -453,8 +453,8 @@ div.csl-indent {
 <li><a href="https://mediaspace.wisc.edu/media/iaml+2-2/1_nxtr5uda">Lecture 2: Best Practices and Other Recommendations</a> ~ 27 mins</li>
 <li><a href="https://mediaspace.wisc.edu/media/iaml+2-3/1_xorv88kj">Lecture 3: EDA for Data Cleaning</a> ~ 41 mins</li>
 <li><a href="https://mediaspace.wisc.edu/media/iaml+2-4/1_f6hm842y">Lecture 4: EDA for Modeling - Univariate</a> ~ 24 mins</li>
-<li><a href="">Lecture 5: EDA for Modeling - Bivariate</a></li>
-<li><a href="">Lecture 6: Working with Recipes</a><br>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+2-5/1_y1gydyw4">Lecture 5: EDA for Modeling - Bivariate</a> ~ 20 mins</li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+2-6/1_rf4pbef3">Lecture 6: Working with Recipes</a> ~ 13 mins<br>
 <br>
 </li>
 <li><a href="">Discussion</a></li>
@@ -5695,10 +5695,9 @@ garage_cars
 <p>We can visualize correlations among predictors/features using <code>corrplot.mixed()</code> from <code>corrplot</code> package</p>
 <ul>
 <li>Best for numeric variables</li>
-<li>Can include ordered categorical or two level unordered categorical variables if transformed to numeric</li>
-<li>Can include unordered categorical variables with &gt; 2 levels if first transformed appropriately (e.g., dummy features, not demonstrated yet)</li>
+<li>Can include ordinal or two level nominal variables if transformed to numeric</li>
+<li>Can include nominal variables with &gt; 2 levels if first transformed appropriately (e.g., dummy features, not demonstrated yet)</li>
 <li>Works best with relatively small set of variables</li>
-<li>Need to consider how to handle missing values</li>
 </ul>
 <hr>
 <div class="cell">
@@ -5722,7 +5721,7 @@ garage_cars
 <p>A grouped version of the combined box and violin plot is our preferred visualization for relationship between categorical and numeric variables (included in <code>fun_plots.r</code>)</p>
 <ul>
 <li>Often best when feature is categorical and outcome is numeric but can reverse</li>
-<li>Can use with ordered or unordered categorical variable</li>
+<li>Can use with both nominal and ordinal categorical variable</li>
 <li><span class="citation" data-cites="RDS">Wickham, Çetinkaya-Rundel, and Grolemund (<a href="#ref-RDS" role="doc-biblioref">2023</a>)</span> also describes use of grouped frequency polygons for this combination of variable classes</li>
 </ul>
 <div class="cell">
@@ -5741,7 +5740,7 @@ garage_cars
 <hr>
 <p>Here is the relationship between <code>overall_qual</code> and <code>sale_price</code></p>
 <ul>
-<li>Tend to prefer this over the scatterplot (with <code>as.numeric()</code>) for ordered categorical variables</li>
+<li>Tend to prefer this over the scatterplot (with <code>as.numeric()</code>) for ordinal variables</li>
 <li>Increasing spread of <code>sale_price</code> at higher levels of <code>overall_qual</code> is clearer in this plot</li>
 </ul>
 <div class="cell">
@@ -5751,7 +5750,7 @@ garage_cars
 </div>
 </div>
 <hr>
-<p>Here is a grouped box + violin with an unordered categorical variable</p>
+<p>Here is a grouped box + violin with a nominal variable</p>
 <ul>
 <li>More variation and skew in <code>sale_price</code> for one family homes (additional features, moderators?)</li>
 <li>Position of townhouse (interior vs.&nbsp;exterior) seems to matter (don’t collapse?)</li>
@@ -5763,7 +5762,7 @@ garage_cars
 </div>
 </div>
 <hr>
-<p>When we have a categorical predictor (ordered or unordered) and a numeric outcome, we often want to see both the relationship between the variables AND the variability on the categorical variable alone.</p>
+<p>When we have a categorical predictor and a numeric outcome, we often want to see both the relationship between the variables AND the variability on the categorical variable alone.</p>
 <p>We like this combined plot enough when doing EDA to provide a specific function (included in <code>fun_plots.r</code>)!</p>
 <p>It is our go to for understanding the potential effect of a categorical predictor</p>
 <div class="cell">
@@ -5808,7 +5807,7 @@ garage_cars
 <h3 data-number="2.5.14" class="anchored" data-anchor-id="stacked-barplots-for-categorical-bivariate"><span class="header-section-number">2.5.14</span> Stacked Barplots for Categorical (Bivariate)</h3>
 <p>Stacked Barplots:</p>
 <ul>
-<li>Can be useful with both ordered and unordered categorical variables</li>
+<li>Can be useful with both nominal and ordinal variables</li>
 <li>Can create with either raw counts or percentages.
 <ul>
 <li>Displays different perspective (particularly with uneven distributions across levels)</li>
@@ -5872,7 +5871,7 @@ garage_cars
 </section>
 <section id="tile-plot-for-ordered-categorical-bivariate" class="level3" data-number="2.5.15">
 <h3 data-number="2.5.15" class="anchored" data-anchor-id="tile-plot-for-ordered-categorical-bivariate"><span class="header-section-number">2.5.15</span> Tile Plot for Ordered Categorical (Bivariate)</h3>
-<p>Tile plots may be useful if both categorical variables are ordered</p>
+<p>Tile plots may be useful if both categorical variables are ordinal</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb95"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a>plot_tile <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, y){</span>
 <span id="cb95-2"><a href="#cb95-2" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">|&gt;</span></span>
@@ -5935,6 +5934,7 @@ garage_cars
 <li>Recipes use only information from the training set in all feature engineering</li>
 <li>Consider example of standardizing <code>x1</code> for a feature in train vs.&nbsp;validation and test. Must use mean and sd from TRAIN to standardize <code>x1</code> in train, validate, and test. VERY IMPORTANT.</li>
 </ul>
+<hr>
 <p>We use recipes in a two step process - <code>prep()</code> and <code>bake()</code></p>
 <ul>
 <li>“Prepping” a recipe involves calculating any statistics needed for the transformations that will be applied to engineer features (e.g., mean and standard deviation to normalize a numeric variable).
@@ -5998,12 +5998,13 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, town_inside, town_end, dup
 <ul>
 <li>Can use <code>.</code> to indicate all predictors
 <ul>
-<li>Currently, our preferred method with some exceptions</li>
+<li>Currently, our preferred method for larger data sets</li>
 <li>We can exclude some predictors later by changing their role, removing them with a later recipe step (<span class="math inline">\(step\_rm()\)</span>), or specifying a more precise formula when we fit the model</li>
 <li>See <a href="https://recipes.tidymodels.org/articles/Roles.html">Roles in Recipes</a> for more info</li>
 </ul></li>
-<li>Can use specific names of predictors along with <span class="math inline">\(+\)</span> if only a few predictors
+<li>Can use specific names of predictors along with <span class="math inline">\(+\)</span>
 <ul>
+<li>This is our preferred method when we have a smaller set of predictors (We will show you both approaches)</li>
 <li>e.g., <code>sale_price ~ lot_area + year_built + overall_qual</code></li>
 </ul></li>
 <li>Do NOT indicate interactions here
@@ -6056,7 +6057,11 @@ predictor: 9</code></pre>
 <section id="prepping-and-baking-a-recipe" class="level3" data-number="2.6.1">
 <h3 data-number="2.6.1" class="anchored" data-anchor-id="prepping-and-baking-a-recipe"><span class="header-section-number">2.6.1</span> Prepping and Baking a Recipe</h3>
 <p>Let’s make a feature matrix from the training set</p>
-<p>There are two discrete (and important) steps - <code>prep()</code> - <code>bake()</code></p>
+<p>There are two discrete (and important) steps</p>
+<ul>
+<li><code>prep()</code></li>
+<li><code>bake()</code></li>
+</ul>
 <p>First we prep the recipe using the training data</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb112"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb112-1"><a href="#cb112-1" aria-hidden="true" tabindex="-1"></a>rec_prep <span class="ot">&lt;-</span> rec <span class="sc">|&gt;</span> <span class="co"># &lt;1&gt;</span></span>
