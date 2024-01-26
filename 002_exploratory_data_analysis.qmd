@@ -37,11 +37,12 @@ editor_options:
   
 - [Lecture 1: Stages of Data Analysis and Model Development](https://mediaspace.wisc.edu/media/iaml+2-1/1_m7rm2anw) ~ 10 mins
 - [Lecture 2: Best Practices and Other Recommendations](https://mediaspace.wisc.edu/media/iaml+2-2/1_nxtr5uda) ~ 27 mins
-- [Lecture 3: EDA for Data Cleaning]()
+- [Lecture 3: EDA for Data Cleaning](https://mediaspace.wisc.edu/media/iaml+2-3/1_xorv88kj) ~ 41 mins
 - [Lecture 4: EDA for Modeling - Univariate]()
 - [Lecture 5: EDA for Modeling - Bivariate]()
 - [Lecture 6: Working with Recipes]()
-
+\
+\
 - [Discussion]()
 
 Post questions or discuss readings or lectures in Slack
@@ -284,18 +285,14 @@ path_data <- "data"
 ### Read and Glimpse Dataframe
 Lets read in the data and glimpse the subset of observations we will work with in Units 2-3 and the first two application assignments.  
 
-Note that we re-class all character variables as factors
-
 ```{r u2-overview-2}
 data_all <- read_csv(here::here(path_data, "ames_raw_class.csv"),   # <1>
                      col_types = cols()) |> # <2> 
-  mutate(across(where(is.character), factor)) |> # <3> 
-  glimpse() # <4>
+  glimpse() # <3>
 ```
 1. First we read data using a relative path and the `here::here()` function.  This is a replacement for `file.path()` that works better for both interactive use and rendering in Quarto when using projects.
 2.  We use `col_types = cols()` to let R guess the correct class for each column. This suppresses messages that aren't important at this point prior to EDA.
-3. Then we use a mutate to re-class all character data to factors.  This should handle most of our nominal and ordinal variables.  We may need to still class some that were missed because they appeared to be numeric.  I prefer `factor()` to `forcats::fct()` because factor orders the levels alphabetically.  Be aware that this *could* change if your code is used in a region of the world where this sorting is different.  I still prefer this to the alternative (in `fct()`) that orders by the order the levels are found in your data.
-4. It is good practice to always `glimpse()` data after you read it.
+3. It is good practice to always `glimpse()` data after you read it.
 
 -----
 
@@ -384,7 +381,7 @@ data_all |> names()
 
 ### Explore variable classes
 
-At this point, variables should be classed as either numeric or factor
+At this point, we should class all of our variables as either numeric or factor
 
 - Interval and ratio variables use numeric classes (dbl or int)
 - Nominal and ordinal variable use factor class
@@ -394,32 +391,36 @@ Subsequent cleaning steps are clearer if we have this established/confirmed now
 
 -----
 
-We have one variable to change to factor class
+We have a number of nominal or ordinal variables that are classed as character. 
+
+We have one ordinal variable (`overall_qual`) that is classed as numeric (because the levels were coded with numbers rather than text)
+
+- `read_csv()` thought was numeric by the levels are coded using numbers
+- The data dictionary indicates that valid values range from 1 - 10.
 
 ```{r u2-clean-2}
 data_all |> glimpse()
 ```
 
-`overall_qual` is ordinal
-
-- `read_csv()` thought was numeric by the levels are coded using numbers
-- We should convert it to a factor and confirm the levels are ordered properly.  
-- The data dictionary indicates that valid values range from 1 - 10.
-
 -----
 
-Here is the code to re-class it
+We can the recode `overall_qual` first and set its levels
+
+We can recode all the character variables to factor in one step.  Most are nominal.  We will handle the order for `garage_qual` later.
+
 
 ```{r u2-clean-3}
 oq_levels <- 1:10 # <1>
 
-t <-  data_all |> 
+data_all <-  data_all |> 
   mutate(overall_qual = factor(overall_qual, 
                                levels = oq_levels)) |> # <2>
+  mutate(across(where(is.character), factor)) |>  # <3>
   glimpse()
 ```
 1. It is always best to explicitly set the levels of an ordinal factor in the order you prefer.  It is not necessary here because `overall_qual` was numeric and therefore sorts in the expected order.  However, if it had been numbers stored as characters, it could sort incorrectly (e.g., 1, 10, 2, 3, ...).  And obviously if the orders levels were names, the order would have to be specified.
 2. We indicate the levels here.
+3. We use a mutate to re-class all character data to factors.  I prefer `factor()` to `forcats::fct()` because factor orders the levels alphabetically.  Be aware that this *could* change if your code is used in a region of the world where this sorting is different.  I still prefer this to the alternative (in `fct()`) that orders by the order the levels are found in your data.
 
 -----
 
@@ -431,7 +432,7 @@ t <-  data_all |>
 - We use different versions for cleaning and modeling EDA
 - For cleaning EDA, we just remove some stats that we don't want to see at this time
 - We can get many of the summary stats for cleaning in one call 
-- We have a custom skim defined in the `fun_eda.R` library that we use regularly.  Here is the code but you can use the function directly if you sourced `fun_eda.R` (as we did above)
+- We have a custom skim defined in the `fun_eda.R` function library that we use regularly.  Here is the code but you can use the function directly if you sourced `fun_eda.R` (as we did above)
 
 ```{r u2-clean-4}
 #| eval: false
@@ -444,7 +445,7 @@ skim_some <- skim_with(numeric = sfl(mean = NULL, sd = NULL, p25 = NULL, p50 = N
 Here is what we get with our new `skim_some()` function
 
 - We will refer to this again for each characteristic we want to review for instructional purposes 
-- We can already see that we can use `skim_some()` to confirm that we only have numeric and character classes
+- We can already see that we can use `skim_some()` to confirm that we only have numeric and factor classes
 ```{r u2-clean-5}
 data_all |> 
   skim_some()
@@ -478,8 +479,10 @@ data_all |>
 
 ```{r u2-clean-6}
 data_all |> 
-  skim_some()
+  skim_some() |> 
+  select(skim_variable, n_missing, complete_rate) # <1>
 ```
+1. `skim_some()` returns a dataframe so you can select only the subset of columns to focus its output on what you want.   Or just print it all!
 
 -----
 
@@ -620,8 +623,12 @@ We should explore mins and maxes for all numeric variables to detect out of vali
 ```{r u2-clean-11}
 data_all |>
   mutate(overall_qual = as.numeric(overall_qual)) |> 
-  skim_some()
+  skim_some() |> 
+  filter(skim_type == "numeric") |>  # <1>
+  select(skim_variable, numeric.p0, numeric.p100) # <2>
 ```
+1. Select only numeric variables since min/max only apply to them
+2. Select relevant stats (min/max)
 
 -----
 
@@ -652,7 +659,7 @@ data_all |>
 
 Feature engineering with nominal and ordinal variables typically involves 
 
-- Converting to factors
+- Converting to factors (already did this!)
 - Often creating dummy features from these factors
 
 This feature engineering will use response labels for naming new features
@@ -689,8 +696,7 @@ Let's use the function
 
 ```{r u2-clean-15}
 data_all <- data_all |> 
-  mutate(across(where(is.factor), tidy_responses)) |> # <1>
-  glimpse()
+  mutate(across(where(is.factor), tidy_responses)) # <1>
 ```
 1. We use the tidy selection helper function to limit our mutate to only factors.  See [more details](https://tidyselect.r-lib.org/reference/language.html) on the tidy selection helpers like `all_of()` and `where()`
 

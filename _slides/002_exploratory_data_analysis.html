@@ -451,11 +451,12 @@
 </ul>
 <h3 id="lecture-videos">Lecture Videos</h3>
 <ul>
-<li><p><a href="">Lecture 1: Overview of EDA</a></p></li>
-<li><p><a href="">Lecture 2: EDA for Cleaning</a></p></li>
-<li><p><a href="">Lecture 3: Introduction to Recipes</a></p></li>
-<li><p><a href="">Lecture 4: EDA for Modeling Part I</a></p></li>
-<li><p><a href="">Lecture 5: EDA for Modeling Part II</a></p></li>
+<li><p><a href="https://mediaspace.wisc.edu/media/iaml+2-1/1_m7rm2anw">Lecture 1: Stages of Data Analysis and Model Development</a> ~ 10 mins</p></li>
+<li><p><a href="https://mediaspace.wisc.edu/media/iaml+2-2/1_nxtr5uda">Lecture 2: Best Practices and Other Recommendations</a> ~ 27 mins</p></li>
+<li><p><a href="">Lecture 3: EDA for Data Cleaning</a></p></li>
+<li><p><a href="">Lecture 4: EDA for Modeling - Univariate</a></p></li>
+<li><p><a href="">Lecture 5: EDA for Modeling - Bivariate</a></p></li>
+<li><p><a href="">Lecture 6: Working with Recipes</a></p></li>
 <li><p><a href="">Discussion</a></p></li>
 </ul>
 <p>Post questions or discuss readings or lectures in Slack</p>
@@ -464,13 +465,14 @@
 
 <h3 id="application-assignment">Application Assignment</h3>
 <ul>
-<li><a href="ames_raw_class.csv">data</a></li>
-<li><a href="ames_data_dictionary.pdf">data dictionary</a></li>
-<li>cleaning EDA: <a href="hw_unit_2_cleaning.Rmd">rmd</a></li>
-<li>modeling EDA: <a href="hw_unit_2_modeling.Rmd">rmd</a></li>
+<li><a href="application_assignments/unit_02/ames_raw_class.csv">data</a></li>
+<li><a href="application_assignments/unit_02/ames_data_dictionary.pdf">data dictionary</a></li>
+<li>cleaning EDA: <a href="application_assignments/unit_02/hw_unit_2_cleaning.qmd">qmd</a></li>
+<li>modeling EDA: <a href="application_assignments/unit_02/hw_unit_2_modeling.qmd">qmd</a></li>
 <li>solutions: <a href="">knit cleaning EDA</a>; <a href="">knit modeling EDA</a></li>
 </ul>
-<p>Submit the <a href="">application assignment</a> by 8 pm on Wednesday, January 31st</p>
+<p>Note: the qmd files may not be viewable but can be downloaded through your browser (e.g., right-click to save)</p>
+<p>Submit the <a href="https://canvas.wisc.edu/courses/395546/assignments/2187687">application assignment</a> by 8 pm on Wednesday, January 31st</p>
 <h3 id="quiz">Quiz</h3>
 <p>Submit the <a href="https://canvas.wisc.edu/courses/395546/quizzes/514049">unit quiz</a> by 8 pm on Wednesday, January 31st</p>
 </section>
@@ -659,19 +661,19 @@
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-lines="1" data-code-cell="annotated-cell-2" data-code-annotation="1">As an alternative, we could have skipped loading the package and instead called the function as <code>janitor::clean_names()</code></span>
+<span data-code-cell="annotated-cell-2" data-code-lines="1" data-code-annotation="1">As an alternative, we could have skipped loading the package and instead called the function as <code>janitor::clean_names()</code></span>
 </dd>
 <dt data-target-cell="annotated-cell-2" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-lines="2" data-code-cell="annotated-cell-2" data-code-annotation="2">Same is true for <code>cowplot</code> package</span>
+<span data-code-cell="annotated-cell-2" data-code-lines="2" data-code-annotation="2">Same is true for <code>cowplot</code> package</span>
 </dd>
 <dt data-target-cell="annotated-cell-2" data-target-annotation="3">3</dt>
 <dd>
-<span data-code-lines="3" data-code-cell="annotated-cell-2" data-code-annotation="3">When loading <code>kableExtra</code> (which we use often), you will always need to exclude <code>groups_rows()</code> to prevent a conflict with <code>dplyr</code> package in the tidyverse</span>
+<span data-code-cell="annotated-cell-2" data-code-lines="3" data-code-annotation="3">When loading <code>kableExtra</code> (which we use often), you will always need to exclude <code>groups_rows()</code> to prevent a conflict with <code>dplyr</code> package in the tidyverse</span>
 </dd>
 <dt data-target-cell="annotated-cell-2" data-target-annotation="4">4</dt>
 <dd>
-<span data-code-lines="5" data-code-cell="annotated-cell-2" data-code-annotation="4">Loading tidymodels will produce conflicts unless you source and call my function <code>tidymodels_conflictRules()</code> (see above)</span>
+<span data-code-cell="annotated-cell-2" data-code-lines="5" data-code-annotation="4">Loading tidymodels will produce conflicts unless you source and call my function <code>tidymodels_conflictRules()</code> (see above)</span>
 </dd>
 </dl>
 </div>
@@ -702,78 +704,72 @@
 
 <h3 id="read-and-glimpse-dataframe">Read and Glimpse Dataframe</h3>
 <p>Lets read in the data and glimpse the subset of observations we will work with in Units 2-3 and the first two application assignments.</p>
-<p>Note that we re-class all character variables as factors</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="annotated-cell-6"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy code-annotated"><code class="sourceCode r"><a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="1" onclick="event.preventDefault();" href="">1</a><span id="annotated-cell-6-1" class="code-annotation-target"><a href="#annotated-cell-6-1"></a>data_all <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(path_data, <span class="st">"ames_raw_class.csv"</span>),</span>
 <a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="2" onclick="event.preventDefault();" href="">2</a><span id="annotated-cell-6-2" class="code-annotation-target"><a href="#annotated-cell-6-2"></a>                     <span class="at">col_types =</span> <span class="fu">cols</span>()) <span class="sc">|&gt;</span></span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="3" onclick="event.preventDefault();" href="">3</a><span id="annotated-cell-6-3" class="code-annotation-target"><a href="#annotated-cell-6-3"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.character), factor)) <span class="sc">|&gt;</span></span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="4" onclick="event.preventDefault();" href="">4</a><span id="annotated-cell-6-4" class="code-annotation-target"><a href="#annotated-cell-6-4"></a>  <span class="fu">glimpse</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="3" onclick="event.preventDefault();" href="">3</a><span id="annotated-cell-6-3" class="code-annotation-target"><a href="#annotated-cell-6-3"></a>  <span class="fu">glimpse</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-6" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-lines="1" data-code-cell="annotated-cell-6" data-code-annotation="1">First we read data using a relative path and the <code>here::here()</code> function. This is a replacement for <code>file.path()</code> that works better for both interactive use and rendering in Quarto when using projects.</span>
+<span data-code-cell="annotated-cell-6" data-code-lines="1" data-code-annotation="1">First we read data using a relative path and the <code>here::here()</code> function. This is a replacement for <code>file.path()</code> that works better for both interactive use and rendering in Quarto when using projects.</span>
 </dd>
 <dt data-target-cell="annotated-cell-6" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-lines="2" data-code-cell="annotated-cell-6" data-code-annotation="2">We use <code>col_types = cols()</code> to let R guess the correct class for each column. This suppresses messages that aren’t important at this point prior to EDA.</span>
+<span data-code-cell="annotated-cell-6" data-code-lines="2" data-code-annotation="2">We use <code>col_types = cols()</code> to let R guess the correct class for each column. This suppresses messages that aren’t important at this point prior to EDA.</span>
 </dd>
 <dt data-target-cell="annotated-cell-6" data-target-annotation="3">3</dt>
 <dd>
-<span data-code-lines="3" data-code-cell="annotated-cell-6" data-code-annotation="3">Then we use a mutate to re-class all character data to factors. This should handle most of our nominal and ordinal variables. We may need to still class some that were missed because they appeared to be numeric. I prefer <code>factor()</code> to <code>forcats::fct()</code> because factor orders the levels alphabetically. Be aware that this <em>could</em> change if your code is used in a region of the world where this sorting is different. I still prefer this to the alternative (in <code>fct()</code>) that orders by the order the levels are found in your data.</span>
-</dd>
-<dt data-target-cell="annotated-cell-6" data-target-annotation="4">4</dt>
-<dd>
-<span data-code-lines="4" data-code-cell="annotated-cell-6" data-code-annotation="4">It is good practice to always <code>glimpse()</code> data after you read it.</span>
+<span data-code-cell="annotated-cell-6" data-code-lines="3" data-code-annotation="3">It is good practice to always <code>glimpse()</code> data after you read it.</span>
 </dd>
 </dl>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 1,955
 Columns: 81
-$ PID               &lt;fct&gt; 0526301100, 0526350040, 0526351010, 0527105010, 0527…
-$ `MS SubClass`     &lt;fct&gt; 020, 020, 020, 060, 120, 120, 120, 060, 060, 060, 02…
-$ `MS Zoning`       &lt;fct&gt; RL, RH, RL, RL, RL, RL, RL, RL, RL, RL, RL, RL, RL, …
+$ PID               &lt;chr&gt; "0526301100", "0526350040", "0526351010", "052710501…
+$ `MS SubClass`     &lt;chr&gt; "020", "020", "020", "060", "120", "120", "120", "06…
+$ `MS Zoning`       &lt;chr&gt; "RL", "RH", "RL", "RL", "RL", "RL", "RL", "RL", "RL"…
 $ `Lot Frontage`    &lt;dbl&gt; 141, 80, 81, 74, 41, 43, 39, 60, 75, 63, 85, NA, 47,…
 $ `Lot Area`        &lt;dbl&gt; 31770, 11622, 14267, 13830, 4920, 5005, 5389, 7500, …
-$ Street            &lt;fct&gt; Pave, Pave, Pave, Pave, Pave, Pave, Pave, Pave, Pave…
-$ Alley             &lt;fct&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …
-$ `Lot Shape`       &lt;fct&gt; IR1, Reg, IR1, IR1, Reg, IR1, IR1, Reg, IR1, IR1, Re…
-$ `Land Contour`    &lt;fct&gt; Lvl, Lvl, Lvl, Lvl, Lvl, HLS, Lvl, Lvl, Lvl, Lvl, Lv…
-$ Utilities         &lt;fct&gt; AllPub, AllPub, AllPub, AllPub, AllPub, AllPub, AllP…
-$ `Lot Config`      &lt;fct&gt; Corner, Inside, Corner, Inside, Inside, Inside, Insi…
-$ `Land Slope`      &lt;fct&gt; Gtl, Gtl, Gtl, Gtl, Gtl, Gtl, Gtl, Gtl, Gtl, Gtl, Gt…
-$ Neighborhood      &lt;fct&gt; NAmes, NAmes, NAmes, Gilbert, StoneBr, StoneBr, Ston…
-$ `Condition 1`     &lt;fct&gt; Norm, Feedr, Norm, Norm, Norm, Norm, Norm, Norm, Nor…
-$ `Condition 2`     &lt;fct&gt; Norm, Norm, Norm, Norm, Norm, Norm, Norm, Norm, Norm…
-$ `Bldg Type`       &lt;fct&gt; 1Fam, 1Fam, 1Fam, 1Fam, TwnhsE, TwnhsE, TwnhsE, 1Fam…
-$ `House Style`     &lt;fct&gt; 1Story, 1Story, 1Story, 2Story, 1Story, 1Story, 1Sto…
+$ Street            &lt;chr&gt; "Pave", "Pave", "Pave", "Pave", "Pave", "Pave", "Pav…
+$ Alley             &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …
+$ `Lot Shape`       &lt;chr&gt; "IR1", "Reg", "IR1", "IR1", "Reg", "IR1", "IR1", "Re…
+$ `Land Contour`    &lt;chr&gt; "Lvl", "Lvl", "Lvl", "Lvl", "Lvl", "HLS", "Lvl", "Lv…
+$ Utilities         &lt;chr&gt; "AllPub", "AllPub", "AllPub", "AllPub", "AllPub", "A…
+$ `Lot Config`      &lt;chr&gt; "Corner", "Inside", "Corner", "Inside", "Inside", "I…
+$ `Land Slope`      &lt;chr&gt; "Gtl", "Gtl", "Gtl", "Gtl", "Gtl", "Gtl", "Gtl", "Gt…
+$ Neighborhood      &lt;chr&gt; "NAmes", "NAmes", "NAmes", "Gilbert", "StoneBr", "St…
+$ `Condition 1`     &lt;chr&gt; "Norm", "Feedr", "Norm", "Norm", "Norm", "Norm", "No…
+$ `Condition 2`     &lt;chr&gt; "Norm", "Norm", "Norm", "Norm", "Norm", "Norm", "Nor…
+$ `Bldg Type`       &lt;chr&gt; "1Fam", "1Fam", "1Fam", "1Fam", "TwnhsE", "TwnhsE", …
+$ `House Style`     &lt;chr&gt; "1Story", "1Story", "1Story", "2Story", "1Story", "1…
 $ `Overall Qual`    &lt;dbl&gt; 6, 5, 6, 5, 8, 8, 8, 7, 6, 6, 7, 8, 8, 8, 9, 4, 6, 6…
 $ `Overall Cond`    &lt;dbl&gt; 5, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 7, 2, 5, 6, 6…
 $ `Year Built`      &lt;dbl&gt; 1960, 1961, 1958, 1997, 2001, 1992, 1995, 1999, 1993…
 $ `Year Remod/Add`  &lt;dbl&gt; 1960, 1961, 1958, 1998, 2001, 1992, 1996, 1999, 1994…
-$ `Roof Style`      &lt;fct&gt; Hip, Gable, Hip, Gable, Gable, Gable, Gable, Gable, …
-$ `Roof Matl`       &lt;fct&gt; CompShg, CompShg, CompShg, CompShg, CompShg, CompShg…
-$ `Exterior 1st`    &lt;fct&gt; BrkFace, VinylSd, Wd Sdng, VinylSd, CemntBd, HdBoard…
-$ `Exterior 2nd`    &lt;fct&gt; Plywood, VinylSd, Wd Sdng, VinylSd, CmentBd, HdBoard…
-$ `Mas Vnr Type`    &lt;fct&gt; Stone, None, BrkFace, None, None, None, None, None, …
+$ `Roof Style`      &lt;chr&gt; "Hip", "Gable", "Hip", "Gable", "Gable", "Gable", "G…
+$ `Roof Matl`       &lt;chr&gt; "CompShg", "CompShg", "CompShg", "CompShg", "CompShg…
+$ `Exterior 1st`    &lt;chr&gt; "BrkFace", "VinylSd", "Wd Sdng", "VinylSd", "CemntBd…
+$ `Exterior 2nd`    &lt;chr&gt; "Plywood", "VinylSd", "Wd Sdng", "VinylSd", "CmentBd…
+$ `Mas Vnr Type`    &lt;chr&gt; "Stone", "None", "BrkFace", "None", "None", "None", …
 $ `Mas Vnr Area`    &lt;dbl&gt; 112, 0, 108, 0, 0, 0, 0, 0, 0, 0, 0, 0, 603, 0, 350,…
-$ `Exter Qual`      &lt;fct&gt; TA, TA, TA, TA, Gd, Gd, Gd, TA, TA, TA, TA, Gd, Ex, …
-$ `Exter Cond`      &lt;fct&gt; TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, …
-$ Foundation        &lt;fct&gt; CBlock, CBlock, CBlock, PConc, PConc, PConc, PConc, …
-$ `Bsmt Qual`       &lt;fct&gt; TA, TA, TA, Gd, Gd, Gd, Gd, TA, Gd, Gd, Gd, Gd, Gd, …
-$ `Bsmt Cond`       &lt;fct&gt; Gd, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, …
-$ `Bsmt Exposure`   &lt;fct&gt; Gd, No, No, No, Mn, No, No, No, No, No, Gd, Av, Gd, …
-$ `BsmtFin Type 1`  &lt;fct&gt; BLQ, Rec, ALQ, GLQ, GLQ, ALQ, GLQ, Unf, Unf, Unf, GL…
+$ `Exter Qual`      &lt;chr&gt; "TA", "TA", "TA", "TA", "Gd", "Gd", "Gd", "TA", "TA"…
+$ `Exter Cond`      &lt;chr&gt; "TA", "TA", "TA", "TA", "TA", "TA", "TA", "TA", "TA"…
+$ Foundation        &lt;chr&gt; "CBlock", "CBlock", "CBlock", "PConc", "PConc", "PCo…
+$ `Bsmt Qual`       &lt;chr&gt; "TA", "TA", "TA", "Gd", "Gd", "Gd", "Gd", "TA", "Gd"…
+$ `Bsmt Cond`       &lt;chr&gt; "Gd", "TA", "TA", "TA", "TA", "TA", "TA", "TA", "TA"…
+$ `Bsmt Exposure`   &lt;chr&gt; "Gd", "No", "No", "No", "Mn", "No", "No", "No", "No"…
+$ `BsmtFin Type 1`  &lt;chr&gt; "BLQ", "Rec", "ALQ", "GLQ", "GLQ", "ALQ", "GLQ", "Un…
 $ `BsmtFin SF 1`    &lt;dbl&gt; 639, 468, 923, 791, 616, 263, 1180, 0, 0, 0, 637, 36…
-$ `BsmtFin Type 2`  &lt;fct&gt; Unf, LwQ, Unf, Unf, Unf, Unf, Unf, Unf, Unf, Unf, Un…
+$ `BsmtFin Type 2`  &lt;chr&gt; "Unf", "LwQ", "Unf", "Unf", "Unf", "Unf", "Unf", "Un…
 $ `BsmtFin SF 2`    &lt;dbl&gt; 0, 144, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1120, 0, 0, 0, 0,…
 $ `Bsmt Unf SF`     &lt;dbl&gt; 441, 270, 406, 137, 722, 1017, 415, 994, 763, 789, 6…
 $ `Total Bsmt SF`   &lt;dbl&gt; 1080, 882, 1329, 928, 1338, 1280, 1595, 994, 763, 78…
-$ Heating           &lt;fct&gt; GasA, GasA, GasA, GasA, GasA, GasA, GasA, GasA, GasA…
-$ `Heating QC`      &lt;fct&gt; Fa, TA, TA, Gd, Ex, Ex, Ex, Gd, Gd, Gd, Gd, TA, Ex, …
-$ `Central Air`     &lt;fct&gt; Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y…
-$ Electrical        &lt;fct&gt; SBrkr, SBrkr, SBrkr, SBrkr, SBrkr, SBrkr, SBrkr, SBr…
+$ Heating           &lt;chr&gt; "GasA", "GasA", "GasA", "GasA", "GasA", "GasA", "Gas…
+$ `Heating QC`      &lt;chr&gt; "Fa", "TA", "TA", "Gd", "Ex", "Ex", "Ex", "Gd", "Gd"…
+$ `Central Air`     &lt;chr&gt; "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y…
+$ Electrical        &lt;chr&gt; "SBrkr", "SBrkr", "SBrkr", "SBrkr", "SBrkr", "SBrkr"…
 $ `1st Flr SF`      &lt;dbl&gt; 1656, 896, 1329, 928, 1338, 1280, 1616, 1028, 763, 7…
 $ `2nd Flr SF`      &lt;dbl&gt; 0, 0, 0, 701, 0, 0, 0, 776, 892, 676, 0, 0, 1589, 67…
 $ `Low Qual Fin SF` &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
@@ -784,33 +780,33 @@ $ `Full Bath`       &lt;dbl&gt; 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 3, 2, 1, 1, 
 $ `Half Bath`       &lt;dbl&gt; 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0…
 $ `Bedroom AbvGr`   &lt;dbl&gt; 3, 2, 3, 3, 2, 2, 2, 3, 3, 3, 2, 1, 4, 4, 1, 2, 3, 3…
 $ `Kitchen AbvGr`   &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1…
-$ `Kitchen Qual`    &lt;fct&gt; TA, TA, Gd, TA, Gd, Gd, Gd, Gd, TA, TA, Gd, Gd, Ex, …
+$ `Kitchen Qual`    &lt;chr&gt; "TA", "TA", "Gd", "TA", "Gd", "Gd", "Gd", "Gd", "TA"…
 $ `TotRms AbvGrd`   &lt;dbl&gt; 7, 5, 6, 6, 6, 5, 5, 7, 7, 7, 5, 4, 12, 8, 8, 4, 7, …
-$ Functional        &lt;fct&gt; Typ, Typ, Typ, Typ, Typ, Typ, Typ, Typ, Typ, Typ, Ty…
+$ Functional        &lt;chr&gt; "Typ", "Typ", "Typ", "Typ", "Typ", "Typ", "Typ", "Ty…
 $ Fireplaces        &lt;dbl&gt; 2, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 2, 1…
-$ `Fireplace Qu`    &lt;fct&gt; Gd, NA, NA, TA, NA, NA, TA, TA, TA, Gd, Po, NA, Gd, …
-$ `Garage Type`     &lt;fct&gt; Attchd, Attchd, Attchd, Attchd, Attchd, Attchd, Attc…
+$ `Fireplace Qu`    &lt;chr&gt; "Gd", NA, NA, "TA", NA, NA, "TA", "TA", "TA", "Gd", …
+$ `Garage Type`     &lt;chr&gt; "Attchd", "Attchd", "Attchd", "Attchd", "Attchd", "A…
 $ `Garage Yr Blt`   &lt;dbl&gt; 1960, 1961, 1958, 1997, 2001, 1992, 1995, 1999, 1993…
-$ `Garage Finish`   &lt;fct&gt; Fin, Unf, Unf, Fin, Fin, RFn, RFn, Fin, Fin, Fin, Un…
+$ `Garage Finish`   &lt;chr&gt; "Fin", "Unf", "Unf", "Fin", "Fin", "RFn", "RFn", "Fi…
 $ `Garage Cars`     &lt;dbl&gt; 2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 3, 2, 2, 2…
 $ `Garage Area`     &lt;dbl&gt; 528, 730, 312, 482, 582, 506, 608, 442, 440, 393, 50…
-$ `Garage Qual`     &lt;fct&gt; TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, …
-$ `Garage Cond`     &lt;fct&gt; TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, …
-$ `Paved Drive`     &lt;fct&gt; P, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y, Y…
+$ `Garage Qual`     &lt;chr&gt; "TA", "TA", "TA", "TA", "TA", "TA", "TA", "TA", "TA"…
+$ `Garage Cond`     &lt;chr&gt; "TA", "TA", "TA", "TA", "TA", "TA", "TA", "TA", "TA"…
+$ `Paved Drive`     &lt;chr&gt; "P", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y", "Y…
 $ `Wood Deck SF`    &lt;dbl&gt; 210, 140, 393, 212, 0, 0, 237, 140, 157, 0, 192, 0, …
 $ `Open Porch SF`   &lt;dbl&gt; 62, 0, 36, 34, 0, 82, 152, 60, 84, 75, 0, 54, 36, 12…
 $ `Enclosed Porch`  &lt;dbl&gt; 0, 0, 0, 0, 170, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…
 $ `3Ssn Porch`      &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
 $ `Screen Porch`    &lt;dbl&gt; 0, 120, 0, 0, 0, 144, 0, 0, 0, 0, 0, 140, 210, 0, 0,…
 $ `Pool Area`       &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
-$ `Pool QC`         &lt;fct&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …
-$ Fence             &lt;fct&gt; NA, MnPrv, NA, MnPrv, NA, NA, NA, NA, NA, NA, NA, NA…
-$ `Misc Feature`    &lt;fct&gt; NA, NA, Gar2, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA…
+$ `Pool QC`         &lt;chr&gt; NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, …
+$ Fence             &lt;chr&gt; NA, "MnPrv", NA, "MnPrv", NA, NA, NA, NA, NA, NA, NA…
+$ `Misc Feature`    &lt;chr&gt; NA, NA, "Gar2", NA, NA, NA, NA, NA, NA, NA, NA, NA, …
 $ `Misc Val`        &lt;dbl&gt; 0, 0, 12500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
 $ `Mo Sold`         &lt;dbl&gt; 5, 6, 6, 3, 4, 1, 3, 6, 4, 5, 2, 6, 6, 6, 6, 6, 2, 1…
 $ `Yr Sold`         &lt;dbl&gt; 2010, 2010, 2010, 2010, 2010, 2010, 2010, 2010, 2010…
-$ `Sale Type`       &lt;fct&gt; WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, WD, …
-$ `Sale Condition`  &lt;fct&gt; Normal, Normal, Normal, Normal, Normal, Normal, Norm…
+$ `Sale Type`       &lt;chr&gt; "WD", "WD", "WD", "WD", "WD", "WD", "WD", "WD", "WD"…
+$ `Sale Condition`  &lt;chr&gt; "Normal", "Normal", "Normal", "Normal", "Normal", "N…
 $ SalePrice         &lt;dbl&gt; 215000, 105000, 172000, 189900, 213500, 191500, 2365…</code></pre>
 </div>
 </div>
@@ -849,7 +845,7 @@ $ SalePrice         &lt;dbl&gt; 215000, 105000, 172000, 189900, 213500, 191500, 
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-7" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-lines="11" data-code-cell="annotated-cell-7" data-code-annotation="1">Notice that the dataset used non-standard variable names that include spaces. We need to use back-ticks around the variable names to allow us reference those variables. We will fix this during the cleaning process and you should never use spaces in variable names when setting up your own data!!!</span>
+<span data-code-cell="annotated-cell-7" data-code-lines="11" data-code-annotation="1">Notice that the dataset used non-standard variable names that include spaces. We need to use back-ticks around the variable names to allow us reference those variables. We will fix this during the cleaning process and you should never use spaces in variable names when setting up your own data!!!</span>
 </dd>
 </dl>
 </div>
@@ -862,10 +858,10 @@ $ `Lot Area`     &lt;dbl&gt; 31770, 11622, 14267, 13830, 4920, 5005, 5389, 7500,
 $ `Year Built`   &lt;dbl&gt; 1960, 1961, 1958, 1997, 2001, 1992, 1995, 1999, 1993, 1…
 $ `Overall Qual` &lt;dbl&gt; 6, 5, 6, 5, 8, 8, 8, 7, 6, 6, 7, 8, 8, 8, 9, 4, 6, 6, 7…
 $ `Garage Cars`  &lt;dbl&gt; 2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 3, 2, 2, 2, 2…
-$ `Garage Qual`  &lt;fct&gt; TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA,…
-$ `MS Zoning`    &lt;fct&gt; RL, RH, RL, RL, RL, RL, RL, RL, RL, RL, RL, RL, RL, RL,…
-$ `Lot Config`   &lt;fct&gt; Corner, Inside, Corner, Inside, Inside, Inside, Inside,…
-$ `Bldg Type`    &lt;fct&gt; 1Fam, 1Fam, 1Fam, 1Fam, TwnhsE, TwnhsE, TwnhsE, 1Fam, 1…</code></pre>
+$ `Garage Qual`  &lt;chr&gt; "TA", "TA", "TA", "TA", "TA", "TA", "TA", "TA", "TA", "…
+$ `MS Zoning`    &lt;chr&gt; "RL", "RH", "RL", "RL", "RL", "RL", "RL", "RL", "RL", "…
+$ `Lot Config`   &lt;chr&gt; "Corner", "Inside", "Corner", "Inside", "Inside", "Insi…
+$ `Bldg Type`    &lt;chr&gt; "1Fam", "1Fam", "1Fam", "1Fam", "TwnhsE", "TwnhsE", "Tw…</code></pre>
 </div>
 </div>
 </section>
@@ -924,7 +920,7 @@ $ `Bldg Type`    &lt;fct&gt; 1Fam, 1Fam, 1Fam, 1Fam, TwnhsE, TwnhsE, TwnhsE, 1Fa
 <section class="slide level2">
 
 <h3 id="explore-variable-classes">Explore variable classes</h3>
-<p>At this point, variables should be classed as either numeric or factor</p>
+<p>At this point, we should class all of our variables as either numeric or factor</p>
 <ul>
 <li>Interval and ratio variables use numeric classes (dbl or int)</li>
 <li>Nominal and ordinal variable use factor class</li>
@@ -934,7 +930,12 @@ $ `Bldg Type`    &lt;fct&gt; 1Fam, 1Fam, 1Fam, 1Fam, TwnhsE, TwnhsE, TwnhsE, 1Fa
 </section>
 <section class="slide level2">
 
-<p>We have one variable to change to factor class</p>
+<p>We have a number of nominal or ordinal variables that are classed as character.</p>
+<p>We have one ordinal variable (<code>overall_qual</code>) that is classed as numeric (because the levels were coded with numbers rather than text)</p>
+<ul>
+<li><code>read_csv()</code> thought was numeric by the levels are coded using numbers</li>
+<li>The data dictionary indicates that valid values range from 1 - 10.</li>
+</ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1"></a>data_all <span class="sc">|&gt;</span> <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -946,39 +947,38 @@ $ lot_area     &lt;dbl&gt; 31770, 11622, 14267, 13830, 4920, 5005, 5389, 7500, 1
 $ year_built   &lt;dbl&gt; 1960, 1961, 1958, 1997, 2001, 1992, 1995, 1999, 1993, 199…
 $ overall_qual &lt;dbl&gt; 6, 5, 6, 5, 8, 8, 8, 7, 6, 6, 7, 8, 8, 8, 9, 4, 6, 6, 7, …
 $ garage_cars  &lt;dbl&gt; 2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 3, 2, 2, 2, 2, …
-$ garage_qual  &lt;fct&gt; TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, TA, T…
-$ ms_zoning    &lt;fct&gt; RL, RH, RL, RL, RL, RL, RL, RL, RL, RL, RL, RL, RL, RL, R…
-$ lot_config   &lt;fct&gt; Corner, Inside, Corner, Inside, Inside, Inside, Inside, I…
-$ bldg_type    &lt;fct&gt; 1Fam, 1Fam, 1Fam, 1Fam, TwnhsE, TwnhsE, TwnhsE, 1Fam, 1Fa…</code></pre>
+$ garage_qual  &lt;chr&gt; "TA", "TA", "TA", "TA", "TA", "TA", "TA", "TA", "TA", "TA…
+$ ms_zoning    &lt;chr&gt; "RL", "RH", "RL", "RL", "RL", "RL", "RL", "RL", "RL", "RL…
+$ lot_config   &lt;chr&gt; "Corner", "Inside", "Corner", "Inside", "Inside", "Inside…
+$ bldg_type    &lt;chr&gt; "1Fam", "1Fam", "1Fam", "1Fam", "TwnhsE", "TwnhsE", "Twnh…</code></pre>
 </div>
 </div>
-<p><code>overall_qual</code> is ordinal</p>
-<ul>
-<li><code>read_csv()</code> thought was numeric by the levels are coded using numbers</li>
-<li>We should convert it to a factor and confirm the levels are ordered properly.<br>
-</li>
-<li>The data dictionary indicates that valid values range from 1 - 10.</li>
-</ul>
 </section>
 <section class="slide level2">
 
-<p>Here is the code to re-class it</p>
+<p>We can the recode <code>overall_qual</code> first and set its levels</p>
+<p>We can recode all the character variables to factor in one step. Most are nominal. We will handle the order for <code>garage_qual</code> later.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="annotated-cell-10"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy code-annotated"><code class="sourceCode r"><a class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="1" onclick="event.preventDefault();" href="">1</a><span id="annotated-cell-10-1" class="code-annotation-target"><a href="#annotated-cell-10-1"></a>oq_levels <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
 <span id="annotated-cell-10-2"><a href="#annotated-cell-10-2"></a></span>
-<span id="annotated-cell-10-3"><a href="#annotated-cell-10-3"></a>t <span class="ot">&lt;-</span>  data_all <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-10-3"><a href="#annotated-cell-10-3"></a>data_all <span class="ot">&lt;-</span>  data_all <span class="sc">|&gt;</span> </span>
 <span id="annotated-cell-10-4"><a href="#annotated-cell-10-4"></a>  <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">factor</span>(overall_qual, </span>
 <a class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="2" onclick="event.preventDefault();" href="">2</a><span id="annotated-cell-10-5" class="code-annotation-target"><a href="#annotated-cell-10-5"></a>                               <span class="at">levels =</span> oq_levels)) <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-10-6"><a href="#annotated-cell-10-6"></a>  <span class="fu">glimpse</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="3" onclick="event.preventDefault();" href="">3</a><span id="annotated-cell-10-6" class="code-annotation-target"><a href="#annotated-cell-10-6"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.character), factor)) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-10-7"><a href="#annotated-cell-10-7"></a>  <span class="fu">glimpse</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-10" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-lines="1" data-code-cell="annotated-cell-10" data-code-annotation="1">It is always best to explicitly set the levels of an ordinal factor in the order you prefer. It is not necessary here because <code>overall_qual</code> was numeric and therefore sorts in the expected order. However, if it had been numbers stored as characters, it could sort incorrectly (e.g., 1, 10, 2, 3, …). And obviously if the orders levels were names, the order would have to be specified.</span>
+<span data-code-cell="annotated-cell-10" data-code-lines="1" data-code-annotation="1">It is always best to explicitly set the levels of an ordinal factor in the order you prefer. It is not necessary here because <code>overall_qual</code> was numeric and therefore sorts in the expected order. However, if it had been numbers stored as characters, it could sort incorrectly (e.g., 1, 10, 2, 3, …). And obviously if the orders levels were names, the order would have to be specified.</span>
 </dd>
 <dt data-target-cell="annotated-cell-10" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-lines="5" data-code-cell="annotated-cell-10" data-code-annotation="2">We indicate the levels here.</span>
+<span data-code-cell="annotated-cell-10" data-code-lines="5" data-code-annotation="2">We indicate the levels here.</span>
+</dd>
+<dt data-target-cell="annotated-cell-10" data-target-annotation="3">3</dt>
+<dd>
+<span data-code-cell="annotated-cell-10" data-code-lines="6" data-code-annotation="3">We use a mutate to re-class all character data to factors. I prefer <code>factor()</code> to <code>forcats::fct()</code> because factor orders the levels alphabetically. Be aware that this <em>could</em> change if your code is used in a region of the world where this sorting is different. I still prefer this to the alternative (in <code>fct()</code>) that orders by the order the levels are found in your data.</span>
 </dd>
 </dl>
 </div>
@@ -1007,7 +1007,7 @@ $ bldg_type    &lt;fct&gt; 1Fam, 1Fam, 1Fam, 1Fam, TwnhsE, TwnhsE, TwnhsE, 1Fam,
 <li>We use different versions for cleaning and modeling EDA</li>
 <li>For cleaning EDA, we just remove some stats that we don’t want to see at this time</li>
 <li>We can get many of the summary stats for cleaning in one call</li>
-<li>We have a custom skim defined in the <code>fun_eda.R</code> library that we use regularly. Here is the code but you can use the function directly if you sourced <code>fun_eda.R</code> (as we did above)</li>
+<li>We have a custom skim defined in the <code>fun_eda.R</code> function library that we use regularly. Here is the code but you can use the function directly if you sourced <code>fun_eda.R</code> (as we did above)</li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1"></a>skim_some <span class="ot">&lt;-</span> <span class="fu">skim_with</span>(<span class="at">numeric =</span> <span class="fu">sfl</span>(<span class="at">mean =</span> <span class="cn">NULL</span>, <span class="at">sd =</span> <span class="cn">NULL</span>, <span class="at">p25 =</span> <span class="cn">NULL</span>, <span class="at">p50 =</span> <span class="cn">NULL</span>, <span class="at">p75 =</span> <span class="cn">NULL</span>, <span class="at">hist =</span> <span class="cn">NULL</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1018,7 +1018,7 @@ $ bldg_type    &lt;fct&gt; 1Fam, 1Fam, 1Fam, 1Fam, TwnhsE, TwnhsE, TwnhsE, 1Fam,
 <p>Here is what we get with our new <code>skim_some()</code> function</p>
 <ul>
 <li>We will refer to this again for each characteristic we want to review for instructional purposes</li>
-<li>We can already see that we can use <code>skim_some()</code> to confirm that we only have numeric and character classes</li>
+<li>We can already see that we can use <code>skim_some()</code> to confirm that we only have numeric and factor classes</li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1"></a>data_all <span class="sc">|&gt;</span> </span>
@@ -1073,7 +1073,7 @@ Column type frequency:
 factor
 </td>
 <td style="text-align:left;">
-4
+5
 </td>
 </tr>
 <tr>
@@ -1081,7 +1081,7 @@ factor
 numeric
 </td>
 <td style="text-align:left;">
-6
+5
 </td>
 </tr>
 <tr>
@@ -1128,6 +1128,26 @@ top_counts
 </tr>
 </thead>
 <tbody>
+<tr>
+<td style="text-align:left;">
+overall_qual
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1.00
+</td>
+<td style="text-align:left;">
+FALSE
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:left;">
+5: 556, 6: 487, 7: 403, 8: 233
+</td>
+</tr>
 <tr>
 <td style="text-align:left;">
 garage_qual
@@ -1300,23 +1320,6 @@ year_built
 </td>
 <td style="text-align:right;">
 2010
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-overall_qual
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-10
 </td>
 </tr>
 <tr>
@@ -1371,324 +1374,31 @@ garage_cars
 <h3 id="missing-data---all-variables">Missing Data - All variables</h3>
 <p><code>skim_some()</code> provides us with missing data counts and complete data proportions for each variable</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1"></a>data_all <span class="sc">|&gt;</span> </span>
-<span id="cb14-2"><a href="#cb14-2"></a>  <span class="fu">skim_some</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-
-<table style="width: auto;" class="table table-condensed">
-<caption>
-Data summary
-</caption>
-<tbody>
-<tr>
-<td style="text-align:left;">
-Name
-</td>
-<td style="text-align:left;">
-data_all
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Number of rows
-</td>
-<td style="text-align:left;">
-1955
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Number of columns
-</td>
-<td style="text-align:left;">
-10
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-_______________________
-</td>
-<td style="text-align:left;">
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Column type frequency:
-</td>
-<td style="text-align:left;">
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-factor
-</td>
-<td style="text-align:left;">
-4
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-numeric
-</td>
-<td style="text-align:left;">
-6
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-________________________
-</td>
-<td style="text-align:left;">
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Group variables
-</td>
-<td style="text-align:left;">
-None
-</td>
-</tr>
-</tbody>
-
-</table>
-<p><strong>Variable type: factor</strong></p>
-
-<table>
-<thead>
-<tr>
-<th style="text-align:left;">
-skim_variable
-</th>
-<th style="text-align:right;">
-n_missing
-</th>
-<th style="text-align:right;">
-complete_rate
-</th>
-<th style="text-align:left;">
-ordered
-</th>
-<th style="text-align:right;">
-n_unique
-</th>
-<th style="text-align:left;">
-top_counts
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-garage_qual
-</td>
-<td style="text-align:right;">
-109
-</td>
-<td style="text-align:right;">
-0.94
-</td>
-<td style="text-align:left;">
-FALSE
-</td>
-<td style="text-align:right;">
-5
-</td>
-<td style="text-align:left;">
-TA: 1745, Fa: 79, Gd: 16, Po: 4
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-ms_zoning
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1.00
-</td>
-<td style="text-align:left;">
-FALSE
-</td>
-<td style="text-align:right;">
-7
-</td>
-<td style="text-align:left;">
-RL: 1530, RM: 297, FV: 91, C (: 19
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-lot_config
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1.00
-</td>
-<td style="text-align:left;">
-FALSE
-</td>
-<td style="text-align:right;">
-5
-</td>
-<td style="text-align:left;">
-Ins: 1454, Cor: 328, Cul: 114, FR2: 55
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-bldg_type
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1.00
-</td>
-<td style="text-align:left;">
-FALSE
-</td>
-<td style="text-align:right;">
-5
-</td>
-<td style="text-align:left;">
-1Fa: 1631, Twn: 145, Dup: 77, Twn: 64
-</td>
-</tr>
-</tbody>
-
-</table>
-<p><strong>Variable type: numeric</strong></p>
-
-<table>
-<thead>
-<tr>
-<th style="text-align:left;">
-skim_variable
-</th>
-<th style="text-align:right;">
-n_missing
-</th>
-<th style="text-align:right;">
-complete_rate
-</th>
-<th style="text-align:right;">
-p0
-</th>
-<th style="text-align:right;">
-p100
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-sale_price
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-12789
-</td>
-<td style="text-align:right;">
-745000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-gr_liv_area
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-438
-</td>
-<td style="text-align:right;">
-5642
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-lot_area
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1476
-</td>
-<td style="text-align:right;">
-215245
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-year_built
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1875
-</td>
-<td style="text-align:right;">
-2010
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-overall_qual
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-10
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-garage_cars
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-4
-</td>
-</tr>
-</tbody>
-
-</table>
+<div class="sourceCode cell-code" id="annotated-cell-13"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-13-1"><a href="#annotated-cell-13-1"></a>data_all <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-13-2"><a href="#annotated-cell-13-2"></a>  <span class="fu">skim_some</span>() <span class="sc">|&gt;</span> </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-13" data-target-annotation="1" onclick="event.preventDefault();" href="">1</a><span id="annotated-cell-13-3" class="code-annotation-target"><a href="#annotated-cell-13-3"></a>  <span class="fu">select</span>(skim_variable, n_missing, complete_rate)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-13" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-13" data-code-lines="3" data-code-annotation="1"><code>skim_some()</code> returns a dataframe so you can select only the subset of columns to focus its output on what you want. Or just print it all!</span>
+</dd>
+</dl>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 10 × 3
+   skim_variable n_missing complete_rate
+   &lt;chr&gt;             &lt;int&gt;         &lt;dbl&gt;
+ 1 overall_qual          0         1    
+ 2 garage_qual         109         0.944
+ 3 ms_zoning             0         1    
+ 4 lot_config            0         1    
+ 5 bldg_type             0         1    
+ 6 sale_price            0         1    
+ 7 gr_liv_area           0         1    
+ 8 lot_area              0         1    
+ 9 year_built            0         1    
+10 garage_cars           1         0.999</code></pre>
 </div>
 </div>
 </section>
@@ -1717,15 +1427,15 @@ garage_cars
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-14" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-lines="1" data-code-cell="annotated-cell-14" data-code-annotation="1">This sets print to print all rows and columns. Note that we set these options at the start of the unit b.c. we like to see our full tibbles. If we want only a subset of the first (or last) rows, we use <code>head()</code> or <code>tail()</code></span>
+<span data-code-cell="annotated-cell-14" data-code-lines="1" data-code-annotation="1">This sets print to print all rows and columns. Note that we set these options at the start of the unit b.c. we like to see our full tibbles. If we want only a subset of the first (or last) rows, we use <code>head()</code> or <code>tail()</code></span>
 </dd>
 </dl>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 10
   sale_price gr_liv_area lot_area year_built overall_qual garage_cars
-       &lt;dbl&gt;       &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt;        &lt;dbl&gt;       &lt;dbl&gt;
-1     150909        1828     9060       1923            5          NA
+       &lt;dbl&gt;       &lt;dbl&gt;    &lt;dbl&gt;      &lt;dbl&gt; &lt;fct&gt;              &lt;dbl&gt;
+1     150909        1828     9060       1923 5                     NA
   garage_qual ms_zoning lot_config bldg_type
   &lt;fct&gt;       &lt;fct&gt;     &lt;fct&gt;      &lt;fct&gt;    
 1 &lt;NA&gt;        RM        Inside     1Fam     </code></pre>
@@ -1753,11 +1463,11 @@ garage_cars
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-15" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-lines="2" data-code-cell="annotated-cell-15" data-code-annotation="1">Defaults to a output box of height = “500px”. Can set to other values if preferred.</span>
+<span data-code-cell="annotated-cell-15" data-code-lines="2" data-code-annotation="1">Defaults to a output box of height = “500px”. Can set to other values if preferred.</span>
 </dd>
 <dt data-target-cell="annotated-cell-15" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-lines="6" data-code-cell="annotated-cell-15" data-code-annotation="2">Might want to use <code>height = "100%"</code> if only printing a few rows.</span>
+<span data-code-cell="annotated-cell-15" data-code-lines="6" data-code-annotation="2">Might want to use <code>height = "100%"</code> if only printing a few rows.</span>
 </dd>
 </dl>
 </div>
@@ -4465,11 +4175,11 @@ garage_cars
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-18" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-lines="2" data-code-cell="annotated-cell-18" data-code-annotation="1">First add a new level to the factor</span>
+<span data-code-cell="annotated-cell-18" data-code-lines="2" data-code-annotation="1">First add a new level to the factor</span>
 </dd>
 <dt data-target-cell="annotated-cell-18" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-lines="3" data-code-cell="annotated-cell-18" data-code-annotation="2">Then recode NA to that new level</span>
+<span data-code-cell="annotated-cell-18" data-code-lines="3" data-code-annotation="2">Then recode NA to that new level</span>
 </dd>
 </dl>
 </div>
@@ -4504,15 +4214,15 @@ garage_cars
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-20" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-lines="1" data-code-cell="annotated-cell-20" data-code-annotation="1">Make a vector that indicates the valid levels in order</span>
+<span data-code-cell="annotated-cell-20" data-code-lines="1" data-code-annotation="1">Make a vector that indicates the valid levels in order</span>
 </dd>
 <dt data-target-cell="annotated-cell-20" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-lines="3" data-code-cell="annotated-cell-20" data-code-annotation="2">Pass that into <code>fct_relevel()</code>. See <code>?fct_relevel</code> for other ways to adjust the levels of a factor.</span>
+<span data-code-cell="annotated-cell-20" data-code-lines="3" data-code-annotation="2">Pass that into <code>fct_relevel()</code>. See <code>?fct_relevel</code> for other ways to adjust the levels of a factor.</span>
 </dd>
 <dt data-target-cell="annotated-cell-20" data-target-annotation="3">3</dt>
 <dd>
-<span data-code-lines="5" data-code-cell="annotated-cell-20" data-code-annotation="3">Confirm that the levels are now correct</span>
+<span data-code-cell="annotated-cell-20" data-code-lines="5" data-code-annotation="3">Confirm that the levels are now correct</span>
 </dd>
 </dl>
 </div>
@@ -4538,330 +4248,35 @@ garage_cars
 </ul></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1"></a>data_all <span class="sc">|&gt;</span></span>
-<span id="cb21-2"><a href="#cb21-2"></a>  <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">as.numeric</span>(overall_qual)) <span class="sc">|&gt;</span> </span>
-<span id="cb21-3"><a href="#cb21-3"></a>  <span class="fu">skim_some</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-
-<table style="width: auto;" class="table table-condensed">
-<caption>
-Data summary
-</caption>
-<tbody>
-<tr>
-<td style="text-align:left;">
-Name
-</td>
-<td style="text-align:left;">
-mutate(data_all, overall_…
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Number of rows
-</td>
-<td style="text-align:left;">
-1955
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Number of columns
-</td>
-<td style="text-align:left;">
-10
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-_______________________
-</td>
-<td style="text-align:left;">
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Column type frequency:
-</td>
-<td style="text-align:left;">
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-factor
-</td>
-<td style="text-align:left;">
-4
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-numeric
-</td>
-<td style="text-align:left;">
-6
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-________________________
-</td>
-<td style="text-align:left;">
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-Group variables
-</td>
-<td style="text-align:left;">
-None
-</td>
-</tr>
-</tbody>
-
-</table>
-<p><strong>Variable type: factor</strong></p>
-
-<table>
-<thead>
-<tr>
-<th style="text-align:left;">
-skim_variable
-</th>
-<th style="text-align:right;">
-n_missing
-</th>
-<th style="text-align:right;">
-complete_rate
-</th>
-<th style="text-align:left;">
-ordered
-</th>
-<th style="text-align:right;">
-n_unique
-</th>
-<th style="text-align:left;">
-top_counts
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-garage_qual
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:left;">
-FALSE
-</td>
-<td style="text-align:right;">
-6
-</td>
-<td style="text-align:left;">
-TA: 1745, no_: 109, Fa: 79, Gd: 16
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-ms_zoning
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:left;">
-FALSE
-</td>
-<td style="text-align:right;">
-7
-</td>
-<td style="text-align:left;">
-RL: 1530, RM: 297, FV: 91, C (: 19
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-lot_config
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:left;">
-FALSE
-</td>
-<td style="text-align:right;">
-5
-</td>
-<td style="text-align:left;">
-Ins: 1454, Cor: 328, Cul: 114, FR2: 55
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-bldg_type
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:left;">
-FALSE
-</td>
-<td style="text-align:right;">
-5
-</td>
-<td style="text-align:left;">
-1Fa: 1631, Twn: 145, Dup: 77, Twn: 64
-</td>
-</tr>
-</tbody>
-
-</table>
-<p><strong>Variable type: numeric</strong></p>
-
-<table>
-<thead>
-<tr>
-<th style="text-align:left;">
-skim_variable
-</th>
-<th style="text-align:right;">
-n_missing
-</th>
-<th style="text-align:right;">
-complete_rate
-</th>
-<th style="text-align:right;">
-p0
-</th>
-<th style="text-align:right;">
-p100
-</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:left;">
-sale_price
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-12789
-</td>
-<td style="text-align:right;">
-745000
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-gr_liv_area
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-438
-</td>
-<td style="text-align:right;">
-5642
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-lot_area
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1476
-</td>
-<td style="text-align:right;">
-215245
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-year_built
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1875
-</td>
-<td style="text-align:right;">
-2010
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-overall_qual
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-10
-</td>
-</tr>
-<tr>
-<td style="text-align:left;">
-garage_cars
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-1
-</td>
-<td style="text-align:right;">
-0
-</td>
-<td style="text-align:right;">
-4
-</td>
-</tr>
-</tbody>
-
-</table>
+<div class="sourceCode cell-code" id="annotated-cell-21"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-21-1"><a href="#annotated-cell-21-1"></a>data_all <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-21-2"><a href="#annotated-cell-21-2"></a>  <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">as.numeric</span>(overall_qual)) <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-21-3"><a href="#annotated-cell-21-3"></a>  <span class="fu">skim_some</span>() <span class="sc">|&gt;</span> </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-21" data-target-annotation="1" onclick="event.preventDefault();" href="">1</a><span id="annotated-cell-21-4" class="code-annotation-target"><a href="#annotated-cell-21-4"></a>  <span class="fu">filter</span>(skim_type <span class="sc">==</span> <span class="st">"numeric"</span>) <span class="sc">|&gt;</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-21" data-target-annotation="2" onclick="event.preventDefault();" href="">2</a><span id="annotated-cell-21-5" class="code-annotation-target"><a href="#annotated-cell-21-5"></a>  <span class="fu">select</span>(skim_variable, numeric.p0, numeric.p100)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-annotation">
+<dl class="code-annotation-container-grid">
+<dt data-target-cell="annotated-cell-21" data-target-annotation="1">1</dt>
+<dd>
+<span data-code-cell="annotated-cell-21" data-code-lines="4" data-code-annotation="1">Select only numeric variables since min/max only apply to them</span>
+</dd>
+<dt data-target-cell="annotated-cell-21" data-target-annotation="2">2</dt>
+<dd>
+<span data-code-cell="annotated-cell-21" data-code-lines="5" data-code-annotation="2">Select relevant stats (min/max)</span>
+</dd>
+</dl>
+</div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 3
+  skim_variable numeric.p0 numeric.p100
+  &lt;chr&gt;              &lt;dbl&gt;        &lt;dbl&gt;
+1 sale_price         12789       745000
+2 gr_liv_area          438         5642
+3 lot_area            1476       215245
+4 year_built          1875         2010
+5 overall_qual           1           10
+6 garage_cars            0            4</code></pre>
 </div>
 </div>
-</section>
-<section class="slide level2">
-
 <h3 id="explore-all-responses-for-categorical-variables">Explore All Responses for Categorical Variables</h3>
 <p>We should explore all unique responses for nominal variables</p>
 <p>Might also do this for ordinal variables that are coded with labels vs.&nbsp;numbers.</p>
@@ -4870,7 +4285,8 @@ garage_cars
 <span id="cb22-2"><a href="#cb22-2"></a>  <span class="fu">select</span>(<span class="fu">where</span>(is.factor)) <span class="sc">|&gt;</span></span>
 <span id="cb22-3"><a href="#cb22-3"></a>  <span class="fu">walk</span>(\(column) <span class="fu">print</span>(<span class="fu">levels</span>(column)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "no_garage" "Po"        "Fa"        "TA"        "Gd"        "Ex"       
+<pre><code> [1] "1"  "2"  "3"  "4"  "5"  "6"  "7"  "8"  "9"  "10"
+[1] "no_garage" "Po"        "Fa"        "TA"        "Gd"        "Ex"       
 [1] "A (agr)" "C (all)" "FV"      "I (all)" "RH"      "RL"      "RM"     
 [1] "Corner"  "CulDSac" "FR2"     "FR3"     "Inside" 
 [1] "1Fam"   "2fmCon" "Duplex" "Twnhs"  "TwnhsE"</code></pre>
@@ -4890,7 +4306,7 @@ garage_cars
 <h3 id="tidy-responses-for-categorical-variables">Tidy Responses for Categorical Variables</h3>
 <p>Feature engineering with nominal and ordinal variables typically involves</p>
 <ul>
-<li>Converting to factors</li>
+<li>Converting to factors (already did this!)</li>
 <li>Often creating dummy features from these factors</li>
 </ul>
 <p>This feature engineering will use response labels for naming new features</p>
@@ -4925,29 +4341,14 @@ garage_cars
 <p>Let’s use the function</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="annotated-cell-24"><pre class="sourceCode numberSource r code-annotation-code number-lines code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-24-1"><a href="#annotated-cell-24-1"></a>data_all <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-24" data-target-annotation="1" onclick="event.preventDefault();" href="">1</a><span id="annotated-cell-24-2" class="code-annotation-target"><a href="#annotated-cell-24-2"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.factor), tidy_responses)) <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-24-3"><a href="#annotated-cell-24-3"></a>  <span class="fu">glimpse</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-24" data-target-annotation="1" onclick="event.preventDefault();" href="">1</a><span id="annotated-cell-24-2" class="code-annotation-target"><a href="#annotated-cell-24-2"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.factor), tidy_responses))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-24" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-lines="2" data-code-cell="annotated-cell-24" data-code-annotation="1">We use the tidy selection helper function to limit our mutate to only factors. See <a href="https://tidyselect.r-lib.org/reference/language.html">more details</a> on the tidy selection helpers like <code>all_of()</code> and <code>where()</code></span>
+<span data-code-cell="annotated-cell-24" data-code-lines="2" data-code-annotation="1">We use the tidy selection helper function to limit our mutate to only factors. See <a href="https://tidyselect.r-lib.org/reference/language.html">more details</a> on the tidy selection helpers like <code>all_of()</code> and <code>where()</code></span>
 </dd>
 </dl>
-</div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Rows: 1,955
-Columns: 10
-$ sale_price   &lt;dbl&gt; 215000, 105000, 172000, 189900, 213500, 191500, 236500, 1…
-$ gr_liv_area  &lt;dbl&gt; 1656, 896, 1329, 1629, 1338, 1280, 1616, 1804, 1655, 1465…
-$ lot_area     &lt;dbl&gt; 31770, 11622, 14267, 13830, 4920, 5005, 5389, 7500, 10000…
-$ year_built   &lt;dbl&gt; 1960, 1961, 1958, 1997, 2001, 1992, 1995, 1999, 1993, 199…
-$ overall_qual &lt;dbl&gt; 6, 5, 6, 5, 8, 8, 8, 7, 6, 6, 7, 8, 8, 8, 9, 4, 6, 6, 7, …
-$ garage_cars  &lt;dbl&gt; 2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 3, 2, 2, 2, 2, …
-$ garage_qual  &lt;fct&gt; ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, t…
-$ ms_zoning    &lt;fct&gt; rl, rh, rl, rl, rl, rl, rl, rl, rl, rl, rl, rl, rl, rl, r…
-$ lot_config   &lt;fct&gt; corner, inside, corner, inside, inside, inside, inside, i…
-$ bldg_type    &lt;fct&gt; 1fam, 1fam, 1fam, 1fam, twnhse, twnhse, twnhse, 1fam, 1fa…</code></pre>
 </div>
 </div>
 </section>
@@ -4959,11 +4360,12 @@ $ bldg_type    &lt;fct&gt; 1fam, 1fam, 1fam, 1fam, twnhse, twnhse, twnhse, 1fam,
 <li>Here, we show you what we got from using <code>tidy_responses()</code></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1"></a>data_all <span class="sc">|&gt;</span> </span>
-<span id="cb26-2"><a href="#cb26-2"></a>  <span class="fu">select</span>(<span class="fu">where</span>(is.factor)) <span class="sc">|&gt;</span></span>
-<span id="cb26-3"><a href="#cb26-3"></a>  <span class="fu">walk</span>(\(column) <span class="fu">print</span>(<span class="fu">levels</span>(column)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1"></a>data_all <span class="sc">|&gt;</span> </span>
+<span id="cb25-2"><a href="#cb25-2"></a>  <span class="fu">select</span>(<span class="fu">where</span>(is.factor)) <span class="sc">|&gt;</span></span>
+<span id="cb25-3"><a href="#cb25-3"></a>  <span class="fu">walk</span>(\(column) <span class="fu">print</span>(<span class="fu">levels</span>(column)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "no_garage" "po"        "fa"        "ta"        "gd"        "ex"       
+<pre><code> [1] "1"  "2"  "3"  "4"  "5"  "6"  "7"  "8"  "9"  "10"
+[1] "no_garage" "po"        "fa"        "ta"        "gd"        "ex"       
 [1] "a_agr" "c_all" "fv"    "i_all" "rh"    "rl"    "rm"   
 [1] "corner"  "culdsac" "fr2"     "fr3"     "inside" 
 [1] "1fam"   "2fmcon" "duplex" "twnhs"  "twnhse"</code></pre>
@@ -4992,7 +4394,7 @@ $ bldg_type    &lt;fct&gt; 1fam, 1fam, 1fam, 1fam, twnhse, twnhse, twnhse, 1fam,
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-26" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-lines="10" data-code-cell="annotated-cell-26" data-code-annotation="1">Note that I did not need to list all levels in the recode. Only the levels I wanted to change.</span>
+<span data-code-cell="annotated-cell-26" data-code-lines="10" data-code-annotation="1">Note that I did not need to list all levels in the recode. Only the levels I wanted to change.</span>
 </dd>
 </dl>
 </div>
@@ -5023,9 +4425,9 @@ $ bldg_type    &lt;fct&gt; 1fam, 1fam, 1fam, 1fam, twnhse, twnhse, twnhse, 1fam,
 <li><strong>IMPORTANT</strong>: Set a seed so that you can reproduce these splits if you later do more cleaning</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1"></a><span class="fu">set.seed</span>(<span class="dv">20110522</span>)</span>
-<span id="cb28-2"><a href="#cb28-2"></a>splits <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
-<span id="cb28-3"><a href="#cb28-3"></a>  <span class="fu">initial_split</span>(<span class="at">prop =</span> <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>, <span class="at">strata =</span> <span class="st">"sale_price"</span>, <span class="at">breaks =</span> <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1"></a><span class="fu">set.seed</span>(<span class="dv">20110522</span>)</span>
+<span id="cb27-2"><a href="#cb27-2"></a>splits <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
+<span id="cb27-3"><a href="#cb27-3"></a>  <span class="fu">initial_split</span>(<span class="at">prop =</span> <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>, <span class="at">strata =</span> <span class="st">"sale_price"</span>, <span class="at">breaks =</span> <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
@@ -5043,7 +4445,7 @@ $ bldg_type    &lt;fct&gt; 1fam, 1fam, 1fam, 1fam, twnhse, twnhse, twnhse, 1fam,
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-28" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-lines="2" data-code-cell="annotated-cell-28" data-code-annotation="1"><code>analysis()</code> pulls out the training set from our splits of <code>data_all</code></span>
+<span data-code-cell="annotated-cell-28" data-code-lines="2" data-code-annotation="1"><code>analysis()</code> pulls out the training set from our splits of <code>data_all</code></span>
 </dd>
 </dl>
 </div>
@@ -5054,7 +4456,7 @@ $ sale_price   &lt;dbl&gt; 105000, 126000, 115000, 120000, 99500, 112000, 122000
 $ gr_liv_area  &lt;dbl&gt; 896, 882, 864, 836, 918, 1902, 900, 1225, 1728, 858, 1306…
 $ lot_area     &lt;dbl&gt; 11622, 8400, 10500, 2280, 7892, 8930, 9819, 9320, 13260, …
 $ year_built   &lt;dbl&gt; 1961, 1970, 1971, 1975, 1979, 1978, 1967, 1959, 1962, 195…
-$ overall_qual &lt;dbl&gt; 5, 4, 4, 7, 6, 6, 5, 4, 5, 5, 3, 5, 4, 5, 3, 5, 2, 6, 5, …
+$ overall_qual &lt;fct&gt; 5, 4, 4, 7, 6, 6, 5, 4, 5, 5, 3, 5, 4, 5, 3, 5, 2, 6, 5, …
 $ garage_cars  &lt;dbl&gt; 1, 2, 0, 1, 1, 2, 1, 0, 0, 0, 0, 1, 2, 2, 1, 1, 2, 2, 1, …
 $ garage_qual  &lt;fct&gt; ta, ta, no_garage, ta, ta, ta, ta, no_garage, no_garage, …
 $ ms_zoning    &lt;fct&gt; res_high, res_low, res_low, res_low, res_low, res_med, re…
@@ -5081,7 +4483,7 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, town_inside, town_end, dup
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-29" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-lines="2" data-code-cell="annotated-cell-29" data-code-annotation="1"><code>assessment()</code> pulls out the validation set from our splits of <code>data_all</code></span>
+<span data-code-cell="annotated-cell-29" data-code-lines="2" data-code-annotation="1"><code>assessment()</code> pulls out the validation set from our splits of <code>data_all</code></span>
 </dd>
 </dl>
 </div>
@@ -5092,7 +4494,7 @@ $ sale_price   &lt;dbl&gt; 215000, 189900, 189000, 171500, 212000, 164000, 39443
 $ gr_liv_area  &lt;dbl&gt; 1656, 1629, 1804, 1341, 1502, 1752, 1856, 1004, 1092, 106…
 $ lot_area     &lt;dbl&gt; 31770, 13830, 7500, 10176, 6820, 12134, 11394, 11241, 168…
 $ year_built   &lt;dbl&gt; 1960, 1997, 1999, 1990, 1985, 1988, 2010, 1970, 1971, 197…
-$ overall_qual &lt;dbl&gt; 6, 5, 7, 7, 8, 8, 9, 6, 5, 6, 7, 9, 8, 8, 7, 8, 6, 5, 5, …
+$ overall_qual &lt;fct&gt; 6, 5, 7, 7, 8, 8, 9, 6, 5, 6, 7, 9, 8, 8, 7, 8, 6, 5, 5, …
 $ garage_cars  &lt;dbl&gt; 2, 2, 2, 2, 2, 2, 3, 2, 1, 2, 2, 2, 2, 3, 2, 3, 1, 1, 2, …
 $ garage_qual  &lt;fct&gt; ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, t…
 $ ms_zoning    &lt;fct&gt; res_low, res_low, res_low, res_low, res_low, res_low, res…
@@ -5120,8 +4522,8 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, one_fam, town_end, one_fam
 <li>categorical predictors are classed as factors.</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1"></a> data_trn <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(path_data, <span class="st">"ames_clean_class_trn.csv"</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb31-2"><a href="#cb31-2"></a>  <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1"></a> data_trn <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(path_data, <span class="st">"ames_clean_class_trn.csv"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb30-2"><a href="#cb30-2"></a>  <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 1,465
 Columns: 10
@@ -5164,23 +4566,23 @@ $ bldg_type    &lt;chr&gt; "one_fam", "one_fam", "one_fam", "town_inside", "town
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-31" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-lines="3" data-code-cell="annotated-cell-31" data-code-annotation="1">use col_types = cols() to suppress messages about default class assignments</span>
+<span data-code-cell="annotated-cell-31" data-code-lines="3" data-code-annotation="1">use col_types = cols() to suppress messages about default class assignments</span>
 </dd>
 <dt data-target-cell="annotated-cell-31" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-lines="4" data-code-cell="annotated-cell-31" data-code-annotation="2">use <code>mutate()</code> with <code>across()</code> to change all character variables to factors</span>
+<span data-code-cell="annotated-cell-31" data-code-lines="4" data-code-annotation="2">use <code>mutate()</code> with <code>across()</code> to change all character variables to factors</span>
 </dd>
 <dt data-target-cell="annotated-cell-31" data-target-annotation="3">3</dt>
 <dd>
-<span data-code-lines="5" data-code-cell="annotated-cell-31" data-code-annotation="3">use <code>mutate()</code> with <code>factor()</code> to change numeric variable to factor.</span>
+<span data-code-cell="annotated-cell-31" data-code-lines="5" data-code-annotation="3">use <code>mutate()</code> with <code>factor()</code> to change numeric variable to factor.</span>
 </dd>
 <dt data-target-cell="annotated-cell-31" data-target-annotation="4">4</dt>
 <dd>
-<span data-code-lines="6" data-code-cell="annotated-cell-31" data-code-annotation="4">use <code>mutate()</code> with <code>fct_relevel()</code> to explicitly set levels of an ordered factor</span>
+<span data-code-cell="annotated-cell-31" data-code-lines="6" data-code-annotation="4">use <code>mutate()</code> with <code>fct_relevel()</code> to explicitly set levels of an ordered factor</span>
 </dd>
 <dt data-target-cell="annotated-cell-31" data-target-annotation="5">5</dt>
 <dd>
-<span data-code-lines="8" data-code-cell="annotated-cell-31" data-code-annotation="5">notice the warning about the unknown level. Always explore warnings! In this instance, its fine. There were only two observations with ex and neither ended up in the training split. Still best to include this level to note it exists!</span>
+<span data-code-cell="annotated-cell-31" data-code-lines="8" data-code-annotation="5">notice the warning about the unknown level. Always explore warnings! In this instance, its fine. There were only two observations with ex and neither ended up in the training split. Still best to include this level to note it exists!</span>
 </dd>
 </dl>
 </div>
@@ -5204,15 +4606,15 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, town_inside, town_end, dup
 
 <p><strong>Coding sidebar</strong>: We will likely re-class the Ames dataset many times (for training, validation, test). We could copy/paste these mutates each time but whenever you do something more than twice, I recommend writing a function. We might write this one to re-class the ames variables</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1"></a>class_ames <span class="ot">&lt;-</span> <span class="cf">function</span>(df){</span>
-<span id="cb34-2"><a href="#cb34-2"></a>  </span>
-<span id="cb34-3"><a href="#cb34-3"></a>  df <span class="sc">|&gt;</span></span>
-<span id="cb34-4"><a href="#cb34-4"></a>    <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.character), factor)) <span class="sc">|&gt;</span> </span>
-<span id="cb34-5"><a href="#cb34-5"></a>    <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">factor</span>(overall_qual), </span>
-<span id="cb34-6"><a href="#cb34-6"></a>           <span class="at">overall_qual =</span> <span class="fu">fct_relevel</span>(overall_qual, <span class="fu">as.character</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>)), </span>
-<span id="cb34-7"><a href="#cb34-7"></a>           <span class="at">garage_qual =</span> <span class="fu">fct_relevel</span>(garage_qual, <span class="fu">c</span>(<span class="st">"no_garage"</span>, <span class="st">"po"</span>, <span class="st">"fa"</span>, </span>
-<span id="cb34-8"><a href="#cb34-8"></a>                                                    <span class="st">"ta"</span>, <span class="st">"gd"</span>, <span class="st">"ex"</span>)))</span>
-<span id="cb34-9"><a href="#cb34-9"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1"></a>class_ames <span class="ot">&lt;-</span> <span class="cf">function</span>(df){</span>
+<span id="cb33-2"><a href="#cb33-2"></a>  </span>
+<span id="cb33-3"><a href="#cb33-3"></a>  df <span class="sc">|&gt;</span></span>
+<span id="cb33-4"><a href="#cb33-4"></a>    <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.character), factor)) <span class="sc">|&gt;</span> </span>
+<span id="cb33-5"><a href="#cb33-5"></a>    <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">factor</span>(overall_qual), </span>
+<span id="cb33-6"><a href="#cb33-6"></a>           <span class="at">overall_qual =</span> <span class="fu">fct_relevel</span>(overall_qual, <span class="fu">as.character</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>)), </span>
+<span id="cb33-7"><a href="#cb33-7"></a>           <span class="at">garage_qual =</span> <span class="fu">fct_relevel</span>(garage_qual, <span class="fu">c</span>(<span class="st">"no_garage"</span>, <span class="st">"po"</span>, <span class="st">"fa"</span>, </span>
+<span id="cb33-8"><a href="#cb33-8"></a>                                                    <span class="st">"ta"</span>, <span class="st">"gd"</span>, <span class="st">"ex"</span>)))</span>
+<span id="cb33-9"><a href="#cb33-9"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now we can use it every time we read in one of the Ames datasets</p>
 <div class="cell">
@@ -5224,7 +4626,7 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, town_inside, town_end, dup
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-33" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-lines="3" data-code-cell="annotated-cell-33" data-code-annotation="1">Using our new function!</span>
+<span data-code-cell="annotated-cell-33" data-code-lines="3" data-code-annotation="1">Using our new function!</span>
 </dd>
 </dl>
 </div>
@@ -5271,20 +4673,20 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, town_inside, town_end, dup
 <li>included in <code>fun_eda.R</code> on github</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1"></a>skew_na <span class="ot">&lt;-</span> <span class="fu">partial</span>(e1071<span class="sc">::</span>skewness, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb36-2"><a href="#cb36-2"></a>kurt_na <span class="ot">&lt;-</span> <span class="fu">partial</span>(e1071<span class="sc">::</span>kurtosis, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb36-3"><a href="#cb36-3"></a></span>
-<span id="cb36-4"><a href="#cb36-4"></a>skim_all <span class="ot">&lt;-</span> skimr<span class="sc">::</span><span class="fu">skim_with</span>(<span class="at">numeric =</span> skimr<span class="sc">::</span><span class="fu">sfl</span>(<span class="at">skew =</span> skew_na, </span>
-<span id="cb36-5"><a href="#cb36-5"></a>                                                  <span class="at">kurtosis =</span> kurt_na, </span>
-<span id="cb36-6"><a href="#cb36-6"></a>                                                  <span class="at">hist =</span> <span class="cn">NULL</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1"></a>skew_na <span class="ot">&lt;-</span> <span class="fu">partial</span>(e1071<span class="sc">::</span>skewness, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb35-2"><a href="#cb35-2"></a>kurt_na <span class="ot">&lt;-</span> <span class="fu">partial</span>(e1071<span class="sc">::</span>kurtosis, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb35-3"><a href="#cb35-3"></a></span>
+<span id="cb35-4"><a href="#cb35-4"></a>skim_all <span class="ot">&lt;-</span> skimr<span class="sc">::</span><span class="fu">skim_with</span>(<span class="at">numeric =</span> skimr<span class="sc">::</span><span class="fu">sfl</span>(<span class="at">skew =</span> skew_na, </span>
+<span id="cb35-5"><a href="#cb35-5"></a>                                                  <span class="at">kurtosis =</span> kurt_na, </span>
+<span id="cb35-6"><a href="#cb35-6"></a>                                                  <span class="at">hist =</span> <span class="cn">NULL</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
 
 <p>Careful review of this output provides a great orientation to our data</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1"></a>data_trn <span class="sc">|&gt;</span> </span>
-<span id="cb37-2"><a href="#cb37-2"></a>  <span class="fu">skim_all</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1"></a>data_trn <span class="sc">|&gt;</span> </span>
+<span id="cb36-2"><a href="#cb36-2"></a>  <span class="fu">skim_all</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 
 <table style="width: auto;" class="table table-condensed">
@@ -5734,15 +5136,15 @@ garage_cars
 <li>We share this and all the remaining plots used in this unit in <code>fun_plot.R</code>. Source it to use them without having to re-code each time</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1"></a>plot_bar <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x){</span>
-<span id="cb38-2"><a href="#cb38-2"></a>  x_label_size <span class="ot">&lt;-</span> <span class="fu">if_else</span>(skimr<span class="sc">::</span><span class="fu">n_unique</span>(df[[x]]) <span class="sc">&lt;</span> <span class="dv">7</span>, <span class="dv">11</span>, <span class="dv">7</span>)</span>
-<span id="cb38-3"><a href="#cb38-3"></a>  </span>
-<span id="cb38-4"><a href="#cb38-4"></a>  df <span class="sc">|&gt;</span></span>
-<span id="cb38-5"><a href="#cb38-5"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]])) <span class="sc">+</span></span>
-<span id="cb38-6"><a href="#cb38-6"></a>    <span class="fu">geom_bar</span>() <span class="sc">+</span></span>
-<span id="cb38-7"><a href="#cb38-7"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">size =</span> x_label_size, <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
-<span id="cb38-8"><a href="#cb38-8"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
-<span id="cb38-9"><a href="#cb38-9"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1"></a>plot_bar <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x){</span>
+<span id="cb37-2"><a href="#cb37-2"></a>  x_label_size <span class="ot">&lt;-</span> <span class="fu">if_else</span>(skimr<span class="sc">::</span><span class="fu">n_unique</span>(df[[x]]) <span class="sc">&lt;</span> <span class="dv">7</span>, <span class="dv">11</span>, <span class="dv">7</span>)</span>
+<span id="cb37-3"><a href="#cb37-3"></a>  </span>
+<span id="cb37-4"><a href="#cb37-4"></a>  df <span class="sc">|&gt;</span></span>
+<span id="cb37-5"><a href="#cb37-5"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]])) <span class="sc">+</span></span>
+<span id="cb37-6"><a href="#cb37-6"></a>    <span class="fu">geom_bar</span>() <span class="sc">+</span></span>
+<span id="cb37-7"><a href="#cb37-7"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">size =</span> x_label_size, <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb37-8"><a href="#cb37-8"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
+<span id="cb37-9"><a href="#cb37-9"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
@@ -5764,7 +5166,7 @@ garage_cars
 <li>See <code>bldg_type</code></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_bar</span>(<span class="st">"bldg_type"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_bar</span>(<span class="st">"bldg_type"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 </div>
 <img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-2-1.png" width="960" class="r-stretch"></section>
@@ -5775,7 +5177,7 @@ garage_cars
 <li>See <code>overall_qual</code>. Though it is not very skewed.</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_bar</span>(<span class="st">"overall_qual"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_bar</span>(<span class="st">"overall_qual"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 </div>
 <img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-3-1.png" width="960" class="r-stretch"></section>
@@ -5793,19 +5195,19 @@ garage_cars
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-39" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-lines="2" data-code-cell="annotated-cell-39" data-code-annotation="1">Select only the factor columns</span>
+<span data-code-cell="annotated-cell-39" data-code-lines="2" data-code-annotation="1">Select only the factor columns</span>
 </dd>
 <dt data-target-cell="annotated-cell-39" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-lines="3" data-code-cell="annotated-cell-39" data-code-annotation="2">Get their names as strings (that is why we use quoted variables in these plot functions</span>
+<span data-code-cell="annotated-cell-39" data-code-lines="3" data-code-annotation="2">Get their names as strings (that is why we use quoted variables in these plot functions</span>
 </dd>
 <dt data-target-cell="annotated-cell-39" data-target-annotation="3">3</dt>
 <dd>
-<span data-code-lines="4" data-code-cell="annotated-cell-39" data-code-annotation="3">Use <code>map()</code> to iterative <code>plot_bar()</code> over every column. (see <a href="https://r4ds.hadley.nz/iteration.html">iteration</a> in <span class="citation" data-cites="RDS">Wickham, Çetinkaya-Rundel, and Grolemund (<a href="#/discussion-topics" role="doc-biblioref" onclick="">2023</a>)</span>)</span>
+<span data-code-cell="annotated-cell-39" data-code-lines="4" data-code-annotation="3">Use <code>map()</code> to iterative <code>plot_bar()</code> over every column. (see <a href="https://r4ds.hadley.nz/iteration.html">iteration</a> in <span class="citation" data-cites="RDS">Wickham, Çetinkaya-Rundel, and Grolemund (<a href="#/discussion-topics" role="doc-biblioref" onclick="">2023</a>)</span>)</span>
 </dd>
 <dt data-target-cell="annotated-cell-39" data-target-annotation="4">4</dt>
 <dd>
-<span data-code-lines="5" data-code-cell="annotated-cell-39" data-code-annotation="4">Use <code>plot_grid()</code> from <code>cowplot</code> package to display the list of plots in a grid</span>
+<span data-code-cell="annotated-cell-39" data-code-lines="5" data-code-annotation="4">Use <code>plot_grid()</code> from <code>cowplot</code> package to display the list of plots in a grid</span>
 </dd>
 </dl>
 </div>
@@ -5823,10 +5225,10 @@ garage_cars
 </ul>
 <p>We have included it in <code>fun_eda.R</code> for your use.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1"></a>tab <span class="ot">&lt;-</span> <span class="cf">function</span>(df, var, <span class="at">sort =</span> <span class="cn">FALSE</span>) {</span>
-<span id="cb41-2"><a href="#cb41-2"></a>  df <span class="sc">|&gt;</span>  dplyr<span class="sc">::</span><span class="fu">count</span>({{ var }}, <span class="at">sort =</span> sort) <span class="sc">|&gt;</span> </span>
-<span id="cb41-3"><a href="#cb41-3"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">prop =</span> n <span class="sc">/</span> <span class="fu">sum</span>(n))</span>
-<span id="cb41-4"><a href="#cb41-4"></a>} </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1"></a>tab <span class="ot">&lt;-</span> <span class="cf">function</span>(df, var, <span class="at">sort =</span> <span class="cn">FALSE</span>) {</span>
+<span id="cb40-2"><a href="#cb40-2"></a>  df <span class="sc">|&gt;</span>  dplyr<span class="sc">::</span><span class="fu">count</span>({{ var }}, <span class="at">sort =</span> sort) <span class="sc">|&gt;</span> </span>
+<span id="cb40-3"><a href="#cb40-3"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">prop =</span> n <span class="sc">/</span> <span class="fu">sum</span>(n))</span>
+<span id="cb40-4"><a href="#cb40-4"></a>} </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
@@ -5837,7 +5239,7 @@ garage_cars
 <li>May want to collapse low frequency (or low percentage) categories to reduce the number of features needed to represent the predictor</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">tab</span>(ms_zoning)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">tab</span>(ms_zoning)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 7 × 3
   ms_zoning     n     prop
@@ -5855,7 +5257,7 @@ garage_cars
 <li>We could also view the table sorted if we prefer</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">tab</span>(ms_zoning, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">tab</span>(ms_zoning, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 7 × 3
   ms_zoning     n     prop
@@ -5874,7 +5276,7 @@ garage_cars
 
 <p>but could see all this detail with plot as well</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_bar</span>(<span class="st">"ms_zoning"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_bar</span>(<span class="st">"ms_zoning"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 </div>
 <img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-6-1.png" width="960" class="r-stretch"></section>
@@ -5889,13 +5291,13 @@ garage_cars
 <li>This is one of the limitations of histograms</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1"></a>plot_hist <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, <span class="at">bins =</span> <span class="dv">100</span>){</span>
-<span id="cb47-2"><a href="#cb47-2"></a>  df <span class="sc">|&gt;</span></span>
-<span id="cb47-3"><a href="#cb47-3"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]])) <span class="sc">+</span></span>
-<span id="cb47-4"><a href="#cb47-4"></a>    <span class="fu">geom_histogram</span>(<span class="at">bins =</span> bins) <span class="sc">+</span></span>
-<span id="cb47-5"><a href="#cb47-5"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>),</span>
-<span id="cb47-6"><a href="#cb47-6"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
-<span id="cb47-7"><a href="#cb47-7"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1"></a>plot_hist <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, <span class="at">bins =</span> <span class="dv">100</span>){</span>
+<span id="cb46-2"><a href="#cb46-2"></a>  df <span class="sc">|&gt;</span></span>
+<span id="cb46-3"><a href="#cb46-3"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]])) <span class="sc">+</span></span>
+<span id="cb46-4"><a href="#cb46-4"></a>    <span class="fu">geom_histogram</span>(<span class="at">bins =</span> bins) <span class="sc">+</span></span>
+<span id="cb46-5"><a href="#cb46-5"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>),</span>
+<span id="cb46-6"><a href="#cb46-6"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
+<span id="cb46-7"><a href="#cb46-7"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
@@ -5907,7 +5309,7 @@ garage_cars
 <li>Could cause problems for some algorithms (e.g., lm) when features are normal</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_hist</span>(<span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_hist</span>(<span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 </div>
 <img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-9-1.png" width="960" class="r-stretch"></section>
@@ -5919,13 +5321,13 @@ garage_cars
 <li>Define a frequency polygon function and use it (included in <code>fun_plots.r</code>)</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1"></a>plot_freqpoly <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, <span class="at">bins =</span> <span class="dv">50</span>){</span>
-<span id="cb49-2"><a href="#cb49-2"></a>  df <span class="sc">|&gt;</span></span>
-<span id="cb49-3"><a href="#cb49-3"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]])) <span class="sc">+</span></span>
-<span id="cb49-4"><a href="#cb49-4"></a>    <span class="fu">geom_freqpoly</span>(<span class="at">bins =</span> bins) <span class="sc">+</span></span>
-<span id="cb49-5"><a href="#cb49-5"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>),</span>
-<span id="cb49-6"><a href="#cb49-6"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
-<span id="cb49-7"><a href="#cb49-7"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1"></a>plot_freqpoly <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, <span class="at">bins =</span> <span class="dv">50</span>){</span>
+<span id="cb48-2"><a href="#cb48-2"></a>  df <span class="sc">|&gt;</span></span>
+<span id="cb48-3"><a href="#cb48-3"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]])) <span class="sc">+</span></span>
+<span id="cb48-4"><a href="#cb48-4"></a>    <span class="fu">geom_freqpoly</span>(<span class="at">bins =</span> bins) <span class="sc">+</span></span>
+<span id="cb48-5"><a href="#cb48-5"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>),</span>
+<span id="cb48-6"><a href="#cb48-6"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
+<span id="cb48-7"><a href="#cb48-7"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
@@ -5934,7 +5336,7 @@ garage_cars
 <li>Bins may matter again</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_freqpoly</span>(<span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_freqpoly</span>(<span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 </div>
 <img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-11-1.png" width="960" class="r-stretch"></section>
@@ -5950,23 +5352,23 @@ garage_cars
 </ul>
 <p>Define a boxplot function and use it (included in <code>fun_plots.r</code>)</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1"></a>plot_boxplot <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x){</span>
-<span id="cb51-2"><a href="#cb51-2"></a>  x_label_size <span class="ot">&lt;-</span> <span class="fu">if_else</span>(skimr<span class="sc">::</span><span class="fu">n_unique</span>(df[[x]]) <span class="sc">&lt;</span> <span class="dv">7</span>, <span class="dv">11</span>, <span class="dv">7</span>)</span>
-<span id="cb51-3"><a href="#cb51-3"></a>  </span>
-<span id="cb51-4"><a href="#cb51-4"></a>  df <span class="sc">|&gt;</span></span>
-<span id="cb51-5"><a href="#cb51-5"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]])) <span class="sc">+</span></span>
-<span id="cb51-6"><a href="#cb51-6"></a>    <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
-<span id="cb51-7"><a href="#cb51-7"></a>    <span class="fu">theme</span>(<span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb51-8"><a href="#cb51-8"></a>          <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb51-9"><a href="#cb51-9"></a>          <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">size =</span> x_label_size, <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span>
-<span id="cb51-10"><a href="#cb51-10"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1"></a>plot_boxplot <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x){</span>
+<span id="cb50-2"><a href="#cb50-2"></a>  x_label_size <span class="ot">&lt;-</span> <span class="fu">if_else</span>(skimr<span class="sc">::</span><span class="fu">n_unique</span>(df[[x]]) <span class="sc">&lt;</span> <span class="dv">7</span>, <span class="dv">11</span>, <span class="dv">7</span>)</span>
+<span id="cb50-3"><a href="#cb50-3"></a>  </span>
+<span id="cb50-4"><a href="#cb50-4"></a>  df <span class="sc">|&gt;</span></span>
+<span id="cb50-5"><a href="#cb50-5"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]])) <span class="sc">+</span></span>
+<span id="cb50-6"><a href="#cb50-6"></a>    <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb50-7"><a href="#cb50-7"></a>    <span class="fu">theme</span>(<span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb50-8"><a href="#cb50-8"></a>          <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb50-9"><a href="#cb50-9"></a>          <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">size =</span> x_label_size, <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span>
+<span id="cb50-10"><a href="#cb50-10"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
 
 <p>Here is the plot for <code>sale_price</code></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_boxplot</span>(<span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_boxplot</span>(<span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 </div>
 <img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-13-1.png" width="960" class="r-stretch"></section>
@@ -5982,18 +5384,18 @@ garage_cars
 </ul>
 <p>Define a combined plot (included in <code>fun_plots.r</code>)</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1"></a>plot_box_violin <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x){</span>
-<span id="cb53-2"><a href="#cb53-2"></a>  x_label_size <span class="ot">&lt;-</span> <span class="fu">if_else</span>(skimr<span class="sc">::</span><span class="fu">n_unique</span>(df[[x]]) <span class="sc">&lt;</span> <span class="dv">7</span>, <span class="dv">11</span>, <span class="dv">7</span>)</span>
-<span id="cb53-3"><a href="#cb53-3"></a>  </span>
-<span id="cb53-4"><a href="#cb53-4"></a>  df <span class="sc">|&gt;</span></span>
-<span id="cb53-5"><a href="#cb53-5"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]])) <span class="sc">+</span></span>
-<span id="cb53-6"><a href="#cb53-6"></a>    <span class="fu">geom_violin</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="dv">0</span>), <span class="at">fill =</span> <span class="st">"green"</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
-<span id="cb53-7"><a href="#cb53-7"></a>    <span class="fu">geom_boxplot</span>(<span class="at">width =</span> .<span class="dv">1</span>, <span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">lwd =</span> <span class="fl">1.1</span>, <span class="at">fatten =</span> <span class="fl">1.1</span>) <span class="sc">+</span></span>
-<span id="cb53-8"><a href="#cb53-8"></a>    <span class="fu">theme</span>(<span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb53-9"><a href="#cb53-9"></a>          <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb53-10"><a href="#cb53-10"></a>          <span class="at">axis.title.y =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb53-11"><a href="#cb53-11"></a>          <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">size =</span> x_label_size, <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span>
-<span id="cb53-12"><a href="#cb53-12"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1"></a>plot_box_violin <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x){</span>
+<span id="cb52-2"><a href="#cb52-2"></a>  x_label_size <span class="ot">&lt;-</span> <span class="fu">if_else</span>(skimr<span class="sc">::</span><span class="fu">n_unique</span>(df[[x]]) <span class="sc">&lt;</span> <span class="dv">7</span>, <span class="dv">11</span>, <span class="dv">7</span>)</span>
+<span id="cb52-3"><a href="#cb52-3"></a>  </span>
+<span id="cb52-4"><a href="#cb52-4"></a>  df <span class="sc">|&gt;</span></span>
+<span id="cb52-5"><a href="#cb52-5"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]])) <span class="sc">+</span></span>
+<span id="cb52-6"><a href="#cb52-6"></a>    <span class="fu">geom_violin</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="dv">0</span>), <span class="at">fill =</span> <span class="st">"green"</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb52-7"><a href="#cb52-7"></a>    <span class="fu">geom_boxplot</span>(<span class="at">width =</span> .<span class="dv">1</span>, <span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">lwd =</span> <span class="fl">1.1</span>, <span class="at">fatten =</span> <span class="fl">1.1</span>) <span class="sc">+</span></span>
+<span id="cb52-8"><a href="#cb52-8"></a>    <span class="fu">theme</span>(<span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb52-9"><a href="#cb52-9"></a>          <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb52-10"><a href="#cb52-10"></a>          <span class="at">axis.title.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb52-11"><a href="#cb52-11"></a>          <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">size =</span> x_label_size, <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span>
+<span id="cb52-12"><a href="#cb52-12"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
@@ -6003,7 +5405,7 @@ garage_cars
 <li>In this instance, the skew is NOT due to only a few outliers</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_box_violin</span>(<span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_box_violin</span>(<span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 </div>
 <img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-15-1.png" width="960" class="r-stretch"></section>
@@ -6023,7 +5425,7 @@ garage_cars
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-52" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-lines="2" data-code-cell="annotated-cell-52" data-code-annotation="1">Now select numeric rather than factor but otherwise same as previous example</span>
+<span data-code-cell="annotated-cell-52" data-code-lines="2" data-code-annotation="1">Now select numeric rather than factor but otherwise same as previous example</span>
 </dd>
 </dl>
 </div>
@@ -6041,9 +5443,9 @@ garage_cars
 </ul>
 <p>You can get skim of only numeric variables if you like</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1"></a>data_trn <span class="sc">|&gt;</span> </span>
-<span id="cb55-2"><a href="#cb55-2"></a>  <span class="fu">select</span>(<span class="fu">where</span>(is.numeric)) <span class="sc">|&gt;</span> </span>
-<span id="cb55-3"><a href="#cb55-3"></a>  <span class="fu">skim_all</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1"></a>data_trn <span class="sc">|&gt;</span> </span>
+<span id="cb54-2"><a href="#cb54-2"></a>  <span class="fu">select</span>(<span class="fu">where</span>(is.numeric)) <span class="sc">|&gt;</span> </span>
+<span id="cb54-3"><a href="#cb54-3"></a>  <span class="fu">skim_all</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 
 <table style="width: auto;" class="table table-condensed">
@@ -6374,15 +5776,15 @@ garage_cars
 <li>These lines are useful for considering shape of relationship</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1"></a>plot_scatter <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, y){</span>
-<span id="cb56-2"><a href="#cb56-2"></a>  df <span class="sc">|&gt;</span></span>
-<span id="cb56-3"><a href="#cb56-3"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]], <span class="at">y =</span> .data[[y]])) <span class="sc">+</span></span>
-<span id="cb56-4"><a href="#cb56-4"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb56-5"><a href="#cb56-5"></a>    <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">formula =</span> y <span class="sc">~</span> x, <span class="at">col =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
-<span id="cb56-6"><a href="#cb56-6"></a>    <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"loess"</span>, <span class="at">formula =</span> y <span class="sc">~</span> x, <span class="at">col =</span> <span class="st">"green"</span>) <span class="sc">+</span></span>
-<span id="cb56-7"><a href="#cb56-7"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>),</span>
-<span id="cb56-8"><a href="#cb56-8"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
-<span id="cb56-9"><a href="#cb56-9"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1"></a>plot_scatter <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, y){</span>
+<span id="cb55-2"><a href="#cb55-2"></a>  df <span class="sc">|&gt;</span></span>
+<span id="cb55-3"><a href="#cb55-3"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]], <span class="at">y =</span> .data[[y]])) <span class="sc">+</span></span>
+<span id="cb55-4"><a href="#cb55-4"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb55-5"><a href="#cb55-5"></a>    <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">formula =</span> y <span class="sc">~</span> x, <span class="at">col =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb55-6"><a href="#cb55-6"></a>    <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"loess"</span>, <span class="at">formula =</span> y <span class="sc">~</span> x, <span class="at">col =</span> <span class="st">"green"</span>) <span class="sc">+</span></span>
+<span id="cb55-7"><a href="#cb55-7"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>),</span>
+<span id="cb55-8"><a href="#cb55-8"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
+<span id="cb55-9"><a href="#cb55-9"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
@@ -6404,7 +5806,7 @@ garage_cars
 <li>Use same train/test split after fixing</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_scatter</span>(<span class="st">"gr_liv_area"</span>, <span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_scatter</span>(<span class="st">"gr_liv_area"</span>, <span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 </div>
 <img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-19-1.png" width="960" class="r-stretch"></section>
@@ -6412,7 +5814,7 @@ garage_cars
 
 <p>Here is another example where the relationship might be non-linear</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_scatter</span>(<span class="st">"year_built"</span>, <span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_scatter</span>(<span class="st">"year_built"</span>, <span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 </div>
 <img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-21-1.png" width="960" class="r-stretch"></section>
@@ -6426,15 +5828,15 @@ garage_cars
 <li>This doesn’t seem promising by itself</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1"></a>data_trn <span class="sc">|&gt;</span> </span>
-<span id="cb59-2"><a href="#cb59-2"></a>  <span class="fu">mutate</span>(<span class="at">sale_price =</span> <span class="fu">log</span>(sale_price)) <span class="sc">|&gt;</span> </span>
-<span id="cb59-3"><a href="#cb59-3"></a>  <span class="fu">plot_scatter</span>(<span class="st">"gr_liv_area"</span>, <span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1"></a>data_trn <span class="sc">|&gt;</span> </span>
+<span id="cb58-2"><a href="#cb58-2"></a>  <span class="fu">mutate</span>(<span class="at">sale_price =</span> <span class="fu">log</span>(sale_price)) <span class="sc">|&gt;</span> </span>
+<span id="cb58-3"><a href="#cb58-3"></a>  <span class="fu">plot_scatter</span>(<span class="st">"gr_liv_area"</span>, <span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-22-1.png" width="960"></p>
 </div>
-<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1"></a>data_trn <span class="sc">|&gt;</span> </span>
-<span id="cb60-2"><a href="#cb60-2"></a>  <span class="fu">mutate</span>(<span class="at">sale_price =</span> <span class="fu">log</span>(sale_price)) <span class="sc">|&gt;</span></span>
-<span id="cb60-3"><a href="#cb60-3"></a>  <span class="fu">plot_scatter</span>(<span class="st">"year_built"</span>, <span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1"></a>data_trn <span class="sc">|&gt;</span> </span>
+<span id="cb59-2"><a href="#cb59-2"></a>  <span class="fu">mutate</span>(<span class="at">sale_price =</span> <span class="fu">log</span>(sale_price)) <span class="sc">|&gt;</span></span>
+<span id="cb59-3"><a href="#cb59-3"></a>  <span class="fu">plot_scatter</span>(<span class="st">"year_built"</span>, <span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-22-2.png" width="960"></p>
 </div>
@@ -6448,9 +5850,9 @@ garage_cars
 <li>Use <code>as.numeric()</code> to allow for lm and LOWESS lines on otherwise categorical variable</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1"></a>data_trn <span class="sc">|&gt;</span> </span>
-<span id="cb61-2"><a href="#cb61-2"></a>  <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">as.numeric</span>(overall_qual)) <span class="sc">|&gt;</span> </span>
-<span id="cb61-3"><a href="#cb61-3"></a>  <span class="fu">plot_scatter</span>(<span class="st">"overall_qual"</span>, <span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1"></a>data_trn <span class="sc">|&gt;</span> </span>
+<span id="cb60-2"><a href="#cb60-2"></a>  <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">as.numeric</span>(overall_qual)) <span class="sc">|&gt;</span> </span>
+<span id="cb60-3"><a href="#cb60-3"></a>  <span class="fu">plot_scatter</span>(<span class="st">"overall_qual"</span>, <span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 </div>
 <img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-23-1.png" width="960" class="r-stretch"></section>
@@ -6458,9 +5860,9 @@ garage_cars
 
 <p><strong>Coding sidebar</strong>: Use <code>jitter()</code> with x to help with overplotting</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1"></a>data_trn <span class="sc">|&gt;</span> </span>
-<span id="cb62-2"><a href="#cb62-2"></a>  <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">jitter</span>(<span class="fu">as.numeric</span>(overall_qual))) <span class="sc">|&gt;</span> </span>
-<span id="cb62-3"><a href="#cb62-3"></a>  <span class="fu">plot_scatter</span>(<span class="st">"overall_qual"</span>, <span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1"></a>data_trn <span class="sc">|&gt;</span> </span>
+<span id="cb61-2"><a href="#cb61-2"></a>  <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">jitter</span>(<span class="fu">as.numeric</span>(overall_qual))) <span class="sc">|&gt;</span> </span>
+<span id="cb61-3"><a href="#cb61-3"></a>  <span class="fu">plot_scatter</span>(<span class="st">"overall_qual"</span>, <span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 </div>
 <img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-24-1.png" width="960" class="r-stretch"></section>
@@ -6473,22 +5875,22 @@ garage_cars
 <li>This dataset doesn’t have much of an overplotting problem but…..</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1"></a>plot_hexbin <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, y){</span>
-<span id="cb63-2"><a href="#cb63-2"></a>  df <span class="sc">|&gt;</span></span>
-<span id="cb63-3"><a href="#cb63-3"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]], <span class="at">y =</span> .data[[y]])) <span class="sc">+</span></span>
-<span id="cb63-4"><a href="#cb63-4"></a>    <span class="fu">geom_hex</span>() <span class="sc">+</span></span>
-<span id="cb63-5"><a href="#cb63-5"></a>    <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">col =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
-<span id="cb63-6"><a href="#cb63-6"></a>    <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"loess"</span>, <span class="at">col =</span> <span class="st">"green"</span>)  <span class="sc">+</span></span>
-<span id="cb63-7"><a href="#cb63-7"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>),</span>
-<span id="cb63-8"><a href="#cb63-8"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
-<span id="cb63-9"><a href="#cb63-9"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1"></a>plot_hexbin <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, y){</span>
+<span id="cb62-2"><a href="#cb62-2"></a>  df <span class="sc">|&gt;</span></span>
+<span id="cb62-3"><a href="#cb62-3"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]], <span class="at">y =</span> .data[[y]])) <span class="sc">+</span></span>
+<span id="cb62-4"><a href="#cb62-4"></a>    <span class="fu">geom_hex</span>() <span class="sc">+</span></span>
+<span id="cb62-5"><a href="#cb62-5"></a>    <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"lm"</span>, <span class="at">col =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb62-6"><a href="#cb62-6"></a>    <span class="fu">geom_smooth</span>(<span class="at">method =</span> <span class="st">"loess"</span>, <span class="at">col =</span> <span class="st">"green"</span>)  <span class="sc">+</span></span>
+<span id="cb62-7"><a href="#cb62-7"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>),</span>
+<span id="cb62-8"><a href="#cb62-8"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
+<span id="cb62-9"><a href="#cb62-9"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
 
 <p><code>sale_price</code> by <code>gr_liv_area</code></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_hexbin</span>(<span class="st">"gr_liv_area"</span>, <span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_hexbin</span>(<span class="st">"gr_liv_area"</span>, <span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 </div>
 <img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-26-1.png" width="960" class="r-stretch"></section>
@@ -6520,7 +5922,7 @@ garage_cars
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-63" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-lines="6" data-code-cell="annotated-cell-63" data-code-annotation="1">Note use of namespace (<code>corrplot::corrplot.mixed()</code>) to call this function from <code>corrplot</code> package</span>
+<span data-code-cell="annotated-cell-63" data-code-lines="6" data-code-annotation="1">Note use of namespace (<code>corrplot::corrplot.mixed()</code>) to call this function from <code>corrplot</code> package</span>
 </dd>
 </dl>
 </div>
@@ -6538,17 +5940,17 @@ garage_cars
 <li><span class="citation" data-cites="RDS">Wickham, Çetinkaya-Rundel, and Grolemund (<a href="#/discussion-topics" role="doc-biblioref" onclick="">2023</a>)</span> also describes use of grouped frequency polygons for this combination of variable classes</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1"></a>plot_grouped_box_violin <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, y){</span>
-<span id="cb65-2"><a href="#cb65-2"></a>  x_label_size <span class="ot">&lt;-</span> <span class="fu">if_else</span>(skimr<span class="sc">::</span><span class="fu">n_unique</span>(df[[x]]) <span class="sc">&lt;</span> <span class="dv">7</span>, <span class="dv">11</span>, <span class="dv">7</span>)</span>
-<span id="cb65-3"><a href="#cb65-3"></a>  </span>
-<span id="cb65-4"><a href="#cb65-4"></a>  df <span class="sc">|&gt;</span></span>
-<span id="cb65-5"><a href="#cb65-5"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]], <span class="at">y =</span> .data[[y]])) <span class="sc">+</span></span>
-<span id="cb65-6"><a href="#cb65-6"></a>    <span class="fu">geom_violin</span>(<span class="at">fill =</span> <span class="st">"green"</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
-<span id="cb65-7"><a href="#cb65-7"></a>    <span class="fu">geom_boxplot</span>(<span class="at">width =</span> .<span class="dv">1</span>, <span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">lwd =</span> <span class="fl">1.1</span>, <span class="at">fatten =</span> <span class="fl">1.1</span>) <span class="sc">+</span></span>
-<span id="cb65-8"><a href="#cb65-8"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">size =</span> x_label_size, </span>
-<span id="cb65-9"><a href="#cb65-9"></a>                                     <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
-<span id="cb65-10"><a href="#cb65-10"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
-<span id="cb65-11"><a href="#cb65-11"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1"></a>plot_grouped_box_violin <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, y){</span>
+<span id="cb64-2"><a href="#cb64-2"></a>  x_label_size <span class="ot">&lt;-</span> <span class="fu">if_else</span>(skimr<span class="sc">::</span><span class="fu">n_unique</span>(df[[x]]) <span class="sc">&lt;</span> <span class="dv">7</span>, <span class="dv">11</span>, <span class="dv">7</span>)</span>
+<span id="cb64-3"><a href="#cb64-3"></a>  </span>
+<span id="cb64-4"><a href="#cb64-4"></a>  df <span class="sc">|&gt;</span></span>
+<span id="cb64-5"><a href="#cb64-5"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]], <span class="at">y =</span> .data[[y]])) <span class="sc">+</span></span>
+<span id="cb64-6"><a href="#cb64-6"></a>    <span class="fu">geom_violin</span>(<span class="at">fill =</span> <span class="st">"green"</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb64-7"><a href="#cb64-7"></a>    <span class="fu">geom_boxplot</span>(<span class="at">width =</span> .<span class="dv">1</span>, <span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">lwd =</span> <span class="fl">1.1</span>, <span class="at">fatten =</span> <span class="fl">1.1</span>) <span class="sc">+</span></span>
+<span id="cb64-8"><a href="#cb64-8"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">size =</span> x_label_size, </span>
+<span id="cb64-9"><a href="#cb64-9"></a>                                     <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb64-10"><a href="#cb64-10"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
+<span id="cb64-11"><a href="#cb64-11"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
@@ -6559,7 +5961,7 @@ garage_cars
 <li>Increasing spread of <code>sale_price</code> at higher levels of <code>overall_qual</code> is clearer in this plot</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_grouped_box_violin</span>(<span class="st">"overall_qual"</span>, <span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_grouped_box_violin</span>(<span class="st">"overall_qual"</span>, <span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 </div>
 <img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-29-1.png" width="960" class="r-stretch"></section>
@@ -6571,7 +5973,7 @@ garage_cars
 <li>Position of townhouse (interior vs.&nbsp;exterior) seems to matter (don’t collapse?)</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_grouped_box_violin</span>(<span class="st">"bldg_type"</span>, <span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_grouped_box_violin</span>(<span class="st">"bldg_type"</span>, <span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 </div>
 <img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-30-1.png" width="960" class="r-stretch"></section>
@@ -6579,39 +5981,39 @@ garage_cars
 
 <p>When we have a categorical predictor (ordered or unordered) and a numeric outcome, we often want to see both the relationship between the variables AND the variability on the categorical variable alone. We like this combined plot enough when doing EDA to provide a specific function (included in <code>fun_plots.r</code>)! It is our go to for understanding the potential effect of a categorical predictor</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1"></a>plot_categorical <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, y, <span class="at">ordered =</span> <span class="cn">FALSE</span>){</span>
-<span id="cb68-2"><a href="#cb68-2"></a>  <span class="cf">if</span> (ordered) {</span>
-<span id="cb68-3"><a href="#cb68-3"></a>    df <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
-<span id="cb68-4"><a href="#cb68-4"></a>      <span class="fu">mutate</span>(<span class="sc">!!</span><span class="at">x :=</span> <span class="fu">fct_reorder</span>(.data[[x]], .data[[y]]))</span>
-<span id="cb68-5"><a href="#cb68-5"></a>  }</span>
-<span id="cb68-6"><a href="#cb68-6"></a>  </span>
-<span id="cb68-7"><a href="#cb68-7"></a>  x_label_size <span class="ot">&lt;-</span> <span class="fu">if_else</span>(skimr<span class="sc">::</span><span class="fu">n_unique</span>(df[[x]]) <span class="sc">&lt;</span> <span class="dv">7</span>, <span class="dv">11</span>, <span class="dv">7</span>)</span>
-<span id="cb68-8"><a href="#cb68-8"></a>  </span>
-<span id="cb68-9"><a href="#cb68-9"></a>  p_bar <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
-<span id="cb68-10"><a href="#cb68-10"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]])) <span class="sc">+</span></span>
-<span id="cb68-11"><a href="#cb68-11"></a>    <span class="fu">geom_bar</span>()  <span class="sc">+</span></span>
-<span id="cb68-12"><a href="#cb68-12"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">size =</span> x_label_size, </span>
-<span id="cb68-13"><a href="#cb68-13"></a>                                     <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
-<span id="cb68-14"><a href="#cb68-14"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
-<span id="cb68-15"><a href="#cb68-15"></a>  </span>
-<span id="cb68-16"><a href="#cb68-16"></a>  p_box <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
-<span id="cb68-17"><a href="#cb68-17"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]], <span class="at">y =</span> .data[[y]])) <span class="sc">+</span></span>
-<span id="cb68-18"><a href="#cb68-18"></a>    <span class="fu">geom_violin</span>(<span class="at">fill =</span> <span class="st">"green"</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
-<span id="cb68-19"><a href="#cb68-19"></a>    <span class="fu">geom_boxplot</span>(<span class="at">width =</span> .<span class="dv">1</span>, <span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">lwd =</span> <span class="fl">1.1</span>, <span class="at">fatten =</span> <span class="fl">1.1</span>) <span class="sc">+</span></span>
-<span id="cb68-20"><a href="#cb68-20"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">size =</span> x_label_size, </span>
-<span id="cb68-21"><a href="#cb68-21"></a>                                     <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
-<span id="cb68-22"><a href="#cb68-22"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
-<span id="cb68-23"><a href="#cb68-23"></a>  </span>
-<span id="cb68-24"><a href="#cb68-24"></a>  <span class="fu">return</span>(<span class="fu">list</span>(p_bar, p_box))</span>
-<span id="cb68-25"><a href="#cb68-25"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1"></a>plot_categorical <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, y, <span class="at">ordered =</span> <span class="cn">FALSE</span>){</span>
+<span id="cb67-2"><a href="#cb67-2"></a>  <span class="cf">if</span> (ordered) {</span>
+<span id="cb67-3"><a href="#cb67-3"></a>    df <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
+<span id="cb67-4"><a href="#cb67-4"></a>      <span class="fu">mutate</span>(<span class="sc">!!</span><span class="at">x :=</span> <span class="fu">fct_reorder</span>(.data[[x]], .data[[y]]))</span>
+<span id="cb67-5"><a href="#cb67-5"></a>  }</span>
+<span id="cb67-6"><a href="#cb67-6"></a>  </span>
+<span id="cb67-7"><a href="#cb67-7"></a>  x_label_size <span class="ot">&lt;-</span> <span class="fu">if_else</span>(skimr<span class="sc">::</span><span class="fu">n_unique</span>(df[[x]]) <span class="sc">&lt;</span> <span class="dv">7</span>, <span class="dv">11</span>, <span class="dv">7</span>)</span>
+<span id="cb67-8"><a href="#cb67-8"></a>  </span>
+<span id="cb67-9"><a href="#cb67-9"></a>  p_bar <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
+<span id="cb67-10"><a href="#cb67-10"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]])) <span class="sc">+</span></span>
+<span id="cb67-11"><a href="#cb67-11"></a>    <span class="fu">geom_bar</span>()  <span class="sc">+</span></span>
+<span id="cb67-12"><a href="#cb67-12"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">size =</span> x_label_size, </span>
+<span id="cb67-13"><a href="#cb67-13"></a>                                     <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb67-14"><a href="#cb67-14"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
+<span id="cb67-15"><a href="#cb67-15"></a>  </span>
+<span id="cb67-16"><a href="#cb67-16"></a>  p_box <span class="ot">&lt;-</span> df <span class="sc">|&gt;</span></span>
+<span id="cb67-17"><a href="#cb67-17"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]], <span class="at">y =</span> .data[[y]])) <span class="sc">+</span></span>
+<span id="cb67-18"><a href="#cb67-18"></a>    <span class="fu">geom_violin</span>(<span class="at">fill =</span> <span class="st">"green"</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb67-19"><a href="#cb67-19"></a>    <span class="fu">geom_boxplot</span>(<span class="at">width =</span> .<span class="dv">1</span>, <span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">lwd =</span> <span class="fl">1.1</span>, <span class="at">fatten =</span> <span class="fl">1.1</span>) <span class="sc">+</span></span>
+<span id="cb67-20"><a href="#cb67-20"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">size =</span> x_label_size, </span>
+<span id="cb67-21"><a href="#cb67-21"></a>                                     <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb67-22"><a href="#cb67-22"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
+<span id="cb67-23"><a href="#cb67-23"></a>  </span>
+<span id="cb67-24"><a href="#cb67-24"></a>  <span class="fu">return</span>(<span class="fu">list</span>(p_bar, p_box))</span>
+<span id="cb67-25"><a href="#cb67-25"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
 
 <p><code>sale_price</code> by <code>bldg_type</code></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_categorical</span>(<span class="st">"bldg_type"</span>, <span class="st">"sale_price"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb69-2"><a href="#cb69-2"></a>  <span class="fu">plot_grid</span>(<span class="at">plotlist =</span> _, <span class="at">ncol =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_categorical</span>(<span class="st">"bldg_type"</span>, <span class="st">"sale_price"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb68-2"><a href="#cb68-2"></a>  <span class="fu">plot_grid</span>(<span class="at">plotlist =</span> _, <span class="at">ncol =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 </div>
 <img data-src="002_exploratory_data_analysis_files/figure-revealjs/unnamed-chunk-17-1.png" width="960" class="r-stretch"></section>
@@ -6630,41 +6032,41 @@ garage_cars
 <li>Often, you will place the outcome on the x-axis and the feature is coded by fill</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1"></a>plot_grouped_barplot_count <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, y){</span>
-<span id="cb70-2"><a href="#cb70-2"></a>  x_label_size <span class="ot">&lt;-</span> <span class="fu">if_else</span>(skimr<span class="sc">::</span><span class="fu">n_unique</span>(df[[x]]) <span class="sc">&lt;</span> <span class="dv">7</span>, <span class="dv">11</span>, <span class="dv">7</span>)</span>
-<span id="cb70-3"><a href="#cb70-3"></a>  </span>
-<span id="cb70-4"><a href="#cb70-4"></a>  df <span class="sc">|&gt;</span></span>
-<span id="cb70-5"><a href="#cb70-5"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[y]], <span class="at">fill =</span> .data[[x]])) <span class="sc">+</span></span>
-<span id="cb70-6"><a href="#cb70-6"></a>    <span class="fu">geom_bar</span>(<span class="at">position =</span> <span class="st">"stack"</span>) <span class="sc">+</span></span>
-<span id="cb70-7"><a href="#cb70-7"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">size =</span> x_label_size, </span>
-<span id="cb70-8"><a href="#cb70-8"></a>                                     <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
-<span id="cb70-9"><a href="#cb70-9"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
-<span id="cb70-10"><a href="#cb70-10"></a>}</span>
-<span id="cb70-11"><a href="#cb70-11"></a></span>
-<span id="cb70-12"><a href="#cb70-12"></a>plot_grouped_barplot_percent <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, y){</span>
-<span id="cb70-13"><a href="#cb70-13"></a>  x_label_size <span class="ot">&lt;-</span> <span class="fu">if_else</span>(skimr<span class="sc">::</span><span class="fu">n_unique</span>(df[[x]]) <span class="sc">&lt;</span> <span class="dv">7</span>, <span class="dv">11</span>, <span class="dv">7</span>)</span>
-<span id="cb70-14"><a href="#cb70-14"></a>  </span>
-<span id="cb70-15"><a href="#cb70-15"></a>  df <span class="sc">|&gt;</span></span>
-<span id="cb70-16"><a href="#cb70-16"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[y]], <span class="at">fill =</span> .data[[x]])) <span class="sc">+</span></span>
-<span id="cb70-17"><a href="#cb70-17"></a>    <span class="fu">geom_bar</span>(<span class="at">position =</span> <span class="st">"fill"</span>) <span class="sc">+</span></span>
-<span id="cb70-18"><a href="#cb70-18"></a>    <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Proportion"</span>) <span class="sc">+</span></span>
-<span id="cb70-19"><a href="#cb70-19"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">size =</span> x_label_size, </span>
-<span id="cb70-20"><a href="#cb70-20"></a>                                     <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
-<span id="cb70-21"><a href="#cb70-21"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
-<span id="cb70-22"><a href="#cb70-22"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1"></a>plot_grouped_barplot_count <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, y){</span>
+<span id="cb69-2"><a href="#cb69-2"></a>  x_label_size <span class="ot">&lt;-</span> <span class="fu">if_else</span>(skimr<span class="sc">::</span><span class="fu">n_unique</span>(df[[x]]) <span class="sc">&lt;</span> <span class="dv">7</span>, <span class="dv">11</span>, <span class="dv">7</span>)</span>
+<span id="cb69-3"><a href="#cb69-3"></a>  </span>
+<span id="cb69-4"><a href="#cb69-4"></a>  df <span class="sc">|&gt;</span></span>
+<span id="cb69-5"><a href="#cb69-5"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[y]], <span class="at">fill =</span> .data[[x]])) <span class="sc">+</span></span>
+<span id="cb69-6"><a href="#cb69-6"></a>    <span class="fu">geom_bar</span>(<span class="at">position =</span> <span class="st">"stack"</span>) <span class="sc">+</span></span>
+<span id="cb69-7"><a href="#cb69-7"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">size =</span> x_label_size, </span>
+<span id="cb69-8"><a href="#cb69-8"></a>                                     <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb69-9"><a href="#cb69-9"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
+<span id="cb69-10"><a href="#cb69-10"></a>}</span>
+<span id="cb69-11"><a href="#cb69-11"></a></span>
+<span id="cb69-12"><a href="#cb69-12"></a>plot_grouped_barplot_percent <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, y){</span>
+<span id="cb69-13"><a href="#cb69-13"></a>  x_label_size <span class="ot">&lt;-</span> <span class="fu">if_else</span>(skimr<span class="sc">::</span><span class="fu">n_unique</span>(df[[x]]) <span class="sc">&lt;</span> <span class="dv">7</span>, <span class="dv">11</span>, <span class="dv">7</span>)</span>
+<span id="cb69-14"><a href="#cb69-14"></a>  </span>
+<span id="cb69-15"><a href="#cb69-15"></a>  df <span class="sc">|&gt;</span></span>
+<span id="cb69-16"><a href="#cb69-16"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[y]], <span class="at">fill =</span> .data[[x]])) <span class="sc">+</span></span>
+<span id="cb69-17"><a href="#cb69-17"></a>    <span class="fu">geom_bar</span>(<span class="at">position =</span> <span class="st">"fill"</span>) <span class="sc">+</span></span>
+<span id="cb69-18"><a href="#cb69-18"></a>    <span class="fu">labs</span>(<span class="at">y =</span> <span class="st">"Proportion"</span>) <span class="sc">+</span></span>
+<span id="cb69-19"><a href="#cb69-19"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">size =</span> x_label_size, </span>
+<span id="cb69-20"><a href="#cb69-20"></a>                                     <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb69-21"><a href="#cb69-21"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
+<span id="cb69-22"><a href="#cb69-22"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
 
 <p>For example, if we wanted to learn about how <code>bldg_type</code> varies by <code>lot_config</code>, see these plots</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_grouped_barplot_count</span>(<span class="st">"lot_config"</span>, <span class="st">"bldg_type"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_grouped_barplot_count</span>(<span class="st">"lot_config"</span>, <span class="st">"bldg_type"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-33-1.png" width="960"></p>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_grouped_barplot_percent</span>(<span class="st">"lot_config"</span>, <span class="st">"bldg_type"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_grouped_barplot_percent</span>(<span class="st">"lot_config"</span>, <span class="st">"bldg_type"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-34-1.png" width="960"></p>
 </div>
@@ -6674,13 +6076,13 @@ garage_cars
 
 <p>May want to plot both ways</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_grouped_barplot_percent</span>(<span class="st">"lot_config"</span>, <span class="st">"bldg_type"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_grouped_barplot_percent</span>(<span class="st">"lot_config"</span>, <span class="st">"bldg_type"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-35-1.png" width="960"></p>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_grouped_barplot_percent</span>(<span class="st">"bldg_type"</span>, <span class="st">"lot_config"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_grouped_barplot_percent</span>(<span class="st">"bldg_type"</span>, <span class="st">"lot_config"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-36-1.png" width="960"></p>
 </div>
@@ -6691,15 +6093,15 @@ garage_cars
 <h5 id="tile-plot">Tile Plot</h5>
 <p>Tile plots may be useful if both categorical variables are ordered</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1"></a>plot_tile <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, y){</span>
-<span id="cb75-2"><a href="#cb75-2"></a>  df <span class="sc">|&gt;</span></span>
-<span id="cb75-3"><a href="#cb75-3"></a>    <span class="fu">count</span>(.data[[x]], .data[[y]]) <span class="sc">|&gt;</span></span>
-<span id="cb75-4"><a href="#cb75-4"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]], <span class="at">y =</span> .data[[y]])) <span class="sc">+</span></span>
-<span id="cb75-5"><a href="#cb75-5"></a>    <span class="fu">geom_tile</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">fill =</span> n))</span>
-<span id="cb75-6"><a href="#cb75-6"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1"></a>plot_tile <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, y){</span>
+<span id="cb74-2"><a href="#cb74-2"></a>  df <span class="sc">|&gt;</span></span>
+<span id="cb74-3"><a href="#cb74-3"></a>    <span class="fu">count</span>(.data[[x]], .data[[y]]) <span class="sc">|&gt;</span></span>
+<span id="cb74-4"><a href="#cb74-4"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]], <span class="at">y =</span> .data[[y]])) <span class="sc">+</span></span>
+<span id="cb74-5"><a href="#cb74-5"></a>    <span class="fu">geom_tile</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">fill =</span> n))</span>
+<span id="cb74-6"><a href="#cb74-6"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_tile</span>(<span class="st">"overall_qual"</span>, <span class="st">"garage_qual"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_tile</span>(<span class="st">"overall_qual"</span>, <span class="st">"garage_qual"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 </div>
 <img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-38-1.png" width="960" class="r-stretch"></section>
@@ -6707,10 +6109,10 @@ garage_cars
 
 <p>You might also consider a scatterplot with jitter in this instance</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1"></a>data_trn <span class="sc">|&gt;</span> </span>
-<span id="cb77-2"><a href="#cb77-2"></a>  <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">jitter</span>(<span class="fu">as.numeric</span>(overall_qual)),</span>
-<span id="cb77-3"><a href="#cb77-3"></a>         <span class="at">garage_qual =</span> <span class="fu">as.numeric</span>(garage_qual)) <span class="sc">|&gt;</span> </span>
-<span id="cb77-4"><a href="#cb77-4"></a>  <span class="fu">plot_scatter</span>(<span class="st">"overall_qual"</span>, <span class="st">"garage_qual"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1"></a>data_trn <span class="sc">|&gt;</span> </span>
+<span id="cb76-2"><a href="#cb76-2"></a>  <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">jitter</span>(<span class="fu">as.numeric</span>(overall_qual)),</span>
+<span id="cb76-3"><a href="#cb76-3"></a>         <span class="at">garage_qual =</span> <span class="fu">as.numeric</span>(garage_qual)) <span class="sc">|&gt;</span> </span>
+<span id="cb76-4"><a href="#cb76-4"></a>  <span class="fu">plot_scatter</span>(<span class="st">"overall_qual"</span>, <span class="st">"garage_qual"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 </div>
 <img data-src="002_exploratory_data_analysis_files/figure-revealjs/u2-modeling-39-1.png" width="960" class="r-stretch"></section>
@@ -6720,7 +6122,7 @@ garage_cars
 <p>Two-way tables are sometimes a useful summary statistic for two categorical variables. We can use <code>tabyl()</code> from the janitor package for this</p>
 <p>For example, the relationship between <code>bldg_type</code> and <code>lot_config</code></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1"></a>data_trn <span class="sc">|&gt;</span> janitor<span class="sc">::</span><span class="fu">tabyl</span>(bldg_type, lot_config)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1"></a>data_trn <span class="sc">|&gt;</span> janitor<span class="sc">::</span><span class="fu">tabyl</span>(bldg_type, lot_config)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   bldg_type corner culdsac fr2 fr3 inside
       duplex     13       0   3   0     47
@@ -6789,7 +6191,7 @@ garage_cars
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-78" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-lines="3" data-code-cell="annotated-cell-78" data-code-annotation="1">Remember our function for classing!</span>
+<span data-code-cell="annotated-cell-78" data-code-lines="3" data-code-annotation="1">Remember our function for classing!</span>
 </dd>
 </dl>
 </div>
@@ -6830,11 +6232,11 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, town_inside, town_end, dup
 </ul></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1"></a>rec <span class="ot">&lt;-</span> <span class="fu">recipe</span>(sale_price <span class="sc">~</span> ., <span class="at">data =</span> data_trn)</span>
-<span id="cb81-2"><a href="#cb81-2"></a></span>
-<span id="cb81-3"><a href="#cb81-3"></a>rec</span>
-<span id="cb81-4"><a href="#cb81-4"></a></span>
-<span id="cb81-5"><a href="#cb81-5"></a><span class="fu">summary</span>(rec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1"></a>rec <span class="ot">&lt;-</span> <span class="fu">recipe</span>(sale_price <span class="sc">~</span> ., <span class="at">data =</span> data_trn)</span>
+<span id="cb80-2"><a href="#cb80-2"></a></span>
+<span id="cb80-3"><a href="#cb80-3"></a>rec</span>
+<span id="cb80-4"><a href="#cb80-4"></a></span>
+<span id="cb80-5"><a href="#cb80-5"></a><span class="fu">summary</span>(rec)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 10 × 4
    variable     type      role      source  
@@ -6865,11 +6267,11 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, town_inside, town_end, dup
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-80" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-lines="1" data-code-cell="annotated-cell-80" data-code-annotation="1">We start by prepping our raw/original recipe (<code>rec</code>)</span>
+<span data-code-cell="annotated-cell-80" data-code-lines="1" data-code-annotation="1">We start by prepping our raw/original recipe (<code>rec</code>)</span>
 </dd>
 <dt data-target-cell="annotated-cell-80" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-lines="2" data-code-cell="annotated-cell-80" data-code-annotation="2">We use the <code>prep()</code> function on on the training data. Recipes are ALWAYS prepped using training data. This makes sure that are recipes will always only use information from the training set when making features for any subsequent dataset.</span>
+<span data-code-cell="annotated-cell-80" data-code-lines="2" data-code-annotation="2">We use the <code>prep()</code> function on on the training data. Recipes are ALWAYS prepped using training data. This makes sure that are recipes will always only use information from the training set when making features for any subsequent dataset.</span>
 </dd>
 </dl>
 </div>
@@ -6879,8 +6281,8 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, town_inside, town_end, dup
 
 <p>Second, we bake the training data using this prepped recipe to get a feature matrix from it.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1"></a>feat_trn <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
-<span id="cb83-2"><a href="#cb83-2"></a>  <span class="fu">bake</span>(<span class="at">new_data =</span> data_trn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1"></a>feat_trn <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
+<span id="cb82-2"><a href="#cb82-2"></a>  <span class="fu">bake</span>(<span class="at">new_data =</span> data_trn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
@@ -6890,7 +6292,7 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, town_inside, town_end, dup
 <li>glimpse</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1"></a>feat_trn <span class="sc">|&gt;</span> <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1"></a>feat_trn <span class="sc">|&gt;</span> <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 1,465
 Columns: 10
@@ -6913,7 +6315,7 @@ $ sale_price   &lt;dbl&gt; 105000, 126000, 115000, 120000, 99500, 112000, 122000
 <li>skim</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1"></a>feat_trn <span class="sc">|&gt;</span> <span class="fu">skim_all</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1"></a>feat_trn <span class="sc">|&gt;</span> <span class="fu">skim_all</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 
 <table style="width: auto;" class="table table-condensed">
