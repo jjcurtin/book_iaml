@@ -810,42 +810,35 @@ We prefer to write separate scripts for Cleaning vs. Modeling EDA (but not displ
 
 Lets re-load (and glimpse) our training set to pretend we are at the start of a new script.
 
-Now that we are done cleaning the data, we should start to fully class our variables for how we will use them for modeling EDA and modeling more generally.
-
-- Numeric predictors are classes as numeric (int or double)
-- categorical predictors are classed as factors.
-
 
 ```{r}
  data_trn <- read_csv(here::here(path_data, "ames_clean_class_trn.csv")) |> 
   glimpse()
 ```
 
+-----
 
-Opps:
+We have some work to do (again)
 
 - Notice that `overall_qual` is back to being classed as numeric (dbl).  
-  - This is because `read_csv()` guesses the type for each column and we used only numbers for this ordinal categorical variable.   
 - Notice that your factors are back to character
   - This is because csv files don't save anything other than the values (labels for factors).  They are the cleaned labels though!
-- You should class all variables using the same approach as before (often just a copy/paste).  My preferred way is via mutates
+- You should class all variables using the same approach as before (often just a copy/paste). 
 
 ```{r}
  data_trn <- 
   read_csv(here::here(path_data, "ames_clean_class_trn.csv"), 
            col_types = cols()) |>  # <1>
   mutate(across(where(is.character), factor)) |> # <2>
-  mutate(overall_qual = factor(overall_qual),  # <3>
-         overall_qual = fct_relevel(overall_qual, as.character(1:10)), # <4>
+  mutate(overall_qual = factor(overall_qual, levels = 1:10),  # <3>
          garage_qual = fct_relevel(garage_qual, c("no_garage", "po", "fa", 
-                                                  "ta", "gd", "ex"))) |>  # <5> 
+                                                  "ta", "gd", "ex"))) |>  # <4> 
   glimpse()
 ```
 1. use col_types = cols() to suppress messages about default class assignments
 2. use `mutate()` with `across()` to change all character variables to factors
 3. use `mutate()` with `factor()` to change numeric variable to factor.
-4. use `mutate()` with `fct_relevel()` to explicitly set levels of an ordered factor
-5. notice the warning about the unknown level.  Always explore warnings!  In this instance, its fine.  There were only two observations with ex and neither ended up in the training split.   Still best to include this level to note it exists!
+4. use `mutate()` with `fct_relevel()` to explicitly set levels of an ordered factor.  Also notice the warning about the unknown level.  Always explore warnings!  In this instance, its fine.  There were only two observations with ex and neither ended up in the training split.   Still best to include this level to note it exists!
 
 -----
 
@@ -856,20 +849,22 @@ class_ames <- function(df){
   
   df |>
     mutate(across(where(is.character), factor)) |> 
-    mutate(overall_qual = factor(overall_qual), 
-           overall_qual = fct_relevel(overall_qual, as.character(1:10)), 
+    mutate(overall_qual = factor(overall_qual, levels = 1:10), 
            garage_qual = fct_relevel(garage_qual, c("no_garage", "po", "fa", 
                                                     "ta", "gd", "ex")))
 }
 ```
 
-Now we can use it every time we read in one of the Ames datasets
+-----
+
+Now we can use this function every time we read in one of the Ames datasets
 
 ```{r}
 #| warning: false
 
 data_trn <- 
-  read_csv(here::here(path_data, "ames_clean_class_trn.csv"), col_types = cols()) |> 
+  read_csv(here::here(path_data, "ames_clean_class_trn.csv"), 
+           col_types = cols()) |> 
   class_ames() |> # <1> 
   glimpse()
 ```
