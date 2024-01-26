@@ -38,7 +38,7 @@ editor_options:
 - [Lecture 1: Stages of Data Analysis and Model Development](https://mediaspace.wisc.edu/media/iaml+2-1/1_m7rm2anw) ~ 10 mins
 - [Lecture 2: Best Practices and Other Recommendations](https://mediaspace.wisc.edu/media/iaml+2-2/1_nxtr5uda) ~ 27 mins
 - [Lecture 3: EDA for Data Cleaning](https://mediaspace.wisc.edu/media/iaml+2-3/1_xorv88kj) ~ 41 mins
-- [Lecture 4: EDA for Modeling - Univariate]()
+- [Lecture 4: EDA for Modeling - Univariate](https://mediaspace.wisc.edu/media/iaml+2-4/1_f6hm842y) ~ 24 mins
 - [Lecture 5: EDA for Modeling - Bivariate]()
 - [Lecture 6: Working with Recipes]()
 \
@@ -928,6 +928,8 @@ Exploration of univariate distributions are useful to
 
 We generally select different visualizations and summary statistics for categorical vs. numeric variables
 
+-----
+
 ### Barplots for Categorical Variables (Univariate)
 
 The primary visualization for categorical variables is the bar plot
@@ -1031,6 +1033,8 @@ Tables can be used to identify responses that have very low frequency and to thi
 ```{r u2-modeling-5}
 data_trn |> tab(ms_zoning)
 ```
+
+-----
 
 - We could also view the table sorted if we prefer
 ```{r}
@@ -1210,10 +1214,11 @@ data_trn |>
 You can get skim of only numeric variables if you like
 ```{r}
 data_trn |> 
-  select(where(is.numeric)) |> 
-  skim_all()
+  skim_all() |> 
+  filter(skim_type == "numeric")
 ```
 
+-----
 
 ### Bivariate Relationships with Outcome
 
@@ -1227,8 +1232,7 @@ Again, we prefer visualizations but summary statistics are also available
 
 -----
 
-
-### Scatterplots
+### Scatterplots for Numeric Variables (Bivariate)
 
 Scatterplots are the preferred visualization when both variables are numeric
 
@@ -1326,43 +1330,15 @@ data_trn |>
 
 -----
 
-When the dataset is large, overplotting can even be a problem with true numeric variables
-
-- You can bin the values to remove this problem
-- Continue to use lm and LOWESS lines
-- This dataset doesn't have much of an overplotting problem but.....
-
-```{r u2-modeling-25}
-#| eval: false
-
-plot_hexbin <- function(df, x, y){
-  df |>
-    ggplot(aes(x = .data[[x]], y = .data[[y]])) +
-    geom_hex() +
-    geom_smooth(method = "lm", col = "red") +
-    geom_smooth(method = "loess", col = "green")  +
-    theme(axis.text.x = element_text(size = 11),
-          axis.text.y = element_text(size = 11))
-}
-```
-
------
-
-`sale_price` by `gr_liv_area`
-
-```{r u2-modeling-26}
-data_trn |> plot_hexbin("gr_liv_area", "sale_price")
-```
-
------
-
-##### Correlations & Plots
+### Correlations & Correlation Plots for Numeric Variables (Bivariate)
 
 Correlations are useful summary statistics for numeric variables
 
 Some statistical algorithms are sensitive to high correlations among features (multi-collinearity)
 
 At best, highly correlated features add unnecessary flexibility and can lead to overfitting
+
+-----
 
 We can visualize correlations among predictors/features using `corrplot.mixed()` from `corrplot` package
 
@@ -1386,9 +1362,7 @@ data_trn |>
 
 -----
 
-#### Categorical and Numeric
-
-##### Grouped Box + Violin Plots
+### Grouped Box + Violin Plots for Categorical and Numeric (Bivariate)
 
 A grouped version of the combined box and violin plot is our preferred visualization for relationship between categorical and numeric variables (included in `fun_plots.r`)
 
@@ -1426,7 +1400,7 @@ data_trn |> plot_grouped_box_violin("overall_qual", "sale_price")
 
 -----
 
-Here is a box + violin with an unordered categorical variable
+Here is a grouped box + violin with an unordered categorical variable
 
 - More variation and skew in `sale_price` for one family homes (additional features, moderators?)
 - Position of townhouse (interior vs. exterior) seems to matter (don't collapse?)
@@ -1437,7 +1411,11 @@ data_trn |> plot_grouped_box_violin("bldg_type", "sale_price")
 
 -----
 
-When we have a categorical predictor (ordered or unordered) and a numeric outcome, we often want to see both the relationship between the variables AND the variability on the categorical variable alone.   We like this combined plot enough when doing EDA to provide a specific function (included in `fun_plots.r`)!  It is our go to for understanding the potential effect of a categorical predictor
+When we have a categorical predictor (ordered or unordered) and a numeric outcome, we often want to see both the relationship between the variables AND the variability on the categorical variable alone.   
+
+We like this combined plot enough when doing EDA to provide a specific function (included in `fun_plots.r`)!  
+
+It is our go to for understanding the potential effect of a categorical predictor
 
 ```{r  u2-modeling-31}
 #| eval: false
@@ -1480,9 +1458,8 @@ data_trn |> plot_categorical("bldg_type", "sale_price") |>
 
 -----
 
-#### Both Categorical
 
-##### Stacked Barplots
+### Stacked Barplots for Categorical (Bivariate)
 
 Stacked Barplots:
 
@@ -1545,7 +1522,7 @@ data_trn |> plot_grouped_barplot_percent("bldg_type", "lot_config")
 
 -----
 
-##### Tile Plot
+### Tile Plot for Ordered Categorical (Bivariate)
 
 Tile plots may be useful if both categorical variables are ordered
 
@@ -1559,6 +1536,8 @@ plot_tile <- function(df, x, y){
     geom_tile(mapping = aes(fill = n))
 }
 ```
+
+-----
 
 ```{r u2-modeling-38}
 data_trn |> plot_tile("overall_qual", "garage_qual")
@@ -1576,13 +1555,13 @@ data_trn |>
 
 -----
 
-##### Two-way Tables
+### Two-way Tables for Categorical Variables (Bivariate)
 
-Two-way tables are sometimes a useful summary statistic for two categorical variables.  We can use `tabyl()` from the janitor package for this
+Two-way tables are sometimes a useful summary statistic for two categorical variables.  We can use a 2-variable form of the tab function, `tab2()`, from my function scripts for this
 
 For example, the relationship between `bldg_type` and `lot_config`
 ```{r u2-modeling-40}
-data_trn |> janitor::tabyl(bldg_type, lot_config)
+data_trn |> tab2(bldg_type, lot_config)
 ```
 
 -----
