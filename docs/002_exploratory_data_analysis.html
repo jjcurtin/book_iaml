@@ -382,7 +382,7 @@ div.csl-indent {
   <li><a href="#correlations-correlation-plots-for-numeric-variables-bivariate" id="toc-correlations-correlation-plots-for-numeric-variables-bivariate" class="nav-link" data-scroll-target="#correlations-correlation-plots-for-numeric-variables-bivariate"><span class="toc-section-number">2.5.12</span>  Correlations &amp; Correlation Plots for Numeric Variables (Bivariate)</a></li>
   <li><a href="#grouped-box-violin-plots-for-categorical-and-numeric-bivariate" id="toc-grouped-box-violin-plots-for-categorical-and-numeric-bivariate" class="nav-link" data-scroll-target="#grouped-box-violin-plots-for-categorical-and-numeric-bivariate"><span class="toc-section-number">2.5.13</span>  Grouped Box + Violin Plots for Categorical and Numeric (Bivariate)</a></li>
   <li><a href="#stacked-barplots-for-categorical-bivariate" id="toc-stacked-barplots-for-categorical-bivariate" class="nav-link" data-scroll-target="#stacked-barplots-for-categorical-bivariate"><span class="toc-section-number">2.5.14</span>  Stacked Barplots for Categorical (Bivariate)</a></li>
-  <li><a href="#tile-plot-for-ordered-categorical-bivariate" id="toc-tile-plot-for-ordered-categorical-bivariate" class="nav-link" data-scroll-target="#tile-plot-for-ordered-categorical-bivariate"><span class="toc-section-number">2.5.15</span>  Tile Plot for Ordered Categorical (Bivariate)</a></li>
+  <li><a href="#tile-plot-for-ordinal-categorical-bivariate" id="toc-tile-plot-for-ordinal-categorical-bivariate" class="nav-link" data-scroll-target="#tile-plot-for-ordinal-categorical-bivariate"><span class="toc-section-number">2.5.15</span>  Tile Plot for Ordinal Categorical (Bivariate)</a></li>
   <li><a href="#two-way-tables-for-categorical-variables-bivariate" id="toc-two-way-tables-for-categorical-variables-bivariate" class="nav-link" data-scroll-target="#two-way-tables-for-categorical-variables-bivariate"><span class="toc-section-number">2.5.16</span>  Two-way Tables for Categorical Variables (Bivariate)</a></li>
   </ul></li>
   <li><a href="#working-with-recipes" id="toc-working-with-recipes" class="nav-link" data-scroll-target="#working-with-recipes"><span class="toc-section-number">2.6</span>  Working with Recipes</a>
@@ -467,8 +467,8 @@ div.csl-indent {
 <ul>
 <li><a href="application_assignments/unit_02/ames_raw_class.csv">data</a></li>
 <li><a href="application_assignments/unit_02/ames_data_dictionary.pdf">data dictionary</a></li>
-<li>cleaning EDA: <a href="application_assignments/unit_02/hw_unit_2_cleaning.qmd">qmd</a></li>
-<li>modeling EDA: <a href="application_assignments/unit_02/hw_unit_2_modeling.qmd">qmd</a></li>
+<li>cleaning EDA: <a href="https://raw.githubusercontent.com/jjcurtin/book_iaml/main/application_assignments/unit_02/hw_unit_02_cleaning.qmd">qmd</a></li>
+<li>modeling EDA: <a href="https://raw.githubusercontent.com/jjcurtin/book_iaml/main/application_assignments/unit_02/hw_unit_2_modeling.qmd">qmd</a></li>
 <li>solutions: <a href="">knit cleaning EDA</a>; <a href="">knit modeling EDA</a></li>
 </ul>
 <p>Note: the qmd files may not be viewable but can be downloaded through your browser (e.g., right-click to save)</p>
@@ -4441,7 +4441,7 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, town_inside, town_end, dup
 <li>use col_types = cols() to suppress messages about default class assignments</li>
 <li>use <code>mutate()</code> with <code>across()</code> to change all character variables to factors</li>
 <li>use <code>mutate()</code> with <code>factor()</code> to change numeric variable to factor.</li>
-<li>use <code>mutate()</code> with <code>fct_relevel()</code> to explicitly set levels of an ordered factor. Also notice the warning about the unknown level. Always explore warnings! In this instance, its fine. There were only two observations with ex and neither ended up in the training split. Still best to include this level to note it exists!</li>
+<li>use <code>mutate()</code> with <code>fct_relevel()</code> to explicitly set levels of an ordinal factor. Also notice the warning about the unknown level. Always explore warnings! In this instance, its fine. There were only two observations with ex and neither ended up in the training split. Still best to include this level to note it exists!</li>
 </ol>
 <hr>
 <p><strong>Coding sidebar</strong>: We will likely re-class the Ames dataset many times (for training, validation, test). We could copy/paste these mutates each time but whenever you do something more than twice, I recommend writing a function. We might write this one to re-class the ames variables</p>
@@ -5661,7 +5661,7 @@ garage_cars
 </div>
 </div>
 <hr>
-<p>Can make scatterplots for ordered factors as well</p>
+<p>Can make scatterplots for ordinal variables as well</p>
 <ul>
 <li>But other (perhaps better) options also exist for this combination of variable classes.</li>
 <li>Use <code>as.numeric()</code> to allow for lm and LOWESS lines on otherwise categorical variable</li>
@@ -5869,8 +5869,8 @@ garage_cars
 </div>
 <hr>
 </section>
-<section id="tile-plot-for-ordered-categorical-bivariate" class="level3" data-number="2.5.15">
-<h3 data-number="2.5.15" class="anchored" data-anchor-id="tile-plot-for-ordered-categorical-bivariate"><span class="header-section-number">2.5.15</span> Tile Plot for Ordered Categorical (Bivariate)</h3>
+<section id="tile-plot-for-ordinal-categorical-bivariate" class="level3" data-number="2.5.15">
+<h3 data-number="2.5.15" class="anchored" data-anchor-id="tile-plot-for-ordinal-categorical-bivariate"><span class="header-section-number">2.5.15</span> Tile Plot for Ordinal Categorical (Bivariate)</h3>
 <p>Tile plots may be useful if both categorical variables are ordinal</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb95"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a>plot_tile <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, y){</span>
