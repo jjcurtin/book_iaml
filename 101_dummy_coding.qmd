@@ -1,5 +1,5 @@
 ---
-title: "Handling Novel Values in Held Out Sets"
+title: "Dummy Coding Nominal (and Some Ordinal) Predictors"
 format: 
   html: 
     embed-resources: true
@@ -7,18 +7,19 @@ editor_options:
   chunk_output_type: console
 ---   
 
+## Issues with Novel Levels in Held-Out Set
 When you have nominal/ordinal predictors that have levels that are infrequent, you will occassionally find that an infrequent level appears in your held out set (i.e., validation or test) but not in your training set.  This can cause problems when you try to make predictions for these new values.  Specifcally, the feature values for this level will be set to NA and therefore, you will get predictions of NA for these observations. 
 
 In this appendix, we demonstrate this problem and our preferred solution given our workflow of classing all nominal/ordinal predictors as factors in our dataframes.
 
-```{r conflict_policy}
+```{r}
 #| include: false
 options(conflicts.policy = "depends.ok")
 devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
 tidymodels_conflictRules()
 ```
 
-```{r packages_source}
+```{r}
 #| message: false
 library(tidyverse) 
 library(tidymodels) 
@@ -129,3 +130,19 @@ predict(fit1, feat_test1) |>
 ```
 
 This is our preferred solution when new/previously unseen values exist in held out data.  A comparable solution is offered as a recipe step.  See `step_novel()`
+
+
+## step_other()
+
+```{r}
+#| echo: false
+?step_other
+```
+
+## step_unknown()
+
+```{r}
+#| echo: false
+?step_unknown
+```
+
