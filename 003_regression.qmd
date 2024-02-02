@@ -33,7 +33,7 @@ editor_options:
 - [Lecture 1: Overview](https://mediaspace.wisc.edu/media/iaml+unit+3-1/1_76q87xgn) ~ 13 mins
 - [Lecture 2: The Simple Linear Model, Part 1](https://mediaspace.wisc.edu/media/iaml+unit+3-2/1_yyb8dcub) ~ 16 mins
 - [Lecture 3: The Simple Linear Model, Part 2](https://mediaspace.wisc.edu/media/iaml+unit+3-3/1_ep9ibptc) ~ 12 mins 
-- [Lecture 4: Extension to Multiple Predictors]()
+- [Lecture 4: Extension to Multiple Predictors](https://mediaspace.wisc.edu/media/iaml+Unit+3-4/1_24rrga7b) ~ 15 mins
 - [Lecture 5: Extension to Categorical Predictors]()
 - [Lecture 6: Extension to Interactions and Non-Linear Effects]()
 - [Lecture 7: Introduction to KNN]()
@@ -810,7 +810,7 @@ rmse_vec(feat_val$sale_price,
 
 -----
 
-- Let's the new performance metric to our results table
+- Let's bind the new performance metric to our results table
 ```{r u3-simple-31}
 #| echo: false
 
@@ -1060,6 +1060,7 @@ We can add these two features manually to the data frame and view a handful of o
 
 ```{r}
 #| echo: false
+
 data_dummy <- data_dummy |> 
   mutate(d1 = if_else(ms_zoning3 == "residential", 1, 0),
          d2 = if_else(ms_zoning3 == "floating", 1, 0))
@@ -1087,9 +1088,9 @@ m <- lm(sale_price ~ d1 + d2, data = data_dummy)
 m |> summary()
 ```
 
-- The mean sale price of residential properties is `r round(m$coefficients["f1"])` dollars higher than commercial properties.
+- The mean sale price of residential properties is `r round(round(m$coefficients["d1"]))` dollars higher than commercial properties.
 
-- The mean sale price of floating villages is `r round(m$coefficients["f2"])` dollars higher than commercial properties. 
+- The mean sale price of floating villages is `r round((m$coefficients["d2"]))` dollars higher than commercial properties. 
 
 -----
 
