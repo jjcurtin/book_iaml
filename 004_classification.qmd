@@ -20,6 +20,8 @@ editor_options:
 - Decision boundaries in the two feature space
 - Relative costs and benefits of these different statistical algorithms
 
+-----
+
 ### Readings
 
 - @ISL [Chapter 4, pp 129 - 164](https://dionysus.psych.wisc.edu/iaml/pdfs/ISLRv2.pdf)
@@ -38,6 +40,8 @@ editor_options:
 - [Discussion](https://dionysus.psych.wisc.edu/iaml/videos/discussion_unit4_2023.mp4)
 Post questions or discuss readings or lectures on the appropriate Slack channel
 
+-----
+
 ### Application Assignment and Quiz
   
 - data: [raw](homework/unit_4/titanic_raw.csv); [test](https://dionysus.psych.wisc.edu/iaml/homework/unit_4/titanic_test_cln.csv)
@@ -54,50 +58,30 @@ Submit the application assignment [here](https://canvas.wisc.edu/courses/395546/
 
 -----
 
-Our eventual goal in this unit is to build a machine learning classification model that can accurately predict who lived vs. died on the titanic.  
+```{r}
+#| include: false
 
-To begin, we need to:
+# set up environment.  Now hidden from view
 
-- Set up conflicts policies
-- We will hide this in future units (showing one last time)
-```{r u4-conflict_policy}
 options(conflicts.policy = "depends.ok")
 devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
 tidymodels_conflictRules()
-```
 
-- Load the packages we will need
-```{r u4-packages}
-#| message: false
-#| warning: false
-library(janitor, include.only = "clean_names")
-library(cowplot, include.only = "plot_grid") # for plot_grid()
-library(kableExtra, exclude = "group_rows") # exclude dplyr conflict
 library(tidyverse) # for general data wrangling
 library(tidymodels) # for modeling
-```
 
-- source additional class functions libraries
-- We will hide this in future units (showing one last time)
-```{r u4-source}
 devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
 devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
-```
 
-- set display options
-- We will hide this in future units (showing one last time)
-```{r u4-display}
 theme_set(theme_classic())
 options(tibble.width = Inf)
-```
 
-- handle paths
-```{r u4-paths}
 path_data <- "./data"
 ``` 
 
-
 ## Bayes classifier
+
+Our eventual goal in this unit is to build a machine learning classification model that can accurately predict who lived vs. died on the titanic.  
 
 First, lets introduce the Bayes classifier, which is the classifier that will have the lowest error rate of all classifiers using the same set of features. 
 
