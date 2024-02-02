@@ -34,7 +34,7 @@ editor_options:
 - [Lecture 2: The Simple Linear Model, Part 1](https://mediaspace.wisc.edu/media/iaml+unit+3-2/1_yyb8dcub) ~ 16 mins
 - [Lecture 3: The Simple Linear Model, Part 2](https://mediaspace.wisc.edu/media/iaml+unit+3-3/1_ep9ibptc) ~ 12 mins 
 - [Lecture 4: Extension to Multiple Predictors](https://mediaspace.wisc.edu/media/iaml+Unit+3-4/1_24rrga7b) ~ 15 mins
-- [Lecture 5: Extension to Categorical Predictors]()
+- [Lecture 5: Extension to Categorical Predictors](https://mediaspace.wisc.edu/media/iaml+unit+3-5/1_2a3tsj3n) ~ 30 mins
 - [Lecture 6: Extension to Interactions and Non-Linear Effects]()
 - [Lecture 7: Introduction to KNN]()
 - [Lecture 8: Distance and Scaling in KNN]()
@@ -1154,7 +1154,6 @@ Lets return first to `ms_zoning`
 
 
 ```{r u3-categorical-2}
-#| out-width: 3in
 #| out-height: 3in
 
 data_trn |> 
@@ -1183,7 +1182,6 @@ Data dictionary entry: Identifies the general zoning classification of the sale.
 `lot_config`
 
 ```{r u3-categorical-3}
-#| out-width: 3in
 #| out-height: 3in
 
 data_trn |> 
@@ -1211,7 +1209,6 @@ Data dictionary entry: Lot configuration
 `bldg_type`
 
 ```{r u3-categorical-4}
-#| out-width: 3in
 #| out-height: 3in
 
 data_trn |> 
@@ -1334,6 +1331,8 @@ fit_lm_6 <-
 - plot it
 
 ```{r}
+#| out-height: 3in
+
 plot_truth(truth = feat_val$sale_price, 
            estimate = predict(fit_lm_6, feat_val)$.pred)
 ```
@@ -1344,6 +1343,7 @@ plot_truth(truth = feat_val$sale_price,
 
 ```{r}
 #| echo: false
+
 error_val <- error_val |> 
   bind_rows(tibble(model = "6 feature linear model w/ms_zoning", 
                    rmse_val = rmse_vec(feat_val$sale_price,
@@ -1387,6 +1387,8 @@ We have two paths to pursue for ordinal predictors
 Let's consider `overall_qual`
 
 ```{r u3-categorical-7}
+#| out-height: 3in
+
 data_trn |> 
   plot_categorical("overall_qual", "sale_price") |> 
   cowplot::plot_grid(plotlist = _, ncol = 2)
