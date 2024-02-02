@@ -36,10 +36,10 @@ editor_options:
 - [Lecture 4: Extension to Multiple Predictors](https://mediaspace.wisc.edu/media/iaml+Unit+3-4/1_24rrga7b) ~ 15 mins
 - [Lecture 5: Extension to Categorical Predictors](https://mediaspace.wisc.edu/media/iaml+unit+3-5/1_2a3tsj3n) ~ 30 mins
 - [Lecture 6: Extension to Interactions and Non-Linear Effects]()
-- [Lecture 7: Introduction to KNN]()
-- [Lecture 8: Distance and Scaling in KNN]()
-- [Lecture 9: KNN with Ames]()
-- [Discussijn]()
+- [Lecture 7: Introduction to KNN](https://mediaspace.wisc.edu/media/iaml+unit+3-7/1_ega1aohm) ~ 9 mins
+- [Lecture 8: The hyperparameter k](https://mediaspace.wisc.edu/media/iaml+unit+3-8/1_xc8x13en) ~ 13 mins
+- [Lecture 9: Distance and Scaling in KNN]()
+- [Lecture 10: KNN with Ames]()
 
 -----
 
@@ -1842,7 +1842,7 @@ data_trn_demo |>
 
 -----
 
-### The hyperparameter k
+## The Hyperparameter k in KNN
 
 KNN is our first example of a statistical algorithm that includes a **hyperparameter**, in this case $k$
 
@@ -1895,8 +1895,10 @@ fit_5nn_demo <-
 
 -----
 
-- Get a validation set (a new sample using same polynomial DGP)
+- Get features for a validation set (a new sample using same polynomial DGP)
 ```{r u3-knn-9}
+#| echo: false
+
 data_val_demo <- tibble(x = runif(200, 1, 100),
                y = rnorm(200, x, 10),
                y_dgp = rnorm(200, x ,0),
@@ -1904,7 +1906,9 @@ data_val_demo <- tibble(x = runif(200, 1, 100),
                y2_dgp = rnorm(200, x^4 / 800000 ,0),
                y3 = if_else(x < 40, rnorm(200, 25, 10),  rnorm(200, 75, 10)),
                y3_dgp = if_else(x < 40, rnorm(200, 25, 0),  rnorm(200, 75, 0)))
+```
 
+```{r}
 feat_val_demo <- rec_prep |> 
   bake(data_val_demo)
 ```
@@ -1944,7 +1948,7 @@ Let's pause and consider our conceptual understanding of the impact of $k$ on th
 #| echo: true
 #| code-fold: true
 #| code-summary: "Show Answer"
-Smaller values of $k$ will tend to increase overfitting (and therefore variance 
+Smaller values of k will tend to increase overfitting (and therefore variance 
 across training samples) but decrease bias.  Larger values of k will tend to decrease
 overfitting but increase bias.  We need to find the Goldilocks "sweet spot"
 ```
@@ -1986,10 +1990,11 @@ fit_1nn_demo <-
 
 -----
 
-V_ isualize prediction models in Train and Validation
+Visualize prediction models in Train and Validation
 
 ```{r u3-knn-14}
 #| echo: false
+#| out-height: 5in
 
 plot_train <- feat_trn_demo |> 
   bind_cols(data_trn_demo |> select(y, y2_dgp)) |> # add in other outcomes for fig
@@ -2057,7 +2062,9 @@ fit_75nn_demo <-
 Visualize prediction models in Train and Validation
 
 ```{r u3-knn-19}
-#|echo: false
+#| echo: false
+#| out-height: 5in
+
 plot_train <- feat_trn_demo |> 
   bind_cols(data_trn_demo |> select(y, y2_dgp)) |> # add in other outcomes for fig
   ggplot(aes(x = x, y = y2)) +

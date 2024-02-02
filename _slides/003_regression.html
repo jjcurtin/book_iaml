@@ -443,12 +443,12 @@
 <li><a href="https://mediaspace.wisc.edu/media/iaml+unit+3-2/1_yyb8dcub">Lecture 2: The Simple Linear Model, Part 1</a> ~ 16 mins</li>
 <li><a href="https://mediaspace.wisc.edu/media/iaml+unit+3-3/1_ep9ibptc">Lecture 3: The Simple Linear Model, Part 2</a> ~ 12 mins</li>
 <li><a href="https://mediaspace.wisc.edu/media/iaml+Unit+3-4/1_24rrga7b">Lecture 4: Extension to Multiple Predictors</a> ~ 15 mins</li>
-<li><a href="">Lecture 5: Extension to Categorical Predictors</a></li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+3-5/1_2a3tsj3n">Lecture 5: Extension to Categorical Predictors</a> ~ 30 mins</li>
 <li><a href="">Lecture 6: Extension to Interactions and Non-Linear Effects</a></li>
-<li><a href="">Lecture 7: Introduction to KNN</a></li>
-<li><a href="">Lecture 8: Distance and Scaling in KNN</a></li>
-<li><a href="">Lecture 9: KNN with Ames</a></li>
-<li><a href="">Discussijn</a></li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+3-7/1_ega1aohm">Lecture 7: Introduction to KNN</a> ~ 9 mins</li>
+<li><a href="">Lecture 8: The hyperparameter k</a></li>
+<li><a href="">Lecture 9: Distance and Scaling in KNN</a></li>
+<li><a href="">Lecture 10: KNN with Ames</a></li>
 </ul>
 </section>
 <section class="slide level2">
@@ -4264,9 +4264,8 @@ F-statistic: 23.78 on 2 and 1462 DF,  p-value: 6.858e-11</code></pre>
 <p>DGP: <span class="math inline">\(y3 = if\_else(x &lt; 40, rnorm(150, 25, 10), rnorm(150, 75, 10))\)</span></p>
 
 <img data-src="003_regression_files/figure-revealjs/u3-knn-4-1.png" width="960" class="r-stretch"></section>
-<section class="slide level2">
-
-<h3 id="the-hyperparameter-k">The hyperparameter k</h3>
+<section id="the-hyperparameter-k-in-knn" class="slide level2">
+<h2>The Hyperparameter k in KNN</h2>
 <p>KNN is our first example of a statistical algorithm that includes a <strong>hyperparameter</strong>, in this case <span class="math inline">\(k\)</span></p>
 <ul>
 <li><p>Algorithm hyperparameters differ from parameters in that they cannot be estimated while fitting the algorithm to the training set</p></li>
@@ -4334,19 +4333,14 @@ kknn::train.kknn(formula = missing_arg(), data = missing_arg(),
 <section class="slide level2">
 
 <ul>
-<li>Get a validation set (a new sample using same polynomial DGP)</li>
+<li>Get features for a validation set (a new sample using same polynomial DGP)</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb145"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb145-1"><a href="#cb145-1"></a>data_val_demo <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">x =</span> <span class="fu">runif</span>(<span class="dv">200</span>, <span class="dv">1</span>, <span class="dv">100</span>),</span>
-<span id="cb145-2"><a href="#cb145-2"></a>               <span class="at">y =</span> <span class="fu">rnorm</span>(<span class="dv">200</span>, x, <span class="dv">10</span>),</span>
-<span id="cb145-3"><a href="#cb145-3"></a>               <span class="at">y_dgp =</span> <span class="fu">rnorm</span>(<span class="dv">200</span>, x ,<span class="dv">0</span>),</span>
-<span id="cb145-4"><a href="#cb145-4"></a>               <span class="at">y2 =</span> <span class="fu">rnorm</span>(<span class="dv">200</span>, x<span class="sc">^</span><span class="dv">4</span> <span class="sc">/</span> <span class="dv">800000</span>, <span class="dv">8</span>),</span>
-<span id="cb145-5"><a href="#cb145-5"></a>               <span class="at">y2_dgp =</span> <span class="fu">rnorm</span>(<span class="dv">200</span>, x<span class="sc">^</span><span class="dv">4</span> <span class="sc">/</span> <span class="dv">800000</span> ,<span class="dv">0</span>),</span>
-<span id="cb145-6"><a href="#cb145-6"></a>               <span class="at">y3 =</span> <span class="fu">if_else</span>(x <span class="sc">&lt;</span> <span class="dv">40</span>, <span class="fu">rnorm</span>(<span class="dv">200</span>, <span class="dv">25</span>, <span class="dv">10</span>),  <span class="fu">rnorm</span>(<span class="dv">200</span>, <span class="dv">75</span>, <span class="dv">10</span>)),</span>
-<span id="cb145-7"><a href="#cb145-7"></a>               <span class="at">y3_dgp =</span> <span class="fu">if_else</span>(x <span class="sc">&lt;</span> <span class="dv">40</span>, <span class="fu">rnorm</span>(<span class="dv">200</span>, <span class="dv">25</span>, <span class="dv">0</span>),  <span class="fu">rnorm</span>(<span class="dv">200</span>, <span class="dv">75</span>, <span class="dv">0</span>)))</span>
-<span id="cb145-8"><a href="#cb145-8"></a></span>
-<span id="cb145-9"><a href="#cb145-9"></a>feat_val_demo <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
-<span id="cb145-10"><a href="#cb145-10"></a>  <span class="fu">bake</span>(data_val_demo)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb145"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb145-1"><a href="#cb145-1"></a>feat_val_demo <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
+<span id="cb145-2"><a href="#cb145-2"></a>  <span class="fu">bake</span>(data_val_demo)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
@@ -4373,7 +4367,7 @@ kknn::train.kknn(formula = missing_arg(), data = missing_arg(),
 <div class="cell">
 <details>
 <summary>Show Answer</summary>
-<div class="sourceCode cell-code" id="cb146"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb146-1"><a href="#cb146-1"></a>Smaller values of $k$ will tend to increase overfitting (and therefore variance </span>
+<div class="sourceCode cell-code" id="cb146"><pre class="sourceCode numberSource html number-lines code-with-copy"><code class="sourceCode html"><span id="cb146-1"><a href="#cb146-1"></a>Smaller values of k will tend to increase overfitting (and therefore variance </span>
 <span id="cb146-2"><a href="#cb146-2"></a>across training samples) but decrease bias.  Larger values of k will tend to decrease</span>
 <span id="cb146-3"><a href="#cb146-3"></a>overfitting but increase bias.  We need to find the Goldilocks "sweet spot"</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
@@ -4425,9 +4419,13 @@ kknn::train.kknn(formula = missing_arg(), data = missing_arg(),
 </section>
 <section class="slide level2">
 
-<p>V_ isualize prediction models in Train and Validation</p>
-
-<img data-src="003_regression_files/figure-revealjs/u3-knn-14-1.png" width="960" class="r-stretch"></section>
+<p>Visualize prediction models in Train and Validation</p>
+<div class="cell">
+<div class="cell-output-display">
+<p><img data-src="003_regression_files/figure-revealjs/u3-knn-14-1.png" style="height:5in" width="960"></p>
+</div>
+</div>
+</section>
 <section class="slide level2">
 
 <p>Calculate RMSE in validation for two KNN models</p>
@@ -4463,45 +4461,11 @@ kknn::train.kknn(formula = missing_arg(), data = missing_arg(),
 
 <p>Visualize prediction models in Train and Validation</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb154"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb154-1"><a href="#cb154-1"></a><span class="co">#|echo: false</span></span>
-<span id="cb154-2"><a href="#cb154-2"></a>plot_train <span class="ot">&lt;-</span> feat_trn_demo <span class="sc">|&gt;</span> </span>
-<span id="cb154-3"><a href="#cb154-3"></a>  <span class="fu">bind_cols</span>(data_trn_demo <span class="sc">|&gt;</span> <span class="fu">select</span>(y, y2_dgp)) <span class="sc">|&gt;</span> <span class="co"># add in other outcomes for fig</span></span>
-<span id="cb154-4"><a href="#cb154-4"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y2)) <span class="sc">+</span></span>
-<span id="cb154-5"><a href="#cb154-5"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y2_dgp, <span class="at">color =</span> <span class="st">"blue"</span>), <span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
-<span id="cb154-6"><a href="#cb154-6"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> <span class="fu">predict</span>(fit_5nn_demo, feat_trn_demo)<span class="sc">$</span>.pred, </span>
-<span id="cb154-7"><a href="#cb154-7"></a>                  <span class="at">color =</span> <span class="st">"red"</span>), <span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
-<span id="cb154-8"><a href="#cb154-8"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> <span class="fu">predict</span>(fit_1nn_demo, feat_trn_demo)<span class="sc">$</span>.pred, </span>
-<span id="cb154-9"><a href="#cb154-9"></a>                  <span class="at">color =</span> <span class="st">"green"</span>), <span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
-<span id="cb154-10"><a href="#cb154-10"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> <span class="fu">predict</span>(fit_75nn_demo, feat_trn_demo)<span class="sc">$</span>.pred, </span>
-<span id="cb154-11"><a href="#cb154-11"></a>                  <span class="at">color =</span> <span class="st">"yellow"</span>), <span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
-<span id="cb154-12"><a href="#cb154-12"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> y2), <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
-<span id="cb154-13"><a href="#cb154-13"></a>    <span class="fu">scale_color_identity</span>(<span class="at">name =</span> <span class="st">"Model"</span>,</span>
-<span id="cb154-14"><a href="#cb154-14"></a>                       <span class="at">breaks =</span> <span class="fu">c</span>(<span class="st">"blue"</span>, <span class="st">"red"</span>, <span class="st">"green"</span>, <span class="st">"yellow"</span>),</span>
-<span id="cb154-15"><a href="#cb154-15"></a>                       <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"DGP"</span>, <span class="st">"k = 5"</span>, <span class="st">"k = 1"</span>, <span class="st">"k = 75"</span>),</span>
-<span id="cb154-16"><a href="#cb154-16"></a>                       <span class="at">guide =</span> <span class="st">"legend"</span>)</span>
-<span id="cb154-17"><a href="#cb154-17"></a></span>
-<span id="cb154-18"><a href="#cb154-18"></a>plot_val <span class="ot">&lt;-</span> feat_val_demo <span class="sc">|&gt;</span> </span>
-<span id="cb154-19"><a href="#cb154-19"></a>  <span class="fu">bind_cols</span>(data_val_demo <span class="sc">|&gt;</span> <span class="fu">select</span>(y, y2_dgp)) <span class="sc">|&gt;</span> <span class="co"># add in other outcomes for fig</span></span>
-<span id="cb154-20"><a href="#cb154-20"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y2)) <span class="sc">+</span></span>
-<span id="cb154-21"><a href="#cb154-21"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> y2_dgp, <span class="at">color =</span> <span class="st">"blue"</span>), <span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
-<span id="cb154-22"><a href="#cb154-22"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> <span class="fu">predict</span>(fit_5nn_demo, feat_val_demo)<span class="sc">$</span>.pred, </span>
-<span id="cb154-23"><a href="#cb154-23"></a>                  <span class="at">color =</span> <span class="st">"red"</span>), <span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
-<span id="cb154-24"><a href="#cb154-24"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> <span class="fu">predict</span>(fit_1nn_demo, feat_val_demo)<span class="sc">$</span>.pred, </span>
-<span id="cb154-25"><a href="#cb154-25"></a>                  <span class="at">color =</span> <span class="st">"green"</span>), <span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
-<span id="cb154-26"><a href="#cb154-26"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">x =</span> x, <span class="at">y =</span> <span class="fu">predict</span>(fit_75nn_demo, feat_val_demo)<span class="sc">$</span>.pred, </span>
-<span id="cb154-27"><a href="#cb154-27"></a>                  <span class="at">color =</span> <span class="st">"yellow"</span>), <span class="at">linewidth =</span> <span class="fl">1.5</span>) <span class="sc">+</span></span>
-<span id="cb154-28"><a href="#cb154-28"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> y2), <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
-<span id="cb154-29"><a href="#cb154-29"></a>     <span class="fu">scale_color_identity</span>(<span class="at">name =</span> <span class="st">"Model"</span>,</span>
-<span id="cb154-30"><a href="#cb154-30"></a>                       <span class="at">breaks =</span> <span class="fu">c</span>(<span class="st">"blue"</span>, <span class="st">"red"</span>, <span class="st">"green"</span>, <span class="st">"yellow"</span>),</span>
-<span id="cb154-31"><a href="#cb154-31"></a>                       <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"DGP"</span>, <span class="st">"k = 5"</span>, <span class="st">"k = 1"</span>, <span class="st">"k = 75"</span>),</span>
-<span id="cb154-32"><a href="#cb154-32"></a>                       <span class="at">guide =</span> <span class="st">"legend"</span>)</span>
-<span id="cb154-33"><a href="#cb154-33"></a></span>
-<span id="cb154-34"><a href="#cb154-34"></a>cowplot<span class="sc">::</span><span class="fu">plot_grid</span>(plot_train, plot_val, </span>
-<span id="cb154-35"><a href="#cb154-35"></a>                   <span class="at">labels =</span> <span class="fu">list</span>(<span class="st">"Training Set"</span>, <span class="st">"Validation Set"</span>), </span>
-<span id="cb154-36"><a href="#cb154-36"></a>                   <span class="at">ncol =</span> <span class="dv">2</span>, <span class="at">nrow =</span> <span class="dv">1</span>, <span class="at">hjust =</span> <span class="sc">-</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-
+<div class="cell-output-display">
+<p><img data-src="003_regression_files/figure-revealjs/u3-knn-19-1.png" style="height:5in" width="960"></p>
 </div>
-<img data-src="003_regression_files/figure-revealjs/u3-knn-19-1.png" width="960" class="r-stretch"></section>
+</div>
+</section>
 <section class="slide level2">
 
 <p>Calculate RMSE in validation for three KNN models</p>
@@ -4510,8 +4474,8 @@ kknn::train.kknn(formula = missing_arg(), data = missing_arg(),
 <li><code>k = 1</code> - high variance</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb155"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb155-1"><a href="#cb155-1"></a><span class="fu">rmse_vec</span>(feat_val_demo<span class="sc">$</span>y2, </span>
-<span id="cb155-2"><a href="#cb155-2"></a>         <span class="fu">predict</span>(fit_1nn_demo, feat_val_demo)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb154"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb154-1"><a href="#cb154-1"></a><span class="fu">rmse_vec</span>(feat_val_demo<span class="sc">$</span>y2, </span>
+<span id="cb154-2"><a href="#cb154-2"></a>         <span class="fu">predict</span>(fit_1nn_demo, feat_val_demo)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 10.91586</code></pre>
 </div>
@@ -4520,8 +4484,8 @@ kknn::train.kknn(formula = missing_arg(), data = missing_arg(),
 <li><code>k = 5</code> - just right (well better at least)</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb157"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb157-1"><a href="#cb157-1"></a><span class="fu">rmse_vec</span>(feat_val_demo<span class="sc">$</span>y2, </span>
-<span id="cb157-2"><a href="#cb157-2"></a>         <span class="fu">predict</span>(fit_5nn_demo, feat_val_demo)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb156"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb156-1"><a href="#cb156-1"></a><span class="fu">rmse_vec</span>(feat_val_demo<span class="sc">$</span>y2, </span>
+<span id="cb156-2"><a href="#cb156-2"></a>         <span class="fu">predict</span>(fit_5nn_demo, feat_val_demo)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 8.387035</code></pre>
 </div>
@@ -4530,8 +4494,8 @@ kknn::train.kknn(formula = missing_arg(), data = missing_arg(),
 <li><code>k = 75</code> - high bias</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb159"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb159-1"><a href="#cb159-1"></a><span class="fu">rmse_vec</span>(feat_val_demo<span class="sc">$</span>y2, </span>
-<span id="cb159-2"><a href="#cb159-2"></a>         <span class="fu">predict</span>(fit_75nn_demo, feat_val_demo)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb158"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb158-1"><a href="#cb158-1"></a><span class="fu">rmse_vec</span>(feat_val_demo<span class="sc">$</span>y2, </span>
+<span id="cb158-2"><a href="#cb158-2"></a>         <span class="fu">predict</span>(fit_75nn_demo, feat_val_demo)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 15.34998</code></pre>
 </div>
@@ -4634,12 +4598,12 @@ kknn::train.kknn(formula = missing_arg(), data = missing_arg(),
 <li>Set SD = 1 for all features</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb161"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb161-1"><a href="#cb161-1"></a>rec <span class="ot">&lt;-</span> </span>
-<span id="cb161-2"><a href="#cb161-2"></a>  <span class="fu">recipe</span>(sale_price <span class="sc">~</span> gr_liv_area <span class="sc">+</span> lot_area <span class="sc">+</span> year_built <span class="sc">+</span> garage_cars <span class="sc">+</span> overall_qual, </span>
-<span id="cb161-3"><a href="#cb161-3"></a>         <span class="at">data =</span> data_trn) <span class="sc">|&gt;</span> </span>
-<span id="cb161-4"><a href="#cb161-4"></a>  <span class="fu">step_impute_median</span>(garage_cars) <span class="sc">|&gt;</span> </span>
-<span id="cb161-5"><a href="#cb161-5"></a>  <span class="fu">step_mutate</span>(<span class="at">overall_qual =</span> <span class="fu">as.numeric</span>(overall_qual)) <span class="sc">|&gt;</span> </span>
-<span id="cb161-6"><a href="#cb161-6"></a>  <span class="fu">step_scale</span>(<span class="fu">all_numeric_predictors</span>()) <span class="co"># &lt;1&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb160"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb160-1"><a href="#cb160-1"></a>rec <span class="ot">&lt;-</span> </span>
+<span id="cb160-2"><a href="#cb160-2"></a>  <span class="fu">recipe</span>(sale_price <span class="sc">~</span> gr_liv_area <span class="sc">+</span> lot_area <span class="sc">+</span> year_built <span class="sc">+</span> garage_cars <span class="sc">+</span> overall_qual, </span>
+<span id="cb160-3"><a href="#cb160-3"></a>         <span class="at">data =</span> data_trn) <span class="sc">|&gt;</span> </span>
+<span id="cb160-4"><a href="#cb160-4"></a>  <span class="fu">step_impute_median</span>(garage_cars) <span class="sc">|&gt;</span> </span>
+<span id="cb160-5"><a href="#cb160-5"></a>  <span class="fu">step_mutate</span>(<span class="at">overall_qual =</span> <span class="fu">as.numeric</span>(overall_qual)) <span class="sc">|&gt;</span> </span>
+<span id="cb160-6"><a href="#cb160-6"></a>  <span class="fu">step_scale</span>(<span class="fu">all_numeric_predictors</span>()) <span class="co"># &lt;1&gt;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ol type="1">
 <li>Remember to take advantage of these selectors for easier code! See <code>?has_role</code> for more details</li>
@@ -4651,14 +4615,14 @@ kknn::train.kknn(formula = missing_arg(), data = missing_arg(),
 <li>prep, bake</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb162"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb162-1"><a href="#cb162-1"></a>rec_prep <span class="ot">&lt;-</span> rec <span class="sc">|&gt;</span> </span>
-<span id="cb162-2"><a href="#cb162-2"></a>  <span class="fu">prep</span>(data_trn)</span>
-<span id="cb162-3"><a href="#cb162-3"></a></span>
-<span id="cb162-4"><a href="#cb162-4"></a>feat_trn <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span></span>
-<span id="cb162-5"><a href="#cb162-5"></a>  <span class="fu">bake</span>(data_trn)</span>
-<span id="cb162-6"><a href="#cb162-6"></a></span>
-<span id="cb162-7"><a href="#cb162-7"></a>feat_val <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
-<span id="cb162-8"><a href="#cb162-8"></a>  <span class="fu">bake</span>(data_val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb161"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb161-1"><a href="#cb161-1"></a>rec_prep <span class="ot">&lt;-</span> rec <span class="sc">|&gt;</span> </span>
+<span id="cb161-2"><a href="#cb161-2"></a>  <span class="fu">prep</span>(data_trn)</span>
+<span id="cb161-3"><a href="#cb161-3"></a></span>
+<span id="cb161-4"><a href="#cb161-4"></a>feat_trn <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span></span>
+<span id="cb161-5"><a href="#cb161-5"></a>  <span class="fu">bake</span>(data_trn)</span>
+<span id="cb161-6"><a href="#cb161-6"></a></span>
+<span id="cb161-7"><a href="#cb161-7"></a>feat_val <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
+<span id="cb161-8"><a href="#cb161-8"></a>  <span class="fu">bake</span>(data_val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
@@ -4667,7 +4631,7 @@ kknn::train.kknn(formula = missing_arg(), data = missing_arg(),
 <li>Skim training features. Note all SD = 1</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb163"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb163-1"><a href="#cb163-1"></a>feat_trn <span class="sc">|&gt;</span> <span class="fu">skim_all</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb162"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb162-1"><a href="#cb162-1"></a>feat_trn <span class="sc">|&gt;</span> <span class="fu">skim_all</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table>
 <caption>Data summary</caption>
@@ -4834,7 +4798,7 @@ kknn::train.kknn(formula = missing_arg(), data = missing_arg(),
 <li>Skim validation features. Note SD. <span class="red">Why not exactly 1?</span></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb164"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb164-1"><a href="#cb164-1"></a>feat_val <span class="sc">|&gt;</span> <span class="fu">skim_all</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb163"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb163-1"><a href="#cb163-1"></a>feat_val <span class="sc">|&gt;</span> <span class="fu">skim_all</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table>
 <caption>Data summary</caption>
@@ -5001,22 +4965,22 @@ kknn::train.kknn(formula = missing_arg(), data = missing_arg(),
 <li>Fit 5NN</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb165"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb165-1"><a href="#cb165-1"></a>fit_5nn_5num <span class="ot">&lt;-</span> </span>
-<span id="cb165-2"><a href="#cb165-2"></a>  <span class="fu">nearest_neighbor</span>() <span class="sc">|&gt;</span>   </span>
-<span id="cb165-3"><a href="#cb165-3"></a>  <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">|&gt;</span>   </span>
-<span id="cb165-4"><a href="#cb165-4"></a>  <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb165-5"><a href="#cb165-5"></a>  <span class="fu">fit</span>(sale_price <span class="sc">~</span> ., <span class="at">data =</span> feat_trn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb164"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb164-1"><a href="#cb164-1"></a>fit_5nn_5num <span class="ot">&lt;-</span> </span>
+<span id="cb164-2"><a href="#cb164-2"></a>  <span class="fu">nearest_neighbor</span>() <span class="sc">|&gt;</span>   </span>
+<span id="cb164-3"><a href="#cb164-3"></a>  <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">|&gt;</span>   </span>
+<span id="cb164-4"><a href="#cb164-4"></a>  <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb164-5"><a href="#cb164-5"></a>  <span class="fu">fit</span>(sale_price <span class="sc">~</span> ., <span class="at">data =</span> feat_trn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
 
 <div class="cell">
-<div class="sourceCode cell-code" id="cb166"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb166-1"><a href="#cb166-1"></a>error_val <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(error_val, </span>
-<span id="cb166-2"><a href="#cb166-2"></a>                        <span class="fu">tibble</span>(<span class="at">model =</span> <span class="st">"5 numeric predictor 5nn"</span>, </span>
-<span id="cb166-3"><a href="#cb166-3"></a>                               <span class="at">rmse_val =</span> <span class="fu">rmse_vec</span>(feat_val<span class="sc">$</span>sale_price, </span>
-<span id="cb166-4"><a href="#cb166-4"></a>                                                   <span class="fu">predict</span>(fit_5nn_5num, feat_val)<span class="sc">$</span>.pred)))</span>
-<span id="cb166-5"><a href="#cb166-5"></a></span>
-<span id="cb166-6"><a href="#cb166-6"></a>error_val</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb165"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb165-1"><a href="#cb165-1"></a>error_val <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(error_val, </span>
+<span id="cb165-2"><a href="#cb165-2"></a>                        <span class="fu">tibble</span>(<span class="at">model =</span> <span class="st">"5 numeric predictor 5nn"</span>, </span>
+<span id="cb165-3"><a href="#cb165-3"></a>                               <span class="at">rmse_val =</span> <span class="fu">rmse_vec</span>(feat_val<span class="sc">$</span>sale_price, </span>
+<span id="cb165-4"><a href="#cb165-4"></a>                                                   <span class="fu">predict</span>(fit_5nn_5num, feat_val)<span class="sc">$</span>.pred)))</span>
+<span id="cb165-5"><a href="#cb165-5"></a></span>
+<span id="cb165-6"><a href="#cb165-6"></a>error_val</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 8 × 2
   model                                  rmse_val
@@ -5043,8 +5007,8 @@ kknn::train.kknn(formula = missing_arg(), data = missing_arg(),
 <li>However, this wasn’t needed for KNN!</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb168"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb168-1"><a href="#cb168-1"></a><span class="fu">plot_truth</span>(<span class="at">truth =</span> feat_val<span class="sc">$</span>sale_price, </span>
-<span id="cb168-2"><a href="#cb168-2"></a>           <span class="at">estimate =</span> <span class="fu">predict</span>(fit_5nn_5num, feat_val)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb167"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb167-1"><a href="#cb167-1"></a><span class="fu">plot_truth</span>(<span class="at">truth =</span> feat_val<span class="sc">$</span>sale_price, </span>
+<span id="cb167-2"><a href="#cb167-2"></a>           <span class="at">estimate =</span> <span class="fu">predict</span>(fit_5nn_5num, feat_val)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 
 </div>
 <img data-src="003_regression_files/figure-revealjs/u3-knn-29-1.png" width="960" class="r-stretch"></section>
@@ -5053,11 +5017,11 @@ kknn::train.kknn(formula = missing_arg(), data = missing_arg(),
 <p>But 5NN may be overfit. <code>k = 5</code> is pretty low</p>
 <p>Again with <code>k = 20</code></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb169"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb169-1"><a href="#cb169-1"></a>fit_20nn_5num <span class="ot">&lt;-</span> </span>
-<span id="cb169-2"><a href="#cb169-2"></a>  <span class="fu">nearest_neighbor</span>(<span class="at">neighbors =</span> <span class="dv">20</span>) <span class="sc">|&gt;</span>   </span>
-<span id="cb169-3"><a href="#cb169-3"></a>  <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">|&gt;</span>   </span>
-<span id="cb169-4"><a href="#cb169-4"></a>  <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb169-5"><a href="#cb169-5"></a>  <span class="fu">fit</span>(sale_price <span class="sc">~</span> ., <span class="at">data =</span> feat_trn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb168"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb168-1"><a href="#cb168-1"></a>fit_20nn_5num <span class="ot">&lt;-</span> </span>
+<span id="cb168-2"><a href="#cb168-2"></a>  <span class="fu">nearest_neighbor</span>(<span class="at">neighbors =</span> <span class="dv">20</span>) <span class="sc">|&gt;</span>   </span>
+<span id="cb168-3"><a href="#cb168-3"></a>  <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">|&gt;</span>   </span>
+<span id="cb168-4"><a href="#cb168-4"></a>  <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb168-5"><a href="#cb168-5"></a>  <span class="fu">fit</span>(sale_price <span class="sc">~</span> ., <span class="at">data =</span> feat_trn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
@@ -5086,11 +5050,11 @@ kknn::train.kknn(formula = missing_arg(), data = missing_arg(),
 
 <p>One more time with <code>k = 50</code> to see where we are in the bias-variance function</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb171"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb171-1"><a href="#cb171-1"></a>fit_50nn_5num <span class="ot">&lt;-</span> </span>
-<span id="cb171-2"><a href="#cb171-2"></a>  <span class="fu">nearest_neighbor</span>(<span class="at">neighbors =</span> <span class="dv">50</span>) <span class="sc">|&gt;</span>   </span>
-<span id="cb171-3"><a href="#cb171-3"></a>  <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">|&gt;</span>   </span>
-<span id="cb171-4"><a href="#cb171-4"></a>  <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb171-5"><a href="#cb171-5"></a>  <span class="fu">fit</span>(sale_price <span class="sc">~</span> ., <span class="at">data =</span> feat_trn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb170"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb170-1"><a href="#cb170-1"></a>fit_50nn_5num <span class="ot">&lt;-</span> </span>
+<span id="cb170-2"><a href="#cb170-2"></a>  <span class="fu">nearest_neighbor</span>(<span class="at">neighbors =</span> <span class="dv">50</span>) <span class="sc">|&gt;</span>   </span>
+<span id="cb170-3"><a href="#cb170-3"></a>  <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">|&gt;</span>   </span>
+<span id="cb170-4"><a href="#cb170-4"></a>  <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb170-5"><a href="#cb170-5"></a>  <span class="fu">fit</span>(sale_price <span class="sc">~</span> ., <span class="at">data =</span> feat_trn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
@@ -5126,18 +5090,18 @@ kknn::train.kknn(formula = missing_arg(), data = missing_arg(),
 <li>Training error is increasing as <span class="math inline">\(k\)</span> increases b/c it KNN is overfitting less (so its not fitting the noise in train as well)</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb173"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb173-1"><a href="#cb173-1"></a><span class="fu">rmse_vec</span>(feat_trn<span class="sc">$</span>sale_price, </span>
-<span id="cb173-2"><a href="#cb173-2"></a>         <span class="fu">predict</span>(fit_5nn_5num, feat_trn)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb172"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb172-1"><a href="#cb172-1"></a><span class="fu">rmse_vec</span>(feat_trn<span class="sc">$</span>sale_price, </span>
+<span id="cb172-2"><a href="#cb172-2"></a>         <span class="fu">predict</span>(fit_5nn_5num, feat_trn)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 19012.94</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb175"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb175-1"><a href="#cb175-1"></a><span class="fu">rmse_vec</span>(feat_trn<span class="sc">$</span>sale_price, </span>
-<span id="cb175-2"><a href="#cb175-2"></a>         <span class="fu">predict</span>(fit_20nn_5num, feat_trn)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb174"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb174-1"><a href="#cb174-1"></a><span class="fu">rmse_vec</span>(feat_trn<span class="sc">$</span>sale_price, </span>
+<span id="cb174-2"><a href="#cb174-2"></a>         <span class="fu">predict</span>(fit_20nn_5num, feat_trn)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 27662.2</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb177"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb177-1"><a href="#cb177-1"></a><span class="fu">rmse_vec</span>(feat_trn<span class="sc">$</span>sale_price, </span>
-<span id="cb177-2"><a href="#cb177-2"></a>         <span class="fu">predict</span>(fit_50nn_5num, feat_trn)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb176"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb176-1"><a href="#cb176-1"></a><span class="fu">rmse_vec</span>(feat_trn<span class="sc">$</span>sale_price, </span>
+<span id="cb176-2"><a href="#cb176-2"></a>         <span class="fu">predict</span>(fit_50nn_5num, feat_trn)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 31069.12</code></pre>
 </div>
@@ -5154,18 +5118,18 @@ kknn::train.kknn(formula = missing_arg(), data = missing_arg(),
 <li>At some point, as <span class="math inline">\(k\)</span> increases the increase in bias outweighed the decrease in variance and validation error increased too.</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb179"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb179-1"><a href="#cb179-1"></a><span class="fu">rmse_vec</span>(feat_val<span class="sc">$</span>sale_price, </span>
-<span id="cb179-2"><a href="#cb179-2"></a>         <span class="fu">predict</span>(fit_5nn_5num, feat_val)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb178"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb178-1"><a href="#cb178-1"></a><span class="fu">rmse_vec</span>(feat_val<span class="sc">$</span>sale_price, </span>
+<span id="cb178-2"><a href="#cb178-2"></a>         <span class="fu">predict</span>(fit_5nn_5num, feat_val)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 32837.37</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb181"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb181-1"><a href="#cb181-1"></a><span class="fu">rmse_vec</span>(feat_val<span class="sc">$</span>sale_price, </span>
-<span id="cb181-2"><a href="#cb181-2"></a>         <span class="fu">predict</span>(fit_20nn_5num, feat_val)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb180"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb180-1"><a href="#cb180-1"></a><span class="fu">rmse_vec</span>(feat_val<span class="sc">$</span>sale_price, </span>
+<span id="cb180-2"><a href="#cb180-2"></a>         <span class="fu">predict</span>(fit_20nn_5num, feat_val)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 30535.04</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb183"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb183-1"><a href="#cb183-1"></a><span class="fu">rmse_vec</span>(feat_val<span class="sc">$</span>sale_price, </span>
-<span id="cb183-2"><a href="#cb183-2"></a>         <span class="fu">predict</span>(fit_50nn_5num, feat_val)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb182"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb182-1"><a href="#cb182-1"></a><span class="fu">rmse_vec</span>(feat_val<span class="sc">$</span>sale_price, </span>
+<span id="cb182-2"><a href="#cb182-2"></a>         <span class="fu">predict</span>(fit_50nn_5num, feat_val)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 31054.6</code></pre>
 </div>
@@ -5178,17 +5142,17 @@ kknn::train.kknn(formula = missing_arg(), data = missing_arg(),
 <li>Need to collapse levels and then dummy</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb185"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb185-1"><a href="#cb185-1"></a>rec <span class="ot">&lt;-</span> </span>
-<span id="cb185-2"><a href="#cb185-2"></a>  <span class="fu">recipe</span>(sale_price <span class="sc">~</span> gr_liv_area <span class="sc">+</span> lot_area <span class="sc">+</span> year_built <span class="sc">+</span> garage_cars <span class="sc">+</span> </span>
-<span id="cb185-3"><a href="#cb185-3"></a>           overall_qual <span class="sc">+</span> ms_zoning, <span class="at">data =</span> data_trn) <span class="sc">|&gt;</span> </span>
-<span id="cb185-4"><a href="#cb185-4"></a>  <span class="fu">step_impute_median</span>(garage_cars) <span class="sc">|&gt;</span> </span>
-<span id="cb185-5"><a href="#cb185-5"></a>  <span class="fu">step_mutate</span>(<span class="at">overall_qual =</span> <span class="fu">as.numeric</span>(overall_qual)) <span class="sc">|&gt;</span> </span>
-<span id="cb185-6"><a href="#cb185-6"></a>  <span class="fu">step_mutate</span>(<span class="at">ms_zoning =</span> <span class="fu">fct_collapse</span>(ms_zoning,</span>
-<span id="cb185-7"><a href="#cb185-7"></a>                                 <span class="st">"residential"</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"res_high"</span>, <span class="st">"res_med"</span>, <span class="st">"res_low"</span>),</span>
-<span id="cb185-8"><a href="#cb185-8"></a>                                 <span class="st">"commercial"</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"agri"</span>, <span class="st">"commer"</span>, <span class="st">"indus"</span>),</span>
-<span id="cb185-9"><a href="#cb185-9"></a>                                 <span class="st">"floating"</span> <span class="ot">=</span> <span class="st">"float"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb185-10"><a href="#cb185-10"></a>  <span class="fu">step_dummy</span>(ms_zoning) <span class="sc">|&gt;</span> </span>
-<span id="cb185-11"><a href="#cb185-11"></a>  <span class="fu">step_scale</span>(<span class="fu">all_numeric_predictors</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb184"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb184-1"><a href="#cb184-1"></a>rec <span class="ot">&lt;-</span> </span>
+<span id="cb184-2"><a href="#cb184-2"></a>  <span class="fu">recipe</span>(sale_price <span class="sc">~</span> gr_liv_area <span class="sc">+</span> lot_area <span class="sc">+</span> year_built <span class="sc">+</span> garage_cars <span class="sc">+</span> </span>
+<span id="cb184-3"><a href="#cb184-3"></a>           overall_qual <span class="sc">+</span> ms_zoning, <span class="at">data =</span> data_trn) <span class="sc">|&gt;</span> </span>
+<span id="cb184-4"><a href="#cb184-4"></a>  <span class="fu">step_impute_median</span>(garage_cars) <span class="sc">|&gt;</span> </span>
+<span id="cb184-5"><a href="#cb184-5"></a>  <span class="fu">step_mutate</span>(<span class="at">overall_qual =</span> <span class="fu">as.numeric</span>(overall_qual)) <span class="sc">|&gt;</span> </span>
+<span id="cb184-6"><a href="#cb184-6"></a>  <span class="fu">step_mutate</span>(<span class="at">ms_zoning =</span> <span class="fu">fct_collapse</span>(ms_zoning,</span>
+<span id="cb184-7"><a href="#cb184-7"></a>                                 <span class="st">"residential"</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"res_high"</span>, <span class="st">"res_med"</span>, <span class="st">"res_low"</span>),</span>
+<span id="cb184-8"><a href="#cb184-8"></a>                                 <span class="st">"commercial"</span> <span class="ot">=</span> <span class="fu">c</span>(<span class="st">"agri"</span>, <span class="st">"commer"</span>, <span class="st">"indus"</span>),</span>
+<span id="cb184-9"><a href="#cb184-9"></a>                                 <span class="st">"floating"</span> <span class="ot">=</span> <span class="st">"float"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb184-10"><a href="#cb184-10"></a>  <span class="fu">step_dummy</span>(ms_zoning) <span class="sc">|&gt;</span> </span>
+<span id="cb184-11"><a href="#cb184-11"></a>  <span class="fu">step_scale</span>(<span class="fu">all_numeric_predictors</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
@@ -5197,14 +5161,14 @@ kknn::train.kknn(formula = missing_arg(), data = missing_arg(),
 <li>prep, bake</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb186"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb186-1"><a href="#cb186-1"></a>rec_prep <span class="ot">&lt;-</span> rec <span class="sc">|&gt;</span> </span>
-<span id="cb186-2"><a href="#cb186-2"></a>  <span class="fu">prep</span>(data_trn)</span>
-<span id="cb186-3"><a href="#cb186-3"></a></span>
-<span id="cb186-4"><a href="#cb186-4"></a>feat_trn <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
-<span id="cb186-5"><a href="#cb186-5"></a>  <span class="fu">bake</span>(data_trn)</span>
-<span id="cb186-6"><a href="#cb186-6"></a></span>
-<span id="cb186-7"><a href="#cb186-7"></a>feat_val <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
-<span id="cb186-8"><a href="#cb186-8"></a>  <span class="fu">bake</span>(data_val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb185"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb185-1"><a href="#cb185-1"></a>rec_prep <span class="ot">&lt;-</span> rec <span class="sc">|&gt;</span> </span>
+<span id="cb185-2"><a href="#cb185-2"></a>  <span class="fu">prep</span>(data_trn)</span>
+<span id="cb185-3"><a href="#cb185-3"></a></span>
+<span id="cb185-4"><a href="#cb185-4"></a>feat_trn <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
+<span id="cb185-5"><a href="#cb185-5"></a>  <span class="fu">bake</span>(data_trn)</span>
+<span id="cb185-6"><a href="#cb185-6"></a></span>
+<span id="cb185-7"><a href="#cb185-7"></a>feat_val <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
+<span id="cb185-8"><a href="#cb185-8"></a>  <span class="fu">bake</span>(data_val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
@@ -5213,11 +5177,11 @@ kknn::train.kknn(formula = missing_arg(), data = missing_arg(),
 <li>Fit</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb187"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb187-1"><a href="#cb187-1"></a>fit_20nn_5num_mszone <span class="ot">&lt;-</span> </span>
-<span id="cb187-2"><a href="#cb187-2"></a>  <span class="fu">nearest_neighbor</span>(<span class="at">neighbors =</span> <span class="dv">20</span>) <span class="sc">|&gt;</span>   </span>
-<span id="cb187-3"><a href="#cb187-3"></a>  <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">|&gt;</span>   </span>
-<span id="cb187-4"><a href="#cb187-4"></a>  <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb187-5"><a href="#cb187-5"></a>  <span class="fu">fit</span>(sale_price <span class="sc">~</span> ., <span class="at">data =</span> feat_trn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb186"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb186-1"><a href="#cb186-1"></a>fit_20nn_5num_mszone <span class="ot">&lt;-</span> </span>
+<span id="cb186-2"><a href="#cb186-2"></a>  <span class="fu">nearest_neighbor</span>(<span class="at">neighbors =</span> <span class="dv">20</span>) <span class="sc">|&gt;</span>   </span>
+<span id="cb186-3"><a href="#cb186-3"></a>  <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">|&gt;</span>   </span>
+<span id="cb186-4"><a href="#cb186-4"></a>  <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb186-5"><a href="#cb186-5"></a>  <span class="fu">fit</span>(sale_price <span class="sc">~</span> ., <span class="at">data =</span> feat_trn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section class="slide level2">
@@ -5255,8 +5219,8 @@ kknn::train.kknn(formula = missing_arg(), data = missing_arg(),
 
 <p>As a teaser, here is another performance metric for this model - <span class="math inline">\(R^2\)</span>. Not too shabby! Remember, there is certainly some irreducible error in <code>sale_price</code> that will put a ceiling on <span class="math inline">\(R^2\)</span> and a floor on RMSE</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb189"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb189-1"><a href="#cb189-1"></a><span class="fu">rsq_vec</span>(feat_val<span class="sc">$</span>sale_price, </span>
-<span id="cb189-2"><a href="#cb189-2"></a>        <span class="fu">predict</span>(fit_20nn_5num_mszone, feat_val)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb188"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb188-1"><a href="#cb188-1"></a><span class="fu">rsq_vec</span>(feat_val<span class="sc">$</span>sale_price, </span>
+<span id="cb188-2"><a href="#cb188-2"></a>        <span class="fu">predict</span>(fit_20nn_5num_mszone, feat_val)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.8404044</code></pre>
 </div>
@@ -5314,90 +5278,90 @@ kknn::train.kknn(formula = missing_arg(), data = missing_arg(),
 <li>Took some shortcuts (no recipe, predict back into train)</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb191"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb191-1"><a href="#cb191-1"></a>n <span class="ot">&lt;-</span> <span class="dv">200</span></span>
-<span id="cb191-2"><a href="#cb191-2"></a><span class="fu">set.seed</span>(<span class="dv">5433</span>)</span>
-<span id="cb191-3"><a href="#cb191-3"></a></span>
-<span id="cb191-4"><a href="#cb191-4"></a>d <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">x1 =</span> <span class="fu">runif</span>(n, <span class="dv">0</span>,<span class="dv">100</span>), <span class="co"># uniform</span></span>
-<span id="cb191-5"><a href="#cb191-5"></a>               <span class="at">x2 =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>), n<span class="sc">/</span><span class="dv">2</span>), <span class="co"># dichotomous</span></span>
-<span id="cb191-6"><a href="#cb191-6"></a>               <span class="at">x1_x2 =</span> x1<span class="sc">*</span>x2, <span class="co"># interaction</span></span>
-<span id="cb191-7"><a href="#cb191-7"></a>               <span class="at">y =</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span> <span class="sc">+</span> <span class="dv">1</span><span class="sc">*</span>x1 <span class="sc">+</span> <span class="dv">10</span><span class="sc">*</span>x2 <span class="sc">+</span> <span class="dv">10</span><span class="sc">*</span> x1_x2, <span class="dv">20</span>)) <span class="co">#DGP + noise</span></span>
-<span id="cb191-8"><a href="#cb191-8"></a></span>
-<span id="cb191-9"><a href="#cb191-9"></a>fit_lm <span class="ot">&lt;-</span> </span>
-<span id="cb191-10"><a href="#cb191-10"></a>  <span class="fu">linear_reg</span>() <span class="sc">|&gt;</span>   </span>
-<span id="cb191-11"><a href="#cb191-11"></a>  <span class="fu">set_engine</span>(<span class="st">"lm"</span>) <span class="sc">|&gt;</span>   </span>
-<span id="cb191-12"><a href="#cb191-12"></a>  <span class="fu">fit</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> d)</span>
-<span id="cb191-13"><a href="#cb191-13"></a></span>
-<span id="cb191-14"><a href="#cb191-14"></a>fit_lm_int <span class="ot">&lt;-</span> </span>
-<span id="cb191-15"><a href="#cb191-15"></a>  <span class="fu">linear_reg</span>() <span class="sc">|&gt;</span>   </span>
-<span id="cb191-16"><a href="#cb191-16"></a>  <span class="fu">set_engine</span>(<span class="st">"lm"</span>) <span class="sc">|&gt;</span>   </span>
-<span id="cb191-17"><a href="#cb191-17"></a>  <span class="fu">fit</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> x1_x2, <span class="at">data =</span> d)</span>
-<span id="cb191-18"><a href="#cb191-18"></a></span>
-<span id="cb191-19"><a href="#cb191-19"></a>fit_knn <span class="ot">&lt;-</span> </span>
-<span id="cb191-20"><a href="#cb191-20"></a>  <span class="fu">nearest_neighbor</span>(<span class="at">neighbors =</span> <span class="dv">20</span>) <span class="sc">|&gt;</span>   </span>
-<span id="cb191-21"><a href="#cb191-21"></a>  <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">|&gt;</span>   </span>
-<span id="cb191-22"><a href="#cb191-22"></a>  <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb191-23"><a href="#cb191-23"></a>  <span class="fu">fit</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> d)</span>
-<span id="cb191-24"><a href="#cb191-24"></a></span>
-<span id="cb191-25"><a href="#cb191-25"></a>fit_knn_int <span class="ot">&lt;-</span> </span>
-<span id="cb191-26"><a href="#cb191-26"></a>  <span class="fu">nearest_neighbor</span>(<span class="at">neighbors =</span> <span class="dv">20</span>) <span class="sc">|&gt;</span>   </span>
-<span id="cb191-27"><a href="#cb191-27"></a>  <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">|&gt;</span>   </span>
-<span id="cb191-28"><a href="#cb191-28"></a>  <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb191-29"><a href="#cb191-29"></a>  <span class="fu">fit</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> x1_x2, <span class="at">data =</span> d)</span>
-<span id="cb191-30"><a href="#cb191-30"></a></span>
-<span id="cb191-31"><a href="#cb191-31"></a>d <span class="ot">&lt;-</span> d <span class="sc">|&gt;</span> </span>
-<span id="cb191-32"><a href="#cb191-32"></a>  <span class="fu">mutate</span>(<span class="at">pred_lm =</span> <span class="fu">predict</span>(fit_lm, d)<span class="sc">$</span>.pred,</span>
-<span id="cb191-33"><a href="#cb191-33"></a>         <span class="at">pred_lm_int =</span> <span class="fu">predict</span>(fit_lm_int, d)<span class="sc">$</span>.pred,</span>
-<span id="cb191-34"><a href="#cb191-34"></a>         <span class="at">pred_knn =</span> <span class="fu">predict</span>(fit_knn, d)<span class="sc">$</span>.pred,</span>
-<span id="cb191-35"><a href="#cb191-35"></a>         <span class="at">pred_knn_int =</span> <span class="fu">predict</span>(fit_knn_int, d)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb190"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb190-1"><a href="#cb190-1"></a>n <span class="ot">&lt;-</span> <span class="dv">200</span></span>
+<span id="cb190-2"><a href="#cb190-2"></a><span class="fu">set.seed</span>(<span class="dv">5433</span>)</span>
+<span id="cb190-3"><a href="#cb190-3"></a></span>
+<span id="cb190-4"><a href="#cb190-4"></a>d <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">x1 =</span> <span class="fu">runif</span>(n, <span class="dv">0</span>,<span class="dv">100</span>), <span class="co"># uniform</span></span>
+<span id="cb190-5"><a href="#cb190-5"></a>               <span class="at">x2 =</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="dv">0</span>,<span class="dv">1</span>), n<span class="sc">/</span><span class="dv">2</span>), <span class="co"># dichotomous</span></span>
+<span id="cb190-6"><a href="#cb190-6"></a>               <span class="at">x1_x2 =</span> x1<span class="sc">*</span>x2, <span class="co"># interaction</span></span>
+<span id="cb190-7"><a href="#cb190-7"></a>               <span class="at">y =</span> <span class="fu">rnorm</span>(n, <span class="dv">0</span> <span class="sc">+</span> <span class="dv">1</span><span class="sc">*</span>x1 <span class="sc">+</span> <span class="dv">10</span><span class="sc">*</span>x2 <span class="sc">+</span> <span class="dv">10</span><span class="sc">*</span> x1_x2, <span class="dv">20</span>)) <span class="co">#DGP + noise</span></span>
+<span id="cb190-8"><a href="#cb190-8"></a></span>
+<span id="cb190-9"><a href="#cb190-9"></a>fit_lm <span class="ot">&lt;-</span> </span>
+<span id="cb190-10"><a href="#cb190-10"></a>  <span class="fu">linear_reg</span>() <span class="sc">|&gt;</span>   </span>
+<span id="cb190-11"><a href="#cb190-11"></a>  <span class="fu">set_engine</span>(<span class="st">"lm"</span>) <span class="sc">|&gt;</span>   </span>
+<span id="cb190-12"><a href="#cb190-12"></a>  <span class="fu">fit</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> d)</span>
+<span id="cb190-13"><a href="#cb190-13"></a></span>
+<span id="cb190-14"><a href="#cb190-14"></a>fit_lm_int <span class="ot">&lt;-</span> </span>
+<span id="cb190-15"><a href="#cb190-15"></a>  <span class="fu">linear_reg</span>() <span class="sc">|&gt;</span>   </span>
+<span id="cb190-16"><a href="#cb190-16"></a>  <span class="fu">set_engine</span>(<span class="st">"lm"</span>) <span class="sc">|&gt;</span>   </span>
+<span id="cb190-17"><a href="#cb190-17"></a>  <span class="fu">fit</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> x1_x2, <span class="at">data =</span> d)</span>
+<span id="cb190-18"><a href="#cb190-18"></a></span>
+<span id="cb190-19"><a href="#cb190-19"></a>fit_knn <span class="ot">&lt;-</span> </span>
+<span id="cb190-20"><a href="#cb190-20"></a>  <span class="fu">nearest_neighbor</span>(<span class="at">neighbors =</span> <span class="dv">20</span>) <span class="sc">|&gt;</span>   </span>
+<span id="cb190-21"><a href="#cb190-21"></a>  <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">|&gt;</span>   </span>
+<span id="cb190-22"><a href="#cb190-22"></a>  <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb190-23"><a href="#cb190-23"></a>  <span class="fu">fit</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2, <span class="at">data =</span> d)</span>
+<span id="cb190-24"><a href="#cb190-24"></a></span>
+<span id="cb190-25"><a href="#cb190-25"></a>fit_knn_int <span class="ot">&lt;-</span> </span>
+<span id="cb190-26"><a href="#cb190-26"></a>  <span class="fu">nearest_neighbor</span>(<span class="at">neighbors =</span> <span class="dv">20</span>) <span class="sc">|&gt;</span>   </span>
+<span id="cb190-27"><a href="#cb190-27"></a>  <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">|&gt;</span>   </span>
+<span id="cb190-28"><a href="#cb190-28"></a>  <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb190-29"><a href="#cb190-29"></a>  <span class="fu">fit</span>(y <span class="sc">~</span> x1 <span class="sc">+</span> x2 <span class="sc">+</span> x1_x2, <span class="at">data =</span> d)</span>
+<span id="cb190-30"><a href="#cb190-30"></a></span>
+<span id="cb190-31"><a href="#cb190-31"></a>d <span class="ot">&lt;-</span> d <span class="sc">|&gt;</span> </span>
+<span id="cb190-32"><a href="#cb190-32"></a>  <span class="fu">mutate</span>(<span class="at">pred_lm =</span> <span class="fu">predict</span>(fit_lm, d)<span class="sc">$</span>.pred,</span>
+<span id="cb190-33"><a href="#cb190-33"></a>         <span class="at">pred_lm_int =</span> <span class="fu">predict</span>(fit_lm_int, d)<span class="sc">$</span>.pred,</span>
+<span id="cb190-34"><a href="#cb190-34"></a>         <span class="at">pred_knn =</span> <span class="fu">predict</span>(fit_knn, d)<span class="sc">$</span>.pred,</span>
+<span id="cb190-35"><a href="#cb190-35"></a>         <span class="at">pred_knn_int =</span> <span class="fu">predict</span>(fit_knn_int, d)<span class="sc">$</span>.pred)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ul>
 <li>Predictions from linear model with and without interaction</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb192"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb192-1"><a href="#cb192-1"></a>d <span class="sc">|&gt;</span> </span>
-<span id="cb192-2"><a href="#cb192-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x1, <span class="at">group =</span> <span class="fu">factor</span>(x2), <span class="at">color =</span> <span class="fu">factor</span>(x2))) <span class="sc">+</span></span>
-<span id="cb192-3"><a href="#cb192-3"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> pred_lm)) <span class="sc">+</span></span>
-<span id="cb192-4"><a href="#cb192-4"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> y)) <span class="sc">+</span></span>
-<span id="cb192-5"><a href="#cb192-5"></a>    <span class="fu">ggtitle</span>(<span class="st">"lm without interaction"</span>) <span class="sc">+</span></span>
-<span id="cb192-6"><a href="#cb192-6"></a>    <span class="fu">ylab</span>(<span class="st">"y"</span>) <span class="sc">+</span></span>
-<span id="cb192-7"><a href="#cb192-7"></a>    <span class="fu">scale_color_discrete</span>(<span class="at">name =</span> <span class="st">"x2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img data-src="003_regression_files/figure-revealjs/unnamed-chunk-62-1.png" width="960"></p>
-</div>
-<div class="sourceCode cell-code" id="cb193"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb193-1"><a href="#cb193-1"></a>d <span class="sc">|&gt;</span> </span>
-<span id="cb193-2"><a href="#cb193-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x1, <span class="at">group =</span> <span class="fu">factor</span>(x2), <span class="at">color =</span> <span class="fu">factor</span>(x2))) <span class="sc">+</span></span>
-<span id="cb193-3"><a href="#cb193-3"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> pred_lm_int)) <span class="sc">+</span></span>
-<span id="cb193-4"><a href="#cb193-4"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> y)) <span class="sc">+</span></span>
-<span id="cb193-5"><a href="#cb193-5"></a>    <span class="fu">ggtitle</span>(<span class="st">"lm with interaction"</span>) <span class="sc">+</span></span>
-<span id="cb193-6"><a href="#cb193-6"></a>    <span class="fu">ylab</span>(<span class="st">"y"</span>) <span class="sc">+</span></span>
-<span id="cb193-7"><a href="#cb193-7"></a>    <span class="fu">scale_color_discrete</span>(<span class="at">name =</span> <span class="st">"x2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output-display">
-<p><img data-src="003_regression_files/figure-revealjs/unnamed-chunk-62-2.png" width="960"></p>
-</div>
-</div>
-<ul>
-<li>Predictions from linear model with and without interaction</li>
-</ul>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb194"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb194-1"><a href="#cb194-1"></a>d <span class="sc">|&gt;</span> </span>
-<span id="cb194-2"><a href="#cb194-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x1, <span class="at">group =</span> <span class="fu">factor</span>(x2), <span class="at">color =</span> <span class="fu">factor</span>(x2))) <span class="sc">+</span></span>
-<span id="cb194-3"><a href="#cb194-3"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> pred_knn)) <span class="sc">+</span></span>
-<span id="cb194-4"><a href="#cb194-4"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> y)) <span class="sc">+</span></span>
-<span id="cb194-5"><a href="#cb194-5"></a>    <span class="fu">ggtitle</span>(<span class="st">"KNN without interaction"</span>) <span class="sc">+</span></span>
-<span id="cb194-6"><a href="#cb194-6"></a>    <span class="fu">ylab</span>(<span class="st">"y"</span>) <span class="sc">+</span></span>
-<span id="cb194-7"><a href="#cb194-7"></a>    <span class="fu">scale_color_discrete</span>(<span class="at">name =</span> <span class="st">"x2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb191"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb191-1"><a href="#cb191-1"></a>d <span class="sc">|&gt;</span> </span>
+<span id="cb191-2"><a href="#cb191-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x1, <span class="at">group =</span> <span class="fu">factor</span>(x2), <span class="at">color =</span> <span class="fu">factor</span>(x2))) <span class="sc">+</span></span>
+<span id="cb191-3"><a href="#cb191-3"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> pred_lm)) <span class="sc">+</span></span>
+<span id="cb191-4"><a href="#cb191-4"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> y)) <span class="sc">+</span></span>
+<span id="cb191-5"><a href="#cb191-5"></a>    <span class="fu">ggtitle</span>(<span class="st">"lm without interaction"</span>) <span class="sc">+</span></span>
+<span id="cb191-6"><a href="#cb191-6"></a>    <span class="fu">ylab</span>(<span class="st">"y"</span>) <span class="sc">+</span></span>
+<span id="cb191-7"><a href="#cb191-7"></a>    <span class="fu">scale_color_discrete</span>(<span class="at">name =</span> <span class="st">"x2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img data-src="003_regression_files/figure-revealjs/unnamed-chunk-63-1.png" width="960"></p>
 </div>
-<div class="sourceCode cell-code" id="cb195"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb195-1"><a href="#cb195-1"></a>d <span class="sc">|&gt;</span> </span>
-<span id="cb195-2"><a href="#cb195-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x1, <span class="at">group =</span> <span class="fu">factor</span>(x2), <span class="at">color =</span> <span class="fu">factor</span>(x2))) <span class="sc">+</span></span>
-<span id="cb195-3"><a href="#cb195-3"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> pred_knn_int)) <span class="sc">+</span></span>
-<span id="cb195-4"><a href="#cb195-4"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> y)) <span class="sc">+</span></span>
-<span id="cb195-5"><a href="#cb195-5"></a>    <span class="fu">ggtitle</span>(<span class="st">"KNN with interaction"</span>) <span class="sc">+</span></span>
-<span id="cb195-6"><a href="#cb195-6"></a>    <span class="fu">ylab</span>(<span class="st">"y"</span>) <span class="sc">+</span></span>
-<span id="cb195-7"><a href="#cb195-7"></a>    <span class="fu">scale_color_discrete</span>(<span class="at">name =</span> <span class="st">"x2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb192"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb192-1"><a href="#cb192-1"></a>d <span class="sc">|&gt;</span> </span>
+<span id="cb192-2"><a href="#cb192-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x1, <span class="at">group =</span> <span class="fu">factor</span>(x2), <span class="at">color =</span> <span class="fu">factor</span>(x2))) <span class="sc">+</span></span>
+<span id="cb192-3"><a href="#cb192-3"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> pred_lm_int)) <span class="sc">+</span></span>
+<span id="cb192-4"><a href="#cb192-4"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> y)) <span class="sc">+</span></span>
+<span id="cb192-5"><a href="#cb192-5"></a>    <span class="fu">ggtitle</span>(<span class="st">"lm with interaction"</span>) <span class="sc">+</span></span>
+<span id="cb192-6"><a href="#cb192-6"></a>    <span class="fu">ylab</span>(<span class="st">"y"</span>) <span class="sc">+</span></span>
+<span id="cb192-7"><a href="#cb192-7"></a>    <span class="fu">scale_color_discrete</span>(<span class="at">name =</span> <span class="st">"x2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img data-src="003_regression_files/figure-revealjs/unnamed-chunk-63-2.png" width="960"></p>
+</div>
+</div>
+<ul>
+<li>Predictions from linear model with and without interaction</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb193"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb193-1"><a href="#cb193-1"></a>d <span class="sc">|&gt;</span> </span>
+<span id="cb193-2"><a href="#cb193-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x1, <span class="at">group =</span> <span class="fu">factor</span>(x2), <span class="at">color =</span> <span class="fu">factor</span>(x2))) <span class="sc">+</span></span>
+<span id="cb193-3"><a href="#cb193-3"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> pred_knn)) <span class="sc">+</span></span>
+<span id="cb193-4"><a href="#cb193-4"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> y)) <span class="sc">+</span></span>
+<span id="cb193-5"><a href="#cb193-5"></a>    <span class="fu">ggtitle</span>(<span class="st">"KNN without interaction"</span>) <span class="sc">+</span></span>
+<span id="cb193-6"><a href="#cb193-6"></a>    <span class="fu">ylab</span>(<span class="st">"y"</span>) <span class="sc">+</span></span>
+<span id="cb193-7"><a href="#cb193-7"></a>    <span class="fu">scale_color_discrete</span>(<span class="at">name =</span> <span class="st">"x2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img data-src="003_regression_files/figure-revealjs/unnamed-chunk-64-1.png" width="960"></p>
+</div>
+<div class="sourceCode cell-code" id="cb194"><pre class="sourceCode numberSource r number-lines code-with-copy"><code class="sourceCode r"><span id="cb194-1"><a href="#cb194-1"></a>d <span class="sc">|&gt;</span> </span>
+<span id="cb194-2"><a href="#cb194-2"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x1, <span class="at">group =</span> <span class="fu">factor</span>(x2), <span class="at">color =</span> <span class="fu">factor</span>(x2))) <span class="sc">+</span></span>
+<span id="cb194-3"><a href="#cb194-3"></a>    <span class="fu">geom_line</span>(<span class="fu">aes</span>(<span class="at">y =</span> pred_knn_int)) <span class="sc">+</span></span>
+<span id="cb194-4"><a href="#cb194-4"></a>    <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">y =</span> y)) <span class="sc">+</span></span>
+<span id="cb194-5"><a href="#cb194-5"></a>    <span class="fu">ggtitle</span>(<span class="st">"KNN with interaction"</span>) <span class="sc">+</span></span>
+<span id="cb194-6"><a href="#cb194-6"></a>    <span class="fu">ylab</span>(<span class="st">"y"</span>) <span class="sc">+</span></span>
+<span id="cb194-7"><a href="#cb194-7"></a>    <span class="fu">scale_color_discrete</span>(<span class="at">name =</span> <span class="st">"x2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<p><img data-src="003_regression_files/figure-revealjs/unnamed-chunk-64-2.png" width="960"></p>
 </div>
 </div>
 <ul>
