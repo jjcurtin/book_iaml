@@ -3,6 +3,7 @@ output: html_document
 editor_options: 
   chunk_output_type: console
 ---
+
 # Introduction to Classification Models
 
 ## Unit Overview
@@ -58,42 +59,19 @@ Submit the application assignment [here](https://canvas.wisc.edu/courses/395546/
 
 -----
 
-```{r}
-#| include: false
+Our eventual goal in this unit is for you to build a machine learning classification model that can accurately predict who lived vs. died on the titanic.  
 
-# set up environment.  Now hidden from view
+Prior to that, we will work with an example where we classify a car as high or low fuel efficient (i.e., a dichtomous outcome based on miles per gallon) using features engineered from its characteristics
 
-options(conflicts.policy = "depends.ok")
-devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
-tidymodels_conflictRules()
-
-library(tidyverse) # for general data wrangling
-library(tidymodels) # for modeling
-
-devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
-devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
-
-theme_set(theme_classic())
-options(tibble.width = Inf)
-
-path_data <- "./data"
-``` 
+----
 
 ## Bayes classifier
-
-Our eventual goal in this unit is to build a machine learning classification model that can accurately predict who lived vs. died on the titanic.  
 
 First, lets introduce the Bayes classifier, which is the classifier that will have the lowest error rate of all classifiers using the same set of features. 
 
 The figure below displays simulated data for a classification problem for K = 2 classes as a function of `X1` and `X2`
 
-
-```{r} 
-#| echo: false
-# NEED THIS? out.height = figsizer(fh5), fig.align="center", 
-
-knitr::include_graphics("figs/unit4_two_class_decision_boundry.png")
-```
+![](figs/unit4_two_class_decision_boundry.png){height=4in}
 
 The Bayes classifier assigns each observation its most likely class given its conditional probabilities for the values for `X1` and `X2`
 
@@ -123,19 +101,17 @@ Logistic regression (a special case of the **generalized** linear model) estimat
 - This makes most sense in some applied settings where we are most interested in predicting if one of the two classes is likely, e.g., 
   - Presence of heart disease
   - Positive for some psychiatric diagnoses
-  - Lapse back to alcohol use in patients with alcohol use disorder
+  - Lapse back to alcohol use in people with alcohol use disorder
 
-We prefer to use logistic regression over the **general** linear model with unordered categorical outcomes because:
+-----
 
-- The General Linear Model makes predictions that are not bounded by [0, 1] and do not represent true estimates of conditional probability for each class
-- Logistic regression approaches can be modified to accommodate multi-class outcomes (i.e., more than two levels) even when those outcomes are unordered 
+Logistic regression is used frequently for binary and multi-level outcomes because
 
-Nonetheless, the general linear model is still used at times to predict binary outcomes (see [Linear Probability Model](https://en.wikipedia.org/wiki/Linear_probability_model)) so you should be aware of it.  We won't discuss it further here.
+- The general linear model makes predictions that are not bounded by [0, 1] and do not represent true estimates of conditional probability for each class
+- Logistic regression approaches can be modified to accommodate multi-class outcomes (i.e., more than two levels) even when they are not ordered
+- Nonetheless, the general linear model is still used at times to predict binary outcomes (see [Linear Probability Model](https://en.wikipedia.org/wiki/Linear_probability_model)) so you should be aware of it.  We won't discuss it further here.
 
-```{r } 
-#| echo: false
-knitr::include_graphics("figs/unit4_lm_vs_logistic.png")
-```
+![](figs/unit4_lm_vs_logistic.png){height=4in}
 
 -----
 
@@ -146,7 +122,6 @@ $Pr(positive\:class | X) = \frac{e^{\beta_0 + \beta_1*X_1 + \beta_2*X_2 + ... + 
 These conditional probabilities are bounded by [0, 1]
 
 To maximize accuracy (as per Bayes classifier),  we predict the positive case if Pr(positive class | X) > .5 for any specific X, otherwise we predict the negative class   
-
 -----
 
 As a simple parametric model, logistic regression is commonly used for explanatory purposes as well as prediction
@@ -168,6 +143,7 @@ Odds are defined with respect to probabilities as follows:
 
 $odds = \frac{Pr(positive\:class|X)} {1 - Pr(positive\:class|X)}$
 
+-----
 
 For example, if the UW Badgers have a .5 probability of winning some upcoming game based on X, their odds of winning are 1 (to 1)
 
@@ -188,19 +164,18 @@ If the UW Badgers have a .25 probability of winning some upcoming game based on 
 The logistic function can be modified to provide odds directly:
 
 **Logistic function**:
-$Pr(positive\:class | X) = \frac{e^{\beta_0 + \beta_1*X_1 + \beta_2*X_2 + ... + \beta_p * X_p}}{1 + e^{\beta_0 + \beta_1*X_1 + \beta_2*X_2 + ... + \beta_p * X_p}}$
+
+- $Pr(positive\:class | X) = \frac{e^{\beta_0 + \beta_1*X_1 + \beta_2*X_2 + ... + \beta_p * X_p}}{1 + e^{\beta_0 + \beta_1*X_1 + \beta_2*X_2 + ... + \beta_p * X_p}}$
 
 
 **Definition of odds**:
 
-$odds = \frac{Pr(positive\:class|X)} {1 - Pr(positive\:class|X)}$
+- $odds = \frac{Pr(positive\:class|X)} {1 - Pr(positive\:class|X)}$
 
 Substitute logistic function for $Pr(positive\:class|X)$ on top and bottom and simplify to get: 
 
-
-$odds(positive\:class|X) = e^{\beta_0 + \beta_1*X_1 + \beta_2*X_2 + ... + \beta_p * X_p}$
-
-Odds are bounded by [0, $\infty$]
+- $odds(positive\:class|X) = e^{\beta_0 + \beta_1*X_1 + \beta_2*X_2 + ... + \beta_p * X_p}$
+- Odds are bounded by [0, $\infty$]
 
 -----
 
@@ -208,11 +183,13 @@ The logistic function can be modified further such that the outcome (log-odds/lo
 
 If we take the natural log (base e) of both sides of the odds equation, we get:
 
-$log(odds(positive\:class|X)) = \beta_0 + \beta_1*X_1 + \beta_2*X_2 + ... + \beta_p * X_p$
+- $log(odds(positive\:class|X)) = \beta_0 + \beta_1*X_1 + \beta_2*X_2 + ... + \beta_p * X_p$
+- Log-odds are unbounded $[-\infty, \infty]$
 
-Log-odds are unbounded $[-\infty, \infty]$
+Use of logit transformation:
 
-Use of logit transformation provides the connection between the general linear model and generalized linear models (in this case with link = logit, family = binomial).  Notice that the logit/log-odds is a linear combination of the features (just like in the general linear model)
+- provides the connection between the general linear model and generalized linear models (in this case with link = logit, family = binomial).  
+- Notice that the logit/log-odds is a linear combination of the features (just like in the general linear model)
 
 -----
 
@@ -220,6 +197,8 @@ Use of logit transformation provides the connection between the general linear m
 
   - Therefore, parameter estimates from these models aren't very useful to describe the effect of features
   - This is because unit change in Y per unit change in any specific feature is not the same for all values of the feature
+
+-----
 
 **Log-odds** are a linear function of X
 
@@ -232,16 +211,12 @@ The **odds ratio** addresses these problems
 
 Odds are defined at a specific set of values across the features in your model.  For example, with one feature:
  
-$odds = \frac{Pr(positive\:class|x_1)} {1 - Pr(positive\:class|x_1)}$
+- $odds = \frac{Pr(positive\:class|x_1)} {1 - Pr(positive\:class|x_1)}$
 
-The odds ratio describes the change in odds for a change of c units in your feature
-
-With some manipulation: 
+The odds ratio describes the change in odds for a change of c units in your feature.  With some manipulation: 
 
 - $Odds\:ratio  =  \frac{odds(x+c)}{odds(x)}$
-
 - $Odds\:ratio  =  \frac{e^{\beta_0 + \beta_1*(x_1 + c)}}{e^{\beta_0 + \beta_1*x_1}}$
-
 - $Odds\:ratio  = e^{c*\beta_1}$
 
 -----
@@ -257,55 +232,81 @@ Given this, the odds ratio associated with every increase in 10,000 spectators:
 
 ## The Cars Dataset
 
-Let's put it all of this together in the cars dataset from Carnegie Mellon's [StatLib Dataset Archive](http://lib.stat.cmu.edu/datasets/)  Our goal is to build a classifier (machine learning model for a categorical outcome) that classifies cars as either high or low mpg.
+```{r}
+#| include: false
+
+# set up environment.  Now hidden from view
+
+options(conflicts.policy = "depends.ok")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+tidymodels_conflictRules()
+
+library(tidyverse) # for general data wrangling
+library(tidymodels) # for modeling
+
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+
+theme_set(theme_classic())
+options(tibble.width = Inf)
+
+path_data <- "./data"
+``` 
+
+Now, let's put this all of this together in the Cars dataset from Carnegie Mellon's [StatLib Dataset Archive](http://lib.stat.cmu.edu/datasets/)  
+
+Our goal is to build a classifier (machine learning model for a categorical outcome) that classifies cars as either high or low mpg.
 
 -----
 
 ### Cleaning EDA
+
 Let's start with some cleaning EDA
 
 - Open and "skim" it RE variable names, classes & missing data
 - Variable names are already tidy
 - no missing data
 - mins (p0) and maxes(p100) for numeric look good
+- there are two character variables (`mpq` and `name`) that will need to be re-classed
+
 ```{r u4-cars-1}
 data_all <- read_csv(here::here(path_data, "auto_all.csv"),
-                     col_types = cols()) |> 
-  glimpse()
+                     col_types = cols()) 
 
 data_all |> skim_some()
 ```
 
 -----
 
-- After reviewing the [data dictionary](data/auto_data_dictionary.pdf), we see that `origin` is an unordered categorical variable that is coded numeric (where 1 = American, 2 = European, and 3 = Japanese).  Let's recode as character with meaningful labels and then convert to factor
-- In fact, lets change all our categorical variables (`mgp`, `origin`, and `name`) to factors.  
 - `mpg` is ordinal, so lets set the levels to indicate the order.
+- After reviewing the [data dictionary](data/auto_data_dictionary.pdf), we see that `origin` is a nominal predictor that is coded numeric (where 1 = American, 2 = European, and 3 = Japanese).  Let's recode as character with meaningful labels and then class as a factor
+- and lets not forget to re-class `name` too
 
 ```{r u4-cars-2}
 data_all <- data_all |> 
-  mutate(origin = case_when(origin == 1 ~ "american", 
-                            origin == 2 ~ "european", 
-                            origin == 3 ~ "japanese")) |>
   mutate(mpg = factor(mpg, levels = c("low", "high")),
-         origin = factor(origin),
-         name = factor(name)) |> 
-  glimpse()
+         name = factor(name), 
+         origin = factor (origin),
+         origin = fct_recode(as.character(origin), #<1>
+                             "american" = "1",
+                            "european" = "2",
+                            "japanese" = "3")) 
 ```
+1. `fct_recode()` works on levels stored as characters, so convert 1, 2, 3, to character first.
 
 -----
 
-- Explore responses for categorical variables
-  - Other than `name`, responses for all other variables are tidy
+Now, we can explore responses for categorical variables
 
-```{r u4-cars-3}
+  - Other than `name`, responses for all other variables are tidy
+  - `name` has many different responses
+  - We won't know how to handle this until we get to later units in the class on natural language processing!
+```{r}
 data_all |> 
   select(where(is.factor)) |>
   walk(\(column) print(levels(column)))
 ```
 
-- `name` has many different responses
-- We won't know how to handle this until we get to later units in the class on natural language processing!
 - Remove `name`
 ```{r u4-cars-4}
 data_all <- data_all |> 
@@ -317,7 +318,7 @@ data_all <- data_all |>
 Finally, let's make and save our training and validation sets.  If we were doing model building for prediction we would also need a test set but we will focus this unit on just selecting the best model but not rigorously evaluating it.
 
 - Let's use a 75/25 split, stratified on `mpg`
-- Don't forget to set a seed in case you need to resplit again in the future!
+- Don't forget to set a seed in case you need to re-split again in the future!
 
 ```{r u4-cars-5}
 set.seed(20110522) 
@@ -336,24 +337,49 @@ splits |>
   write_csv(here::here(path_data, "auto_val.csv"))
 ```
 
-[Any concerns about using this training-validation split?].{red}
-^[These sample sizes are starting to get a little small.  Fitted models will have higher variance with only 75% (N = 294) observations and performance in validation (with only N = 98 observations) may not be a very precise estimate of true validation error.  We will learn more robust methods in the unit on resampling.]
+-----
+
+::: {.callout-important collapse="false"}
+#### Question: Any concerns about using this training-validation split?
+```{html}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show Answer"
+These sample sizes are starting to get a little small.  Fitted models will have 
+higher variance with only 75% (N = 294) observations and performance in validation 
+(with only N = 98 observations) may not be a very precise estimate of true validation 
+error.  We will learn more robust methods in the unit on resampling.
+```
+:::
 
 -----
 
 ### Modeling EDA
 
-Let's do some quick modeling EDA to get a sense of the data.  We will keep it quick and dirty.
+Let's do some quick modeling EDA to get a sense of the data.  
 
-- Open train ( we don't need validate for modeling EDA)
+- We will keep it quick and dirty.
+- First, we should problem make a function to class Cars since we may open it frequently
+- Even though its simple, still better this way (e.g., what if we decide to change how to handle classing - will only need to make that change in one place!)
+
+```{r}
+class_cars <- function(d) { 
+  d |> 
+    mutate(mpg = factor(mpg, levels = c("low", "high")),
+           origin = factor (origin))
+}
+```
+
+-----
+
+- Open train (we don't need validate for modeling EDA)
 - [We are pretending this is a new script....]
-- Let's make sure to class all variable appropriately
+- Class the predictors
 
 ```{r  u4-cars-6}
 data_trn <- read_csv(here::here(path_data, "auto_trn.csv"),
                      col_type = cols()) |> 
-  mutate(mpg = factor (mpg, levels  = c("low", "high")),
-         origin = factor(origin)) |> 
+  class_cars() |> 
   glimpse()
 ```
 
@@ -374,7 +400,7 @@ data_trn |> plot_bar("mpg")
 data_trn |> 
   select(where(is.numeric)) |> 
   names() |> 
-  map(~ plot_grouped_box_violin(df = data_trn, x = "mpg", y = .x)) |> 
+  map(\(name) plot_grouped_box_violin(df = data_trn, x = "mpg", y = name)) |> 
   cowplot::plot_grid(plotlist = _, ncol = 2)
 ```
 
@@ -404,13 +430,12 @@ data_trn |>
   mutate(mpg_high = if_else(mpg == "high", 1, 0), #<1>
          origin_japan = if_else(origin == "japanese", 1, 0),
          origin_europe = if_else(origin == "european", 1, 0)) |> 
-  select(-origin, -mpg) |> #<2>
+  select(-origin, -mpg) |>  #<2>
   cor() |> 
-  corrplot::corrplot.mixed()  #<3>
+  corrplot::corrplot.mixed() 
 ```
-1. If manually coding an binary outcome variable, best practice is to set the positive class to be 1
-2. Remove origin after convert to dummy-coded features
-3. use namespace:: because didnt load the `corrplot` package
+1. If manually coding a binary outcome variable, best practice is to set the positive class to be 1
+2. Remove `origin` and `mpg` after converting to dummy-coded features
 
 - `cylinders`, `displacement`, `horsepower`, and `weight` are all essentially the same construct (big, beefy car!)
 - All are strongly correlated with `mpg`
