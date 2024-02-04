@@ -1,9 +1,10 @@
 ---
-title: 'Unit 4 (Classification): Fit RDA Models'
-author: "Your name here"
+title: 'Unit 4 (Classification): Fit KNN Models'
+author: "Your Name"
 date: "`r lubridate::today()`"
-output: 
-  html_document:
+format: 
+  html: 
+    embed-resources: true
     toc: true 
     toc_depth: 4
 editor_options: 
@@ -28,11 +29,11 @@ To begin, download the following from the course web book (Unit 4):
 
 The data for this week's assignment (across all scripts) will be the Titanic dataset, which contains survival outcomes and passenger characteristics for the Titanic's passengers. You can find information about the dataset in the data dictionary (available for download from the course website). This is a popular dataset that has been used for machine learning competitions and is noted for being a fun and easy introduction into data science. There is tons of information on how others have worked with this dataset online, and you are encouraged to incorporate knowledge that others have gained if you want! However, only code from the class web book will be needed for full credit on this assignment.
 
-In this script, you will fit a series of RDA models in your training data and use your validation data to select the best model. This script starts with reading in the titanic_train.csv & titanic_val.csv files that you created in the cleaning EDA script. Although this assignment does not have an explicit script for modeling EDA, we expect that you will have done some modeling EDA on your own to be able to do good feature engineering and fit good models. You should now have multiple examples of good modeling EDA (the web book and two modeling EDA homework keys). You do not need to turn in any code for modeling EDA that you complete.
+In this script, you will fit a series of KNN models in your training data and use your validation data to select the best model. This script starts with reading in the titanic_train.csv & titanic_val.csv files that you created in the cleaning EDA script. Although this assignment does not have an explicit script for modeling EDA, we expect that you will have done some modeling EDA on your own to be able to do good feature engineering and fit good models. You should now have multiple examples of good modeling EDA (the web book and two modeling EDA homework keys, courtesy of Sarah). You do not need to turn in any code for modeling EDA that you complete.
 
-At the end of this assignment, you will select your best performing model across all KNN and RDA models that you fit. Like last week, you will use the titanic_test_cln.csv file **only once** at the end of the assignment to generate your best model's predictions of survived in the held-out test set. We will assess everyone's predictions on the held-out set to determine the best fitting model in the class. **The winner gets a high five from John & a free lunch!**
+At the end of this assignment, you will select your best performing model across all KNN and RDA models that you fit. Like last week, you will use the titanic_test_cln.csv file **only once** at the end of the assignment to generate your best model's predictions of the survived outcomein the held-out test set. We will assess everyone's predictions on the held-out set to determine the best fitting model in the class. **The winner gets a  high five from John & a free lunch!**
 
-Your assignment is due Wednesday at 5:00 PM. Let's get started!
+Your assignment is due Wednesday, February 15th at 5:00 PM. Let's get started!
 
 ## Setup
 
@@ -42,6 +43,7 @@ library(tidymodels) # for modeling
 library(tidyverse) # for general data wrangling
 library(kableExtra) # for displaying formatted tables w/ kbl()
 library(skimr) # for skim()
+source("~/github/lab_support/fun_modeling.R")
 ```
 
 ### Create file path object
@@ -76,30 +78,34 @@ Create an empty tracking tibble to track the validation error across the various
 
 ```
 
-## RDA model building instructions
+## KNN model building instructions
 
-You may consider as many RDA model configurations as you wish, but there are a few rules:
+You may consider as many KNN model configurations as you wish, but there are a few rules:
 
 * All models must use survived as the outcome variable
 
 * You must build a minimum of 3 models (this is not a trick - if you build 3 models, that is sufficient to receive full credit on this component of the homework assignment!)
 
-* At least one model must include a variable with missing data (you will need to handle that missingness before using the variable)
+* At least one model must include 2 or more numeric predictors
 
-* At least one model must include a transformation of a numeric variable
+* At least one model must include a categorical predictor with 3 or more levels
 
-* At least one model must include interaction(s) among features
+* At least one model must include a categorical variable with levels that have been modified during feature engineering (NOT including dummy coding)
 
-* All models you fit should use the hyperparameter values associated with a QDA because you don't know how to tune hyperparameters yet (though you will by next week!). You can get more details on this in section 4.7.2 of the web book, but the code needed for this appears in the model-fitting chunks below (fit_model_1).
+* At least one model must engineer a feature that is derived from a raw predictor BEYOND transformation of a numeric variable or collapsing categorical variable levels (We want you to start thinking more elaborately and creatively about how to construct new features from the raw predictors)
+
+* At least one model must consider at least 3 values of *k*
 
 Your models may include as many other predictors as you would like (e.g., your model satisfying the 2 numeric predictors requirement may include more than 2 numeric variables, categorical variables, etc.). Be as creative as you'd like!
 
-## RDA model configuration 1
+## KNN model configuration 1
 
-Indicate which required model components you are including for your first model by deleting the requirements that do **not** apply in the text below:
-*Variable with missingness*
-*Transformed numeric*
-*Interaction(s)*
+Indicate which required model components you are including for your first model by deleting the requirements that do **not** apply from the text below:
+*2+ numeric predictors*
+*Categorical > 2 levels*
+*Modified categorical*
+*3+ values of k*
+*More creative feature engineering*
 
 ### Set up recipe
 
@@ -117,10 +123,9 @@ Use the make_features() function to generate the feature matrix of the training 
 
 ### Fit your model
 
-Fit a RDA model predicting survived from your training feature matrix
+Fit a knn model predicting survived from your training feature matrix
 ```{r fit_model_1}
-# use these hyperparamater values:
-# discrim_regularized(frac_common_cov = 0, frac_identity = 0)
+
 ```
 
 ### Validation feature matrix
@@ -137,12 +142,14 @@ Use the accuracy_vec() function to calculate the validation error (accuracy) of 
 
 ```
 
-## RDA model configuration 2
+## KNN model configuration 2
 
-Indicate which required model components you are including for your second model by deleting the requirements that do **not** apply in the text below:
-*Variable with missingness*
-*Transformed numeric*
-*Interaction(s)*
+Indicate which required model components you are including for your second model by deleting the requirements that do **not** apply from the text below:
+*2+ numeric predictors*
+*Categorical > 2 levels*
+*Modified categorical*
+*3+ values of k*
+*More creative feature engineering*
 
 ### Set up recipe
 
@@ -160,10 +167,9 @@ Use the make_features() function to generate the feature matrix of the training 
 
 ### Fit your model
 
-Fit a RDA model predicting survived from your training feature matrix
+Fit a knn model predicting survived from your training feature matrix
 ```{r fit_model_2}
-# use these hyperparamater values:
-# discrim_regularized(frac_common_cov = 0, frac_identity = 0)
+
 ```
 
 ### Validation feature matrix
@@ -180,12 +186,14 @@ Use the accuracy_vec() function to calculate the validation error (accuracy) of 
 
 ```
 
-## RDA model configuration 3
+## KNN model configuration 3
 
-Indicate which required model components you are including for your third model by deleting the requirements that do **not** apply in the text below:
-*Variable with missingness*
-*Transformed numeric*
-*Interaction(s)*
+Indicate which required model components you are including for your third model by deleting the requirements that do **not** apply from the text below:
+*2+ numeric predictors*
+*Categorical > 2 levels*
+*Modified categorical*
+*3+ values of k*
+*More creative feature engineering*
 
 ### Set up recipe
 
@@ -203,10 +211,9 @@ Use the make_features() function to generate the feature matrix of the training 
 
 ### Fit your model
 
-Fit a RDA model predicting survived from your training feature matrix
+Fit a knn model predicting survived from your training feature matrix
 ```{r fit_model_3}
-# use these hyperparamater values:
-# discrim_regularized(frac_common_cov = 0, frac_identity = 0)
+
 ```
 
 ### Validation feature matrix
@@ -225,7 +232,7 @@ Use the accuracy_vec() function to calculate the validation error (accuracy) of 
 
 ## Additional model configurations (Optional)
 
-Create as many code chunks as you would like below to test additional RDA model configurations. Record your models' performance in the validation data (accuracy) in your validation error tracking tibble.
+Create as many code chunks as you would like below to test additional KNN model configurations. Record your models' performance in the validation data (accuracy) in your validation error tracking tibble.
 
 ```{r additional_knns}
 
@@ -233,15 +240,15 @@ Create as many code chunks as you would like below to test additional RDA model 
 
 ## Generate predictions
 
-This section is for generating predictions for your best model in the held-out test set. You should only generate predictions for **ONE MODEL** out of all KNN and RDA models you fit across both model fitting files (hw_unit_4_fit_rda.Rmd and hw_unit_4_fit_knn.Rmd). We will use these predictions to generate your ONE estimate of model performance in the held-out data.
+This section is for generating predictions for your best model in the held-out test set. You should only generate predictions for **ONE MODEL** out of all KNN and RDA models you fit across both model fitting files. We will use these predictions to generate your ONE estimate of model performance in the held-out data.
 
-If your **best** model is a RDA (from this script), follow the steps below. If your best model is a KNN (from your other script), skip to **Save & Knit** at the end of the document.
+If your **best** model is a KNN (from this script), follow the steps below. If your best model is a RDA (from your other script), skip to **Save & Knit** at the end of the document.
 
-### Confirm best model is RDA
+### Confirm best model is KNN
 
-Change "FALSE" to "TRUE" if your best model is a RDA. Add your last name between the quotation marks.
+Change "FALSE" to "TRUE" if your best model is a KNN. Add your last name between the quotation marks.
 ```{r}
-rda_best <- FALSE
+knn_best <- FALSE
 last_name <- ""
 ```
 
@@ -249,24 +256,24 @@ last_name <- ""
 
 Now that a single, best model has been selected, you want to fit that model in all your held-in data (training PLUS validation). The following code will combine your data appropriately as long as you have used the data_trn & data_val object names (no need to change anything in this chunk).
 ```{r}
-if (rda_best) {
+if (knn_best) {
  data_held_in <- bind_rows(data_trn, data_val) 
 }
 ```
 
 ### Make feature matrices from all held-in data
 
-Make feature matrix for held-in data from held-in data. Substitute the name of your best recipe object where it says "INSERT."
+Make feature matrix for held-in data from held-in data. Substitute the name of your best recipe where it says "INSERT."
 ```{r}
-if (rda_best) {
+if (knn_best) {
   feat_held_in <- INSERT %>% 
     make_features(data_held_in, data_held_in)
 }
 ```
 
-Make feature matrix for held-out (test) data from held-in data. Substitute the name of your best recipe object where it says "INSERT."
+Make feature matrix for held-out (test) data from held-in data. Substitute the name of your best recipe where it says "INSERT."
 ```{r}
-if (rda_best) {
+if (knn_best) {
  feat_test <- INSERT %>% 
   make_features(data_held_in, data_test) 
 }
@@ -274,27 +281,27 @@ if (rda_best) {
 
 ### Fit best model
 
-Update the code below to reflect your best model. You need to adjust the formula based on the best model you've selected.
+Update the code below to reflect your best model. You need to set your neighbors value and adjust the formula based on the best model you've selected.
 ```{r}
-if (rda_best) {
-  best_model <- discrim_regularized(frac_common_cov = 0, 
-                                    frac_identity = 0) %>% 
-  set_engine("klaR") %>% 
-  fit(survived ~ INSERT, data = feat_held_in)
+if (knn_best) {
+ best_model <- nearest_neighbor(neighbors = INSERT) %>% 
+  set_engine("kknn") %>% 
+  set_mode("classification") %>%   
+  fit(survived ~ INSERT, data = feat_held_in) 
 }
 ```
 
 ### Generate test predictions
 
-Run this code chunk to save out your best model's predictions in the held-out test set. Look over your predictions to confirm your model generated valid predictions for each test observation. If you left rda_best as "FALSE" no file will be saved out. (no need to change anything in this chunk)
+Run this code chunk to save out your best model's predictions in the held-out test set. Look over your predictions to confirm your model generated valid predictions for each test observation. If you left knn_best as "FALSE" no file will be saved out. (no need to change anything in this chunk)
 ```{r}
-if (rda_best) {
+if (knn_best) {
   feat_test %>% 
     mutate(survived = predict(best_model, feat_test)$.pred_class) %>% 
     select(passenger_id, survived) %>% 
     glimpse() %>% 
     write_csv(file.path(path_hw_unit_4,
-                        str_c("test_preds_", last_name, ".csv")))
+                                  str_c("test_preds_", last_name, ".csv")))
 }
 ```
 
@@ -304,7 +311,7 @@ Save this .Rmd file with your last name at the end (e.g., hw_unit_4_fit_knn_sant
 
 We will assess everyone's predictions in the test, and the winner gets free lunch AND a high five from John!
 
-Don't forget to complete the KNN portion of this assignment and submit it to Canvas (hw_unit_4_fit_knn.Rmd) if you haven't already.
+Don't forget to complete the RDA portion of this assignment (hw_unit_4_fit_rda.Rmd) if you haven't already and submit it to Canvas.
 
 **Way to go!!**
 
