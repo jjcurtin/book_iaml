@@ -29,7 +29,7 @@ The data for this week's assignment (across all scripts) will be the Titanic dat
 
 In this script, you will fit a series of `knn` models in your training data and use your validation data to select the best model. This script starts with reading in the `titanic_train.csv` & `titanic_val.csv` files that you created in the cleaning EDA script. Although this assignment does not have an explicit script for modeling EDA, we expect that you will have done some modeling EDA on your own to be able to do good feature engineering and fit good models. You should now have multiple examples of good modeling EDA (the web book and two modeling EDA homework keys). You do not need to turn in any code for modeling EDA that you complete.
 
-At the end of this assignment, you will select your best performing model across all `knn` and `rda` models that you fit. You will use the `titanic_test_cln_no_label.csv` file **only once** at the end of the assignment to generate your best model's predictions of the survived outcome in the held-out test set. We will assess everyone's predictions on the held-out set to determine the best fitting model in the class. **The winner gets a  high five from John & a free lunch!**
+At the end of this assignment, you will select your best performing model across all `knn` and `rda` models that you fit. You will use the `titanic_test_cln_no_label.csv` file **only once** at the end of the assignment to generate your best model's predictions of the survived outcome in the held-out test set. We will assess everyone's predictions on the held-out set to determine the best fitting model in the class. **The winner gets a free lunch!**
 
 ## Setup
 
@@ -281,7 +281,7 @@ If your **best** model is a `knn` from this script, edit the following objects i
 
 If your best model is a `rda`, don't edit anything in the next two code chunks and skip to the final section to save, render, etc.
 ```{r}
-best_model <- NA
+best_model <- NULL
 best_rec <- NA # best recipe
 last_name <- ""
 ```
@@ -293,7 +293,7 @@ Run this code chunk to save out your best model's predictions of `survived` in t
 
 ADVANCED NOTE:  You *could* improve this code below to train an even better model.  If you know what could be improved, do it.  If not, do not worry. This will work well enough (but maybe not for a free lunch!!).  
 ```{r}
-if (!is.na(best_model)){
+if (!is.null(best_model)){
   
  # Make test set features with the best recipe
   rec_prep <- best_rec |> 
@@ -308,7 +308,7 @@ if (!is.na(best_model)){
     select(passenger_id, survived) #passenger_id is the id variable to match predictions
   
   # Save predictions as a csv file with your last name in the file name
-   write.csv(test_preds, file.path(path_data,str_c("test_preds_", 
+   write.csv(test_preds, here::here(path_data,str_c("test_preds_", 
                                                    last_name,
                                                    ".csv")))
 }
