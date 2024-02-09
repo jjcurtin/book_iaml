@@ -2,7 +2,7 @@
 
 # ./render.sh FILE FORMAT
 # FILE = all or filename
-# FORMAT = book, slides, or wide_slides
+# FORMAT = book, slides, or slides_wide
 
 FILE=$1
 FORMAT=$2
@@ -27,7 +27,7 @@ if [ $FILE != "all" ] && [ "$FORMAT" = "slides" ];  then
   quarto publish quarto-pub "$FILE" 
 fi
  
-if [ $FILE != "all" ] && [ "$FORMAT" = "wide_slides" ];  then
+if [ $FILE != "all" ] && [ "$FORMAT" = "slides_wide" ];  then
 	echo "Rendering $FILE to wide slides on quarto-pub"
   cp _quarto_slides_wide.yml _quarto.yml
   quarto publish quarto-pub "$FILE" 
