@@ -3,6 +3,7 @@ output: html_document
 editor_options: 
   chunk_output_type: console
 ---
+
 # Resampling Methods for Model Selection and Evaluation
 
 ## Overview of Unit
@@ -233,12 +234,20 @@ It really speeds things up to set up parallel processing backend!
 - Some options are OS specific
 - This version is sufficient for most uses in tidymodels
 ```{r}
-library(doParallel)
+library(doParallel, exclude = c("accumulate", "when"))
 cl <- makePSOCKcluster(parallel::detectCores(logical = FALSE))
 registerDoParallel(cl)
 ```
 
-### Using Cache
+### Using Cache::: {.callout-important collapse="false"}
+### Question: 
+```{html}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show Answer"
+Insert answer text.  Hard return at about 80 char
+```
+:::
 
 NEED TO ADD THIS SECTION TO WEBBOOK.  Will recommend use of `xfun::cache_rds()`
 
@@ -397,11 +406,51 @@ Our estimate of its future accuracy is based on our previous assessment (one of 
 
 Lets consider some conceptual issues that are key to understand with respect to resampling for model selection OR model evaluation
 
-`r colorize("What do you know about the performance of the final/best model fit with n = 303 vs. a model fit with 50% (N = 152) that we designated as our training set?", "red")`  ^[The model fit in the subset of training data will perform less well than the model fit to the full n = 303.  Because it is fit with a smaller sample size it will have be more overfit (and show more variance across different potential training sets)]
+::: {.callout-important collapse="false"}
+### Question: What do you know about the performance of the final/best model fit with n = 303 vs. a model fit with 50% (N = 152) that we designated as our training set?
+```{html}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show Answer"
+The model fit in the subset of training data will perform less well than the model
+fit to the full n = 303.  Because it is fit with a smaller sample size it will have
+be more overfit (and show more variance across different potential training sets)
+```
+:::
 
-`r colorize("If our final/best model was fit with n = 303, what can you say about our estimate of its performance using this single train/test split that only fit with a subset of the available data?", "red")`  ^[Our performance estimate of our final model (fit with n = 303) based on a model fit with n = 152 will be biased.  Our performance estimate will likely underestimate the true performance of our final model trained with n = 303 because we are evaluating a fitted model that will be more overfit than this model because it was fit with a smaller n.]
+-----
+::: {.callout-important collapse="false"}
+### Question: If our final/best model was fit with n = 303, what can you say about our estimate of its performance using this single train/test split that only fit with a subset of the available data?
+```{html}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show Answer"
+Our performance estimate of our final model (fit with n = 303) based on a model 
+fit with n = 152 will be biased.  Our performance estimate will likely underestimate
+the true performance of our final model trained with n = 303 because we are
+evaluating a fitted model that will be more overfit than this model because it was
+fit with a smaller n.
+```
+:::
 
-`r colorize("Contrast the costs/benefits of a 50/50 vs. 80/20 split for train and test", "red")`  ^[Using a training set with 80% of the sample will yield a less biased (under) estimate of the final (using all data) model performance than a training set with 50% of the sample.  However, using a test set of 20% of the data will produce a more variable (less precise) estimate of performance than the 50% test set.  This is another bias-variance trade off but now instead of talking about model performance, we are seeing that we have to trade off bias and variance in our estimate of the model performance too!]
+-----
+
+::: {.callout-important collapse="false"}
+### Question: Contrast the costs/benefits of a 50/50 vs. 80/20 split for train and test
+```{html}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show Answer"
+Using a training set with 80% of the sample will yield a less biased (under)
+estimate of the final (using all data) model performance than a training set with
+50% of the sample.  However, using a test set of 20% of the data will produce a 
+more variable (less precise) estimate of performance than the 50% test set.  This 
+is another bias-variance trade off but now instead of talking about model
+performance, we are seeing that we have to trade off bias and variance in our
+estimate of the model performance too!
+```
+:::
+
 
 This recognition of a bias-variance trade-off in our performance estimates is what motivates the more complicated resampling approaches we will now consider.
 
@@ -412,40 +461,72 @@ This recognition of a bias-variance trade-off in our performance estimates is wh
 Let's turn to a new resampling technique and start with some questions to motivate it
 
 
-`r colorize("How could you use this single validation set approach to get the least biased estimate of model performance with your n = 303 dataset that would still allow you to estimate its performance in a held out test set?", "red")`  ^[Put all but one case into the training set (i.e., leave only one case out in the test set).  In our example, you would fit a model with n = 302  This model will have essentially equivalent overfitting as n = 303 so it will not yield much bias when we use it to estimate the performance of the n = 303 model.]
+::: {.callout-important collapse="false"}
+### Question: How could you use this single validation set approach to get the least biased estimate of model performance with your n = 303 dataset that would still allow you to estimate its performance in a held out test set?
+```{html}
+#| echo: true
+#| code-fold: true
+#| code-summary: "show answer"
+Put all but one case into the training set (i.e., leave only one case out in the
+test set).  In our example, you would fit a model with n = 302  this model will 
+have essentially equivalent overfitting as n = 303 so it will not yield much bias 
+when we use it to estimate the performance of the n = 303 model.
+```
+:::
 
-`r colorize("What will be the biggest problem with this approach?", "red")`  ^[You will estimate performance with only n = 1 in the test set.  This means there will be high variance in your performance estimate.]
+::: {.callout-important collapse="false"}
+### Question: What will be the biggest problem with this approach?
+```{html}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show Answer"
+You will estimate performance with only n = 1 in the test set.  This means there 
+will be high variance in your performance estimate.
+```
+:::
 
-`r colorize("How might you reduce this problem?", "red")`  ^[Repeat this split between training and validation n times so that there are n different sets of n = 1 test sets.  Then average the performance across all n of these test sets to get a more stable estimate of performance.  This is Leave One Out Cross-validation.]
+
+
+::: {.callout-important collapse="false"}
+### Question: How might you reduce this problem?
+```{html}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show Answer"
+Repeat this split between training and validation n times so that there are n different
+sets of n = 1 test sets.  Then average the performance across all n of these test 
+sets to get a more stable estimate of performance.  this is leave one out
+cross-validation.
+```
+:::
+
+
+comparisons across loocv and single validation set approaches
+
+- the performance estimate from loocv has less bias than the single validation set method (because the models that are evaluated were fit with close to the full n of the final model)
+
+- loocv uses all observations as "test" at some point.   less variance than single 20% or 50% validation set?
+
+but...
+
+- loocv can be computationally expensive (need to fit and evaluate the same model configuration n times).  this is a real problem when you are also working with a high number of model configurations (i.e., number fits = n * number of model configurations).
 
 -----
 
-Comparisons across LOOCV and Single Validation Set Approaches
+loocv eventually uses all the data for test across the 'n' test sets.  averaging also helps reduce variance in the performance metric.
 
-- The performance estimate from LOOCV has less bias than the single validation set method (because the models that are evaluated were fit with close to the full n of the final model)
+however, averaging reduces variance to a greater degree when the performance measures being averaged are less related/more independent.
 
-- LOOCV uses all observations as "test" at some point.   Less variance than single 20% or 50% validation set?
+the n fitted models are very similar in loocv b/c they are each fit on almost the same data (each with n-1 observations)
 
-But...
+k-fold cross validation (next method) improves the variance of the average performance metric by averaging across more independent (less overlapping) training sets
 
-- LOOCV can be computationally expensive (need to fit and evaluate the same model configuration n times).  This is a real problem when you are also working with a high number of model configurations (i.e., number fits = n * number of model configurations).
+for this reason, it is superior and (always?) preferred over loocv
 
------
+we are not demonstrating loocv b/c we strongly prefer other methods (k-fold)
 
-LOOCV eventually uses all the data for test across the 'n' test sets.  Averaging also helps reduce variance in the performance metric.
-
-However, averaging reduces variance to a greater degree when the performance measures being averaged are less related/more independent.
-
-The n fitted models are VERY similar in LOOCV b/c they are each fit on almost the same data (each with n-1 observations)
-
-K-fold cross validation (next method) improves the variance of the average performance metric by averaging across more independent (less overlapping) training sets
-
-For this reason, it is superior and (always?) preferred over LOOCV
-
-We are not demonstrating LOOCV b/c we strongly prefer other methods (K-fold)
-
-- Still important to understand it conceptually and its strengths/weaknesses
-- If you wanted to use this resampling approach, simply substitute `loo_cv()` for `vfold_cv()` in the next example
+- still important to understand it conceptually and its strengths/weaknesses
+- if you wanted to use this resampling approach, simply substitute `loo_cv()` for `vfold_cv()` in the next example
 
 -----
 
@@ -468,7 +549,7 @@ Note that K is sometimes referred to as V in some fields/literatures (Don't blam
 
 Visualization of K-fold
 
-```{r  u5-kfold-1, out.height = figsizer(fh5), fig.align="center", echo=FALSE} 
+```{r  u5-kfold-1, fig.align="center", echo=FALSE} 
 knitr::include_graphics("figs/unit4_k_fold.png")
 ```
 
@@ -1066,8 +1147,20 @@ Nested resampling evaluates a fitting and selection process not a specific model
 
 -----
 
-`r colorize("Why bootstrap on inner loop and k-fold on outer loop?", "red")`  ^[The inner loop is used for selecting models.  Bootstrap yields low variance performance estimates (but they are biased).  We want low variance to select best model configuration.  K-fold is a good method for less biased performance estimates.  We want less bias in our final evaluation of our best model.  You can do repeated K-fold in the outer loop to both reduce its variance and give you a sense of the performance sampling distribution. BUT VERY COMPUTATIONALLY INTENSIVE]
-
+::: {.callout-important collapse="false"}
+### Question: Why bootstrap on inner loop and k-fold on outer loop?
+```{html}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show Answer"
+The inner loop is used for selecting models.  Bootstrap yields low variance performance
+estimates (but they are biased).  We want low variance to select best model
+configuration.  K-fold is a good method for less biased performance estimates.  
+We want less bias in our final evaluation of our best model.  You can do repeated
+K-fold in the outer loop to both reduce its variance and give you a sense of the
+performance sampling distribution. BUT VERY COMPUTATIONALLY INTENSIVE
+```
+:::
 
 -----
 
