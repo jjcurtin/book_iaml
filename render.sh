@@ -11,6 +11,7 @@ if [ "$FILE" = "all" ] && [ "$FORMAT" = "book" ]; then
   echo ""
   echo "Rendering all chapters to web book"
   echo "Do not forget to add, commit, and push to Github"
+  echo ""
   cp _quarto_book.yml _quarto.yml
   quarto render
 fi
@@ -19,6 +20,7 @@ if [ $FILE != "all" ] && [ "$FORMAT" = "book" ];  then
   echo ""
 	echo "Rendering $FILE to web book"
   echo "Do not forget to add, commit, and push to Github"
+  echo ""
   cp _quarto_book.yml _quarto.yml
   quarto render "$FILE"
 fi
@@ -26,6 +28,7 @@ fi
 if [ $FILE != "all" ] && [ "$FORMAT" = "slides" ];  then
   echo ""
 	echo "Rendering $FILE to standard slides on quarto-pub"
+  echo ""
   cp _quarto_slides.yml _quarto.yml
   quarto publish quarto-pub "$FILE" 
 fi
@@ -33,6 +36,7 @@ fi
 if [ $FILE != "all" ] && [ "$FORMAT" = "slides_wide" ];  then
   echo ""
 	echo "Rendering $FILE to wide slides on quarto-pub"
+  echo ""
   cp _quarto_slides_wide.yml _quarto.yml
   quarto publish quarto-pub "$FILE" 
 fi
