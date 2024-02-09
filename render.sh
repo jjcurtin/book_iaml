@@ -14,6 +14,7 @@ if [ "$FILE" = "all" ] && [ "$FORMAT" = "book" ]; then
   echo ""
   cp _quarto_book.yml _quarto.yml
   quarto render
+  git restore _quarto.yml
 fi
 
 if [ $FILE != "all" ] && [ "$FORMAT" = "book" ];  then
@@ -23,6 +24,7 @@ if [ $FILE != "all" ] && [ "$FORMAT" = "book" ];  then
   echo ""
   cp _quarto_book.yml _quarto.yml
   quarto render "$FILE"
+  git restore _quarto.yml
 fi
  
 if [ $FILE != "all" ] && [ "$FORMAT" = "slides" ];  then
@@ -31,6 +33,7 @@ if [ $FILE != "all" ] && [ "$FORMAT" = "slides" ];  then
   echo ""
   cp _quarto_slides.yml _quarto.yml
   quarto publish quarto-pub "$FILE" 
+  git restore _quarto.yml
 fi
  
 if [ $FILE != "all" ] && [ "$FORMAT" = "slides_wide" ];  then
@@ -39,4 +42,5 @@ if [ $FILE != "all" ] && [ "$FORMAT" = "slides_wide" ];  then
   echo ""
   cp _quarto_slides_wide.yml _quarto.yml
   quarto publish quarto-pub "$FILE" 
+  git restore _quarto.yml
 fi
