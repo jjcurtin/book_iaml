@@ -12,7 +12,9 @@ editor_options:
 
 - Bias vs. variance wrt model performance estimates
   - How is this different from bias vs. variable of model itself
-- How to do parallel processing
+- Methods for computationally intense calculations
+  - Parallel processing
+  - Cache
 - Types of resampling
   - Validation set approach
   - Leave One Out CV
@@ -64,7 +66,108 @@ Submit the application assignment [here](https://canvas.wisc.edu/courses/395546/
 
 -----
 
-## Introduction
+## Some Technical Details for Costly Computations
+
+Before we dive into resampling, we need to introduce two coding techniques that can save us a lot of time when implementing resampling methods
+
+- Parallel processing
+- Caching time-consuming computations
+
+### Parallel Processing
+
+When using resampling, we often end up fitting many, many model configurations
+
+- This can be the same model configuration in many different training sets
+- Or many different model configurations in many different training sets (even more computationally demanding)
+\
+\
+Critically
+
+- The fitting process for each of these configurations is independent for the others
+- The order that the configurations are fit doesn't matter either
+- When these two criteria are met, the processes can be run in parallel with an often big time savings
+
+-----
+
+To do this in R, we need to set up a parallel processing backend
+
+- Lots of [options and details](https://tune.tidymodels.org/articles/extras/optimizations.html) depending on the code you intend to run in parallel to do it really well
+- We can discuss some of these issues/details and other solutions (i.e., High Throughput Computing at CHTC)
+- Some options are OS specific
+- Provide more details [elsewhere](https://jjcurtin.github.io/book_dwvt/parallel_processing.html)
+
+-----
+
+TLDR - copy the following code chunk into your scripts
+```{r}
+cl <- parallel::makePSOCKcluster(parallel::detectCores(logical = FALSE))
+doParallel::registerDoParallel(cl)
+```
+
+-----
+
+### Using Cache
+
+Even with parallel processing, resampling procedures can STILL take a lot of time, particularly on notebook computers that don't have a lot of cores available
+\
+\
+In these instances, you may also want to consider caching the result
+
+- When you cache some set of calculations, you are essentially saving the results of the calculations
+- If you need to run the script again, you simply load the saved calculations again from disk, rather than re-calculating them (its much quicker to just read them from a file)
+\
+\
+But...
+
+- You need to redo the calculations if you change anything in your script that could affect them
+- This is called "invalidating the cache"
+- You need to be very careful to reuse the cache when you can but also to invalidate it when the calculations have changed
+
+-----
+
+We describe [three options] to cache calculations that are available in R.  
+
+- You should read more about those options if you plan to use one
+- Our preferred solution is to use `xfun::cache_rds()` 
+- Read the help for this function (`?xfun::cache_rds`) if you plan to use it 
+- Cache is complicated and can lead to errors.   
+- But cache can also save you a lot of time during development!
+
+-----
+
+Start by loading only that function for the `xfun` package
+
+```{r}
+library(xfun, include.only = "cache_rds")
+```
+
+-----
+
+To use the function
+
+- You will pass the code for the calculations you want to cache as the first argument (`expr`) to the function inside a set of curly brackets `{}`
+- You will also provide three other arguments
+- Here is the function call with our recommended values for the latter arguments
+
+```{r}
+#| eval: false
+
+cache_rds(
+  expr = {
+ },
+ file = "filename", # <1>
+ rerun = FALSE,
+ hash = "auto"
+)
+```
+1. You should substitute a meaningful filename (without extension) for this set of calculations.
+\
+\
+We will demonstrate the use of this function throughout the book.  BUT you do not need to use it if you find it confusing.
+
+-----
+
+## Introduction to Resampling
 
 We will use resampling for two goals:
 
@@ -146,9 +249,7 @@ data_all <- read_csv(here::here(path_data, "cleveland.csv"),
 
 -----
 
-- Code categorical variables as factors with meaningful text labels (and no spaces)
-  - Can use `if_else()` for binary recode
-  - Use `recode()` for more complicated recodes (don't forget namespace. `dplyr::`)
+Code categorical variables as factors with meaningful text labels (and no spaces)
 
 ```{r}
 data_all <- data_all |> 
@@ -164,7 +265,9 @@ data_all <- data_all |>
          cp = factor(cp, levels = 1:4, 
                      labels = c("typ_ang", "atyp_ang", "non_anginal", "non_anginal")),
          rest_ecg = factor(rest_ecg, levels = 0:2, 
-                           labels = c("normal", "wave_abn", "ventric_hypertrophy")),
+                           labels = c("normal", "abnormal1", "abnormal2")),
+         rest_ecg = fct_collapse(rest_ecg, 
+                                abnormal = c("abnormal1", "abnormal2")),
          thal = factor(thal, levels = c(3, 6, 7), 
                        labels = c("normal", "fixeddefect", "reversabledefect"))) |> 
   glimpse()
@@ -192,7 +295,7 @@ We will be fitting a logistic regression with all of the predictors for the firs
 Lets set up a recipe for feature engineering with this statistical algorithm
 
 - Impute missing data for all numeric predictors using median imputation 
-- Impute missing data for all nominal nominal predictors using the modal value
+- Impute missing data for all nominal predictors using the modal value
 - Dummy code all nominal predictors
 ```{r u5-overview-5}
 rec <- recipe(disease ~ ., data = data_all) |> 
@@ -218,37 +321,11 @@ While your project’s needs may vary, here is a suggested order of potential st
 
 -----
 
-## Some Technical Details
-
-### Parallel Processing
-
-When using resampling, we often end up fitting many, many models
-
-  - This can be the same model configuration in many different training sets
-  - Or many different model configurations in many different training sets (even more computationally demanding)
-
-It really speeds things up to set up parallel processing backend!
-
-- Lots of [options and details](https://tune.tidymodels.org/articles/extras/optimizations.html) depending on the code you intend to run in parallel to do it really well
-- We can discuss some of these issues/details and other solutions (i.e., High Throughput Computing at CHTC)
-- Some options are OS specific
-- This version is sufficient for most uses in tidymodels
-```{r}
-library(doParallel, exclude = c("accumulate", "when"))
-cl <- makePSOCKcluster(parallel::detectCores(logical = FALSE))
-registerDoParallel(cl)
-```
-
-### Using Cache
-
-NEED TO ADD THIS SECTION TO WEBBOOK.  Will recommend use of `xfun::cache_rds()`
-
-
-
 ## The single validation (test) set approach
 
 To date, you have essentially learned how to do the single validation set approach (although we haven't called it that)
-
+\
+\
 With this approach, we would take our full n = 303 and:
 
 - Split into one training set and one held-out set
@@ -256,29 +333,36 @@ With this approach, we would take our full n = 303 and:
 - Use this trained model to predict scores in held-out set
 - Calculate a performance metric (e.g., accuracy, rmse) based on predicted and observed scores in the held-out set
 
+-----
+
 If our goal was to evaluate the expected performance of a single model configuration in new data
 
   - We called this held-out set a test set
   - We would report this performance metric from the held-out test set as our estimate of the performance of our model in new data
 
+-----
 
 If our goal was to select the best model configuration among many candidate configurations
 
 - We called this held-out set a validation set
 - We would use this performance metric from the held-out validation set to select the best model configuration
 
+-----
+
 We call this the single validation set approach but that single held-out set can be either a validation or test set depending on our goals
+
+If you need to BOTH select a best model configuration AND evaluate that best model configuration, you would need both a validation and a test set.
 
 -----
 
-We have been doing the single validation set approach all along but we will provide one more example now (with a 50/50 split) to transition the code
-we are using to a more general workflow that will accommodate our more complicated resampling approaches
-
+We have been doing the single validation set approach all along but we will provide one more example now (with a 50/50 split) to transition the code we are using to a more general workflow that will accommodate our more complicated resampling approaches
+\
+\
 In the first half of this unit, we will focus on assessing the performance of a single model configuration
 
   - Logistic regression algorithm
-  - No hyper-parameters
-  - All available predictors
+  - No hyperparameters
+  - Features based on all available predictors
   
 We will call the held-out set a test set and use it to evaluate the expected future performance of this single configuration
 
@@ -288,12 +372,13 @@ Previously:
 
 - We would fit the model configuration in training and then made predictions for observations in the held-out test set in separate steps
 - We did this in separate steps so you could better understand the process
-  - I will show you that first again as a baseline
+- I will show you that first again as a baseline
   
-Now:
+Then:
+
 - We will now do these tasks in one step using $validation\_split()$
-  - I will show you this combined approach second
-  - This latter approach will be an example for how we code this for our more complicated resampling approaches.
+- I will show you this combined approach second
+- This latter approach will be an example for how we code this for our more complicated resampling approaches.
 
 -----
 
@@ -312,14 +397,21 @@ data_test <- assessment(splits)
 data_test |> nrow()
 ```
 
+-----
+
 - Make features for train and test
 ```{r u5-validation-set-2}
-feat_trn <- rec |> 
-  make_features(data_trn, data_trn)
+rec_prep <- rec |> 
+  prep(data_trn)
 
-feat_test <- rec |> 
-  make_features(data_trn, data_test)
+feat_trn <- rec_prep |> 
+  bake(data_trn)
+
+feat_test <- rec_prep |> 
+  bake(data_test)
 ```
+
+-----
 
 - Fit model in train
 
@@ -330,7 +422,9 @@ fit_lr <-
   fit(disease ~ ., data = feat_trn)
 ```
 
-- Evaluate model in validate
+-----
+
+- Evaluate model in test 
 
 ```{r u5-validation-set-4}
 accuracy_vec(feat_test$disease, predict(fit_lr, feat_test, type = "class")$.pred_class)
@@ -352,24 +446,21 @@ splits_validate <- data_all |>
   validation_split(prop = 0.5, strata = "disease")
 ```
 
-```{r u5-valdiation-set-6}
-fits_lr <-xfun::cache_rds({
-
+```{r}
+fits_lr <-
   logistic_reg() |> 
-    set_engine("glm") |> 
-    fit_resamples(preprocessor = rec, resamples = splits_validate, 
-                  metrics = metric_set(accuracy))
-  
-}, 
-rerun = FALSE,
-hash = list(rec, splits_validate),
-dir = "cache/",
-file = "u5-valdiation-set-6.rds")
+  set_engine("glm") |> 
+  fit_resamples(preprocessor = rec, resamples = splits_validate, 
+                 metrics = metric_set(accuracy))
 ```
 
+-----
+
+- Now we can pull out our performance metric from our fits object
 
 ```{r u5-validation-set-7}
-collect_metrics(fits_lr, summarize = TRUE)
+fits_lr |> 
+  collect_metrics(summarize = TRUE)
 ```
 
 -----
