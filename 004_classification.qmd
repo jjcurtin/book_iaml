@@ -761,13 +761,14 @@ plot_decision_boundary <- function(data, model, x_names, y_name, n_points = 100)
          aes(x = .data[[x_names[1]]], 
              y = .data[[x_names[2]]], 
              color = .data[[y_name]])) +
+    geom_point(size = 2, alpha = .5) +
     geom_contour(data = preds, 
                  aes(x = .data[[x_names[1]]], 
                      y = .data[[x_names[2]]], 
                      z = .data[[y_name]]), 
                  color = "black", breaks = .5, linewidth = 2) +
-    geom_point(size = 2, alpha = .5) +
-    labs(x = x_names[1], y = x_names[2], color = y_name)
+    labs(x = x_names[1], y = x_names[2], color = y_name) +
+    coord_obs_pred()
 }
 ```
 
@@ -1307,12 +1308,13 @@ cowplot::plot_grid(p_train, p_val, labels = list("Train", "Validation"), hjust =
 - LDA makes additional assumptions about X (multivariate normal and common $\sum$) beyond logistic regression.  Relative performance is based on the quality of this assumption
 
 - QDA relaxes the LDA assumption about common $\sum$ (and RDA can relax it partially)
-  - This also allows for nonlinear decision boundaries
+  - This also allows for nonlinear decision boundaries including 2-way interactions among features
   - QDA is therefore more flexible, which means possibly less bias but more potential for overfitting
 
 - Both QDA and LDA assume multivariate normal X so *may* not accommodate categorical predictors very well.  Logistic and KNN do accommodate categorical predictors
 
 - KNN is non-parametric and therefore the most flexible
+  - Can also handle interactions and non-linear effects natively (with feature engineering)
   - Increased overfitting, decreased bias?
   - Not very interpretable.  But LDA/QDA, although parametric, aren't as interpretable as logistic regression
 
@@ -1784,3 +1786,136 @@ cowplot::plot_grid(p_train, p_test, labels = list("Train", "Test"), hjust = -1.5
   - use cases for random forest models 
 
   - For all of these classifiers, will they work differently on large datasets with different types of data such as texts and images? If yes, which ones may work faster with large text data and large image data?   
+### Interaction in KNN - Consider bias first (but also variance) in this example
+
+- Simulate data
+- Fit models for lm and knn with and without interaction
+- Took some shortcuts (no recipe, predict back into train)
+
+-----
+
+### Interactions in LDA and QDA
+
+- Simulate multivariate normal distribution for X (`x1` and `x2`) using MASS package
+- Separately for trn and val
+- NOTE: I first did this with uniform distributions on X and the models fit more poorly.  Why?
+```{r}
+set.seed(5433)
+means <- c(0, 0)
+sigma <- diag(2) * 100
+data_trn <- MASS::mvrnorm(n = 300, mu = means, Sigma = sigma) |>  
+    magrittr::set_colnames(str_c("x", 1:length(means))) |>  
+    as_tibble()
+
+data_val <- MASS::mvrnorm(n = 3000, mu = means, Sigma = sigma) |>  
+    magrittr::set_colnames(str_c("x", 1:length(means))) |>  
+    as_tibble()
+```
+
+-----
+
+- Write function for interactive DGP based on `x1` and `x2`
+- Will map this over rows of d
+- Can specify any values for b
+- b[4] will be interaction parameter estimate
+```{r}
+b <- c(0, 0, 0, .5)
+
+calc_p <- function(x, b){
+   exp(b[1] + b[2]*x$x1 + b[3]*x$x2 + b[4]*x$x1*x$x2) /
+     (1 + exp(b[1] + b[2]*x$x1 + b[3]*x$x2 + b[4]*x$x1*x$x2))
+}
+```
+
+-----
+
+- Add p and then observed classes to trn and val 
+
+```{r}
+data_trn <- data_trn |> 
+  mutate(p = calc_p(data_trn, b)) |> 
+  mutate(y = rbinom(nrow(data_trn), 1, p),
+         y = factor(y, levels = 0:1, labels = c("neg", "pos")))
+
+head(data_trn, 10)
+
+data_val <- data_val |> 
+  mutate(p = calc_p(data_val, b)) |> 
+  mutate(y = rbinom(nrow(data_val), 1, p),
+         y = factor(y, levels = 0:1, labels = c("neg", "pos")))
+```
+
+-----
+
+- Lets look at what an interactive DGP looks like for two features and a binary outcome
+- Parameter estimates set up a "cross-over" interaction
+```{r}
+data_val |> 
+  ggplot(mapping = aes(x = x1, y = x2, color = y)) +
+    geom_point(size = 2, alpha = .5)
+```
+
+-----
+
+- Fit models in trn 
+```{r}
+fit_lda <- 
+  discrim_linear() |> 
+  set_engine("MASS") |> 
+  fit(y ~ x1 + x2, data = data_trn)
+
+fit_lda_int <- 
+  discrim_linear() |> 
+  set_engine("MASS") |> 
+  fit(y ~ x1 + x2 + x1*x2, data = data_trn)
+
+fit_qda <- 
+  discrim_regularized(frac_common_cov = 0, frac_identity = 0) |> 
+  set_engine("klaR") |> 
+  fit(y ~ x1 + x2, data = data_trn)
+
+fit_qda_int <- 
+  discrim_regularized(frac_common_cov = 0, frac_identity = 0) |> 
+  set_engine("klaR") |> 
+  fit(y ~ x1 + x2 + x1*x2, data = data_trn)
+```
+
+-----
+
+- Additive LDA model decision boundary and performance in val
+```{r}
+data_val |> 
+  plot_decision_boundary(fit_lda, x_names = c("x1", "x2"), y_name = "y",
+                         n_points = 400)
+```
+
+-----
+
+-  Interactive LDA model decision boundary and performance in val
+```{r}
+data_val |> 
+  plot_decision_boundary(fit_lda_int, x_names = c("x1", "x2"), y_name = "y",
+                         n_points = 400) 
+```
+
+-----
+
+- Additive QDA model decision boundary
+```{r}
+data_val |> 
+  plot_decision_boundary(fit_qda, x_names = c("x1", "x2"), y_name = "y",
+                         n_points = 400)
+```
+
+- Interactive QDA model decision boundary
+
+-----
+
+```{r}
+data_val |> 
+  plot_decision_boundary(fit_qda_int, x_names = c("x1", "x2"), y_name = "y",
+                         n_points = 400) 
+```
+ 
+- Costs for QDA vs. LDA intearctive in this example and more generally with more features?
+- What if you were using RDA, which can model the full range of models between linear and quadratic?
