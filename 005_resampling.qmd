@@ -33,7 +33,7 @@ editor_options:
 
 - @APM [Chapter 4, pp 61 - 80](https://vuquangnguyen2016.files.wordpress.com/2018/03/applied-predictive-modeling-max-kuhn-kjell-johnson_1518.pdf)
 
-- **Supplemental:** @ISL [Chapter 5, pp 197 - 208 186](https://dionysus.psych.wisc.edu/iaml/pdfs/ISLRv2.pdf)
+- **Supplemental:** @ISL [Chapter 5, pp 197 - 208 186](pdfs/isl_2.pdf)
 
 
 ### Lecture Videos
@@ -54,9 +54,9 @@ Post questions or discuss readings or lectures on Slack
 
 ### Application Assignment and Quiz
   
-- [data](homework/unit_5/smoking_ema.csv)
-- [data dictionary](homework/unit_5/data_dictionary.csv)
-- [rmd shell](homework/unit_5/hw_unit_5_resampling.Rmd)
+- [data](application_assignments/unit_05/smoking_ema.csv)
+- [data dictionary](application_assignments/unit_05/data_dictionary.csv)
+- [qmd shell](https://raw.githubusercontent.com/jjcurtin/book_iaml/main/application_assignments/unit_05/hw_unit_05_resampling.qmd)
 - [solution]() 
 
 
@@ -72,6 +72,8 @@ Before we dive into resampling, we need to introduce two coding techniques that 
 
 - Parallel processing
 - Caching time-consuming computations
+
+-----
 
 ### Parallel Processing
 
@@ -118,6 +120,7 @@ In these instances, you may also want to consider caching the result
 - If you need to run the script again, you simply load the saved calculations again from disk, rather than re-calculating them (its much quicker to just read them from a file)
 \
 \
+
 But...
 
 - You need to redo the calculations if you change anything in your script that could affect them
@@ -252,8 +255,7 @@ data_all <- read_csv(here::here(path_data, "cleveland.csv"),
          exer_st_slope = X11,
          ca = X12,
          thal = X13,
-         disease = X14) |> 
-  glimpse()
+         disease = X14)
 ```
 1. Indicating that column names are NOT on the first row.  First row begins with data
 2. Specifying a non-standard value for NA
@@ -302,7 +304,8 @@ data_all |> skim_all()
 -----
 
 We will be fitting a logistic regression with all of the predictors for the first half of this unit
-
+\
+\
 Lets set up a recipe for feature engineering with this statistical algorithm
 
 - Impute missing data for all numeric predictors using median imputation 
@@ -318,7 +321,8 @@ rec_lr <- recipe(disease ~ ., data = data_all) |>
 -----
 
 The order of steps in a recipe matter
-
+\
+\
 While your project’s needs may vary, here is a suggested order of potential steps that should work for most problems [according to tidy models folks](https://recipes.tidymodels.org/articles/Ordering.html):
 
 - [Convert character to factor]  (we do this outside our recipe as part of cleaning)
@@ -361,7 +365,8 @@ If our goal was to select the best model configuration among many candidate conf
 -----
 
 We call this the single validation set approach but that single held-out set can be either a validation or test set depending on our goals
-
+\
+\
 If you need to BOTH select a best model configuration AND evaluate that best model configuration, you would need both a validation and a test set.
 
 -----
@@ -560,7 +565,7 @@ If you plan to actually use your model in the real world for prediction, you sho
 
 
 ::: {.callout-important collapse="false"}
-### Question: But what does this mean about our estimate of the performance of this final model using all data when we get that estimate using a smaller sample size (the sample size in our training set)?
+### Question: But what does this mean about our estimate of the performance of this final model (fit with all available data) data when we get that estimate using a model that as fit with a smaller sample size (the sample size in our training set)?
 ```{html}
 #| echo: true
 #| code-fold: true
@@ -568,7 +573,10 @@ If you plan to actually use your model in the real world for prediction, you sho
 Our estimate will likely be biased.  It will underestimate the true expected 
 peformance of our final model.  We can think of it as a lower bound on that expected
 performance.  The amount of bias will be a function of the difference between the 
-sample size of the training set and the size the of full dataset.   If we want less biased estimates, we want to allocate as much data as possible to the training set when estimating the performance of our final model configuration (but this will come with other costs!)
+sample size of the training set and the size the of full dataset.   If we want less 
+biased estimates, we want to allocate as much data as possible to the training set 
+when estimating the performance of our final model configuration (but this will come 
+with other costs!)
 ```
 :::
 
@@ -585,8 +593,9 @@ estimate of the final (using all data) model performance than a training set wit
 50% of the sample.  
 
 However, using a test set of 20% of the data will produce a 
-more variable (less precise) estimate of performance than the 50% test set.  This 
-is another bias-variance trade off but now instead of talking about model
+more variable (less precise) estimate of performance than the 50% test set.  
+
+This  is another bias-variance trade off but now instead of talking about model
 performance, we are seeing that we have to trade off bias and variance in our
 estimate of the model performance too!
 ```
@@ -638,7 +647,7 @@ fit_lr |> tidy()
 If we need to predict disease in the future, this is the model we would use (with these parameter estimates)
 \
 \
-Our estimate of its future accuracy is based on our previous assessment using the held-in training set to fit the model configuration and the held-out test set to estimate its performance
+Our estimate of its future accuracy is based on our previous assessment using the **held-in** training set to fit the model configuration and the **held-out** test set to estimate its performance
 \
 \
 This estimate should be considered a lower bound on its expected performance
@@ -684,7 +693,7 @@ will be high variance in your performance estimate.
 #| echo: true
 #| code-fold: true
 #| code-summary: "Show Answer"
-Repeat this split between training and validation n times so that there are n different
+Repeat this split between training and test n times so that there are n different
 sets of n = 1 test sets.  Then average the performance across all n of these test 
 sets to get a more stable estimate of performance. Averaging is a good way to reduce 
 the variance of any estimate.  
@@ -703,7 +712,8 @@ Comparisons across LOOCV and single validation set approaches
 
 but...
 
-- LOOCV can be computationally expensive (need to fit and evaluate the same model configuration n times).  this is a real problem when you are also working with a high number of model configurations (i.e., number fits = n * number of model configurations).
+- LOOCV can be computationally expensive (need to fit and evaluate the same model configuration n times).  
+- This is a real problem when you are also working with a high number of model configurations (i.e., number fits = n * number of model configurations).
 
 -----
 
@@ -715,12 +725,12 @@ LOOCV eventually uses all the data in the held-out set across the 'n' held-out s
 \
 \
 
-k-fold cross validation (next method) improves the variance of the average performance metric by averaging across more independent (less overlapping) training sets
+K-fold cross validation (next method) improves the variance of the average performance metric by averaging across more independent (less overlapping) training sets
 
 - For this reason, it is superior and (always?) preferred over LOOCV 
 - We are not demonstrating LOOCV b/c we strongly prefer other methods (k-fold)
 - Still important to understand it conceptually and its strengths/weaknesses
-- if you wanted to use this resampling approach, simply substitute `loo_cv()` for `vfold_cv()` in the next example
+- If you wanted to use this resampling approach, simply substitute `loo_cv()` for `vfold_cv()` in the next example
 
 -----
 
@@ -752,9 +762,10 @@ Visualization of K-fold
 An example of K-fold Cross-validation
 
 1. Split into 10 folds (default)
-  - repeats = 1 (default; more on this in a bit)
-  - stratify on `disease`
-  
+
+- repeats = 1 (default; more on this in a bit)
+- stratify on `disease`
+
 ```{r}
 splits_kfold <- data_all |> 
   vfold_cv(v = 10, repeats = 1, strata = "disease")
@@ -769,6 +780,7 @@ splits_kfold
 - Use `fit_resamples()` as before 
 - Still no need to continue to remake features for held-in and held-out sets.  Just provide `splits` and `rec`
 - Set performance metrics with `metric_set()`
+
 ```{r}
 fits_lr_kfold <- 
   logistic_reg() |> 
@@ -783,7 +795,7 @@ fits_lr_kfold <-
 3. Review performance estimates in held out folds using `collect_metrics()`
 
 - Can see performance in all folds using `summarize = FALSE`
-
+- The performance estimates are not all the same.  This is what we mean when we take about the variance in our performance estimates.  You couldn't see it before with only one held-out set but now that we have 10, it becomes more concrete.  Ideally this variance is as low as possible. 
 ```{r}
 metrics_kfold <- collect_metrics(fits_lr_kfold, summarize = FALSE)
 
@@ -792,7 +804,7 @@ metrics_kfold |> print_kbl()
 
 -----
 
-- Could plot this as a histogram to visualize sampling distribution of performance estimates
+- Could plot this as a histogram to visualize this variance (i.e., the sampling distribution of performance estimates)
 - Would be better if we had more folds (see repeats in a bit)
 ```{r}
 metrics_kfold |> plot_hist(".estimate")
@@ -801,13 +813,14 @@ metrics_kfold |> plot_hist(".estimate")
 -----
 
 - Can see the average performance over folds along with its standard error using `summarize = TRUE`
+- This average will have lower variance (which is estimated by the standard error.  Still not zero!)
 ```{r}
 collect_metrics(fits_lr_kfold, summarize = TRUE)
 ```
 
 -----
 
-4.  You still fit the final model as before using the full dataset.  
+4.  You still fit the final model as before using the full dataset
 
 - We already have the feature matrix for the full dataset (`feat_all`) from earlier
 - Otherwise, remake it
@@ -823,15 +836,18 @@ fit_lr <-
 ```{r}
 fit_lr |> tidy()
 ```
-
+\
+\
 If we need to predict disease in the future, this is the fitted model we would use (with these parameter estimates)
-
+\
+\
 Our estimate of its future accuracy is `r collect_metrics(fits_lr_kfold, summarize = TRUE)$mean` with a standard error of `r collect_metrics(fits_lr_kfold, summarize = TRUE)$std_err`
 
 -----
 
 Comparisons between K-fold vs. LOOCV and Single Validation set
-
+\
+\
 For Bias:
 
 - K-fold typically has less bias than the single validation set method
@@ -877,8 +893,15 @@ rerun_setting <- FALSE
 - Now use the `cache_rds()` function
 - Put the resampling code inside of `{}`
 - Cached file will be saved in `cached/` folder with filename `fits_lr_kfold_HASH`
-- If you change the raw data file but don't update rec or splits, it will not. Be careful! 
+- If you change any code in the function, it will invalidate the cache and re-run the code
+- However, it will not invalidate the cache if you change objects or data that affect this function but are outside it, e.g., 
+  - Fix errors in data
+  - Update `rec_lr`
+  - Update `splits_kfold`
+  - Be VERY careful!
 - You can manually invalidate just the cache for just this code chunk by setting `rerun = TRUE` temporarily or  you can change `rerun_setting <- TRUE` at the top of your script to do fresh calculations for all of your cached code chunks
+- You can set `rerun_settings <- TRUE` when you are done with your development to make sure everything is accurate (review output carefully for any changes!)
+
 ```{r fits_lr_kfold}
 fits_lr_kfold <- cache_rds(
   expr = {
@@ -898,11 +921,14 @@ fits_lr_kfold <- cache_rds(
 ## Repeated K-fold Cross Validation
 
 You can repeat the K-fold procedure multiple times with new splits for a different mix of K folds each time
-
+\
+\
 Two benefits:
 
 - More stable performance estimate (because averaged over more folds: repeats * K)
 - Many more estimates of performance to characterize (SE; plot) of your performance estimate
+\
+\
 
 But it is computationally expensive (depending on number of repeats)
 
@@ -938,19 +964,28 @@ fits_lr_kfold10x <- cache_rds(
 
 -----
 
+- Individual estimates across 100 held-out folds
 ```{r}
 metrics_kfold10x <- collect_metrics(fits_lr_kfold10x, summarize = FALSE)
 
 metrics_kfold10x |> print_kbl()
+```
 
+-----
+
+- Histogram of those 100 individual estimates
+```{r}
 metrics_kfold10x |> plot_hist(".estimate", bins = 10)
 ```
 
 -----
 
+Average performance estimated (and its SE) across the 100 held-out folds
 ```{r}
 collect_metrics(fits_lr_kfold10x, summarize = TRUE)
 ```
+
+-----
 
 - You should also refit a final model in the full data at the end as before
 - We wont demonstrate that here
@@ -958,7 +993,8 @@ collect_metrics(fits_lr_kfold10x, summarize = TRUE)
 -----
 
 Comparisons between repeated K-fold and K-fold
-
+\
+\
 Repeated K-fold: 
 
 - Has same bias as K-fold (still fitting models with K-1 folds)
@@ -966,6 +1002,8 @@ Repeated K-fold:
 - Has even more stable estimate of performance (mean over more folds/repeats)
 - Provides more info about distribution for the performance estimate
 - **But** is more computationally expensive
+\
+\
 
 Repeated K-fold is preferred over K-fold to the degree possible based on computational limitations (parallel, N, p, statistical algorithm, # of model configurations)
 
@@ -986,9 +1024,11 @@ We have to be particularly careful with resampling methods when we have repeated
 ## Bootstrap Resampling
 
 A bootstrap sample is a random sample taken with replacement (i.e., same observations can be sampled multiple times within one bootstrap sample)
-
+\
+\
 If you bootstrap a new sample of size n from a dataset with sample size n, approximately 63.2% of the original observations end up in the bootstrap sample
-
+\
+\
 The remaining 36.8% of the observations are often called the "out of bag" (OOB) samples
 
 -----
@@ -1036,15 +1076,23 @@ fits_lr_boot <- cache_rds(
 
 -----
 
+- 100 individual performance estimates from the 100 OOB sets
 ```{r}
 metrics_boot <- collect_metrics(fits_lr_boot, summarize = FALSE)
 
 metrics_boot |> print_kbl()
+```
 
+-----
+
+- Histogram of those 100 performance estimates
+```{r}
 metrics_boot |> plot_hist(".estimate", bins = 10)
 ```
 
 -----
+
+- Average performance over those 100 estimates
 ```{r}
 collect_metrics(fits_lr_boot, summarize = TRUE)
 ```
@@ -1078,8 +1126,9 @@ Relevant comparisons, strengths/weaknesses for bootstrap for resampling
 ## Using Resampling to Select Best Model Configurations 
 
 In all of the previous examples, we have used various resampling methods only to evaluate the performance of a single model configuration in new data.  In these instances, we were treating the held-out sets as test sets.
-
-Resampling is also used to get held out performance estimates to select best model configurations.  Best means the model configuration that performs the best in new data and therefore is closest to the true DGP for the data
+\
+\
+Resampling is also used to get held out performance estimates to select best model configurations.  **Best** means the model configuration that performs the best in new data and therefore is closest to the true DGP for the data
 
 -----
 
@@ -1109,10 +1158,12 @@ One additional common scenario where you will do model selection across many mod
 - We need (or can) select values to consider for that hyperparameter (or we can let the `tune` package functions decide in some cases)
 - We will now use [`tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html) rather `fit_resamples()` to fit and evaluate the models configurations that differ with respect to their hyperparameters
 - This IS computationally costly.  Now fitting and estimating performance for multiple configurations across multipe held-in/held-out sets
+
 -----
 
 Lets use bootstrap resampling to select the best K for KNN applied to our heart disease dataset
-
+\
+\
 We can use the same splits are established as before (`splits_boot`)
 \
 \
@@ -1132,8 +1183,9 @@ rec_knn <- recipe(disease ~ ., data = data_all) |>
 -----
 
 2. The fitting process is what is different
-  - We set up a tibble with values of the hyperparameters to consider
-  - We indicate which hyperparameters need to be tuned
+
+- We set up a tibble with values of the hyperparameters to consider
+- We indicate which hyperparameters need to be tuned
   
 ```{r}
 hyper_grid <- expand.grid(neighbors = seq(1, 150, by = 3))
@@ -1142,8 +1194,8 @@ hyper_grid
   
 -----  
   
-  - Model configurations are fit using `tune_grid()` 
-  - We need to set `grid =` now
+- Model configurations are fit using `tune_grid()` 
+- We need to set `grid =` now
 ```{r fits_knn_boot}
 fits_knn_boot <- cache_rds(
   expr = {
@@ -1165,15 +1217,15 @@ fits_knn_boot <- cache_rds(
 
 3. Reviewing performance of model configurations is similar to before but now with multiple configurations
 
-  - We can see the average performance over folds along with its standard error using `summarize = TRUE`
-  - We *could* see the performance of each configuration in EACH fold too, but there are lots of them (use `summarize = FALSE`)
+- We can see the average performance over folds along with its standard error using `summarize = TRUE`
+- We *could* see the performance of each configuration in EACH fold too, but there are lots of them (use `summarize = FALSE`)
 ```{r}
 collect_metrics(fits_knn_boot, summarize = TRUE)
 ```
 
 -----
 
-  -  We can plot average performance by the values of the hyperparameter
+-  We can plot average performance by the values of the hyperparameter
 ```{r}
 collect_metrics(fits_knn_boot, summarize = TRUE) |> 
   ggplot(aes(x = neighbors, y = mean)) +
@@ -1380,6 +1432,8 @@ fit_knn_best <-
   fit(disease ~ ., data = feat_trn)
 ```
 
+-----
+
 - Use that fitted model to predict into test set
 
 ```{r}
@@ -1388,8 +1442,13 @@ accuracy_vec(feat_test$disease, predict(fit_knn_best, feat_test)$.pred_class)
 
 -----
 
-Our best estimate of how accurate a model with k = `r select_best(fits_knn_boot_trn)$neighbors` would be in new data is `r accuracy_vec(feat_test$disease, predict(fit_knn_best, feat_test)$.pred_class)`.   However, it was only fit with n = 203 (the training set).  If we truly want the best model, we should now train once again with all of our data.  This model would likely perform even better b/c it has > n.  However, we have no more new data to evaluate it!
+Our best estimate of how accurate a model with k = `r select_best(fits_knn_boot_trn)$neighbors` would be in new data is `r accuracy_vec(feat_test$disease, predict(fit_knn_best, feat_test)$.pred_class)`.   
 
+- However, it was only fit with n = 203 (the training set).  
+- If we truly want the best model, we should now train once again with all of our data.  
+- This model would likely perform even better b/c it has > n.  
+- However, we have no more new data to evaluate it!
+- There is no perfect performance estimate!
 
 ## Nested Resampling
 

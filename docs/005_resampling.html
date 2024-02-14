@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.450">
+<meta name="generator" content="quarto-1.4.549">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -22,7 +22,7 @@ ul.task-list li input[type="checkbox"] {
 }
 /* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -58,6 +58,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 div.csl-bib-body { }
 div.csl-entry {
   clear: both;
+  margin-bottom: 0em;
 }
 .hanging-indent div.csl-entry {
   margin-left:2em;
@@ -100,7 +101,13 @@ div.csl-indent {
   "collapse-after": 3,
   "panel-placement": "start",
   "type": "textbox",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -109,19 +116,46 @@ div.csl-indent {
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
   }
 }</script>
-
 <script src="site_libs/kePrint-0.0.1/kePrint.js"></script>
 <link href="site_libs/lightable-0.0.1/lightable.css" rel="stylesheet">
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
 
-<link rel="stylesheet" href="style.css">
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="book.css">
 </head>
 
 <body class="nav-sidebar floating">
@@ -130,12 +164,12 @@ div.csl-indent {
   <header id="quarto-header" class="headroom fixed-top">
   <nav class="quarto-secondary-nav">
     <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./005_resampling.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Resampling Methods for Model Selection and Evaluation</span></a></li></ol></nav>
-      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-      </a>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./005_resampling.html"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Resampling Methods for Model Selection and Evaluation</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
       </button>
@@ -145,12 +179,12 @@ div.csl-indent {
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="./">Introduction to Applied Machine Learning</a> 
         <div class="sidebar-tools-main tools-wide">
-    <a href="https://github.com/jjcurtin/book_iaml" rel="" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <a href="https://github.com/jjcurtin/book_iaml" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
     <div class="dropdown">
       <a href="" title="Share" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Share"><i class="bi bi-share"></i></a>
       <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
@@ -297,7 +331,7 @@ div.csl-indent {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./app_dummy_coding.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Dummy Coding Nominal (and Some Ordinal) Predictors</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Novel Levels in Held-Out Set(s)</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -329,7 +363,7 @@ div.csl-indent {
     </ul>
     </div>
 </nav>
-<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
@@ -356,20 +390,20 @@ div.csl-indent {
   <li><a href="#grouped-k-fold" id="toc-grouped-k-fold" class="nav-link" data-scroll-target="#grouped-k-fold"><span class="header-section-number">5.8</span> Grouped K-fold</a></li>
   <li><a href="#bootstrap-resampling" id="toc-bootstrap-resampling" class="nav-link" data-scroll-target="#bootstrap-resampling"><span class="header-section-number">5.9</span> Bootstrap Resampling</a></li>
   <li><a href="#using-resampling-to-select-best-model-configurations" id="toc-using-resampling-to-select-best-model-configurations" class="nav-link" data-scroll-target="#using-resampling-to-select-best-model-configurations"><span class="header-section-number">5.10</span> Using Resampling to Select Best Model Configurations</a></li>
-  <li><a href="#resampling-for-both-model-selection-and-evaluation" id="toc-resampling-for-both-model-selection-and-evaluation" class="nav-link" data-scroll-target="#resampling-for-both-model-selection-and-evaluation"><span class="header-section-number">5.12</span> Resampling for Both Model Selection and Evaluation</a>
+  <li><a href="#resampling-for-both-model-selection-and-evaluation" id="toc-resampling-for-both-model-selection-and-evaluation" class="nav-link" data-scroll-target="#resampling-for-both-model-selection-and-evaluation"><span class="header-section-number">5.11</span> Resampling for Both Model Selection and Evaluation</a>
   <ul class="collapse">
-  <li><a href="#bootstrap-with-test-set" id="toc-bootstrap-with-test-set" class="nav-link" data-scroll-target="#bootstrap-with-test-set"><span class="header-section-number">5.12.1</span> Bootstrap with Test Set</a></li>
+  <li><a href="#bootstrap-with-test-set" id="toc-bootstrap-with-test-set" class="nav-link" data-scroll-target="#bootstrap-with-test-set"><span class="header-section-number">5.11.1</span> Bootstrap with Test Set</a></li>
   </ul></li>
-  <li><a href="#nested-resampling" id="toc-nested-resampling" class="nav-link" data-scroll-target="#nested-resampling"><span class="header-section-number">5.13</span> Nested Resampling</a></li>
-  <li><a href="#data-exploration-in-a-nested-world." id="toc-data-exploration-in-a-nested-world." class="nav-link" data-scroll-target="#data-exploration-in-a-nested-world."><span class="header-section-number">5.14</span> Data Exploration in a Nested World….</a></li>
-  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion"><span class="header-section-number">5.15</span> Discussion</a>
+  <li><a href="#nested-resampling" id="toc-nested-resampling" class="nav-link" data-scroll-target="#nested-resampling"><span class="header-section-number">5.12</span> Nested Resampling</a></li>
+  <li><a href="#data-exploration-in-a-nested-world." id="toc-data-exploration-in-a-nested-world." class="nav-link" data-scroll-target="#data-exploration-in-a-nested-world."><span class="header-section-number">5.13</span> Data Exploration in a Nested World….</a></li>
+  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion"><span class="header-section-number">5.14</span> Discussion</a>
   <ul class="collapse">
-  <li><a href="#and-the-winner-is.." id="toc-and-the-winner-is.." class="nav-link" data-scroll-target="#and-the-winner-is.."><span class="header-section-number">5.15.1</span> and the winner is…..</a></li>
-  <li><a href="#other-announcements" id="toc-other-announcements" class="nav-link" data-scroll-target="#other-announcements"><span class="header-section-number">5.15.2</span> Other announcements</a></li>
-  <li><a href="#questions" id="toc-questions" class="nav-link" data-scroll-target="#questions"><span class="header-section-number">5.15.3</span> Questions</a></li>
+  <li><a href="#and-the-winner-is.." id="toc-and-the-winner-is.." class="nav-link" data-scroll-target="#and-the-winner-is.."><span class="header-section-number">5.14.1</span> and the winner is…..</a></li>
+  <li><a href="#other-announcements" id="toc-other-announcements" class="nav-link" data-scroll-target="#other-announcements"><span class="header-section-number">5.14.2</span> Other announcements</a></li>
+  <li><a href="#questions" id="toc-questions" class="nav-link" data-scroll-target="#questions"><span class="header-section-number">5.14.3</span> Questions</a></li>
   </ul></li>
   </ul>
-<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/jjcurtin/book_iaml/edit/main/005_resampling.qmd" class="toc-action">Edit this page</a></p></div></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/jjcurtin/book_iaml/edit/main/005_resampling.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -389,7 +423,9 @@ div.csl-indent {
   </div>
   
 
+
 </header>
+
 
 <section id="overview-of-unit" class="level2" data-number="5.1">
 <h2 data-number="5.1" class="anchored" data-anchor-id="overview-of-unit"><span class="header-section-number">5.1</span> Overview of Unit</h2>
@@ -428,7 +464,7 @@ div.csl-indent {
 <h3 data-number="5.1.2" class="anchored" data-anchor-id="readings"><span class="header-section-number">5.1.2</span> Readings</h3>
 <ul>
 <li><p><span class="citation" data-cites="APM">Kuhn and Johnson (<a href="#ref-APM" role="doc-biblioref">2018</a>)</span> <a href="https://vuquangnguyen2016.files.wordpress.com/2018/03/applied-predictive-modeling-max-kuhn-kjell-johnson_1518.pdf">Chapter 4, pp 61 - 80</a></p></li>
-<li><p><strong>Supplemental:</strong> <span class="citation" data-cites="ISL">James et al. (<a href="#ref-ISL" role="doc-biblioref">2023</a>)</span> <a href="https://dionysus.psych.wisc.edu/iaml/pdfs/ISLRv2.pdf">Chapter 5, pp 197 - 208 186</a></p></li>
+<li><p><strong>Supplemental:</strong> <span class="citation" data-cites="ISL">James et al. (<a href="#ref-ISL" role="doc-biblioref">2023</a>)</span> <a href="pdfs/isl_2.pdf">Chapter 5, pp 197 - 208 186</a></p></li>
 </ul>
 </section>
 <section id="lecture-videos" class="level3" data-number="5.1.3">
@@ -450,9 +486,9 @@ div.csl-indent {
 <section id="application-assignment-and-quiz" class="level3" data-number="5.1.4">
 <h3 data-number="5.1.4" class="anchored" data-anchor-id="application-assignment-and-quiz"><span class="header-section-number">5.1.4</span> Application Assignment and Quiz</h3>
 <ul>
-<li><a href="homework/unit_5/smoking_ema.csv">data</a></li>
-<li><a href="homework/unit_5/data_dictionary.csv">data dictionary</a></li>
-<li><a href="homework/unit_5/hw_unit_5_resampling.Rmd">rmd shell</a></li>
+<li><a href="application_assignments/unit_05/smoking_ema.csv">data</a></li>
+<li><a href="application_assignments/unit_05/data_dictionary.csv">data dictionary</a></li>
+<li><a href="https://raw.githubusercontent.com/jjcurtin/book_iaml/main/application_assignments/unit_05/hw_unit_05_resampling.qmd">qmd shell</a></li>
 <li><a href="">solution</a></li>
 </ul>
 <p>Post questions to application_assignments Slack channel</p>
@@ -467,6 +503,7 @@ div.csl-indent {
 <li>Parallel processing</li>
 <li>Caching time-consuming computations</li>
 </ul>
+<hr>
 <section id="parallel-processing" class="level3" data-number="5.2.1">
 <h3 data-number="5.2.1" class="anchored" data-anchor-id="parallel-processing"><span class="header-section-number">5.2.1</span> Parallel Processing</h3>
 <p>When using resampling, we often end up fitting many, many model configurations</p>
@@ -501,13 +538,16 @@ Critically</p></li>
 <br>
 In these instances, you may also want to consider caching the result</p>
 <ul>
-<li><p>When you cache some set of calculations, you are essentially saving the results of the calculations</p></li>
-<li><p>If you need to run the script again, you simply load the saved calculations again from disk, rather than re-calculating them (its much quicker to just read them from a file)<br>
+<li>When you cache some set of calculations, you are essentially saving the results of the calculations</li>
+<li>If you need to run the script again, you simply load the saved calculations again from disk, rather than re-calculating them (its much quicker to just read them from a file)<br>
 <br>
-But…</p></li>
-<li><p>You need to redo the calculations if you change anything in your script that could affect them</p></li>
-<li><p>This is called “invalidating the cache”</p></li>
-<li><p>You need to be very careful to reuse the cache when you can but also to invalidate it when the calculations have changed</p></li>
+</li>
+</ul>
+<p>But…</p>
+<ul>
+<li>You need to redo the calculations if you change anything in your script that could affect them</li>
+<li>This is called “invalidating the cache”</li>
+<li>You need to be very careful to reuse the cache when you can but also to invalidate it when the calculations have changed</li>
 </ul>
 <hr>
 <p>In other notes, we describe <a href="https://jjcurtin.github.io/book_dwvt/cache.html">three options</a> to cache calculations that are available in R.</p>
@@ -602,17 +642,16 @@ We will demonstrate the use of this function throughout the book. BUT you do not
 <span id="annotated-cell-4-14"><a href="#annotated-cell-4-14" aria-hidden="true" tabindex="-1"></a>         <span class="at">exer_st_slope =</span> X11,</span>
 <span id="annotated-cell-4-15"><a href="#annotated-cell-4-15" aria-hidden="true" tabindex="-1"></a>         <span class="at">ca =</span> X12,</span>
 <span id="annotated-cell-4-16"><a href="#annotated-cell-4-16" aria-hidden="true" tabindex="-1"></a>         <span class="at">thal =</span> X13,</span>
-<span id="annotated-cell-4-17"><a href="#annotated-cell-4-17" aria-hidden="true" tabindex="-1"></a>         <span class="at">disease =</span> X14) <span class="sc">|&gt;</span> </span>
-<span id="annotated-cell-4-18"><a href="#annotated-cell-4-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="annotated-cell-4-17"><a href="#annotated-cell-4-17" aria-hidden="true" tabindex="-1"></a>         <span class="at">disease =</span> X14)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-4" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-lines="2" data-code-cell="annotated-cell-4" data-code-annotation="1">Indicating that column names are NOT on the first row. First row begins with data</span>
+<span data-code-cell="annotated-cell-4" data-code-lines="2" data-code-annotation="1">Indicating that column names are NOT on the first row. First row begins with data</span>
 </dd>
 <dt data-target-cell="annotated-cell-4" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-lines="3" data-code-cell="annotated-cell-4" data-code-annotation="2">Specifying a non-standard value for NA</span>
+<span data-code-cell="annotated-cell-4" data-code-lines="3" data-code-annotation="2">Specifying a non-standard value for NA</span>
 </dd>
 </dl>
 </div>
@@ -625,47 +664,29 @@ dbl (14): X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14
 ℹ Use `spec()` to retrieve the full column specification for this data.
 ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
 </div>
-<div class="cell-output cell-output-stdout">
-<pre><code>Rows: 303
-Columns: 14
-$ age             &lt;dbl&gt; 63, 67, 67, 37, 41, 56, 62, 57, 63, 53, 57, 56, 56, 44…
-$ sex             &lt;dbl&gt; 1, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, …
-$ cp              &lt;dbl&gt; 1, 4, 4, 3, 2, 2, 4, 4, 4, 4, 4, 2, 3, 2, 3, 3, 2, 4, …
-$ rest_bp         &lt;dbl&gt; 145, 160, 120, 130, 130, 120, 140, 120, 130, 140, 140,…
-$ chol            &lt;dbl&gt; 233, 286, 229, 250, 204, 236, 268, 354, 254, 203, 192,…
-$ fbs             &lt;dbl&gt; 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, …
-$ rest_ecg        &lt;dbl&gt; 2, 2, 2, 0, 2, 0, 2, 0, 2, 2, 0, 2, 2, 0, 0, 0, 0, 0, …
-$ max_hr          &lt;dbl&gt; 150, 108, 129, 187, 172, 178, 160, 163, 147, 155, 148,…
-$ exer_ang        &lt;dbl&gt; 0, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, …
-$ exer_st_depress &lt;dbl&gt; 2.3, 1.5, 2.6, 3.5, 1.4, 0.8, 3.6, 0.6, 1.4, 3.1, 0.4,…
-$ exer_st_slope   &lt;dbl&gt; 3, 2, 2, 3, 1, 1, 3, 1, 2, 3, 2, 2, 2, 1, 1, 1, 3, 1, …
-$ ca              &lt;dbl&gt; 0, 3, 2, 0, 0, 0, 2, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, …
-$ thal            &lt;dbl&gt; 6, 3, 7, 3, 3, 3, 3, 3, 7, 7, 6, 3, 6, 7, 7, 3, 7, 3, …
-$ disease         &lt;dbl&gt; 0, 2, 1, 0, 0, 0, 3, 0, 2, 1, 0, 0, 2, 0, 0, 0, 1, 0, …</code></pre>
-</div>
 </div>
 <hr>
 <p>Code categorical variables as factors with meaningful text labels (and no spaces)</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">disease =</span> <span class="fu">factor</span>(disease, <span class="at">levels =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">2</span>, </span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"no"</span>, <span class="st">"yes1"</span>, <span class="st">"yes2"</span>)),</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">disease =</span> <span class="fu">fct_collapse</span>(disease, </span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>                                <span class="at">yes =</span> <span class="fu">c</span>(<span class="st">"yes1"</span>, <span class="st">"yes2"</span>)),</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">sex =</span> <span class="fu">factor</span>(sex,  <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"female"</span>, <span class="st">"male"</span>)),</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">fbs =</span> <span class="fu">factor</span>(fbs, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"no"</span>, <span class="st">"yes"</span>)),</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">exer_ang =</span> <span class="fu">factor</span>(exer_ang, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"no"</span>, <span class="st">"yes"</span>)),</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">exer_st_slope =</span> <span class="fu">factor</span>(exer_st_slope, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, </span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>                                <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"upslope"</span>, <span class="st">"flat"</span>, <span class="st">"downslope"</span>)),</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">cp =</span> <span class="fu">factor</span>(cp, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, </span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"typ_ang"</span>, <span class="st">"atyp_ang"</span>, <span class="st">"non_anginal"</span>, <span class="st">"non_anginal"</span>)),</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">rest_ecg =</span> <span class="fu">factor</span>(rest_ecg, <span class="at">levels =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">2</span>, </span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>                           <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"normal"</span>, <span class="st">"abnormal1"</span>, <span class="st">"abnormal2"</span>)),</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>         <span class="at">rest_ecg =</span> <span class="fu">fct_collapse</span>(rest_ecg, </span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>                                <span class="at">abnormal =</span> <span class="fu">c</span>(<span class="st">"abnormal1"</span>, <span class="st">"abnormal2"</span>)),</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>         <span class="at">thal =</span> <span class="fu">factor</span>(thal, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">6</span>, <span class="dv">7</span>), </span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>                       <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"normal"</span>, <span class="st">"fixeddefect"</span>, <span class="st">"reversabledefect"</span>))) <span class="sc">|&gt;</span> </span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">disease =</span> <span class="fu">factor</span>(disease, <span class="at">levels =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">2</span>, </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"no"</span>, <span class="st">"yes1"</span>, <span class="st">"yes2"</span>)),</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">disease =</span> <span class="fu">fct_collapse</span>(disease, </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                                <span class="at">yes =</span> <span class="fu">c</span>(<span class="st">"yes1"</span>, <span class="st">"yes2"</span>)),</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">sex =</span> <span class="fu">factor</span>(sex,  <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"female"</span>, <span class="st">"male"</span>)),</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">fbs =</span> <span class="fu">factor</span>(fbs, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"no"</span>, <span class="st">"yes"</span>)),</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">exer_ang =</span> <span class="fu">factor</span>(exer_ang, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"no"</span>, <span class="st">"yes"</span>)),</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">exer_st_slope =</span> <span class="fu">factor</span>(exer_st_slope, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, </span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true" tabindex="-1"></a>                                <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"upslope"</span>, <span class="st">"flat"</span>, <span class="st">"downslope"</span>)),</span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">cp =</span> <span class="fu">factor</span>(cp, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, </span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"typ_ang"</span>, <span class="st">"atyp_ang"</span>, <span class="st">"non_anginal"</span>, <span class="st">"non_anginal"</span>)),</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">rest_ecg =</span> <span class="fu">factor</span>(rest_ecg, <span class="at">levels =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">2</span>, </span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true" tabindex="-1"></a>                           <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"normal"</span>, <span class="st">"abnormal1"</span>, <span class="st">"abnormal2"</span>)),</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true" tabindex="-1"></a>         <span class="at">rest_ecg =</span> <span class="fu">fct_collapse</span>(rest_ecg, </span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true" tabindex="-1"></a>                                <span class="at">abnormal =</span> <span class="fu">c</span>(<span class="st">"abnormal1"</span>, <span class="st">"abnormal2"</span>)),</span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true" tabindex="-1"></a>         <span class="at">thal =</span> <span class="fu">factor</span>(thal, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">6</span>, <span class="dv">7</span>), </span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true" tabindex="-1"></a>                       <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"normal"</span>, <span class="st">"fixeddefect"</span>, <span class="st">"reversabledefect"</span>))) <span class="sc">|&gt;</span> </span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 303
 Columns: 14
@@ -696,7 +717,7 @@ $ disease         &lt;fct&gt; no, yes, yes, no, no, no, NA, no, yes, yes, no, no
 <li>4 missing values for ca, which is numeric</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="sc">|&gt;</span> <span class="fu">skim_all</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="sc">|&gt;</span> <span class="fu">skim_all</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="table table-sm table-striped small">
 <caption>Data summary</caption>
@@ -938,22 +959,24 @@ $ disease         &lt;fct&gt; no, yes, yes, no, no, no, NA, no, yes, yes, no, no
 </div>
 </div>
 <hr>
-<p>We will be fitting a logistic regression with all of the predictors for the first half of this unit</p>
-<p>Lets set up a recipe for feature engineering with this statistical algorithm</p>
+<p>We will be fitting a logistic regression with all of the predictors for the first half of this unit<br>
+<br>
+Lets set up a recipe for feature engineering with this statistical algorithm</p>
 <ul>
 <li>Impute missing data for all numeric predictors using median imputation</li>
 <li>Impute missing data for all nominal predictors using the modal value</li>
 <li>Dummy code all nominal predictors</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>rec_lr <span class="ot">&lt;-</span> <span class="fu">recipe</span>(disease <span class="sc">~</span> ., <span class="at">data =</span> data_all) <span class="sc">|&gt;</span> </span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_impute_median</span>(<span class="fu">all_numeric_predictors</span>()) <span class="sc">|&gt;</span> </span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_impute_mode</span>(<span class="fu">all_nominal_predictors</span>()) <span class="sc">|&gt;</span>   </span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_dummy</span>(<span class="fu">all_nominal_predictors</span>()) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>rec_lr <span class="ot">&lt;-</span> <span class="fu">recipe</span>(disease <span class="sc">~</span> ., <span class="at">data =</span> data_all) <span class="sc">|&gt;</span> </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_impute_median</span>(<span class="fu">all_numeric_predictors</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_impute_mode</span>(<span class="fu">all_nominal_predictors</span>()) <span class="sc">|&gt;</span>   </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_dummy</span>(<span class="fu">all_nominal_predictors</span>()) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
-<p>The order of steps in a recipe matter</p>
-<p>While your project’s needs may vary, here is a suggested order of potential steps that should work for most problems <a href="https://recipes.tidymodels.org/articles/Ordering.html">according to tidy models folks</a>:</p>
+<p>The order of steps in a recipe matter<br>
+<br>
+While your project’s needs may vary, here is a suggested order of potential steps that should work for most problems <a href="https://recipes.tidymodels.org/articles/Ordering.html">according to tidy models folks</a>:</p>
 <ul>
 <li>[Convert character to factor] (we do this outside our recipe as part of cleaning)</li>
 <li>Impute</li>
@@ -990,8 +1013,9 @@ With this approach, we would take our full n = 303 and:</p>
 <li>We would use this performance metric from the held-out validation set to select the best model configuration</li>
 </ul>
 <hr>
-<p>We call this the single validation set approach but that single held-out set can be either a validation or test set depending on our goals</p>
-<p>If you need to BOTH select a best model configuration AND evaluate that best model configuration, you would need both a validation and a test set.</p>
+<p>We call this the single validation set approach but that single held-out set can be either a validation or test set depending on our goals<br>
+<br>
+If you need to BOTH select a best model configuration AND evaluate that best model configuration, you would need both a validation and a test set.</p>
 <hr>
 <p>We have been doing the single validation set approach all along but we will provide one more example now (with a 50/50 split) to transition the code we are using to a more general workflow that will accommodate our more complicated resampling approaches<br>
 <br>
@@ -1020,18 +1044,18 @@ In the first half of this unit, we will focus on assessing the performance of a 
 <li>Let’s do a 50/50 split, stratified on our outcome, disease</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">19690127</span>)</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>splits <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">initial_split</span>(<span class="at">prop =</span> <span class="fl">0.5</span>, <span class="at">strata =</span> <span class="st">"disease"</span>)</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>data_trn <span class="ot">&lt;-</span> <span class="fu">analysis</span>(splits)</span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span>  <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">19690127</span>)</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>splits <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">initial_split</span>(<span class="at">prop =</span> <span class="fl">0.5</span>, <span class="at">strata =</span> <span class="st">"disease"</span>)</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>data_trn <span class="ot">&lt;-</span> <span class="fu">analysis</span>(splits)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span>  <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 151</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>data_test <span class="ot">&lt;-</span> <span class="fu">assessment</span>(splits)</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>data_test <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>data_test <span class="ot">&lt;-</span> <span class="fu">assessment</span>(splits)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>data_test <span class="sc">|&gt;</span> <span class="fu">nrow</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 152</code></pre>
 </div>
@@ -1041,31 +1065,31 @@ In the first half of this unit, we will focus on assessing the performance of a 
 <li>Make features for train and test (skim them on your own time!)</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>rec_prep <span class="ot">&lt;-</span> rec_lr <span class="sc">|&gt;</span> </span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(data_trn)</span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>feat_trn <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_trn)</span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>feat_test <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>rec_prep <span class="ot">&lt;-</span> rec_lr <span class="sc">|&gt;</span> </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(data_trn)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>feat_trn <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_trn)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>feat_test <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <ul>
 <li>Fit model in train</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>fit_lr <span class="ot">&lt;-</span></span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">logistic_reg</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"glm"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(disease <span class="sc">~</span> ., <span class="at">data =</span> feat_trn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>fit_lr <span class="ot">&lt;-</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">logistic_reg</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"glm"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(disease <span class="sc">~</span> ., <span class="at">data =</span> feat_trn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <ul>
 <li>Evaluate model in test</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy_vec</span>(feat_test<span class="sc">$</span>disease, <span class="fu">predict</span>(fit_lr, feat_test, <span class="at">type =</span> <span class="st">"class"</span>)<span class="sc">$</span>.pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy_vec</span>(feat_test<span class="sc">$</span>disease, <span class="fu">predict</span>(fit_lr, feat_test, <span class="at">type =</span> <span class="st">"class"</span>)<span class="sc">$</span>.pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.8031496</code></pre>
 </div>
@@ -1078,9 +1102,9 @@ In the first half of this unit, we will focus on assessing the performance of a 
 <li>We will use a variety of functions at this step depending on how we decide to handle resampling</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">19690127</span>)</span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>splits_validate <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">validation_split</span>(<span class="at">prop =</span> <span class="fl">0.5</span>, <span class="at">strata =</span> <span class="st">"disease"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">19690127</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>splits_validate <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">validation_split</span>(<span class="at">prop =</span> <span class="fl">0.5</span>, <span class="at">strata =</span> <span class="st">"disease"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <p>Now we can fit our model configuration in our training set(s) and calculate performance metric(s) in the held-out sets using <code>fit_resamples()</code></p>
@@ -1095,11 +1119,11 @@ In the first half of this unit, we will focus on assessing the performance of a 
 </ul></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>fits_lr <span class="ot">&lt;-</span></span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">logistic_reg</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"glm"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit_resamples</span>(<span class="at">preprocessor =</span> rec_lr, <span class="at">resamples =</span> splits_validate, </span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>fits_lr <span class="ot">&lt;-</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">logistic_reg</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"glm"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit_resamples</span>(<span class="at">preprocessor =</span> rec_lr, <span class="at">resamples =</span> splits_validate, </span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <p>The object (we will call it <code>fits_</code>) that is returned in NOT a model using our model figuration (what we got using <code>fit()</code>, which we called <code>fit_</code>)<br>
@@ -1118,8 +1142,8 @@ Instead, it contains the performance metrics for the configuration, estimated by
 <li>It matches what we got previously when doing this manually</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>fits_lr <span class="sc">|&gt;</span> </span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect_metrics</span>(<span class="at">summarize =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>fits_lr <span class="sc">|&gt;</span> </span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect_metrics</span>(<span class="at">summarize =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 5
   id         .metric  .estimator .estimate .config             
@@ -1141,9 +1165,9 @@ Question: How many participants were used to fit the model that we used to estim
 <div id="callout-1" class="callout-1-contents callout-collapse collapse show">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Show Answer</summary>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>The model configuration was fit in the training set. The training set had N = 151 participants.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>The model configuration was fit in the training set. The training set had N = 151 participants.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -1163,11 +1187,11 @@ Question: If we planned to implement this model (i.e., really use it in practice
 <div id="callout-2" class="callout-2-contents callout-collapse collapse show">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Show Answer</summary>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>This model was trained with N = 151 but we have 303 participants.  If we trained</span>
-<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>the same model configuration with all of our data, that model would be expected</span>
-<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>to performance better than the N-151 model.  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>This model was trained with N = 151 but we have 303 participants.  If we trained</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>the same model configuration with all of our data, that model would be expected</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>to performance better than the N-151 model.  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -1187,15 +1211,15 @@ Question: Why will the N = 303 model always be better (or at worst equivalent) t
 <div id="callout-3" class="callout-3-contents callout-collapse collapse show">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Show Answer</summary>
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>Increasing the sample size used to fit our model configuration will decrease</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>model variance but not change model bias. This will produce overall lower </span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>error.</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>This might not be true if the additional data were not similar quality to our</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>training data but we know our validation/test set is similar because we did a</span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>random resample.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>Increasing the sample size used to fit our model configuration will decrease</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>model variance but not change model bias. This will produce overall lower </span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>error.</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>This might not be true if the additional data were not similar quality to our</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>training data but we know our validation/test set is similar because we did a</span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>random resample.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -1215,9 +1239,9 @@ Question: So why did we not just fit this model configuration using N = 303 to s
 <div id="callout-4" class="callout-4-contents callout-collapse collapse show">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Show Answer</summary>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>Because then we would not have had any new data left to get an estimate of its performance in new data!</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>Because then we would not have had any new data left to get an estimate of its performance in new data!</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -1231,19 +1255,22 @@ Question: So why did we not just fit this model configuration using N = 303 to s
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Question: But what does this mean about our estimate of the performance of this final model using all data when we get that estimate using a smaller sample size (the sample size in our training set)?
+Question: But what does this mean about our estimate of the performance of this final model (fit with all available data) data when we get that estimate using a model that as fit with a smaller sample size (the sample size in our training set)?
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
 <div id="callout-5" class="callout-5-contents callout-collapse collapse show">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Show Answer</summary>
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>Our estimate will likely be biased.  It will underestimate the true expected </span>
-<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>peformance of our final model.  We can think of it as a lower bound on that expected</span>
-<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>performance.  The amount of bias will be a function of the difference between the </span>
-<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>sample size of the training set and the size the of full dataset.   If we want less biased estimates, we want to allocate as much data as possible to the training set when estimating the performance of our final model configuration (but this will come with other costs!)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>Our estimate will likely be biased.  It will underestimate the true expected </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>peformance of our final model.  We can think of it as a lower bound on that expected</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>performance.  The amount of bias will be a function of the difference between the </span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>sample size of the training set and the size the of full dataset.   If we want less </span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>biased estimates, we want to allocate as much data as possible to the training set </span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>when estimating the performance of our final model configuration (but this will come </span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>with other costs!)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -1263,17 +1290,18 @@ Question: Contrast the costs/benefits of a 50/50 vs.&nbsp;80/20 split for train 
 <div id="callout-6" class="callout-6-contents callout-collapse collapse show">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Show Answer</summary>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>Using a training set with 80% of the sample will yield a less biased (under)</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>estimate of the final (using all data) model performance than a training set with</span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>50% of the sample.  </span>
-<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>However, using a test set of 20% of the data will produce a </span>
-<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>more variable (less precise) estimate of performance than the 50% test set.  This </span>
-<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>is another bias-variance trade off but now instead of talking about model</span>
-<span id="cb27-8"><a href="#cb27-8" aria-hidden="true" tabindex="-1"></a>performance, we are seeing that we have to trade off bias and variance in our</span>
-<span id="cb27-9"><a href="#cb27-9" aria-hidden="true" tabindex="-1"></a>estimate of the model performance too!</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>Using a training set with 80% of the sample will yield a less biased (under)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>estimate of the final (using all data) model performance than a training set with</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>50% of the sample.  </span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>However, using a test set of 20% of the data will produce a </span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>more variable (less precise) estimate of performance than the 50% test set.  </span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>This  is another bias-variance trade off but now instead of talking about model</span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>performance, we are seeing that we have to trade off bias and variance in our</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>estimate of the model performance too!</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -1293,23 +1321,23 @@ Question: Contrast the costs/benefits of a 50/50 vs.&nbsp;80/20 split for train 
 <br>
 We are now using the full data set as our new training set so we prep and bake with the full dataset</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>rec_prep <span class="ot">&lt;-</span> rec_lr <span class="sc">|&gt;</span> </span>
-<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(data_all)</span>
-<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>feat_all <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
-<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_all)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>rec_prep <span class="ot">&lt;-</span> rec_lr <span class="sc">|&gt;</span> </span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(data_all)</span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>feat_all <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_all)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <p>And then fit your model configuration</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>fit_lr <span class="ot">&lt;-</span></span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">logistic_reg</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"glm"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(disease <span class="sc">~</span> ., <span class="at">data =</span> feat_all)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>fit_lr <span class="ot">&lt;-</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">logistic_reg</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"glm"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(disease <span class="sc">~</span> ., <span class="at">data =</span> feat_all)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>fit_lr <span class="sc">|&gt;</span> <span class="fu">tidy</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>fit_lr <span class="sc">|&gt;</span> <span class="fu">tidy</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 17 × 5
    term                    estimate std.error statistic   p.value
@@ -1335,7 +1363,7 @@ We are now using the full data set as our new training set so we prep and bake w
 </div>
 <p>If we need to predict disease in the future, this is the model we would use (with these parameter estimates)<br>
 <br>
-Our estimate of its future accuracy is based on our previous assessment using the held-in training set to fit the model configuration and the held-out test set to estimate its performance<br>
+Our estimate of its future accuracy is based on our previous assessment using the <strong>held-in</strong> training set to fit the model configuration and the <strong>held-out</strong> test set to estimate its performance<br>
 <br>
 This estimate should be considered a lower bound on its expected performance</p>
 <hr>
@@ -1356,12 +1384,12 @@ Question: How could you use this single validation set approach to get the least
 <div id="callout-7" class="callout-7-contents callout-collapse collapse show">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>show answer</summary>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>Put all but one case into the training set (i.e., leave only one case out in the</span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>test set).  In our example, you would fit a model with n = 302  this model will </span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>have essentially equivalent overfitting as n = 303 so it will not yield much bias </span>
-<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>when we use it to estimate the performance of the n = 303 model.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>Put all but one case into the training set (i.e., leave only one case out in the</span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a>test set).  In our example, you would fit a model with n = 302  this model will </span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a>have essentially equivalent overfitting as n = 303 so it will not yield much bias </span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a>when we use it to estimate the performance of the n = 303 model.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -1381,10 +1409,10 @@ Question: What will be the biggest problem with this approach?
 <div id="callout-8" class="callout-8-contents callout-collapse collapse show">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Show Answer</summary>
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>You will estimate performance with only n = 1 in the test set.  This means there </span>
-<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>will be high variance in your performance estimate.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>You will estimate performance with only n = 1 in the test set.  This means there </span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>will be high variance in your performance estimate.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -1404,14 +1432,14 @@ Question: How might you reduce this problem?
 <div id="callout-9" class="callout-9-contents callout-collapse collapse show">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Show Answer</summary>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>Repeat this split between training and validation n times so that there are n different</span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>sets of n = 1 test sets.  Then average the performance across all n of these test </span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>sets to get a more stable estimate of performance. Averaging is a good way to reduce </span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>the variance of any estimate.  </span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>This is leave one out cross-validation!</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>Repeat this split between training and test n times so that there are n different</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>sets of n = 1 test sets.  Then average the performance across all n of these test </span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>sets to get a more stable estimate of performance. Averaging is a good way to reduce </span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>the variance of any estimate.  </span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>This is leave one out cross-validation!</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -1425,7 +1453,9 @@ Question: How might you reduce this problem?
 </ul>
 <p>but…</p>
 <ul>
-<li>LOOCV can be computationally expensive (need to fit and evaluate the same model configuration n times). this is a real problem when you are also working with a high number of model configurations (i.e., number fits = n * number of model configurations).</li>
+<li>LOOCV can be computationally expensive (need to fit and evaluate the same model configuration n times).<br>
+</li>
+<li>This is a real problem when you are also working with a high number of model configurations (i.e., number fits = n * number of model configurations).</li>
 </ul>
 <hr>
 <p>LOOCV eventually uses all the data in the held-out set across the ‘n’ held-out sets.</p>
@@ -1436,12 +1466,12 @@ Question: How might you reduce this problem?
 <br>
 </li>
 </ul>
-<p>k-fold cross validation (next method) improves the variance of the average performance metric by averaging across more independent (less overlapping) training sets</p>
+<p>K-fold cross validation (next method) improves the variance of the average performance metric by averaging across more independent (less overlapping) training sets</p>
 <ul>
 <li>For this reason, it is superior and (always?) preferred over LOOCV</li>
 <li>We are not demonstrating LOOCV b/c we strongly prefer other methods (k-fold)</li>
 <li>Still important to understand it conceptually and its strengths/weaknesses</li>
-<li>if you wanted to use this resampling approach, simply substitute <code>loo_cv()</code> for <code>vfold_cv()</code> in the next example</li>
+<li>If you wanted to use this resampling approach, simply substitute <code>loo_cv()</code> for <code>vfold_cv()</code> in the next example</li>
 </ul>
 <hr>
 </section>
@@ -1473,10 +1503,10 @@ Note that K is sometimes referred to as V in some fields/literatures (Don’t bl
 <li>stratify on <code>disease</code></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>splits_kfold <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">vfold_cv</span>(<span class="at">v =</span> <span class="dv">10</span>, <span class="at">repeats =</span> <span class="dv">1</span>, <span class="at">strata =</span> <span class="st">"disease"</span>)</span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>splits_kfold</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>splits_kfold <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">vfold_cv</span>(<span class="at">v =</span> <span class="dv">10</span>, <span class="at">repeats =</span> <span class="dv">1</span>, <span class="at">strata =</span> <span class="st">"disease"</span>)</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>splits_kfold</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#  10-fold cross-validation using stratification 
 # A tibble: 10 × 2
@@ -1504,12 +1534,12 @@ Note that K is sometimes referred to as V in some fields/literatures (Don’t bl
 <li>Set performance metrics with <code>metric_set()</code></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>fits_lr_kfold <span class="ot">&lt;-</span> </span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">logistic_reg</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"glm"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit_resamples</span>(<span class="at">preprocessor =</span> rec_lr, </span>
-<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">resamples =</span> splits_kfold, </span>
-<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>fits_lr_kfold <span class="ot">&lt;-</span> </span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">logistic_reg</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"glm"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit_resamples</span>(<span class="at">preprocessor =</span> rec_lr, </span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">resamples =</span> splits_kfold, </span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <ol start="3" type="1">
@@ -1517,11 +1547,12 @@ Note that K is sometimes referred to as V in some fields/literatures (Don’t bl
 </ol>
 <ul>
 <li>Can see performance in all folds using <code>summarize = FALSE</code></li>
+<li>The performance estimates are not all the same. This is what we mean when we take about the variance in our performance estimates. You couldn’t see it before with only one held-out set but now that we have 10, it becomes more concrete. Ideally this variance is as low as possible.</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>metrics_kfold <span class="ot">&lt;-</span> <span class="fu">collect_metrics</span>(fits_lr_kfold, <span class="at">summarize =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>metrics_kfold <span class="sc">|&gt;</span> <span class="fu">print_kbl</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>metrics_kfold <span class="ot">&lt;-</span> <span class="fu">collect_metrics</span>(fits_lr_kfold, <span class="at">summarize =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>metrics_kfold <span class="sc">|&gt;</span> <span class="fu">print_kbl</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:500px; overflow-x: scroll; width:100%; ">
 <table class="table table-striped table-condensed table-sm small" data-quarto-postprocess="true">
@@ -1613,21 +1644,26 @@ Note that K is sometimes referred to as V in some fields/literatures (Don’t bl
 </div>
 <hr>
 <ul>
-<li>Could plot this as a histogram to visualize sampling distribution of performance estimates</li>
+<li>Could plot this as a histogram to visualize this variance (i.e., the sampling distribution of performance estimates)</li>
 <li>Would be better if we had more folds (see repeats in a bit)</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>metrics_kfold <span class="sc">|&gt;</span> <span class="fu">plot_hist</span>(<span class="st">".estimate"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>metrics_kfold <span class="sc">|&gt;</span> <span class="fu">plot_hist</span>(<span class="st">".estimate"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="005_resampling_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="005_resampling_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <hr>
 <ul>
 <li>Can see the average performance over folds along with its standard error using <code>summarize = TRUE</code></li>
+<li>This average will have lower variance (which is estimated by the standard error. Still not zero!)</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(fits_lr_kfold, <span class="at">summarize =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(fits_lr_kfold, <span class="at">summarize =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 6
   .metric  .estimator  mean     n std_err .config             
@@ -1637,21 +1673,21 @@ Note that K is sometimes referred to as V in some fields/literatures (Don’t bl
 </div>
 <hr>
 <ol start="4" type="1">
-<li>You still fit the final model as before using the full dataset.</li>
+<li>You still fit the final model as before using the full dataset</li>
 </ol>
 <ul>
 <li>We already have the feature matrix for the full dataset (<code>feat_all</code>) from earlier</li>
 <li>Otherwise, remake it</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>fit_lr <span class="ot">&lt;-</span></span>
-<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">logistic_reg</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"glm"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(disease <span class="sc">~</span> ., <span class="at">data =</span> feat_all)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>fit_lr <span class="ot">&lt;-</span></span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">logistic_reg</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"glm"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(disease <span class="sc">~</span> ., <span class="at">data =</span> feat_all)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>fit_lr <span class="sc">|&gt;</span> <span class="fu">tidy</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>fit_lr <span class="sc">|&gt;</span> <span class="fu">tidy</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 17 × 5
    term                    estimate std.error statistic   p.value
@@ -1675,11 +1711,15 @@ Note that K is sometimes referred to as V in some fields/literatures (Don’t bl
 17 thal_reversabledefect    1.17      0.409       2.86  0.00430  </code></pre>
 </div>
 </div>
-<p>If we need to predict disease in the future, this is the fitted model we would use (with these parameter estimates)</p>
-<p>Our estimate of its future accuracy is 0.8037632 with a standard error of 0.019909</p>
+<p><br>
+<br>
+If we need to predict disease in the future, this is the fitted model we would use (with these parameter estimates)<br>
+<br>
+Our estimate of its future accuracy is 0.8037632 with a standard error of 0.019909</p>
 <hr>
-<p>Comparisons between K-fold vs.&nbsp;LOOCV and Single Validation set</p>
-<p>For Bias:</p>
+<p>Comparisons between K-fold vs.&nbsp;LOOCV and Single Validation set<br>
+<br>
+For Bias:</p>
 <ul>
 <li>K-fold typically has less bias than the single validation set method
 <ul>
@@ -1710,38 +1750,49 @@ So you may want to start caching the <code>fits_</code> object so you don’t ha
 <li>Put this near the top of your code with other environment settings so its easy to find</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>rerun_setting <span class="ot">&lt;-</span> <span class="cn">FALSE</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>rerun_setting <span class="ot">&lt;-</span> <span class="cn">FALSE</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <ul>
 <li>Now use the <code>cache_rds()</code> function</li>
 <li>Put the resampling code inside of <code>{}</code></li>
 <li>Cached file will be saved in <code>cached/</code> folder with filename <code>fits_lr_kfold_HASH</code></li>
-<li>If you change the raw data file but don’t update rec or splits, it will not. Be careful!</li>
+<li>If you change any code in the function, it will invalidate the cache and re-run the code</li>
+<li>However, it will not invalidate the cache if you change objects or data that affect this function but are outside it, e.g.,
+<ul>
+<li>Fix errors in data</li>
+<li>Update <code>rec_lr</code></li>
+<li>Update <code>splits_kfold</code></li>
+<li>Be VERY careful!</li>
+</ul></li>
 <li>You can manually invalidate just the cache for just this code chunk by setting <code>rerun = TRUE</code> temporarily or you can change <code>rerun_setting &lt;- TRUE</code> at the top of your script to do fresh calculations for all of your cached code chunks</li>
+<li>You can set <code>rerun_settings &lt;- TRUE</code> when you are done with your development to make sure everything is accurate (review output carefully for any changes!)</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>fits_lr_kfold <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logistic_reg</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_engine</span>(<span class="st">"glm"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fit_resamples</span>(<span class="at">preprocessor =</span> rec_lr, </span>
-<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>                  <span class="at">resamples =</span> splits_kfold, </span>
-<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>                  <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span>
-<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>  }, </span>
-<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/"</span>,</span>
-<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_lr_kfold"</span>,</span>
-<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>fits_lr_kfold <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logistic_reg</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_engine</span>(<span class="st">"glm"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fit_resamples</span>(<span class="at">preprocessor =</span> rec_lr, </span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>                  <span class="at">resamples =</span> splits_kfold, </span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>                  <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>  }, </span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/"</span>,</span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_lr_kfold"</span>,</span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 </section>
 <section id="repeated-k-fold-cross-validation" class="level2" data-number="5.7">
 <h2 data-number="5.7" class="anchored" data-anchor-id="repeated-k-fold-cross-validation"><span class="header-section-number">5.7</span> Repeated K-fold Cross Validation</h2>
-<p>You can repeat the K-fold procedure multiple times with new splits for a different mix of K folds each time</p>
-<p>Two benefits:</p>
+<p>You can repeat the K-fold procedure multiple times with new splits for a different mix of K folds each time<br>
+<br>
+Two benefits:</p>
 <ul>
 <li>More stable performance estimate (because averaged over more folds: repeats * K)</li>
-<li>Many more estimates of performance to characterize (SE; plot) of your performance estimate</li>
+<li>Many more estimates of performance to characterize (SE; plot) of your performance estimate<br>
+<br>
+</li>
 </ul>
 <p>But it is computationally expensive (depending on number of repeats)</p>
 <hr>
@@ -1750,11 +1801,11 @@ So you may want to start caching the <code>fits_</code> object so you don’t ha
 <li>Splits with repeats = 10 (will do 10 different splits of 10-fold)</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">19690127</span>)</span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>splits_kfold10x <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">vfold_cv</span>(<span class="at">v =</span> <span class="dv">10</span>, <span class="at">repeats =</span> <span class="dv">10</span>, <span class="at">strata =</span> <span class="st">"disease"</span>)</span>
-<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>splits_kfold10x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">19690127</span>)</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>splits_kfold10x <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">vfold_cv</span>(<span class="at">v =</span> <span class="dv">10</span>, <span class="at">repeats =</span> <span class="dv">10</span>, <span class="at">strata =</span> <span class="st">"disease"</span>)</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>splits_kfold10x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#  10-fold cross-validation repeated 10 times using stratification 
 # A tibble: 100 × 3
@@ -1778,23 +1829,26 @@ So you may want to start caching the <code>fits_</code> object so you don’t ha
 <li>Everything else is the same!</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>fits_lr_kfold10x <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
-<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
-<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logistic_reg</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">set_engine</span>(<span class="st">"glm"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">fit_resamples</span>(<span class="at">preprocessor =</span> rec_lr, </span>
-<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>                    <span class="at">resamples =</span> splits_kfold10x, </span>
-<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>                    <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span>
-<span id="cb49-8"><a href="#cb49-8" aria-hidden="true" tabindex="-1"></a>  }, </span>
-<span id="cb49-9"><a href="#cb49-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/"</span>,</span>
-<span id="cb49-10"><a href="#cb49-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_lr_kfold10x"</span>,</span>
-<span id="cb49-11"><a href="#cb49-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>fits_lr_kfold10x <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logistic_reg</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">set_engine</span>(<span class="st">"glm"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">fit_resamples</span>(<span class="at">preprocessor =</span> rec_lr, </span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>                    <span class="at">resamples =</span> splits_kfold10x, </span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>                    <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span>
+<span id="cb48-8"><a href="#cb48-8" aria-hidden="true" tabindex="-1"></a>  }, </span>
+<span id="cb48-9"><a href="#cb48-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/"</span>,</span>
+<span id="cb48-10"><a href="#cb48-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_lr_kfold10x"</span>,</span>
+<span id="cb48-11"><a href="#cb48-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
+<ul>
+<li>Individual estimates across 100 held-out folds</li>
+</ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>metrics_kfold10x <span class="ot">&lt;-</span> <span class="fu">collect_metrics</span>(fits_lr_kfold10x, <span class="at">summarize =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>metrics_kfold10x <span class="sc">|&gt;</span> <span class="fu">print_kbl</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>metrics_kfold10x <span class="ot">&lt;-</span> <span class="fu">collect_metrics</span>(fits_lr_kfold10x, <span class="at">summarize =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>metrics_kfold10x <span class="sc">|&gt;</span> <span class="fu">print_kbl</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:500px; overflow-x: scroll; width:100%; ">
 <table class="table table-striped table-condensed table-sm small" data-quarto-postprocess="true">
@@ -2614,14 +2668,25 @@ So you may want to start caching the <code>fits_</code> object so you don’t ha
 </div>
 
 </div>
-<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>metrics_kfold10x <span class="sc">|&gt;</span> <span class="fu">plot_hist</span>(<span class="st">".estimate"</span>, <span class="at">bins =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<ul>
+<li>Histogram of those 100 individual estimates</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>metrics_kfold10x <span class="sc">|&gt;</span> <span class="fu">plot_hist</span>(<span class="st">".estimate"</span>, <span class="at">bins =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="005_resampling_files/figure-html/unnamed-chunk-37-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="005_resampling_files/figure-html/unnamed-chunk-38-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <hr>
+<p>Average performance estimated (and its SE) across the 100 held-out folds</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(fits_lr_kfold10x, <span class="at">summarize =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(fits_lr_kfold10x, <span class="at">summarize =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 6
   .metric  .estimator  mean     n std_err .config             
@@ -2629,19 +2694,23 @@ So you may want to start caching the <code>fits_</code> object so you don’t ha
 1 accuracy binary     0.794   100 0.00652 Preprocessor1_Model1</code></pre>
 </div>
 </div>
+<hr>
 <ul>
 <li>You should also refit a final model in the full data at the end as before</li>
 <li>We wont demonstrate that here</li>
 </ul>
 <hr>
-<p>Comparisons between repeated K-fold and K-fold</p>
-<p>Repeated K-fold:</p>
+<p>Comparisons between repeated K-fold and K-fold<br>
+<br>
+Repeated K-fold:</p>
 <ul>
 <li>Has same bias as K-fold (still fitting models with K-1 folds)</li>
 <li>Has all the benefits of single K-fold</li>
 <li>Has even more stable estimate of performance (mean over more folds/repeats)</li>
 <li>Provides more info about distribution for the performance estimate</li>
-<li><strong>But</strong> is more computationally expensive</li>
+<li><strong>But</strong> is more computationally expensive<br>
+<br>
+</li>
 </ul>
 <p>Repeated K-fold is preferred over K-fold to the degree possible based on computational limitations (parallel, N, p, statistical algorithm, # of model configurations)</p>
 <hr>
@@ -2665,9 +2734,11 @@ So you may want to start caching the <code>fits_</code> object so you don’t ha
 </section>
 <section id="bootstrap-resampling" class="level2" data-number="5.9">
 <h2 data-number="5.9" class="anchored" data-anchor-id="bootstrap-resampling"><span class="header-section-number">5.9</span> Bootstrap Resampling</h2>
-<p>A bootstrap sample is a random sample taken with replacement (i.e., same observations can be sampled multiple times within one bootstrap sample)</p>
-<p>If you bootstrap a new sample of size n from a dataset with sample size n, approximately 63.2% of the original observations end up in the bootstrap sample</p>
-<p>The remaining 36.8% of the observations are often called the “out of bag” (OOB) samples</p>
+<p>A bootstrap sample is a random sample taken with replacement (i.e., same observations can be sampled multiple times within one bootstrap sample)<br>
+<br>
+If you bootstrap a new sample of size n from a dataset with sample size n, approximately 63.2% of the original observations end up in the bootstrap sample<br>
+<br>
+The remaining 36.8% of the observations are often called the “out of bag” (OOB) samples</p>
 <hr>
 <p>Bootstrap Resampling</p>
 <ul>
@@ -2687,11 +2758,11 @@ So you may want to start caching the <code>fits_</code> object so you don’t ha
 <li>Here are 100 bootstraps stratified on <code>disease</code></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">19690127</span>)</span>
-<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>splits_boot <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
-<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bootstraps</span>(<span class="at">times =</span> <span class="dv">100</span>, <span class="at">strata =</span> <span class="st">"disease"</span>) </span>
-<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>splits_boot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">19690127</span>)</span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>splits_boot <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bootstraps</span>(<span class="at">times =</span> <span class="dv">100</span>, <span class="at">strata =</span> <span class="st">"disease"</span>) </span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>splits_boot</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># Bootstrap sampling using stratification 
 # A tibble: 100 × 2
@@ -2715,24 +2786,27 @@ So you may want to start caching the <code>fits_</code> object so you don’t ha
 <li>Everything else is the same!</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>fits_lr_boot <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
-<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
-<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logistic_reg</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">set_engine</span>(<span class="st">"glm"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">fit_resamples</span>(<span class="at">preprocessor =</span> rec_lr, </span>
-<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a>                    <span class="at">resamples =</span> splits_boot, </span>
-<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a>                    <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span>
-<span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb56-9"><a href="#cb56-9" aria-hidden="true" tabindex="-1"></a>  },</span>
-<span id="cb56-10"><a href="#cb56-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/"</span>,</span>
-<span id="cb56-11"><a href="#cb56-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_lr_boot"</span>, </span>
-<span id="cb56-12"><a href="#cb56-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>fits_lr_boot <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
+<span id="cb55-2"><a href="#cb55-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
+<span id="cb55-3"><a href="#cb55-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logistic_reg</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb55-4"><a href="#cb55-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">set_engine</span>(<span class="st">"glm"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb55-5"><a href="#cb55-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">fit_resamples</span>(<span class="at">preprocessor =</span> rec_lr, </span>
+<span id="cb55-6"><a href="#cb55-6" aria-hidden="true" tabindex="-1"></a>                    <span class="at">resamples =</span> splits_boot, </span>
+<span id="cb55-7"><a href="#cb55-7" aria-hidden="true" tabindex="-1"></a>                    <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span>
+<span id="cb55-8"><a href="#cb55-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb55-9"><a href="#cb55-9" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb55-10"><a href="#cb55-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/"</span>,</span>
+<span id="cb55-11"><a href="#cb55-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_lr_boot"</span>, </span>
+<span id="cb55-12"><a href="#cb55-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
+<ul>
+<li>100 individual performance estimates from the 100 OOB sets</li>
+</ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>metrics_boot <span class="ot">&lt;-</span> <span class="fu">collect_metrics</span>(fits_lr_boot, <span class="at">summarize =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>metrics_boot <span class="sc">|&gt;</span> <span class="fu">print_kbl</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>metrics_boot <span class="ot">&lt;-</span> <span class="fu">collect_metrics</span>(fits_lr_boot, <span class="at">summarize =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>metrics_boot <span class="sc">|&gt;</span> <span class="fu">print_kbl</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:500px; overflow-x: scroll; width:100%; ">
 <table class="table table-striped table-condensed table-sm small" data-quarto-postprocess="true">
@@ -3451,14 +3525,27 @@ So you may want to start caching the <code>fits_</code> object so you don’t ha
 </div>
 
 </div>
-<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>metrics_boot <span class="sc">|&gt;</span> <span class="fu">plot_hist</span>(<span class="st">".estimate"</span>, <span class="at">bins =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<ul>
+<li>Histogram of those 100 performance estimates</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>metrics_boot <span class="sc">|&gt;</span> <span class="fu">plot_hist</span>(<span class="st">".estimate"</span>, <span class="at">bins =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="005_resampling_files/figure-html/unnamed-chunk-40-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="005_resampling_files/figure-html/unnamed-chunk-42-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <hr>
+<ul>
+<li>Average performance over those 100 estimates</li>
+</ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(fits_lr_boot, <span class="at">summarize =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(fits_lr_boot, <span class="at">summarize =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 6
   .metric  .estimator  mean     n std_err .config             
@@ -3493,8 +3580,9 @@ So you may want to start caching the <code>fits_</code> object so you don’t ha
 </section>
 <section id="using-resampling-to-select-best-model-configurations" class="level2" data-number="5.10">
 <h2 data-number="5.10" class="anchored" data-anchor-id="using-resampling-to-select-best-model-configurations"><span class="header-section-number">5.10</span> Using Resampling to Select Best Model Configurations</h2>
-<p>In all of the previous examples, we have used various resampling methods only to evaluate the performance of a single model configuration in new data. In these instances, we were treating the held-out sets as test sets.</p>
-<p>Resampling is also used to get held out performance estimates to select best model configurations. Best means the model configuration that performs the best in new data and therefore is closest to the true DGP for the data</p>
+<p>In all of the previous examples, we have used various resampling methods only to evaluate the performance of a single model configuration in new data. In these instances, we were treating the held-out sets as test sets.<br>
+<br>
+Resampling is also used to get held out performance estimates to select best model configurations. <strong>Best</strong> means the model configuration that performs the best in new data and therefore is closest to the true DGP for the data</p>
 <hr>
 <p>For example, we might want to select among model configurations in an explanatory scenario to have a principled approach to determine the model configuration that best matches the true DGP (and would be best to test your hypotheses). e.g.,</p>
 <ul>
@@ -3517,10 +3605,12 @@ So you may want to start caching the <code>fits_</code> object so you don’t ha
 <li>We will need to indicate which hyperparameters we plan to tune in the statistical algorithm</li>
 <li>We need (or can) select values to consider for that hyperparameter (or we can let the <code>tune</code> package functions decide in some cases)</li>
 <li>We will now use <a href="https://tune.tidymodels.org/reference/tune_grid.html"><code>tune_grid()</code></a> rather <code>fit_resamples()</code> to fit and evaluate the models configurations that differ with respect to their hyperparameters</li>
-<li><h2 id="this-is-computationally-costly.-now-fitting-and-estimating-performance-for-multiple-configurations-across-multipe-held-inheld-out-sets" data-number="5.11" class="anchored"><span class="header-section-number">5.11</span> This IS computationally costly. Now fitting and estimating performance for multiple configurations across multipe held-in/held-out sets</h2></li>
+<li>This IS computationally costly. Now fitting and estimating performance for multiple configurations across multipe held-in/held-out sets</li>
 </ul>
-<p>Lets use bootstrap resampling to select the best K for KNN applied to our heart disease dataset</p>
-<p>We can use the same splits are established as before (<code>splits_boot</code>)<br>
+<hr>
+<p>Lets use bootstrap resampling to select the best K for KNN applied to our heart disease dataset<br>
+<br>
+We can use the same splits are established as before (<code>splits_boot</code>)<br>
 <br>
 We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <ul>
@@ -3528,11 +3618,11 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <li>No need to do this to the dummy features. They are already range corrected</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>rec_knn <span class="ot">&lt;-</span> <span class="fu">recipe</span>(disease <span class="sc">~</span> ., <span class="at">data =</span> data_all) <span class="sc">|&gt;</span> </span>
-<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_impute_median</span>(<span class="fu">all_numeric_predictors</span>()) <span class="sc">|&gt;</span> </span>
-<span id="cb61-3"><a href="#cb61-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_impute_mode</span>(<span class="fu">all_nominal_predictors</span>()) <span class="sc">|&gt;</span>   </span>
-<span id="cb61-4"><a href="#cb61-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_range</span>(<span class="fu">all_numeric</span>()) <span class="sc">|&gt;</span> </span>
-<span id="cb61-5"><a href="#cb61-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_dummy</span>(<span class="fu">all_nominal_predictors</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>rec_knn <span class="ot">&lt;-</span> <span class="fu">recipe</span>(disease <span class="sc">~</span> ., <span class="at">data =</span> data_all) <span class="sc">|&gt;</span> </span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_impute_median</span>(<span class="fu">all_numeric_predictors</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_impute_mode</span>(<span class="fu">all_nominal_predictors</span>()) <span class="sc">|&gt;</span>   </span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_range</span>(<span class="fu">all_numeric</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_dummy</span>(<span class="fu">all_nominal_predictors</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <ol start="2" type="1">
@@ -3543,8 +3633,8 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <li>We indicate which hyperparameters need to be tuned</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>hyper_grid <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">neighbors =</span> <span class="fu">seq</span>(<span class="dv">1</span>, <span class="dv">150</span>, <span class="at">by =</span> <span class="dv">3</span>))</span>
-<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>hyper_grid</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>hyper_grid <span class="ot">&lt;-</span> <span class="fu">expand.grid</span>(<span class="at">neighbors =</span> <span class="fu">seq</span>(<span class="dv">1</span>, <span class="dv">150</span>, <span class="at">by =</span> <span class="dv">3</span>))</span>
+<span id="cb61-2"><a href="#cb61-2" aria-hidden="true" tabindex="-1"></a>hyper_grid</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>   neighbors
 1          1
@@ -3605,20 +3695,20 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <li>We need to set <code>grid =</code> now</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>fits_knn_boot <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
-<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
-<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">nearest_neighbor</span>(<span class="at">neighbors =</span> <span class="fu">tune</span>()) <span class="sc">|&gt;</span> </span>
-<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">set_mode</span>(<span class="st">"classification"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb64-6"><a href="#cb64-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">tune_grid</span>(<span class="at">preprocessor =</span> rec_knn, </span>
-<span id="cb64-7"><a href="#cb64-7" aria-hidden="true" tabindex="-1"></a>                <span class="at">resamples =</span> splits_boot, </span>
-<span id="cb64-8"><a href="#cb64-8" aria-hidden="true" tabindex="-1"></a>                <span class="at">grid =</span> hyper_grid,</span>
-<span id="cb64-9"><a href="#cb64-9" aria-hidden="true" tabindex="-1"></a>                <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span>
-<span id="cb64-10"><a href="#cb64-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb64-11"><a href="#cb64-11" aria-hidden="true" tabindex="-1"></a>  },</span>
-<span id="cb64-12"><a href="#cb64-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/"</span>,</span>
-<span id="cb64-13"><a href="#cb64-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_knn_boot"</span>,</span>
-<span id="cb64-14"><a href="#cb64-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>fits_knn_boot <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">nearest_neighbor</span>(<span class="at">neighbors =</span> <span class="fu">tune</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">set_mode</span>(<span class="st">"classification"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">tune_grid</span>(<span class="at">preprocessor =</span> rec_knn, </span>
+<span id="cb63-7"><a href="#cb63-7" aria-hidden="true" tabindex="-1"></a>                <span class="at">resamples =</span> splits_boot, </span>
+<span id="cb63-8"><a href="#cb63-8" aria-hidden="true" tabindex="-1"></a>                <span class="at">grid =</span> hyper_grid,</span>
+<span id="cb63-9"><a href="#cb63-9" aria-hidden="true" tabindex="-1"></a>                <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span>
+<span id="cb63-10"><a href="#cb63-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-11"><a href="#cb63-11" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb63-12"><a href="#cb63-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/"</span>,</span>
+<span id="cb63-13"><a href="#cb63-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_knn_boot"</span>,</span>
+<span id="cb63-14"><a href="#cb63-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <ol start="3" type="1">
@@ -3629,7 +3719,7 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <li>We <em>could</em> see the performance of each configuration in EACH fold too, but there are lots of them (use <code>summarize = FALSE</code>)</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(fits_knn_boot, <span class="at">summarize =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(fits_knn_boot, <span class="at">summarize =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 50 × 7
    neighbors .metric  .estimator  mean     n std_err .config              
@@ -3652,18 +3742,22 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <li>We can plot average performance by the values of the hyperparameter</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(fits_knn_boot, <span class="at">summarize =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> neighbors, <span class="at">y =</span> mean)) <span class="sc">+</span></span>
-<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(fits_knn_boot, <span class="at">summarize =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> neighbors, <span class="at">y =</span> mean)) <span class="sc">+</span></span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_line</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="005_resampling_files/figure-html/unnamed-chunk-45-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="005_resampling_files/figure-html/unnamed-chunk-47-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <p>K (neighbors) is affecting the bias-variance trade-off. As K increases, model bias increases but model variance decreases. In most instances, model variance decreases faster than model bias increases. Therefore performance should increase and then peak at a good point along the bias-variance trade-off. Beyond this optimal value, performance should decrease again. You want to select a hyperparameter value that is associated with peak (or near peak) performance.</p>
 <hr>
 <p>The simplest way to select among model configurations (e.g., hyperparameters) is to choose the model configuration with the best performance</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_best</span>(fits_knn_boot, <span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_best</span>(fits_knn_boot, <span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 10 × 7
    neighbors .metric  .estimator  mean     n std_err .config              
@@ -3679,7 +3773,7 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
  9        67 accuracy binary     0.785   100 0.00348 Preprocessor1_Model23
 10        85 accuracy binary     0.785   100 0.00319 Preprocessor1_Model29</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="fu">select_best</span>(fits_knn_boot)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="fu">select_best</span>(fits_knn_boot)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 2
   neighbors .config              
@@ -3694,8 +3788,8 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <li>Sort performance results from least to most flexible (e.g., <code>desc(neighbors)</code>)</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a><span class="fu">select_by_one_std_err</span>(fits_knn_boot, </span>
-<span id="cb72-2"><a href="#cb72-2" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">desc</span>(neighbors))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a><span class="fu">select_by_one_std_err</span>(fits_knn_boot, </span>
+<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">desc</span>(neighbors))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 9
   neighbors .metric  .estimator  mean     n std_err .config               .best
@@ -3711,11 +3805,11 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <li>We should also refit a final model with the “best” hyperparameter using the full data as before</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>rec_prep <span class="ot">&lt;-</span> rec_knn <span class="sc">|&gt;</span>   </span>
-<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(data_all)</span>
-<span id="cb74-3"><a href="#cb74-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb74-4"><a href="#cb74-4" aria-hidden="true" tabindex="-1"></a>feat_all <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
-<span id="cb74-5"><a href="#cb74-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_all)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a>rec_prep <span class="ot">&lt;-</span> rec_knn <span class="sc">|&gt;</span>   </span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(data_all)</span>
+<span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb73-4"><a href="#cb73-4" aria-hidden="true" tabindex="-1"></a>feat_all <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
+<span id="cb73-5"><a href="#cb73-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_all)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <ul>
@@ -3723,11 +3817,11 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <li><p>Note that we now fit using all the data and switch to <code>fit()</code> rather than <code>tune_grid()</code></p></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>fit_knn_best <span class="ot">&lt;-</span></span>
-<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nearest_neighbor</span>(<span class="at">neighbors =</span> <span class="fu">select_best</span>(fits_knn_boot)<span class="sc">$</span>neighbors) <span class="sc">|&gt;</span> </span>
-<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"classification"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb75-5"><a href="#cb75-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(disease <span class="sc">~</span> ., <span class="at">data =</span> feat_all)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>fit_knn_best <span class="ot">&lt;-</span></span>
+<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nearest_neighbor</span>(<span class="at">neighbors =</span> <span class="fu">select_best</span>(fits_knn_boot)<span class="sc">$</span>neighbors) <span class="sc">|&gt;</span> </span>
+<span id="cb74-3"><a href="#cb74-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb74-4"><a href="#cb74-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"classification"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb74-5"><a href="#cb74-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(disease <span class="sc">~</span> ., <span class="at">data =</span> feat_all)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <ul>
@@ -3736,8 +3830,8 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 </ul>
 <hr>
 </section>
-<section id="resampling-for-both-model-selection-and-evaluation" class="level2" data-number="5.12">
-<h2 data-number="5.12" class="anchored" data-anchor-id="resampling-for-both-model-selection-and-evaluation"><span class="header-section-number">5.12</span> Resampling for Both Model Selection and Evaluation</h2>
+<section id="resampling-for-both-model-selection-and-evaluation" class="level2" data-number="5.11">
+<h2 data-number="5.11" class="anchored" data-anchor-id="resampling-for-both-model-selection-and-evaluation"><span class="header-section-number">5.11</span> Resampling for Both Model Selection and Evaluation</h2>
 <p>Resampling methods can be used to get model performance estimates to <strong>select</strong> the best model configuration and/or <strong>evaluate</strong> that best model</p>
 <ul>
 <li><p>So far we have done EITHER selection OR evaluation but not both together</p></li>
@@ -3764,8 +3858,8 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <li>Can be fine if you just want to find the best model configuration but don’t need to evaluate its performance rigorously</li>
 </ul>
 <hr>
-<section id="bootstrap-with-test-set" class="level3" data-number="5.12.1">
-<h3 data-number="5.12.1" class="anchored" data-anchor-id="bootstrap-with-test-set"><span class="header-section-number">5.12.1</span> Bootstrap with Test Set</h3>
+<section id="bootstrap-with-test-set" class="level3" data-number="5.11.1">
+<h3 data-number="5.11.1" class="anchored" data-anchor-id="bootstrap-with-test-set"><span class="header-section-number">5.11.1</span> Bootstrap with Test Set</h3>
 <ul>
 <li><p>First we divide our data into training and test using <code>inital_split()</code></p></li>
 <li><p>Next, we use bootstrap resampling with the training set to split training into many held-in and held-out sets. We use these held-out (OOB) sets as validation sets to select the best model configuration based on mean/median performance across those sets.</p></li>
@@ -3781,15 +3875,15 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <li>Use <code>initial_split()</code> for first train/test split</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123456</span>)</span>
-<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>splits_test <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
-<span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">initial_split</span>(<span class="at">prop =</span> <span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>, <span class="at">strata =</span> <span class="st">"disease"</span>)</span>
-<span id="cb76-4"><a href="#cb76-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb76-5"><a href="#cb76-5" aria-hidden="true" tabindex="-1"></a>data_trn <span class="ot">&lt;-</span> splits_test <span class="sc">|&gt;</span> </span>
-<span id="cb76-6"><a href="#cb76-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">analysis</span>()</span>
-<span id="cb76-7"><a href="#cb76-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb76-8"><a href="#cb76-8" aria-hidden="true" tabindex="-1"></a>data_test <span class="ot">&lt;-</span> splits_test <span class="sc">|&gt;</span> </span>
-<span id="cb76-9"><a href="#cb76-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">assessment</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123456</span>)</span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>splits_test <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
+<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">initial_split</span>(<span class="at">prop =</span> <span class="dv">2</span><span class="sc">/</span><span class="dv">3</span>, <span class="at">strata =</span> <span class="st">"disease"</span>)</span>
+<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-5"><a href="#cb75-5" aria-hidden="true" tabindex="-1"></a>data_trn <span class="ot">&lt;-</span> splits_test <span class="sc">|&gt;</span> </span>
+<span id="cb75-6"><a href="#cb75-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">analysis</span>()</span>
+<span id="cb75-7"><a href="#cb75-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb75-8"><a href="#cb75-8" aria-hidden="true" tabindex="-1"></a>data_test <span class="ot">&lt;-</span> splits_test <span class="sc">|&gt;</span> </span>
+<span id="cb75-9"><a href="#cb75-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">assessment</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <ul>
@@ -3797,8 +3891,8 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <li>No need for another seed</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>splits_boot_trn <span class="ot">&lt;-</span> data_trn <span class="sc">|&gt;</span> </span>
-<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bootstraps</span>(<span class="at">times =</span> <span class="dv">100</span>, <span class="at">strata =</span> <span class="st">"disease"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>splits_boot_trn <span class="ot">&lt;-</span> data_trn <span class="sc">|&gt;</span> </span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bootstraps</span>(<span class="at">times =</span> <span class="dv">100</span>, <span class="at">strata =</span> <span class="st">"disease"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ul>
 <li>Use the same grid of hyperparameters we set up earlier (<code>hyper_grid</code>)</li>
@@ -3809,19 +3903,19 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <li>Make predictions and calculate accuracy for these fitted models in 100 OOB (validation) sets</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>fits_knn_boot_trn <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
-<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
-<span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">nearest_neighbor</span>(<span class="at">neighbors =</span> <span class="fu">tune</span>()) <span class="sc">|&gt;</span> </span>
-<span id="cb78-4"><a href="#cb78-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb78-5"><a href="#cb78-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">set_mode</span>(<span class="st">"classification"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb78-6"><a href="#cb78-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">tune_grid</span>(<span class="at">preprocessor =</span> rec_knn, </span>
-<span id="cb78-7"><a href="#cb78-7" aria-hidden="true" tabindex="-1"></a>                <span class="at">resamples =</span> splits_boot_trn, </span>
-<span id="cb78-8"><a href="#cb78-8" aria-hidden="true" tabindex="-1"></a>                <span class="at">grid =</span> hyper_grid, </span>
-<span id="cb78-9"><a href="#cb78-9" aria-hidden="true" tabindex="-1"></a>                <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span>
-<span id="cb78-10"><a href="#cb78-10" aria-hidden="true" tabindex="-1"></a>  },</span>
-<span id="cb78-11"><a href="#cb78-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/"</span>,</span>
-<span id="cb78-12"><a href="#cb78-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_knn_boot_trn"</span>,</span>
-<span id="cb78-13"><a href="#cb78-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>fits_knn_boot_trn <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">nearest_neighbor</span>(<span class="at">neighbors =</span> <span class="fu">tune</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb77-5"><a href="#cb77-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">set_mode</span>(<span class="st">"classification"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb77-6"><a href="#cb77-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">tune_grid</span>(<span class="at">preprocessor =</span> rec_knn, </span>
+<span id="cb77-7"><a href="#cb77-7" aria-hidden="true" tabindex="-1"></a>                <span class="at">resamples =</span> splits_boot_trn, </span>
+<span id="cb77-8"><a href="#cb77-8" aria-hidden="true" tabindex="-1"></a>                <span class="at">grid =</span> hyper_grid, </span>
+<span id="cb77-9"><a href="#cb77-9" aria-hidden="true" tabindex="-1"></a>                <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span>
+<span id="cb77-10"><a href="#cb77-10" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb77-11"><a href="#cb77-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/"</span>,</span>
+<span id="cb77-12"><a href="#cb77-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_knn_boot_trn"</span>,</span>
+<span id="cb77-13"><a href="#cb77-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <ul>
@@ -3833,7 +3927,7 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 </ul></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_best</span>(fits_knn_boot_trn, <span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_best</span>(fits_knn_boot_trn, <span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 10 × 7
    neighbors .metric  .estimator  mean     n std_err .config              
@@ -3855,7 +3949,7 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <li>show exact means</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_best</span>(fits_knn_boot_trn, <span class="at">n =</span> <span class="dv">10</span>)<span class="sc">$</span>mean</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_best</span>(fits_knn_boot_trn, <span class="at">n =</span> <span class="dv">10</span>)<span class="sc">$</span>mean</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] 0.7850121 0.7848970 0.7847611 0.7846467 0.7844905 0.7844872 0.7841219
  [8] 0.7838208 0.7837900 0.7833639</code></pre>
@@ -3865,7 +3959,7 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <li>select best</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="fu">select_best</span>(fits_knn_boot_trn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a><span class="fu">select_best</span>(fits_knn_boot_trn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 2
   neighbors .config              
@@ -3878,36 +3972,47 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <li>Fit the k = 97 model configuration in the full training set</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a>rec_prep <span class="ot">&lt;-</span> rec_knn <span class="sc">|&gt;</span> </span>
-<span id="cb85-2"><a href="#cb85-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(data_trn)</span>
-<span id="cb85-3"><a href="#cb85-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-4"><a href="#cb85-4" aria-hidden="true" tabindex="-1"></a>feat_trn <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
-<span id="cb85-5"><a href="#cb85-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_trn)</span>
-<span id="cb85-6"><a href="#cb85-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-7"><a href="#cb85-7" aria-hidden="true" tabindex="-1"></a>feat_test <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
-<span id="cb85-8"><a href="#cb85-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_test)</span>
-<span id="cb85-9"><a href="#cb85-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb85-10"><a href="#cb85-10" aria-hidden="true" tabindex="-1"></a>fit_knn_best <span class="ot">&lt;-</span></span>
-<span id="cb85-11"><a href="#cb85-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nearest_neighbor</span>(<span class="at">neighbors =</span> <span class="fu">select_best</span>(fits_knn_boot_trn)<span class="sc">$</span>neighbors) <span class="sc">|&gt;</span> </span>
-<span id="cb85-12"><a href="#cb85-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb85-13"><a href="#cb85-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"classification"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb85-14"><a href="#cb85-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(disease <span class="sc">~</span> ., <span class="at">data =</span> feat_trn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a>rec_prep <span class="ot">&lt;-</span> rec_knn <span class="sc">|&gt;</span> </span>
+<span id="cb84-2"><a href="#cb84-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(data_trn)</span>
+<span id="cb84-3"><a href="#cb84-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb84-4"><a href="#cb84-4" aria-hidden="true" tabindex="-1"></a>feat_trn <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
+<span id="cb84-5"><a href="#cb84-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_trn)</span>
+<span id="cb84-6"><a href="#cb84-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb84-7"><a href="#cb84-7" aria-hidden="true" tabindex="-1"></a>feat_test <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
+<span id="cb84-8"><a href="#cb84-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_test)</span>
+<span id="cb84-9"><a href="#cb84-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb84-10"><a href="#cb84-10" aria-hidden="true" tabindex="-1"></a>fit_knn_best <span class="ot">&lt;-</span></span>
+<span id="cb84-11"><a href="#cb84-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nearest_neighbor</span>(<span class="at">neighbors =</span> <span class="fu">select_best</span>(fits_knn_boot_trn)<span class="sc">$</span>neighbors) <span class="sc">|&gt;</span> </span>
+<span id="cb84-12"><a href="#cb84-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb84-13"><a href="#cb84-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"classification"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb84-14"><a href="#cb84-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(disease <span class="sc">~</span> ., <span class="at">data =</span> feat_trn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<hr>
 <ul>
 <li>Use that fitted model to predict into test set</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy_vec</span>(feat_test<span class="sc">$</span>disease, <span class="fu">predict</span>(fit_knn_best, feat_test)<span class="sc">$</span>.pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy_vec</span>(feat_test<span class="sc">$</span>disease, <span class="fu">predict</span>(fit_knn_best, feat_test)<span class="sc">$</span>.pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.7752809</code></pre>
 </div>
 </div>
 <hr>
-<p>Our best estimate of how accurate a model with k = 97 would be in new data is 0.7752809. However, it was only fit with n = 203 (the training set). If we truly want the best model, we should now train once again with all of our data. This model would likely perform even better b/c it has &gt; n.&nbsp;However, we have no more new data to evaluate it!</p>
+<p>Our best estimate of how accurate a model with k = 97 would be in new data is 0.7752809.</p>
+<ul>
+<li>However, it was only fit with n = 203 (the training set).<br>
+</li>
+<li>If we truly want the best model, we should now train once again with all of our data.<br>
+</li>
+<li>This model would likely perform even better b/c it has &gt; n.<br>
+</li>
+<li>However, we have no more new data to evaluate it!</li>
+<li>There is no perfect performance estimate!</li>
+</ul>
 </section>
 </section>
-<section id="nested-resampling" class="level2" data-number="5.13">
-<h2 data-number="5.13" class="anchored" data-anchor-id="nested-resampling"><span class="header-section-number">5.13</span> Nested Resampling</h2>
+<section id="nested-resampling" class="level2" data-number="5.12">
+<h2 data-number="5.12" class="anchored" data-anchor-id="nested-resampling"><span class="header-section-number">5.12</span> Nested Resampling</h2>
 <p>And now the final, mind-blowing extension!!!!!<br>
 <br>
 The bootstrap resampling + test set approach to simultaneously select and evaluate models is commonly used<br>
@@ -3983,14 +4088,14 @@ Question: Why bootstrap on inner loop and k-fold on outer loop?
 <div id="callout-10" class="callout-10-contents callout-collapse collapse show">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Show Answer</summary>
-<div class="sourceCode cell-code" id="cb88"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a>The inner loop is used for selecting models.  Bootstrap yields low variance performance</span>
-<span id="cb88-2"><a href="#cb88-2" aria-hidden="true" tabindex="-1"></a>estimates (but they are biased).  We want low variance to select best model</span>
-<span id="cb88-3"><a href="#cb88-3" aria-hidden="true" tabindex="-1"></a>configuration.  K-fold is a good method for less biased performance estimates.  </span>
-<span id="cb88-4"><a href="#cb88-4" aria-hidden="true" tabindex="-1"></a>We want less bias in our final evaluation of our best model.  You can do repeated</span>
-<span id="cb88-5"><a href="#cb88-5" aria-hidden="true" tabindex="-1"></a>K-fold in the outer loop to both reduce its variance and give you a sense of the</span>
-<span id="cb88-6"><a href="#cb88-6" aria-hidden="true" tabindex="-1"></a>performance sampling distribution. BUT VERY COMPUTATIONALLY INTENSIVE</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb87"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a>The inner loop is used for selecting models.  Bootstrap yields low variance performance</span>
+<span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a>estimates (but they are biased).  We want low variance to select best model</span>
+<span id="cb87-3"><a href="#cb87-3" aria-hidden="true" tabindex="-1"></a>configuration.  K-fold is a good method for less biased performance estimates.  </span>
+<span id="cb87-4"><a href="#cb87-4" aria-hidden="true" tabindex="-1"></a>We want less bias in our final evaluation of our best model.  You can do repeated</span>
+<span id="cb87-5"><a href="#cb87-5" aria-hidden="true" tabindex="-1"></a>K-fold in the outer loop to both reduce its variance and give you a sense of the</span>
+<span id="cb87-6"><a href="#cb87-6" aria-hidden="true" tabindex="-1"></a>performance sampling distribution. BUT VERY COMPUTATIONALLY INTENSIVE</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
@@ -3998,8 +4103,8 @@ Question: Why bootstrap on inner loop and k-fold on outer loop?
 </div>
 <hr>
 </section>
-<section id="data-exploration-in-a-nested-world." class="level2" data-number="5.14">
-<h2 data-number="5.14" class="anchored" data-anchor-id="data-exploration-in-a-nested-world."><span class="header-section-number">5.14</span> Data Exploration in a Nested World….</h2>
+<section id="data-exploration-in-a-nested-world." class="level2" data-number="5.13">
+<h2 data-number="5.13" class="anchored" data-anchor-id="data-exploration-in-a-nested-world."><span class="header-section-number">5.13</span> Data Exploration in a Nested World….</h2>
 <p>Final words on resampling:</p>
 <ul>
 <li><p>Iterative methods (K-fold, bootstrap) are superior to single validation set approach wrt bias-variance trade-off in performance measurement</p></li>
@@ -4013,10 +4118,10 @@ Question: Why bootstrap on inner loop and k-fold on outer loop?
 </ul></li>
 </ul>
 </section>
-<section id="discussion" class="level2" data-number="5.15">
-<h2 data-number="5.15" class="anchored" data-anchor-id="discussion"><span class="header-section-number">5.15</span> Discussion</h2>
-<section id="and-the-winner-is.." class="level3" data-number="5.15.1">
-<h3 data-number="5.15.1" class="anchored" data-anchor-id="and-the-winner-is.."><span class="header-section-number">5.15.1</span> and the winner is…..</h3>
+<section id="discussion" class="level2" data-number="5.14">
+<h2 data-number="5.14" class="anchored" data-anchor-id="discussion"><span class="header-section-number">5.14</span> Discussion</h2>
+<section id="and-the-winner-is.." class="level3" data-number="5.14.1">
+<h3 data-number="5.14.1" class="anchored" data-anchor-id="and-the-winner-is.."><span class="header-section-number">5.14.1</span> and the winner is…..</h3>
 <pre><code>student      n correct_predictions accuracy
    &lt;chr&gt;    &lt;int&gt;               &lt;dbl&gt;    &lt;dbl&gt;
  1 vachuska   327                 262    0.801 (Karl)
@@ -4036,8 +4141,8 @@ Question: Why bootstrap on inner loop and k-fold on outer loop?
 0.676
 0.676</code></pre>
 </section>
-<section id="other-announcements" class="level3" data-number="5.15.2">
-<h3 data-number="5.15.2" class="anchored" data-anchor-id="other-announcements"><span class="header-section-number">5.15.2</span> Other announcements</h3>
+<section id="other-announcements" class="level3" data-number="5.14.2">
+<h3 data-number="5.14.2" class="anchored" data-anchor-id="other-announcements"><span class="header-section-number">5.14.2</span> Other announcements</h3>
 <ul>
 <li><p>Mid-term Exam</p></li>
 <li><p>I understand if this isn’t possible, but I’ve noticed that for the most part, only TAs and John respond to errors in Slack, which is fine but creates more work for them. Maybe if there was more motivation (like extra credit) or something to answer people’s questions in the Slack, more people might do it?</p></li>
@@ -4046,8 +4151,8 @@ Question: Why bootstrap on inner loop and k-fold on outer loop?
 <li><p>Can you upload previous videos (unit 1 - 3) to uw-madison site? As second language student, subtitles are really helpful.</p></li>
 </ul>
 </section>
-<section id="questions" class="level3" data-number="5.15.3">
-<h3 data-number="5.15.3" class="anchored" data-anchor-id="questions"><span class="header-section-number">5.15.3</span> Questions</h3>
+<section id="questions" class="level3" data-number="5.14.3">
+<h3 data-number="5.14.3" class="anchored" data-anchor-id="questions"><span class="header-section-number">5.14.3</span> Questions</h3>
 <ul>
 <li><p>Resampling methods to EITHER select best model OR evaluate best model</p>
 <ul>
@@ -4071,7 +4176,7 @@ Question: Why bootstrap on inner loop and k-fold on outer loop?
 </ul>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-ISL" class="csl-entry" role="listitem">
 James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2023. <em>An <span>Introduction</span> to <span>Statistical Learning</span>: With <span>Applications</span> in <span>R</span></em>. 2nd ed. Springer <span>Texts</span> in <span>Statistics</span>. <span>New York</span>: <span>Springer-Verlag</span>.
 </div>
@@ -4162,10 +4267,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
-  function tippyHover(el, contentFn) {
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -4175,8 +4279,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -4189,6 +4302,125 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
       return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -4232,6 +4464,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -4257,6 +4490,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -4318,12 +4577,12 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./004_classification.html" class="pagination-link">
+      <a href="./004_classification.html" class="pagination-link  aria-label=" &lt;span="" to="" classification="" models&lt;="" span&gt;"="">
         <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">4</span>&nbsp; <span class="chapter-title">Introduction to Classification Models</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./006_regularization.html" class="pagination-link">
+      <a href="./006_regularization.html" class="pagination-link" aria-label="<span class='chapter-number'>6</span>&nbsp; <span class='chapter-title'>Regularization and Penalized Models</span>">
         <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Regularization and Penalized Models</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
@@ -4332,4 +4591,5 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-</body></html>
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/jjcurtin/book_iaml/edit/main/005_resampling.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div></div></footer></body></html>
