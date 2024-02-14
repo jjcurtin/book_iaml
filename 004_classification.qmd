@@ -14,7 +14,7 @@ editor_options:
 - Logistic regression
   - probability, odds, and logit models
   - definitions of odds and odds ratios
-- K nearest neighbors
+- K nearest neighbors for classification
 - Linear discriminant analysis
 - Quadratic discriminant analysis
 - Regularized discriminant analysis
@@ -30,15 +30,13 @@ editor_options:
 
 ### Lecture Videos
   
-- [Lecture 1: The Bayes Classifier]()
-- [Lecture 2: Conceptual Overview of Logistic Regression]()
-- [Lecture 3: EDA with the Cars Dataset]()
-- [Lecture 4: Logistic Regression with Cars Dataset]()
-- [Lecture 5: KNN with Cars Dataset]()
-- [Lecture 6: LDA, DQA, RDA with Cars Dataset]()
-- [Lecture 7: Comparisons among Classifiers]()
-
-- [Discussion]()
+- [Lecture 1: The Bayes Classifier](https://mediaspace.wisc.edu/media/iaml+unit+4-1/1_5xvs5z3f) ~ 9 mins
+- [Lecture 2: Conceptual Overview of Logistic Regression](https://mediaspace.wisc.edu/media/iaml+unit+4-2/1_ut2up1mo) ~ 19 mins
+- [Lecture 3: EDA with the Cars Dataset](https://mediaspace.wisc.edu/media/iaml+unit+4-3/1_vydb2j8t) ~ 12 mins
+- [Lecture 4: Logistic Regression with Cars Dataset](https://mediaspace.wisc.edu/media/iaml+unit+4-4/1_dzqnsnf0) ~ 32 mins
+- [Lecture 5: KNN with Cars Dataset](https://mediaspace.wisc.edu/media/iaml+unit+4-5/1_mj1cyhhj) ~ 19 mins
+- [Lecture 6: LDA, DQA, RDA with Cars Dataset](https://mediaspace.wisc.edu/media/iaml+unit+4-6/1_t7mnafsp) ~ 16 mins
+- [Lecture 7: Comparisons among Classifiers](https://mediaspace.wisc.edu/media/iaml+unit+4-7/1_tw44we5w) ~ 11 mins
 
 Post questions or discuss readings or lectures on the appropriate Slack channel
 
@@ -143,7 +141,7 @@ For these reasons, it is worthwhile to fully understand how to work with the log
 
 The logistic function yields the probability of the positive class given X
 
-- However, in some instances, it may make more sense to describe the odds of the positive case occurring (e.g., horse racing) rather than probability
+- However, in some instances (e.g., horse racing, poker), it may make more sense to describe the odds of the positive case occurring rather than probability
 \
 \
 
@@ -158,16 +156,22 @@ For example, if the UW Badgers have a .5 probability of winning some upcoming ga
 - $\frac{0.5} {1 - 0.5}$
 \
 \
+
 If the UW Badgers have a .75 probability of winning some upcoming game based on X, their odds of winning are 3 (:1; '3 to 1')
 
 - $\frac{0.75} {1 - 0.75}$
-\
-\
-If the UW Badgers have a .25 probability of winning some upcoming game based on X, their odds of winning are .33 (1:3)
 
-- $\frac{0.25} {1 - 0.25}$
-\
-\
+-----
+
+::: {.callout-important collapse="false"}
+### Question: If the UW Badgers have a .25 probability of winning some upcoming game based on X, what are their odds of winning? 
+```{html}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show Answer"
+.25 / (1 - .25) = 0.33 or 1:3
+```
+:::
 
 -----
 
@@ -219,7 +223,7 @@ Use of logit transformation:
 
 **Log-odds** are a linear function of X
 
-- Therefore, you can say that log-odds of positive class increases by $\beta_1$ for every one unit increase in $x_1$
+- Therefore, you can say that log-odds of positive class increases by $b_1$ (our estimate of $\beta_1$) for every one unit increase in $x_1$
 - However, log-odds are NOT very descriptive/intuitive so they are not that useful for explanatory purposes
 
 -----
@@ -241,12 +245,12 @@ The odds ratio describes the change in odds for a change of c units in your feat
 
 -----
 
-As an example, if we fit a logistic regression model to predict the probability of the Badgers winning a home football game given the attendance (measured in individual spectators at the game), we might find $\beta_1$ = .000075.
+As an example, if we fit a logistic regression model to predict the probability of the Badgers winning a home football game given the attendance (measured in individual spectators at the game), we might find $b_1$ (our estimate of $\beta_1$) = .000075.
 \
 \
 Given this, the odds ratio associated with every increase in 10,000 spectators:
 
-- $= e^{c * \beta_1}$
+- $= e^{c * \b_1}$
 - $= e^{10000 * .000075}$
 - $= 2.1$
 - For every increase of 10,000 spectators, the odds of the Badgers winning doubles
@@ -383,7 +387,7 @@ error.  We will learn more robust methods in the unit on resampling.
 Let's do some quick modeling EDA to get a sense of the data.  
 
 - We will keep it quick and dirty.
-- First, we should problem make a function to class Cars since we may open it frequently
+- First, we should make a function to class Cars since we may open it frequently
 - Even though its simple, still better this way (e.g., what if we decide to change how to handle classing - will only need to make that change in one place!)
 
 ```{r}
@@ -616,7 +620,7 @@ Can plot this relationship using the predicted probabilities
 
 ```{r u4-lr-6}
 ggplot() +
-  geom_point(data = feat_val, aes(x = year, y = 2 - as.numeric(mpg)), 
+  geom_point(data = feat_val, aes(x = year, y = as.numeric(mpg) - 1), 
              position = position_jitter(height = 0.05, width = 0.05)) +
   geom_line(data = p_high, mapping = aes(x = year, y = .pred_high)) +
   geom_ribbon(data = p_high, 
@@ -757,13 +761,14 @@ plot_decision_boundary <- function(data, model, x_names, y_name, n_points = 100)
          aes(x = .data[[x_names[1]]], 
              y = .data[[x_names[2]]], 
              color = .data[[y_name]])) +
+    geom_point(size = 2, alpha = .5) +
     geom_contour(data = preds, 
                  aes(x = .data[[x_names[1]]], 
                      y = .data[[x_names[2]]], 
                      z = .data[[y_name]]), 
                  color = "black", breaks = .5, linewidth = 2) +
-    geom_point(size = 2, alpha = .5) +
-    labs(x = x_names[1], y = x_names[2], color = y_name)
+    labs(x = x_names[1], y = x_names[2], color = y_name) +
+    coord_obs_pred()
 }
 ```
 
@@ -779,6 +784,8 @@ Logistic regression produces a linear decision boundary when you consider a scat
 
 Here is the decision boundary for this model in both train and validation sets
 ```{r u4-lr-14}
+#| out-height: 3in
+
 p_train <- feat_trn |> 
   plot_decision_boundary(fit_lr_2, x_names = c("year", "beef_1"), y_name = "mpg", n_points = 400)
 
@@ -916,7 +923,7 @@ These figures depict the KNN (and Bayes classifier) decision boundaries for the 
 - Of course, you wouldn't know the true Bayes decision boundary if the data were real (not simulated)
 - But K = 10 would also yield the lowest test error (which is how it should be chosen)
   - Bayes classifier test error: .1304
-  - K = 10 test error: 1363
+  - K = 10 test error: .1363
   - K = 1 test error: .1695
   - K = 100 test err: .1925
 
@@ -1016,7 +1023,7 @@ Of course, training accuracy goes down with decreasing flexibility as k increase
 
 - K = 1
 
-```{r7}
+```{r}
 accuracy_vec(feat_trn$mpg, predict(fit_1nn_2, feat_trn)$.pred_class)
 ```
 
@@ -1128,7 +1135,7 @@ p_high <- p_high |>
 
 ```{r  u4-knn-11}
 ggplot() +
-  geom_point(data = feat_val, aes(x = year, y = 2 - as.numeric(mpg)), 
+  geom_point(data = feat_val, aes(x = year, y = as.numeric(mpg) - 1), 
              position = position_jitter(height = 0.05, width = 0.05)) +
   geom_line(data = p_high, mapping = aes(x = year, y = .pred_high)) +
   scale_x_continuous(name = "Production Year (19XX)", 
@@ -1301,12 +1308,13 @@ cowplot::plot_grid(p_train, p_val, labels = list("Train", "Validation"), hjust =
 - LDA makes additional assumptions about X (multivariate normal and common $\sum$) beyond logistic regression.  Relative performance is based on the quality of this assumption
 
 - QDA relaxes the LDA assumption about common $\sum$ (and RDA can relax it partially)
-  - This also allows for nonlinear decision boundaries
+  - This also allows for nonlinear decision boundaries including 2-way interactions among features
   - QDA is therefore more flexible, which means possibly less bias but more potential for overfitting
 
 - Both QDA and LDA assume multivariate normal X so *may* not accommodate categorical predictors very well.  Logistic and KNN do accommodate categorical predictors
 
 - KNN is non-parametric and therefore the most flexible
+  - Can also handle interactions and non-linear effects natively (with feature engineering)
   - Increased overfitting, decreased bias?
   - Not very interpretable.  But LDA/QDA, although parametric, aren't as interpretable as logistic regression
 
@@ -1467,7 +1475,7 @@ cowplot::plot_grid(p_train, p_test, labels = list("Train", "Test"), hjust = -1.5
 
 -----
 
-### Regularized Discrinant Analysis
+### Regularized Discriminant Analysis
 
 - Fit
 - Letting `rda()` select optimal hyperparameter values
@@ -1778,3 +1786,130 @@ cowplot::plot_grid(p_train, p_test, labels = list("Train", "Test"), hjust = -1.5
   - use cases for random forest models 
 
   - For all of these classifiers, will they work differently on large datasets with different types of data such as texts and images? If yes, which ones may work faster with large text data and large image data?   
+  
+
+### Interactions in LDA and QDA
+
+- Simulate multivariate normal distribution for X (`x1` and `x2`) using MASS package
+- Separately for trn and val
+- NOTE: I first did this with uniform distributions on X and the models fit more poorly.  Why?
+```{r}
+set.seed(5433)
+means <- c(0, 0)
+sigma <- diag(2) * 100
+data_trn <- MASS::mvrnorm(n = 300, mu = means, Sigma = sigma) |>  
+    magrittr::set_colnames(str_c("x", 1:length(means))) |>  
+    as_tibble()
+
+data_val <- MASS::mvrnorm(n = 3000, mu = means, Sigma = sigma) |>  
+    magrittr::set_colnames(str_c("x", 1:length(means))) |>  
+    as_tibble()
+```
+
+-----
+
+- Write function for interactive DGP based on `x1` and `x2`
+- Will map this over rows of d
+- Can specify any values for b
+- b[4] will be interaction parameter estimate
+```{r}
+b <- c(0, 0, 0, .5)
+
+calc_p <- function(x, b){
+   exp(b[1] + b[2]*x$x1 + b[3]*x$x2 + b[4]*x$x1*x$x2) /
+     (1 + exp(b[1] + b[2]*x$x1 + b[3]*x$x2 + b[4]*x$x1*x$x2))
+}
+```
+
+-----
+
+- Add p and then observed classes to trn and val 
+
+```{r}
+data_trn <- data_trn |> 
+  mutate(p = calc_p(data_trn, b)) |> 
+  mutate(y = rbinom(nrow(data_trn), 1, p),
+         y = factor(y, levels = 0:1, labels = c("neg", "pos")))
+
+head(data_trn, 10)
+
+data_val <- data_val |> 
+  mutate(p = calc_p(data_val, b)) |> 
+  mutate(y = rbinom(nrow(data_val), 1, p),
+         y = factor(y, levels = 0:1, labels = c("neg", "pos")))
+```
+
+-----
+
+- Lets look at what an interactive DGP looks like for two features and a binary outcome
+- Parameter estimates set up a "cross-over" interaction
+```{r}
+data_val |> 
+  ggplot(mapping = aes(x = x1, y = x2, color = y)) +
+    geom_point(size = 2, alpha = .5)
+```
+
+-----
+
+- Fit models in trn 
+```{r}
+fit_lda <- 
+  discrim_linear() |> 
+  set_engine("MASS") |> 
+  fit(y ~ x1 + x2, data = data_trn)
+
+fit_lda_int <- 
+  discrim_linear() |> 
+  set_engine("MASS") |> 
+  fit(y ~ x1 + x2 + x1*x2, data = data_trn)
+
+fit_qda <- 
+  discrim_regularized(frac_common_cov = 0, frac_identity = 0) |> 
+  set_engine("klaR") |> 
+  fit(y ~ x1 + x2, data = data_trn)
+
+fit_qda_int <- 
+  discrim_regularized(frac_common_cov = 0, frac_identity = 0) |> 
+  set_engine("klaR") |> 
+  fit(y ~ x1 + x2 + x1*x2, data = data_trn)
+```
+
+-----
+
+- Additive LDA model decision boundary and performance in val
+```{r}
+data_val |> 
+  plot_decision_boundary(fit_lda, x_names = c("x1", "x2"), y_name = "y",
+                         n_points = 400)
+```
+
+-----
+
+-  Interactive LDA model decision boundary and performance in val
+```{r}
+data_val |> 
+  plot_decision_boundary(fit_lda_int, x_names = c("x1", "x2"), y_name = "y",
+                         n_points = 400) 
+```
+
+-----
+
+- Additive QDA model decision boundary
+```{r}
+data_val |> 
+  plot_decision_boundary(fit_qda, x_names = c("x1", "x2"), y_name = "y",
+                         n_points = 400)
+```
+
+- Interactive QDA model decision boundary
+
+-----
+
+```{r}
+data_val |> 
+  plot_decision_boundary(fit_qda_int, x_names = c("x1", "x2"), y_name = "y",
+                         n_points = 400) 
+```
+ 
+- Costs for QDA vs. LDA intearctive in this example and more generally with more features?
+- What if you were using RDA, which can model the full range of models between linear and quadratic?

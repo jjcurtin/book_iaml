@@ -6,22 +6,22 @@ editor_options:
 
 # Key Terminology and Concepts
 
-
 Bias
-: insert definition
-: see also: Variance
+: Bias is a property of estimates "estimates" of a true population value.  Sample statistics can be biased estimates of the population values for those statistics.  Parameter estimates (e.g., from a linear model) can be biased estimates of the true population values for those parameters. And our models can be biased estimates of the true DGP for y.  A model or other estimate is biased if it systematically over- or under-predicts the true population values that are being estimated overall or for some combination of inputs (e.g. features).   Biased models are often described as "underfit" to the true DGP.
+: see also: underfit, overfit, variance; bias-variance trade-off
 
 Bias-Variance trade-off
-: insert defintion
+: The error associated with our estimates of the DGP (i.e., prediction errors from our models) come from two sources: irreducible error and reducible error.  Reducible error can be parsed into error due to bias and variance.  As we seek to reduce the reduce the error from our models, we will often make changes to the model or the modeling process to reduce either the bias or variance of the fitted model.  However, many of the changes we make to reduce bias often increase variance and many changes we make reduce variance often increase bias.  Our goal is to make changes that produce bigger decreases in one of these sources of error than the often associated increase in the other.
+: see also: bias, variance
 
 Cross-validation
 : insert definition
 : see also resampling, bootstrapping 
 
 Feature
-: insert definition
+: Features are used as inputs to our model to make predictions for y.  Feature engineering is the process of transforming our original predictors that we measure into the form that they will be input to our model. In some instances, our features may be exact copies of our predictors.  But often, we transform the original features (e.g., power-transformations, dummy coding, missing data imputation) to allow them to better map onto the DGP for Y and reduce the error of our models.
 : synonyms: X, regressor, input
-: related terms: predictor, independent variable
+: see also: predictor, independent variable
 
 Held-out (data)set
 : insert definition
@@ -34,28 +34,29 @@ Hyperparameter
 Model configuration
 : insert definition
 
-
 Performance metric
-: insert definition
-: see also: 
+: A performance metric is a measure of model performance that allows us to judge the degree of error (or lack thereof) associated with our model's predictions.  Different performance metrics are used for regression vs. classification problems.  For regression, we will often use root mean square error, mean (or median) absolute error, or $R^2$.  For classification, accuracy is the most well known but we will learn many other performance metrics including balanced accuracy, sensitivity, specificity, positive predictive value, negative predictive value, auROC, and f-scores. 
 
 Predictor
-: insert definition
-: see also feature, independent variable, regressor
+: The initial (i.e., raw, original) variables that we collect/measure or manipulate in our studies and use to predict or explain our outcome (or dependent measure) are called predictors.   If these predictors were manipulated in an experiment, we often call them independent variables. We use a process called feature engineering to transform the predictor variables from how they were initially measured in their final form as features (Xs, inputs) in our models.
+: related concepts/terms: independent variable, feature, X, inputs, regressor, outcome, label
 
 Resampling
-: insert definition
+: Resampling is a process of creating multiple subsets of our full dataset.  We often use resampling to get better performance estimates for our models than would be possible if we fit our models and estimated their performance in the sample (full) sample.  There are two broad classes of resampling methods we will learn in this course: cross validation and bootstrapping.  Cross validation itself is a class of resampling methods with many different variants (leave one out CV, K-fold CV, repeated K-fold CV, grouped K-fold CV, nested CV) that have different strengths and weaknesses.
 : see also: Cross-validation, Bootstrapping
 
 Test set
-Training set
 : insert definition
 : see also: Validation set, Test set
 
+Training set
+: A training set is a subset of our full data (obtained using a resampling method).  We use training sets to fit various model configurations to develop our machine learning models.  Model performance estimates based on training data are poor estimates of performance because our models are often overfit (sometimes by a large degree) to the training data.  Therefore model performance estimates based on training data will generally overestimate how well our models will work with new data.
+: see also: validation set, test set, resampling, held-in set, held-out set
+
 Validation set
-: insert definition
-: see also: Training set, Test set
+: A validation set is a subset of our full data (obtained using a resampling method).  When we have several (or more, or many more) model configurations that we are considering, we use validation set(s) to calculate performance metrics to estimate the relative performance of these model configurations in new data.  It is important to use validation sets for this purpose because evaluating our model configurations in training sets could lead us to select the configurations that are most overfit to the training data rather than the model configurations that are expect to perform best with new data that were not used to fit them.
+: see also: training set, test set, resampling, held-in set, held-out set
 
 Variance 
 : insert definition
-: see also: Bias
+: see also: overfit, bias-variance trade off, bias, underfit
