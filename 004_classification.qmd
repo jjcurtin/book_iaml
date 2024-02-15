@@ -1323,7 +1323,7 @@ cowplot::plot_grid(p_train, p_val, labels = list("Train", "Validation"), hjust =
 - LDA, KNN, and QDA naturally accommodate more than two classes  
   - Logistic requires additional tweak (**Briefly describe: multiple one vs other classes models approach**)
   
-- Logisitic regression requires relatively large sample sizes.  LDA/QDA may perform better with smaller sample sizes if X is multivariate normal.
+- Logistic regression requires relatively large sample sizes.  LDA may perform better with smaller sample sizes if assumptions are met
 
 -----
   
@@ -1709,88 +1709,131 @@ cowplot::plot_grid(p_train, p_test, labels = list("Train", "Test"), hjust = -1.5
 
 ## Discussion
 
-### And the winner is....
 
-```{r} 
-#| echo: false
-# knitr::include_graphics("figs/ames_winners.png")
+### Anouncements
+
+- Quiz performance - 95%
+- Please meet with TA or me if you can't generate predictions from your models
+- Room 121 again in two weeks
+- And the winner is.....
+
+-----
+
+```{r}
+read_csv(here::here(path_data, "lunch_004.csv")) |> 
+  print_kbl()
 ```
 
-- Top 3: 
+-----
 
-- Next 3:  
+### Probability, odds, and log-odds
 
-- Everyone else: 
+- DGP on probability
+- what is irreducible error for classification?
+- DGP on X1 - draw it with varying degrees of error  
 
+-----
 
-### Other announcements
-
-- Updated use of discussion
-- Quiz performance
-- Feedback, captions, slack feedback
-- Dummy coding concepts (options for instruction)
-
-
-### Student Questions
+- DGP and error on two features
 
 
 ![](figs/unit4_two_class_decision_boundry.png){height=4in}
 
+-----
 
-- Bayes classifier
-  - Could you explain this statement about the Bayes classifier?: Pr(Y=k|X=x0) for k=1:K 
+- Probability vs. odds vs. log-odds
+- How to interpret parameter estimates (effects of X)
+
+-----
+
+### Comparisons across algorithms
+
+Logistic regression models DGP condition probabilities using logistic function
+
+- Get parameter estimates for effects of X 
+- Makes strong assumptions shape of DGP - linear on log-odds(Y)
+- Yields linear decision boundary
+- Better for binary outcomes but can do more than two levels
+- Needs numeric features but can dummy code categorical variables (as with lm)
+- Problems when classes are fully separable (or even mostly separable)
+
+-----
+
+LDA uses Bayes theorem to estimate condition probability
+
+- LDA models the distributions of the Xs separately for each class
+- Then uses Bayes theorem to estimate $Pr(Y = k | X)$ for each k and assigns the  observation to the class with the highest probability
+
+$Pr(Y = k|X) = \frac{\pi_k * f_k(X)}{\sum_{l = 1}^{K} f_l(X)}$
+
+where
+
+- $\pi_k$ is the prior probability that an observation comes from class k (estimated from frequencies of k in training)
+- $f_k(X)$ is the density function of X for an observation from class k
+  -  $f_k(X)$ is large if there is a high probability that an observation in class k has that set of values for X and small if that probability is low
+  - $f_k(X)$ is difficult to estimate unless we make some simplifying assumptions
+  - X is multivariate normal
+  - Common covariance matrix ($\sum$) across K classesj
+  - With these assumptions, we can estimate $\pi_k$, $\mu_k$, and $\sigma^2$ from the training set and calculate $Pr(Y = k|X)$ for each k
+  
+-----
+
+- Parametric model but parameters not useful for interpretation of effects of X
+- Linear decision boundary  
+- Assumptions about multivariate normal X and common $\sum$
+- Dummy features may not work well given assumption?
+- May require smaller sample sizes to fit than logistic regression if assumptions met
+- Can natively handle more than two level for outcome  
+  
+----- 
+  
+QDA relaxes one restrictive assumption of LDA
+  
+- Still required multivariate normal X
+- **But it allows each class to have its own $\sum$**
+- This makes it:
+  - More flexible
+  - Able to model non-linear decision boundaries including 2-way intearctions (see formula for discriminant in @ISL)
+  - how handle interactions by relaxing common $\sum$? 
+  - But requires substantial increase in parameter estimation (more potential to overfit)
+- Still problems with dummy features
+- Can natively handle more than 2 levels of outcome like LDA
+- Compare to LDA and Logisitic Regression on bias-variance trade off?
+\
+\
+RDA may be better than both LDA and QDA?  More on idea of blending after elastic net
+
+-----
+
+KNN works similar to regression
+
+- But now looks at percentage of observations for each class among nearest neighbours to estimate conditional probabilities
+- Doesn't make assumptions about Xs or $\sum$ for LDA and/or QDA
+- Doesn't not limited to linear decision boundaries like logistic and LDA
+- Very flexible - low bias but high variance?
+- K can be adjusted to impact bias-variance trade-off
+- KNN can handle more than two level outcomes natively
+
+-----
+
+## Categorical predictors
+
+- All algorithms so far require numeric features
+- Ordinal can be made numeric sometimes by just substituting ordered vector (i.e. 1, 2, 3, etc)
+- Nominal needs something more
+- Our go to method is Dummy features
+  - What is big problem with dummy features?
+  - Collapsing levels?
+  - Also issue of binary scores for LDA/QDA
+  
+- Target encoding example
+  - Country of origin for car example (but maybe think of many countries?)
+  - Why not data leakage?
+  - Problems with step_mutate()
+  - Can manually do it with our current resampling
+  - See [embed package](https://embed.tidymodels.org/)
  
-  - I really don't understand Bayes classifier after searching additional information. terminology to this concept is confusing.
-
-- Logistic Regression
-
-  - Logistic Regression and its figure
-
-- LDA/QDA
-  - It would be great if you could talk through the broad logic of what generative classifiers are doing (e.g., James pg 141-2). I feel like I sort of get it; instead of estimating distributions of classes conditioned on features, they're estimating distributions of features conditioned on classes, and then using Bayes' rule? but it would be helpful to talk through this in the context of an example.
-
-  - What is the difference between LDA and QDA? Comparison
-
-  - What makes QDA model more flexible? And why that makes less bias but more potential for overfitting in QDA?
-
-
-- Comparisons among algorithms
-  - I do not understand how logistic regression is different than linear discriminant analysis? It seems in LDA, the goal is to find an optimal line to classify on. However, isn't logistic regression effectively doing the same by trying to create a model that is most predictive? How is the boundary line different?
-  
-  - I think I understand when you would use a LDA versus QDA, but I would like to know more about when to choose the logistic regression. Are LDA and QDAs completely different from the logistic regression conceptually?
-
-  - We haven't talk about logistic regression yet in psych610. What are some advantages and disadvantages of logistic regression compared to other classification methods?
-  
-  - Could you please go over the differences between LDA/QDA and logistic regression. I understand these parametric models are intermediate models between logistic regression and knn, but I don't understand the advantage of using them over knn or logistic regression. 
-  
-- Categorical predictors
-  - Can knn classification deal with data having a 2+ category outcome variable?
-  
-  - Also, best practices for dummy coding or creating grouped levels or if this is just trial and error and what seems to make the most sense.
-  
-- Missing data
-  - We had a lot of missing data this week. I am curious about the best ways to impute this data, and whether or not that should differ between classification and regression models
-  
-  - How to select the right algorithm for missing data?
-
-- Generic modeling questions
-  - How do I figure out why my model is doing worse? How to think about this without visualization?
-
-  - I'm still a bit confused about what would take place in modeling EDA vs. model fitting and evaluation. For example, if I want to separate the Titanic variable cabin into cabin letter and number, would that be a step that takes place in recipes only? 
-
-  - How can we quickly decide which predictors to include in our model when we have so many predictors and multicollinearity issues may happen?
-  
-  - Can we extrapolate more classification questions from the data we already collected? For example, if you are collecting heart rate of a person, while exercising. Can you then create a new variable that says if the person was tired or not? 
-
-- Other questions
-  - In 610, we plotted predicted points along with our predicted data points along in our final graphs. Do you recommend plotting predicted points on our graphs for publication?
-
-  - Can you review the variable "beef" that you create in the "step_pca" function? How do the numeric variables get combined?
-
-  - use cases for random forest models 
-
-  - For all of these classifiers, will they work differently on large datasets with different types of data such as texts and images? If yes, which ones may work faster with large text data and large image data?   
-  
+-----
 
 ### Interactions in LDA and QDA
 
@@ -1917,3 +1960,13 @@ data_val |>
  
 - Costs for QDA vs. LDA intearctive in this example and more generally with more features?
 - What if you were using RDA, which can model the full range of models between linear and quadratic?
+
+
+
+
+-----
+
+PCA
+
+- https://setosa.io/ev/principal-component-analysis/:w
+- https://www.cs.cmu.edu/~elaw/papers/pca.pdf
