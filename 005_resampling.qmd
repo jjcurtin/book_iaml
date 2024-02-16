@@ -41,8 +41,9 @@ editor_options:
 - [Lecture 1: Overview & Parallel Processing](https://mediaspace.wisc.edu/media/iaml+unit+5-1/1_sv29qmvz) ~ 16 mins
 - [Lecture 2: Introduction to Resampling](https://mediaspace.wisc.edu/media/iaml+unit+5-2/1_pyr647gu) ~ 11 mins
 - [Lecture 3: Single Validation/Test Set Approach](https://mediaspace.wisc.edu/media/iaml+unit+5-3/1_21l94nvt) ~ 26 mins
-- [Lecture 4: Leave One Out Cross Validation]() 
-- [Lecture 5: K-fold Cross Validation Approaches]() 
+- [Lecture 4: Leave One Out Cross Validation](https://mediaspace.wisc.edu/media/iaml+unit+5-4/1_uuaa5nj1) ~ 9 mins 
+- [Lecture 5: K-fold Cross Validation Approaches](https://mediaspace.wisc.edu/media/iaml+unit+5-5/1_f60kfk66) ~ 21 mins
+- [Lecture 6: Repeated and Grouped K-fold Approaches]()
 - [Lecture 6: Bootstrap Resampling]() 
 - [Lecture 7: Tuning Hyperparameters via Resampling]() 
 - [Lecture 8: Resampling for Both Model Selection and Evaluation]() 
@@ -759,12 +760,11 @@ Visualization of K-fold
 
 -----
 
-An example of K-fold Cross-validation
+Let's demonstrate the code for K-fold Cross-validation
 
-1. Split into 10 folds (default)
-
-- repeats = 1 (default; more on this in a bit)
-- stratify on `disease`
+- First, we split into 10 folds (default)
+  - repeats = 1 (default; more on this in a bit)
+  - stratify on `disease`
 
 ```{r}
 splits_kfold <- data_all |> 
@@ -775,11 +775,10 @@ splits_kfold
 
 -----
 
-2. Fit model configuration in first 9 folds, evaluate in 10th fold.  Repeat 9 more times for each additional held-out fold
-
-- Use `fit_resamples()` as before 
-- Still no need to continue to remake features for held-in and held-out sets.  Just provide `splits` and `rec`
-- Set performance metrics with `metric_set()`
+- Fit model configuration in first 9 folds, evaluate in 10th fold.  Repeat 9 more times for each additional held-out fold
+  - Use `fit_resamples()` as before 
+  - Still no need to continue to remake features for held-in and held-out sets.  Just provide `splits` and `rec`
+  - Set performance metrics with `metric_set()`
 
 ```{r}
 fits_lr_kfold <- 
@@ -792,10 +791,10 @@ fits_lr_kfold <-
 
 -----
 
-3. Review performance estimates in held out folds using `collect_metrics()`
+- Then, we review performance estimates in held out folds using `collect_metrics()`
 
-- Can see performance in all folds using `summarize = FALSE`
-- The performance estimates are not all the same.  This is what we mean when we take about the variance in our performance estimates.  You couldn't see it before with only one held-out set but now that we have 10, it becomes more concrete.  Ideally this variance is as low as possible. 
+  - Can see performance in all folds using `summarize = FALSE`
+  - The performance estimates are not all the same.  This is what we mean when we talk about the variance in our performance estimates.  You couldn't see it before with only one held-out set but now that we have 10, it becomes more concrete.  Ideally this variance is as low as possible. 
 ```{r}
 metrics_kfold <- collect_metrics(fits_lr_kfold, summarize = FALSE)
 
@@ -820,10 +819,10 @@ collect_metrics(fits_lr_kfold, summarize = TRUE)
 
 -----
 
-4.  You still fit the final model as before using the full dataset
+  As a last step, we still fit the final model as before using the full dataset
 
-- We already have the feature matrix for the full dataset (`feat_all`) from earlier
-- Otherwise, remake it
+  - We already have the feature matrix for the full dataset (`feat_all`) from earlier
+  - Otherwise, remake it
 ```{r}
 fit_lr <-
   logistic_reg() |> 

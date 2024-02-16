@@ -433,8 +433,9 @@ div.csl-indent {
 <li><a href="https://mediaspace.wisc.edu/media/iaml+unit+5-1/1_sv29qmvz">Lecture 1: Overview &amp; Parallel Processing</a> ~ 16 mins</li>
 <li><a href="https://mediaspace.wisc.edu/media/iaml+unit+5-2/1_pyr647gu">Lecture 2: Introduction to Resampling</a> ~ 11 mins</li>
 <li><a href="https://mediaspace.wisc.edu/media/iaml+unit+5-3/1_21l94nvt">Lecture 3: Single Validation/Test Set Approach</a> ~ 26 mins</li>
-<li><a href="">Lecture 4: Leave One Out Cross Validation</a></li>
-<li><a href="">Lecture 5: K-fold Cross Validation Approaches</a></li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+5-4/1_uuaa5nj1">Lecture 4: Leave One Out Cross Validation</a> ~ 9 mins</li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+5-5/1_f60kfk66">Lecture 5: K-fold Cross Validation Approaches</a> ~ 21 mins</li>
+<li><a href="">Lecture 6: Repeated and Grouped K-fold Approaches</a></li>
 <li><a href="">Lecture 6: Bootstrap Resampling</a></li>
 <li><a href="">Lecture 7: Tuning Hyperparameters via Resampling</a></li>
 <li><a href="">Lecture 8: Resampling for Both Model Selection and Evaluation</a></li>
@@ -1450,13 +1451,13 @@ Note that K is sometimes referred to as V in some fields/literatures (Don’t bl
 <p>Visualization of K-fold</p>
 <p><img src="figs/unit5_kfold.png" style="height:5in"></p>
 <hr>
-<p>An example of K-fold Cross-validation</p>
-<ol type="1">
-<li>Split into 10 folds (default)</li>
-</ol>
+<p>Let’s demonstrate the code for K-fold Cross-validation</p>
+<ul>
+<li>First, we split into 10 folds (default)
 <ul>
 <li>repeats = 1 (default; more on this in a bit)</li>
 <li>stratify on <code>disease</code></li>
+</ul></li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>splits_kfold <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
@@ -1481,13 +1482,13 @@ Note that K is sometimes referred to as V in some fields/literatures (Don’t bl
 </div>
 </div>
 <hr>
-<ol start="2" type="1">
-<li>Fit model configuration in first 9 folds, evaluate in 10th fold. Repeat 9 more times for each additional held-out fold</li>
-</ol>
+<ul>
+<li>Fit model configuration in first 9 folds, evaluate in 10th fold. Repeat 9 more times for each additional held-out fold
 <ul>
 <li>Use <code>fit_resamples()</code> as before</li>
 <li>Still no need to continue to remake features for held-in and held-out sets. Just provide <code>splits</code> and <code>rec</code></li>
 <li>Set performance metrics with <code>metric_set()</code></li>
+</ul></li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>fits_lr_kfold <span class="ot">&lt;-</span> </span>
@@ -1498,12 +1499,12 @@ Note that K is sometimes referred to as V in some fields/literatures (Don’t bl
 <span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
-<ol start="3" type="1">
-<li>Review performance estimates in held out folds using <code>collect_metrics()</code></li>
-</ol>
+<ul>
+<li><p>Then, we review performance estimates in held out folds using <code>collect_metrics()</code></p>
 <ul>
 <li>Can see performance in all folds using <code>summarize = FALSE</code></li>
-<li>The performance estimates are not all the same. This is what we mean when we take about the variance in our performance estimates. You couldn’t see it before with only one held-out set but now that we have 10, it becomes more concrete. Ideally this variance is as low as possible.</li>
+<li>The performance estimates are not all the same. This is what we mean when we talk about the variance in our performance estimates. You couldn’t see it before with only one held-out set but now that we have 10, it becomes more concrete. Ideally this variance is as low as possible.</li>
+</ul></li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>metrics_kfold <span class="ot">&lt;-</span> <span class="fu">collect_metrics</span>(fits_lr_kfold, <span class="at">summarize =</span> <span class="cn">FALSE</span>)</span>
@@ -1623,9 +1624,7 @@ Note that K is sometimes referred to as V in some fields/literatures (Don’t bl
 </div>
 </div>
 <hr>
-<ol start="4" type="1">
-<li>You still fit the final model as before using the full dataset</li>
-</ol>
+<p>As a last step, we still fit the final model as before using the full dataset</p>
 <ul>
 <li>We already have the feature matrix for the full dataset (<code>feat_all</code>) from earlier</li>
 <li>Otherwise, remake it</li>
