@@ -40,7 +40,7 @@ editor_options:
 
 - [Lecture 1: Overview & Parallel Processing](https://mediaspace.wisc.edu/media/iaml+unit+5-1/1_sv29qmvz) ~ 16 mins
 - [Lecture 2: Introduction to Resampling](https://mediaspace.wisc.edu/media/iaml+unit+5-2/1_pyr647gu) ~ 11 mins
-- [Lecture 3: Single Validation/Test Set Approach]() 
+- [Lecture 3: Single Validation/Test Set Approach](https://mediaspace.wisc.edu/media/iaml+unit+5-3/1_21l94nvt) ~ 26 mins
 - [Lecture 4: Leave One Out Cross Validation]() 
 - [Lecture 5: K-fold Cross Validation Approaches]() 
 - [Lecture 6: Bootstrap Resampling]() 
@@ -227,9 +227,9 @@ devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plot
 
 theme_set(theme_classic())
 options(tibble.width = Inf)
-rerun_setting <- FALSE
-
 path_data <- "./data"
+
+rerun_setting <- FALSE
 ``` 
 
 Let's get a dataset for this unit.  We will use the [heart disease dataset](https://archive.ics.uci.edu/ml/datasets/Heart+Disease) from the UCI Machine Learning Repository.  We will focus on the Cleveland data subset, whose variable are defined in this [data dictionary](data/cleveland_variables.pdf)
@@ -268,10 +268,8 @@ Code categorical variables as factors with meaningful text labels (and no spaces
 
 ```{r}
 data_all <- data_all |> 
-  mutate(disease = factor(disease, levels = 0:2, 
-                          labels = c("no", "yes1", "yes2")),
-         disease = fct_collapse(disease, 
-                                yes = c("yes1", "yes2")),
+  mutate(disease = factor(disease, levels = 0:4, 
+                          labels = c("no", "yes", "yes", "yes", "yes")),
          sex = factor(sex,  levels = c(0, 1), labels = c("female", "male")),
          fbs = factor(fbs, levels = c(0, 1), labels = c("no", "yes")),
          exer_ang = factor(exer_ang, levels = c(0, 1), labels = c("no", "yes")),

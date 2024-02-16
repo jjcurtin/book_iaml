@@ -432,7 +432,7 @@ div.csl-indent {
 <ul>
 <li><a href="https://mediaspace.wisc.edu/media/iaml+unit+5-1/1_sv29qmvz">Lecture 1: Overview &amp; Parallel Processing</a> ~ 16 mins</li>
 <li><a href="https://mediaspace.wisc.edu/media/iaml+unit+5-2/1_pyr647gu">Lecture 2: Introduction to Resampling</a> ~ 11 mins</li>
-<li><a href="">Lecture 3: Single Validation/Test Set Approach</a></li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+5-3/1_21l94nvt">Lecture 3: Single Validation/Test Set Approach</a> ~ 26 mins</li>
 <li><a href="">Lecture 4: Leave One Out Cross Validation</a></li>
 <li><a href="">Lecture 5: K-fold Cross Validation Approaches</a></li>
 <li><a href="">Lecture 6: Bootstrap Resampling</a></li>
@@ -627,24 +627,22 @@ dbl (14): X1, X2, X3, X4, X5, X6, X7, X8, X9, X10, X11, X12, X13, X14
 <p>Code categorical variables as factors with meaningful text labels (and no spaces)</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">disease =</span> <span class="fu">factor</span>(disease, <span class="at">levels =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">2</span>, </span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"no"</span>, <span class="st">"yes1"</span>, <span class="st">"yes2"</span>)),</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">disease =</span> <span class="fu">fct_collapse</span>(disease, </span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>                                <span class="at">yes =</span> <span class="fu">c</span>(<span class="st">"yes1"</span>, <span class="st">"yes2"</span>)),</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">sex =</span> <span class="fu">factor</span>(sex,  <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"female"</span>, <span class="st">"male"</span>)),</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">fbs =</span> <span class="fu">factor</span>(fbs, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"no"</span>, <span class="st">"yes"</span>)),</span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">exer_ang =</span> <span class="fu">factor</span>(exer_ang, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"no"</span>, <span class="st">"yes"</span>)),</span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">exer_st_slope =</span> <span class="fu">factor</span>(exer_st_slope, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, </span>
-<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>                                <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"upslope"</span>, <span class="st">"flat"</span>, <span class="st">"downslope"</span>)),</span>
-<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">cp =</span> <span class="fu">factor</span>(cp, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, </span>
-<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"typ_ang"</span>, <span class="st">"atyp_ang"</span>, <span class="st">"non_anginal"</span>, <span class="st">"non_anginal"</span>)),</span>
-<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">rest_ecg =</span> <span class="fu">factor</span>(rest_ecg, <span class="at">levels =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">2</span>, </span>
-<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>                           <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"normal"</span>, <span class="st">"abnormal1"</span>, <span class="st">"abnormal2"</span>)),</span>
-<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>         <span class="at">rest_ecg =</span> <span class="fu">fct_collapse</span>(rest_ecg, </span>
-<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>                                <span class="at">abnormal =</span> <span class="fu">c</span>(<span class="st">"abnormal1"</span>, <span class="st">"abnormal2"</span>)),</span>
-<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>         <span class="at">thal =</span> <span class="fu">factor</span>(thal, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">6</span>, <span class="dv">7</span>), </span>
-<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>                       <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"normal"</span>, <span class="st">"fixeddefect"</span>, <span class="st">"reversabledefect"</span>))) <span class="sc">|&gt;</span> </span>
-<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">disease =</span> <span class="fu">factor</span>(disease, <span class="at">levels =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">4</span>, </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                          <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"no"</span>, <span class="st">"yes"</span>, <span class="st">"yes"</span>, <span class="st">"yes"</span>, <span class="st">"yes"</span>)),</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">sex =</span> <span class="fu">factor</span>(sex,  <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"female"</span>, <span class="st">"male"</span>)),</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">fbs =</span> <span class="fu">factor</span>(fbs, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"no"</span>, <span class="st">"yes"</span>)),</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">exer_ang =</span> <span class="fu">factor</span>(exer_ang, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"no"</span>, <span class="st">"yes"</span>)),</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">exer_st_slope =</span> <span class="fu">factor</span>(exer_st_slope, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>, </span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>                                <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"upslope"</span>, <span class="st">"flat"</span>, <span class="st">"downslope"</span>)),</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">cp =</span> <span class="fu">factor</span>(cp, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, </span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"typ_ang"</span>, <span class="st">"atyp_ang"</span>, <span class="st">"non_anginal"</span>, <span class="st">"non_anginal"</span>)),</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">rest_ecg =</span> <span class="fu">factor</span>(rest_ecg, <span class="at">levels =</span> <span class="dv">0</span><span class="sc">:</span><span class="dv">2</span>, </span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>                           <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"normal"</span>, <span class="st">"abnormal1"</span>, <span class="st">"abnormal2"</span>)),</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">rest_ecg =</span> <span class="fu">fct_collapse</span>(rest_ecg, </span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>                                <span class="at">abnormal =</span> <span class="fu">c</span>(<span class="st">"abnormal1"</span>, <span class="st">"abnormal2"</span>)),</span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>         <span class="at">thal =</span> <span class="fu">factor</span>(thal, <span class="at">levels =</span> <span class="fu">c</span>(<span class="dv">3</span>, <span class="dv">6</span>, <span class="dv">7</span>), </span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>                       <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"normal"</span>, <span class="st">"fixeddefect"</span>, <span class="st">"reversabledefect"</span>))) <span class="sc">|&gt;</span> </span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 303
 Columns: 14
@@ -661,7 +659,7 @@ $ exer_st_depress &lt;dbl&gt; 2.3, 1.5, 2.6, 3.5, 1.4, 0.8, 3.6, 0.6, 1.4, 3.1, 
 $ exer_st_slope   &lt;fct&gt; downslope, flat, flat, downslope, upslope, upslope, do…
 $ ca              &lt;dbl&gt; 0, 3, 2, 0, 0, 0, 2, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, …
 $ thal            &lt;fct&gt; fixeddefect, normal, reversabledefect, normal, normal,…
-$ disease         &lt;fct&gt; no, yes, yes, no, no, no, NA, no, yes, yes, no, no, ye…</code></pre>
+$ disease         &lt;fct&gt; no, yes, yes, no, no, no, yes, no, yes, yes, no, no, y…</code></pre>
 </div>
 </div>
 <hr>
@@ -788,10 +786,10 @@ $ disease         &lt;fct&gt; no, yes, yes, no, no, no, NA, no, yes, yes, no, no
 </tr>
 <tr class="even">
 <td style="text-align: left;">disease</td>
-<td style="text-align: right;">48</td>
-<td style="text-align: right;">0.84</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
 <td style="text-align: right;">2</td>
-<td style="text-align: left;">no: 164, yes: 91</td>
+<td style="text-align: left;">no: 164, yes: 139</td>
 </tr>
 </tbody>
 </table>
@@ -1049,7 +1047,7 @@ In the first half of this unit, we will focus on assessing the performance of a 
 <div class="cell">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy_vec</span>(feat_test<span class="sc">$</span>disease, <span class="fu">predict</span>(fit_lr, feat_test, <span class="at">type =</span> <span class="st">"class"</span>)<span class="sc">$</span>.pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.8031496</code></pre>
+<pre><code>[1] 0.8355263</code></pre>
 </div>
 </div>
 <hr>
@@ -1106,7 +1104,7 @@ Instead, it contains the performance metrics for the configuration, estimated by
 <pre><code># A tibble: 1 × 5
   id         .metric  .estimator .estimate .config             
   &lt;chr&gt;      &lt;chr&gt;    &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;               
-1 validation accuracy binary         0.803 Preprocessor1_Model1</code></pre>
+1 validation accuracy binary         0.836 Preprocessor1_Model1</code></pre>
 </div>
 </div>
 <hr>
@@ -1298,25 +1296,25 @@ We are now using the full data set as our new training set so we prep and bake w
 <div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>fit_lr <span class="sc">|&gt;</span> <span class="fu">tidy</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 17 × 5
-   term                    estimate std.error statistic   p.value
-   &lt;chr&gt;                      &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
- 1 (Intercept)             -5.25      2.87       -1.83  0.0671   
- 2 age                     -0.0113    0.0243     -0.465 0.642    
- 3 rest_bp                  0.0235    0.0110      2.13  0.0331   
- 4 chol                     0.00451   0.00383     1.18  0.239    
- 5 max_hr                  -0.0194    0.0109     -1.79  0.0741   
- 6 exer_st_depress          0.166     0.227       0.731 0.465    
- 7 ca                       1.09      0.269       4.06  0.0000487
- 8 sex_male                 1.51      0.510       2.97  0.00303  
- 9 cp_atyp_ang              0.718     0.777       0.924 0.356    
-10 cp_non_anginal           1.10      0.624       1.76  0.0783   
-11 fbs_yes                 -0.847     0.535      -1.58  0.113    
-12 rest_ecg_abnormal        0.328     0.374       0.878 0.380    
-13 exer_ang_yes             1.22      0.411       2.97  0.00296  
-14 exer_st_slope_flat       0.982     0.454       2.16  0.0307   
-15 exer_st_slope_downslope  0.336     0.890       0.377 0.706    
-16 thal_fixeddefect         0.368     0.756       0.487 0.626    
-17 thal_reversabledefect    1.17      0.409       2.86  0.00430  </code></pre>
+   term                    estimate std.error statistic     p.value
+   &lt;chr&gt;                      &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;
+ 1 (Intercept)             -5.06      2.79       -1.81  0.0704     
+ 2 age                     -0.0185    0.0235     -0.787 0.431      
+ 3 rest_bp                  0.0240    0.0109      2.20  0.0279     
+ 4 chol                     0.00414   0.00376     1.10  0.271      
+ 5 max_hr                  -0.0204    0.0104     -1.96  0.0497     
+ 6 exer_st_depress          0.275     0.212       1.30  0.195      
+ 7 ca                       1.32      0.263       5.00  0.000000566
+ 8 sex_male                 1.43      0.489       2.92  0.00345    
+ 9 cp_atyp_ang              1.05      0.752       1.40  0.162      
+10 cp_non_anginal           1.24      0.602       2.06  0.0396     
+11 fbs_yes                 -0.812     0.522      -1.55  0.120      
+12 rest_ecg_abnormal        0.469     0.364       1.29  0.197      
+13 exer_ang_yes             1.24      0.401       3.10  0.00195    
+14 exer_st_slope_flat       1.08      0.442       2.43  0.0150     
+15 exer_st_slope_downslope  0.468     0.819       0.572 0.568      
+16 thal_fixeddefect         0.262     0.759       0.345 0.730      
+17 thal_reversabledefect    1.41      0.397       3.54  0.000396   </code></pre>
 </div>
 </div>
 <p>If we need to predict disease in the future, this is the model we would use (with these parameter estimates)<br>
@@ -1474,11 +1472,11 @@ Note that K is sometimes referred to as V in some fields/literatures (Don’t bl
  2 &lt;split [272/31]&gt; Fold02
  3 &lt;split [272/31]&gt; Fold03
  4 &lt;split [272/31]&gt; Fold04
- 5 &lt;split [272/31]&gt; Fold05
- 6 &lt;split [272/31]&gt; Fold06
+ 5 &lt;split [273/30]&gt; Fold05
+ 6 &lt;split [273/30]&gt; Fold06
  7 &lt;split [273/30]&gt; Fold07
- 8 &lt;split [274/29]&gt; Fold08
- 9 &lt;split [274/29]&gt; Fold09
+ 8 &lt;split [273/30]&gt; Fold08
+ 9 &lt;split [273/30]&gt; Fold09
 10 &lt;split [274/29]&gt; Fold10</code></pre>
 </div>
 </div>
@@ -1528,70 +1526,70 @@ Note that K is sometimes referred to as V in some fields/literatures (Don’t bl
    <td style="text-align:right;"> Fold01 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.76 </td>
+   <td style="text-align:right;"> 0.77 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Fold02 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.89 </td>
+   <td style="text-align:right;"> 0.84 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Fold03 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.76 </td>
+   <td style="text-align:right;"> 0.71 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Fold04 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.79 </td>
+   <td style="text-align:right;"> 0.84 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Fold05 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.72 </td>
+   <td style="text-align:right;"> 0.70 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Fold06 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.80 </td>
+   <td style="text-align:right;"> 0.83 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Fold07 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.85 </td>
+   <td style="text-align:right;"> 0.87 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Fold08 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.92 </td>
+   <td style="text-align:right;"> 0.73 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Fold09 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.76 </td>
+   <td style="text-align:right;"> 0.93 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Fold10 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.79 </td>
+   <td style="text-align:right;"> 0.86 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
 </tbody>
@@ -1621,7 +1619,7 @@ Note that K is sometimes referred to as V in some fields/literatures (Don’t bl
 <pre><code># A tibble: 1 × 6
   .metric  .estimator  mean     n std_err .config             
   &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
-1 accuracy binary     0.804    10  0.0199 Preprocessor1_Model1</code></pre>
+1 accuracy binary     0.809    10  0.0242 Preprocessor1_Model1</code></pre>
 </div>
 </div>
 <hr>
@@ -1643,32 +1641,32 @@ Note that K is sometimes referred to as V in some fields/literatures (Don’t bl
 <div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>fit_lr <span class="sc">|&gt;</span> <span class="fu">tidy</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 17 × 5
-   term                    estimate std.error statistic   p.value
-   &lt;chr&gt;                      &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;
- 1 (Intercept)             -5.25      2.87       -1.83  0.0671   
- 2 age                     -0.0113    0.0243     -0.465 0.642    
- 3 rest_bp                  0.0235    0.0110      2.13  0.0331   
- 4 chol                     0.00451   0.00383     1.18  0.239    
- 5 max_hr                  -0.0194    0.0109     -1.79  0.0741   
- 6 exer_st_depress          0.166     0.227       0.731 0.465    
- 7 ca                       1.09      0.269       4.06  0.0000487
- 8 sex_male                 1.51      0.510       2.97  0.00303  
- 9 cp_atyp_ang              0.718     0.777       0.924 0.356    
-10 cp_non_anginal           1.10      0.624       1.76  0.0783   
-11 fbs_yes                 -0.847     0.535      -1.58  0.113    
-12 rest_ecg_abnormal        0.328     0.374       0.878 0.380    
-13 exer_ang_yes             1.22      0.411       2.97  0.00296  
-14 exer_st_slope_flat       0.982     0.454       2.16  0.0307   
-15 exer_st_slope_downslope  0.336     0.890       0.377 0.706    
-16 thal_fixeddefect         0.368     0.756       0.487 0.626    
-17 thal_reversabledefect    1.17      0.409       2.86  0.00430  </code></pre>
+   term                    estimate std.error statistic     p.value
+   &lt;chr&gt;                      &lt;dbl&gt;     &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;
+ 1 (Intercept)             -5.06      2.79       -1.81  0.0704     
+ 2 age                     -0.0185    0.0235     -0.787 0.431      
+ 3 rest_bp                  0.0240    0.0109      2.20  0.0279     
+ 4 chol                     0.00414   0.00376     1.10  0.271      
+ 5 max_hr                  -0.0204    0.0104     -1.96  0.0497     
+ 6 exer_st_depress          0.275     0.212       1.30  0.195      
+ 7 ca                       1.32      0.263       5.00  0.000000566
+ 8 sex_male                 1.43      0.489       2.92  0.00345    
+ 9 cp_atyp_ang              1.05      0.752       1.40  0.162      
+10 cp_non_anginal           1.24      0.602       2.06  0.0396     
+11 fbs_yes                 -0.812     0.522      -1.55  0.120      
+12 rest_ecg_abnormal        0.469     0.364       1.29  0.197      
+13 exer_ang_yes             1.24      0.401       3.10  0.00195    
+14 exer_st_slope_flat       1.08      0.442       2.43  0.0150     
+15 exer_st_slope_downslope  0.468     0.819       0.572 0.568      
+16 thal_fixeddefect         0.262     0.759       0.345 0.730      
+17 thal_reversabledefect    1.41      0.397       3.54  0.000396   </code></pre>
 </div>
 </div>
 <p><br>
 <br>
 If we need to predict disease in the future, this is the fitted model we would use (with these parameter estimates)<br>
 <br>
-Our estimate of its future accuracy is 0.8037632 with a standard error of 0.019909</p>
+Our estimate of its future accuracy is 0.8090026 with a standard error of 0.0241847</p>
 <hr>
 <p>Comparisons between K-fold vs.&nbsp;LOOCV and Single Validation set<br>
 <br>
@@ -1768,11 +1766,11 @@ Two benefits:</p>
  2 &lt;split [272/31]&gt; Repeat01 Fold02
  3 &lt;split [272/31]&gt; Repeat01 Fold03
  4 &lt;split [272/31]&gt; Repeat01 Fold04
- 5 &lt;split [272/31]&gt; Repeat01 Fold05
+ 5 &lt;split [273/30]&gt; Repeat01 Fold05
  6 &lt;split [273/30]&gt; Repeat01 Fold06
  7 &lt;split [273/30]&gt; Repeat01 Fold07
  8 &lt;split [273/30]&gt; Repeat01 Fold08
- 9 &lt;split [274/29]&gt; Repeat01 Fold09
+ 9 &lt;split [273/30]&gt; Repeat01 Fold09
 10 &lt;split [274/29]&gt; Repeat01 Fold10
 # … with 90 more rows</code></pre>
 </div>
@@ -1821,7 +1819,7 @@ Two benefits:</p>
    <td style="text-align:right;"> Fold01 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.81 </td>
+   <td style="text-align:right;"> 0.77 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
@@ -1829,7 +1827,7 @@ Two benefits:</p>
    <td style="text-align:right;"> Fold02 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.82 </td>
+   <td style="text-align:right;"> 0.90 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
@@ -1837,7 +1835,7 @@ Two benefits:</p>
    <td style="text-align:right;"> Fold03 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.75 </td>
+   <td style="text-align:right;"> 0.81 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
@@ -1845,7 +1843,7 @@ Two benefits:</p>
    <td style="text-align:right;"> Fold04 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.79 </td>
+   <td style="text-align:right;"> 0.81 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
@@ -1853,7 +1851,7 @@ Two benefits:</p>
    <td style="text-align:right;"> Fold05 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.81 </td>
+   <td style="text-align:right;"> 0.90 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
@@ -1861,7 +1859,7 @@ Two benefits:</p>
    <td style="text-align:right;"> Fold06 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> 0.73 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
@@ -1869,7 +1867,7 @@ Two benefits:</p>
    <td style="text-align:right;"> Fold07 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.81 </td>
+   <td style="text-align:right;"> 0.80 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
@@ -1877,7 +1875,7 @@ Two benefits:</p>
    <td style="text-align:right;"> Fold08 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.91 </td>
+   <td style="text-align:right;"> 0.83 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
@@ -1885,27 +1883,187 @@ Two benefits:</p>
    <td style="text-align:right;"> Fold09 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.71 </td>
+   <td style="text-align:right;"> 0.80 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Repeat01 </td>
    <td style="text-align:right;"> Fold10 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.86 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat02 </td>
+   <td style="text-align:right;"> Fold01 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat02 </td>
+   <td style="text-align:right;"> Fold02 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.87 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat02 </td>
+   <td style="text-align:right;"> Fold03 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.87 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat02 </td>
+   <td style="text-align:right;"> Fold04 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.87 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat02 </td>
+   <td style="text-align:right;"> Fold05 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat02 </td>
+   <td style="text-align:right;"> Fold06 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.80 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat02 </td>
+   <td style="text-align:right;"> Fold07 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.90 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat02 </td>
+   <td style="text-align:right;"> Fold08 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.87 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat02 </td>
+   <td style="text-align:right;"> Fold09 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.80 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat02 </td>
+   <td style="text-align:right;"> Fold10 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.79 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat03 </td>
+   <td style="text-align:right;"> Fold01 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.94 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat03 </td>
+   <td style="text-align:right;"> Fold02 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.87 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat03 </td>
+   <td style="text-align:right;"> Fold03 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.87 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat03 </td>
+   <td style="text-align:right;"> Fold04 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.81 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat03 </td>
+   <td style="text-align:right;"> Fold05 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.83 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat03 </td>
+   <td style="text-align:right;"> Fold06 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.83 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat03 </td>
+   <td style="text-align:right;"> Fold07 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.73 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat03 </td>
+   <td style="text-align:right;"> Fold08 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.83 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat03 </td>
+   <td style="text-align:right;"> Fold09 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
    <td style="text-align:right;"> 0.70 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> Repeat02 </td>
-   <td style="text-align:right;"> Fold01 </td>
+   <td style="text-align:right;"> Repeat03 </td>
+   <td style="text-align:right;"> Fold10 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.82 </td>
+   <td style="text-align:right;"> 0.83 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> Repeat02 </td>
+   <td style="text-align:right;"> Repeat04 </td>
+   <td style="text-align:right;"> Fold01 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.81 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat04 </td>
    <td style="text-align:right;"> Fold02 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
@@ -1913,315 +2071,155 @@ Two benefits:</p>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> Repeat02 </td>
+   <td style="text-align:right;"> Repeat04 </td>
    <td style="text-align:right;"> Fold03 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.87 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat04 </td>
+   <td style="text-align:right;"> Fold04 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.90 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat04 </td>
+   <td style="text-align:right;"> Fold05 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.67 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat04 </td>
+   <td style="text-align:right;"> Fold06 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.87 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat04 </td>
+   <td style="text-align:right;"> Fold07 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.90 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat04 </td>
+   <td style="text-align:right;"> Fold08 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
    <td style="text-align:right;"> 0.77 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> Repeat02 </td>
-   <td style="text-align:right;"> Fold04 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.78 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat02 </td>
-   <td style="text-align:right;"> Fold05 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.81 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat02 </td>
-   <td style="text-align:right;"> Fold06 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.73 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat02 </td>
-   <td style="text-align:right;"> Fold07 </td>
+   <td style="text-align:right;"> Repeat04 </td>
+   <td style="text-align:right;"> Fold09 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
    <td style="text-align:right;"> 0.83 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> Repeat02 </td>
-   <td style="text-align:right;"> Fold08 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.88 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat02 </td>
-   <td style="text-align:right;"> Fold09 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.73 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat02 </td>
+   <td style="text-align:right;"> Repeat04 </td>
    <td style="text-align:right;"> Fold10 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.84 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat03 </td>
-   <td style="text-align:right;"> Fold01 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.80 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat03 </td>
-   <td style="text-align:right;"> Fold02 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.88 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat03 </td>
-   <td style="text-align:right;"> Fold03 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.78 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat03 </td>
-   <td style="text-align:right;"> Fold04 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.85 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat03 </td>
-   <td style="text-align:right;"> Fold05 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.92 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat03 </td>
-   <td style="text-align:right;"> Fold06 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.81 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat03 </td>
-   <td style="text-align:right;"> Fold07 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.68 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat03 </td>
-   <td style="text-align:right;"> Fold08 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.83 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat03 </td>
-   <td style="text-align:right;"> Fold09 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.71 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat03 </td>
-   <td style="text-align:right;"> Fold10 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.72 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat04 </td>
-   <td style="text-align:right;"> Fold01 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.71 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat04 </td>
-   <td style="text-align:right;"> Fold02 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.81 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat04 </td>
-   <td style="text-align:right;"> Fold03 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.84 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat04 </td>
-   <td style="text-align:right;"> Fold04 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.75 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat04 </td>
-   <td style="text-align:right;"> Fold05 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.84 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat04 </td>
-   <td style="text-align:right;"> Fold06 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.73 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat04 </td>
-   <td style="text-align:right;"> Fold07 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.69 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat04 </td>
-   <td style="text-align:right;"> Fold08 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
    <td style="text-align:right;"> 0.86 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> Repeat04 </td>
-   <td style="text-align:right;"> Fold09 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.83 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat04 </td>
-   <td style="text-align:right;"> Fold10 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.88 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
    <td style="text-align:right;"> Repeat05 </td>
    <td style="text-align:right;"> Fold01 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.83 </td>
+   <td style="text-align:right;"> 0.84 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Repeat05 </td>
    <td style="text-align:right;"> Fold02 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.74 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat05 </td>
+   <td style="text-align:right;"> Fold03 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.81 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat05 </td>
+   <td style="text-align:right;"> Fold04 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat05 </td>
+   <td style="text-align:right;"> Fold05 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.87 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat05 </td>
+   <td style="text-align:right;"> Fold06 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat05 </td>
+   <td style="text-align:right;"> Fold07 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.93 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat05 </td>
+   <td style="text-align:right;"> Fold08 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.87 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat05 </td>
+   <td style="text-align:right;"> Fold09 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.80 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat05 </td>
+   <td style="text-align:right;"> Fold10 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
    <td style="text-align:right;"> 0.79 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
-   <td style="text-align:right;"> Repeat05 </td>
-   <td style="text-align:right;"> Fold03 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.73 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat05 </td>
-   <td style="text-align:right;"> Fold04 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.83 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat05 </td>
-   <td style="text-align:right;"> Fold05 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.79 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat05 </td>
-   <td style="text-align:right;"> Fold06 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.91 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat05 </td>
-   <td style="text-align:right;"> Fold07 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.75 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat05 </td>
-   <td style="text-align:right;"> Fold08 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.78 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat05 </td>
-   <td style="text-align:right;"> Fold09 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.72 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat05 </td>
-   <td style="text-align:right;"> Fold10 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.83 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
    <td style="text-align:right;"> Repeat06 </td>
    <td style="text-align:right;"> Fold01 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.78 </td>
+   <td style="text-align:right;"> 0.94 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
@@ -2229,7 +2227,7 @@ Two benefits:</p>
    <td style="text-align:right;"> Fold02 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.78 </td>
+   <td style="text-align:right;"> 0.74 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
@@ -2237,383 +2235,383 @@ Two benefits:</p>
    <td style="text-align:right;"> Fold03 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.75 </td>
+   <td style="text-align:right;"> 0.81 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Repeat06 </td>
    <td style="text-align:right;"> Fold04 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.73 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat06 </td>
-   <td style="text-align:right;"> Fold05 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.75 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat06 </td>
-   <td style="text-align:right;"> Fold06 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.78 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat06 </td>
-   <td style="text-align:right;"> Fold07 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.80 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat06 </td>
-   <td style="text-align:right;"> Fold08 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.84 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat06 </td>
-   <td style="text-align:right;"> Fold09 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.78 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat06 </td>
-   <td style="text-align:right;"> Fold10 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.91 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat07 </td>
-   <td style="text-align:right;"> Fold01 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.86 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat07 </td>
-   <td style="text-align:right;"> Fold02 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.81 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat07 </td>
-   <td style="text-align:right;"> Fold03 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.73 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat07 </td>
-   <td style="text-align:right;"> Fold04 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.69 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat07 </td>
-   <td style="text-align:right;"> Fold05 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.88 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat07 </td>
-   <td style="text-align:right;"> Fold06 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.83 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat07 </td>
-   <td style="text-align:right;"> Fold07 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.88 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat07 </td>
-   <td style="text-align:right;"> Fold08 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.72 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat07 </td>
-   <td style="text-align:right;"> Fold09 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.83 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat07 </td>
-   <td style="text-align:right;"> Fold10 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.80 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat08 </td>
-   <td style="text-align:right;"> Fold01 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.64 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat08 </td>
-   <td style="text-align:right;"> Fold02 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.76 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat08 </td>
-   <td style="text-align:right;"> Fold03 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.84 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat08 </td>
-   <td style="text-align:right;"> Fold04 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.83 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat08 </td>
-   <td style="text-align:right;"> Fold05 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.76 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat08 </td>
-   <td style="text-align:right;"> Fold06 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.69 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat08 </td>
-   <td style="text-align:right;"> Fold07 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.81 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat08 </td>
-   <td style="text-align:right;"> Fold08 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.88 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat08 </td>
-   <td style="text-align:right;"> Fold09 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.85 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat08 </td>
-   <td style="text-align:right;"> Fold10 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.81 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat09 </td>
-   <td style="text-align:right;"> Fold01 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.88 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat09 </td>
-   <td style="text-align:right;"> Fold02 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.81 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat09 </td>
-   <td style="text-align:right;"> Fold03 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.65 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat09 </td>
-   <td style="text-align:right;"> Fold04 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.91 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat09 </td>
-   <td style="text-align:right;"> Fold05 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.80 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat09 </td>
-   <td style="text-align:right;"> Fold06 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.69 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat09 </td>
-   <td style="text-align:right;"> Fold07 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.68 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat09 </td>
-   <td style="text-align:right;"> Fold08 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.84 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat09 </td>
-   <td style="text-align:right;"> Fold09 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.85 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat09 </td>
-   <td style="text-align:right;"> Fold10 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.86 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat10 </td>
-   <td style="text-align:right;"> Fold01 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.73 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat10 </td>
-   <td style="text-align:right;"> Fold02 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.78 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat10 </td>
-   <td style="text-align:right;"> Fold03 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.84 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat10 </td>
-   <td style="text-align:right;"> Fold04 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.81 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat10 </td>
-   <td style="text-align:right;"> Fold05 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.71 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat10 </td>
-   <td style="text-align:right;"> Fold06 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.73 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat10 </td>
-   <td style="text-align:right;"> Fold07 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.81 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat10 </td>
-   <td style="text-align:right;"> Fold08 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.75 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat10 </td>
-   <td style="text-align:right;"> Fold09 </td>
-   <td style="text-align:right;"> accuracy </td>
-   <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.96 </td>
-   <td style="text-align:right;"> Preprocessor1_Model1 </td>
-  </tr>
-  <tr>
-   <td style="text-align:right;"> Repeat10 </td>
-   <td style="text-align:right;"> Fold10 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
    <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat06 </td>
+   <td style="text-align:right;"> Fold05 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat06 </td>
+   <td style="text-align:right;"> Fold06 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.83 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat06 </td>
+   <td style="text-align:right;"> Fold07 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.83 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat06 </td>
+   <td style="text-align:right;"> Fold08 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.87 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat06 </td>
+   <td style="text-align:right;"> Fold09 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat06 </td>
+   <td style="text-align:right;"> Fold10 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.90 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat07 </td>
+   <td style="text-align:right;"> Fold01 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.84 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat07 </td>
+   <td style="text-align:right;"> Fold02 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.81 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat07 </td>
+   <td style="text-align:right;"> Fold03 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.87 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat07 </td>
+   <td style="text-align:right;"> Fold04 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.81 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat07 </td>
+   <td style="text-align:right;"> Fold05 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.90 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat07 </td>
+   <td style="text-align:right;"> Fold06 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.83 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat07 </td>
+   <td style="text-align:right;"> Fold07 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.73 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat07 </td>
+   <td style="text-align:right;"> Fold08 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.83 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat07 </td>
+   <td style="text-align:right;"> Fold09 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.87 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat07 </td>
+   <td style="text-align:right;"> Fold10 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.69 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat08 </td>
+   <td style="text-align:right;"> Fold01 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat08 </td>
+   <td style="text-align:right;"> Fold02 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.84 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat08 </td>
+   <td style="text-align:right;"> Fold03 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.84 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat08 </td>
+   <td style="text-align:right;"> Fold04 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.84 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat08 </td>
+   <td style="text-align:right;"> Fold05 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat08 </td>
+   <td style="text-align:right;"> Fold06 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.93 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat08 </td>
+   <td style="text-align:right;"> Fold07 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.90 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat08 </td>
+   <td style="text-align:right;"> Fold08 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.80 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat08 </td>
+   <td style="text-align:right;"> Fold09 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.67 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat08 </td>
+   <td style="text-align:right;"> Fold10 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.90 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat09 </td>
+   <td style="text-align:right;"> Fold01 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.84 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat09 </td>
+   <td style="text-align:right;"> Fold02 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.81 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat09 </td>
+   <td style="text-align:right;"> Fold03 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.84 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat09 </td>
+   <td style="text-align:right;"> Fold04 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.84 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat09 </td>
+   <td style="text-align:right;"> Fold05 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.93 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat09 </td>
+   <td style="text-align:right;"> Fold06 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat09 </td>
+   <td style="text-align:right;"> Fold07 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.90 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat09 </td>
+   <td style="text-align:right;"> Fold08 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.73 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat09 </td>
+   <td style="text-align:right;"> Fold09 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.87 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat09 </td>
+   <td style="text-align:right;"> Fold10 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.72 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat10 </td>
+   <td style="text-align:right;"> Fold01 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.81 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat10 </td>
+   <td style="text-align:right;"> Fold02 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.81 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat10 </td>
+   <td style="text-align:right;"> Fold03 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.81 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat10 </td>
+   <td style="text-align:right;"> Fold04 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.84 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat10 </td>
+   <td style="text-align:right;"> Fold05 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.90 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat10 </td>
+   <td style="text-align:right;"> Fold06 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.80 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat10 </td>
+   <td style="text-align:right;"> Fold07 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.80 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat10 </td>
+   <td style="text-align:right;"> Fold08 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.90 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat10 </td>
+   <td style="text-align:right;"> Fold09 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.90 </td>
+   <td style="text-align:right;"> Preprocessor1_Model1 </td>
+  </tr>
+  <tr>
+   <td style="text-align:right;"> Repeat10 </td>
+   <td style="text-align:right;"> Fold10 </td>
+   <td style="text-align:right;"> accuracy </td>
+   <td style="text-align:right;"> binary </td>
+   <td style="text-align:right;"> 0.76 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
 </tbody>
@@ -2639,7 +2637,7 @@ Two benefits:</p>
 <pre><code># A tibble: 1 × 6
   .metric  .estimator  mean     n std_err .config             
   &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
-1 accuracy binary     0.794   100 0.00652 Preprocessor1_Model1</code></pre>
+1 accuracy binary     0.824   100 0.00604 Preprocessor1_Model1</code></pre>
 </div>
 </div>
 <hr>
@@ -2716,16 +2714,16 @@ The remaining 36.8% of the observations are often called the “out of bag” (O
 # A tibble: 100 × 2
    splits            id          
    &lt;list&gt;            &lt;chr&gt;       
- 1 &lt;split [303/120]&gt; Bootstrap001
- 2 &lt;split [303/115]&gt; Bootstrap002
- 3 &lt;split [303/110]&gt; Bootstrap003
- 4 &lt;split [303/110]&gt; Bootstrap004
- 5 &lt;split [303/113]&gt; Bootstrap005
- 6 &lt;split [303/118]&gt; Bootstrap006
- 7 &lt;split [303/114]&gt; Bootstrap007
+ 1 &lt;split [303/115]&gt; Bootstrap001
+ 2 &lt;split [303/123]&gt; Bootstrap002
+ 3 &lt;split [303/105]&gt; Bootstrap003
+ 4 &lt;split [303/115]&gt; Bootstrap004
+ 5 &lt;split [303/114]&gt; Bootstrap005
+ 6 &lt;split [303/115]&gt; Bootstrap006
+ 7 &lt;split [303/113]&gt; Bootstrap007
  8 &lt;split [303/95]&gt;  Bootstrap008
- 9 &lt;split [303/112]&gt; Bootstrap009
-10 &lt;split [303/113]&gt; Bootstrap010
+ 9 &lt;split [303/101]&gt; Bootstrap009
+10 &lt;split [303/115]&gt; Bootstrap010
 # … with 90 more rows</code></pre>
 </div>
 </div>
@@ -2772,35 +2770,35 @@ The remaining 36.8% of the observations are often called the “out of bag” (O
    <td style="text-align:right;"> Bootstrap001 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> 0.83 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap002 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> 0.78 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap003 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.78 </td>
+   <td style="text-align:right;"> 0.84 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap004 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.76 </td>
+   <td style="text-align:right;"> 0.84 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap005 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.70 </td>
+   <td style="text-align:right;"> 0.82 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
@@ -2814,168 +2812,168 @@ The remaining 36.8% of the observations are often called the “out of bag” (O
    <td style="text-align:right;"> Bootstrap007 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.76 </td>
+   <td style="text-align:right;"> 0.83 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap008 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> 0.81 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap009 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.75 </td>
+   <td style="text-align:right;"> 0.79 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap010 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.79 </td>
+   <td style="text-align:right;"> 0.82 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap011 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.79 </td>
+   <td style="text-align:right;"> 0.87 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap012 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.72 </td>
+   <td style="text-align:right;"> 0.83 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap013 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> 0.82 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap014 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.73 </td>
+   <td style="text-align:right;"> 0.83 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap015 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.76 </td>
+   <td style="text-align:right;"> 0.80 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap016 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> 0.84 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap017 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.75 </td>
+   <td style="text-align:right;"> 0.81 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap018 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.80 </td>
+   <td style="text-align:right;"> 0.85 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap019 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.85 </td>
+   <td style="text-align:right;"> 0.86 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap020 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.74 </td>
+   <td style="text-align:right;"> 0.78 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap021 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.83 </td>
+   <td style="text-align:right;"> 0.74 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap022 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.78 </td>
+   <td style="text-align:right;"> 0.82 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap023 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.80 </td>
+   <td style="text-align:right;"> 0.85 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap024 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.72 </td>
+   <td style="text-align:right;"> 0.84 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap025 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> 0.82 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap026 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.78 </td>
+   <td style="text-align:right;"> 0.83 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap027 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.82 </td>
+   <td style="text-align:right;"> 0.78 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap028 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.81 </td>
+   <td style="text-align:right;"> 0.77 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap029 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> 0.83 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap030 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> 0.78 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
@@ -2989,126 +2987,126 @@ The remaining 36.8% of the observations are often called the “out of bag” (O
    <td style="text-align:right;"> Bootstrap032 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.80 </td>
+   <td style="text-align:right;"> 0.85 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap033 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.74 </td>
+   <td style="text-align:right;"> 0.80 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap034 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.75 </td>
+   <td style="text-align:right;"> 0.80 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap035 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.79 </td>
+   <td style="text-align:right;"> 0.85 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap036 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> 0.78 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap037 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> 0.86 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap038 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.83 </td>
+   <td style="text-align:right;"> 0.80 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap039 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.75 </td>
+   <td style="text-align:right;"> 0.78 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap040 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.81 </td>
+   <td style="text-align:right;"> 0.88 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap041 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.74 </td>
+   <td style="text-align:right;"> 0.82 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap042 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.76 </td>
+   <td style="text-align:right;"> 0.79 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap043 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.80 </td>
+   <td style="text-align:right;"> 0.90 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap044 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.83 </td>
+   <td style="text-align:right;"> 0.80 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap045 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.79 </td>
+   <td style="text-align:right;"> 0.85 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap046 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.76 </td>
+   <td style="text-align:right;"> 0.87 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap047 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.81 </td>
+   <td style="text-align:right;"> 0.87 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap048 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.75 </td>
+   <td style="text-align:right;"> 0.82 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap049 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.78 </td>
+   <td style="text-align:right;"> 0.79 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
@@ -3122,42 +3120,42 @@ The remaining 36.8% of the observations are often called the “out of bag” (O
    <td style="text-align:right;"> Bootstrap051 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.84 </td>
+   <td style="text-align:right;"> 0.75 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap052 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.74 </td>
+   <td style="text-align:right;"> 0.86 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap053 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.80 </td>
+   <td style="text-align:right;"> 0.83 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap054 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.82 </td>
+   <td style="text-align:right;"> 0.83 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap055 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.75 </td>
+   <td style="text-align:right;"> 0.83 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap056 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.75 </td>
+   <td style="text-align:right;"> 0.83 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
@@ -3171,224 +3169,224 @@ The remaining 36.8% of the observations are often called the “out of bag” (O
    <td style="text-align:right;"> Bootstrap058 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.82 </td>
+   <td style="text-align:right;"> 0.80 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap059 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.82 </td>
+   <td style="text-align:right;"> 0.79 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap060 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.80 </td>
+   <td style="text-align:right;"> 0.85 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap061 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.82 </td>
+   <td style="text-align:right;"> 0.72 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap062 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.79 </td>
+   <td style="text-align:right;"> 0.83 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap063 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.78 </td>
+   <td style="text-align:right;"> 0.86 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap064 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.83 </td>
+   <td style="text-align:right;"> 0.78 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap065 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.78 </td>
+   <td style="text-align:right;"> 0.81 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap066 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.74 </td>
+   <td style="text-align:right;"> 0.84 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap067 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> 0.80 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap068 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.78 </td>
+   <td style="text-align:right;"> 0.85 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap069 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.80 </td>
+   <td style="text-align:right;"> 0.87 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap070 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.79 </td>
+   <td style="text-align:right;"> 0.77 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap071 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.86 </td>
+   <td style="text-align:right;"> 0.83 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap072 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.78 </td>
+   <td style="text-align:right;"> 0.80 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap073 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.85 </td>
+   <td style="text-align:right;"> 0.76 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap074 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.80 </td>
+   <td style="text-align:right;"> 0.77 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap075 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.75 </td>
+   <td style="text-align:right;"> 0.84 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap076 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.82 </td>
+   <td style="text-align:right;"> 0.89 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap077 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.80 </td>
+   <td style="text-align:right;"> 0.78 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap078 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.76 </td>
+   <td style="text-align:right;"> 0.81 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap079 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.78 </td>
+   <td style="text-align:right;"> 0.79 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap080 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> 0.82 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap081 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.83 </td>
+   <td style="text-align:right;"> 0.88 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap082 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.76 </td>
+   <td style="text-align:right;"> 0.83 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap083 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.76 </td>
+   <td style="text-align:right;"> 0.77 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap084 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.77 </td>
+   <td style="text-align:right;"> 0.79 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap085 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.76 </td>
+   <td style="text-align:right;"> 0.83 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap086 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.76 </td>
+   <td style="text-align:right;"> 0.82 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap087 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.86 </td>
+   <td style="text-align:right;"> 0.76 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap088 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.74 </td>
+   <td style="text-align:right;"> 0.80 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap089 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.79 </td>
+   <td style="text-align:right;"> 0.81 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
@@ -3402,21 +3400,21 @@ The remaining 36.8% of the observations are often called the “out of bag” (O
    <td style="text-align:right;"> Bootstrap091 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.80 </td>
+   <td style="text-align:right;"> 0.85 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap092 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.81 </td>
+   <td style="text-align:right;"> 0.80 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap093 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.75 </td>
+   <td style="text-align:right;"> 0.83 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
@@ -3430,42 +3428,42 @@ The remaining 36.8% of the observations are often called the “out of bag” (O
    <td style="text-align:right;"> Bootstrap095 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.76 </td>
+   <td style="text-align:right;"> 0.82 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap096 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.74 </td>
+   <td style="text-align:right;"> 0.81 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap097 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.80 </td>
+   <td style="text-align:right;"> 0.84 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap098 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.82 </td>
+   <td style="text-align:right;"> 0.78 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap099 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.72 </td>
+   <td style="text-align:right;"> 0.75 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
   <tr>
    <td style="text-align:right;"> Bootstrap100 </td>
    <td style="text-align:right;"> accuracy </td>
    <td style="text-align:right;"> binary </td>
-   <td style="text-align:right;"> 0.79 </td>
+   <td style="text-align:right;"> 0.80 </td>
    <td style="text-align:right;"> Preprocessor1_Model1 </td>
   </tr>
 </tbody>
@@ -3493,7 +3491,7 @@ The remaining 36.8% of the observations are often called the “out of bag” (O
 <pre><code># A tibble: 1 × 6
   .metric  .estimator  mean     n std_err .config             
   &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
-1 accuracy binary     0.784   100 0.00336 Preprocessor1_Model1</code></pre>
+1 accuracy binary     0.817   100 0.00338 Preprocessor1_Model1</code></pre>
 </div>
 </div>
 <ul>
@@ -3509,7 +3507,7 @@ The remaining 36.8% of the observations are often called the “out of bag” (O
 <hr>
 <ul>
 <li>The bootstrap resampling performance estimate will have less variance than K-fold</li>
-<li>Compare SE of accuracy for 100 resamples using k-fold with repeats: 0.0065186 vs.&nbsp;bootstrap: 0.0033622</li>
+<li>Compare SE of accuracy for 100 resamples using k-fold with repeats: 0.0060406 vs.&nbsp;bootstrap: 0.0033803</li>
 <li>With 1000 bootstraps (and test sets with ~ 37% of n) can get a very precise estimate of held-out error</li>
 </ul>
 <hr>
@@ -3667,16 +3665,16 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <pre><code># A tibble: 50 × 7
    neighbors .metric  .estimator  mean     n std_err .config              
        &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;                
- 1         1 accuracy binary     0.721   100 0.00414 Preprocessor1_Model01
- 2         4 accuracy binary     0.721   100 0.00414 Preprocessor1_Model02
- 3         7 accuracy binary     0.746   100 0.00374 Preprocessor1_Model03
- 4        10 accuracy binary     0.755   100 0.00365 Preprocessor1_Model04
- 5        13 accuracy binary     0.760   100 0.00372 Preprocessor1_Model05
- 6        16 accuracy binary     0.767   100 0.00366 Preprocessor1_Model06
- 7        19 accuracy binary     0.771   100 0.00348 Preprocessor1_Model07
- 8        22 accuracy binary     0.773   100 0.00330 Preprocessor1_Model08
- 9        25 accuracy binary     0.774   100 0.00327 Preprocessor1_Model09
-10        28 accuracy binary     0.776   100 0.00338 Preprocessor1_Model10
+ 1         1 accuracy binary     0.749   100 0.00362 Preprocessor1_Model01
+ 2         4 accuracy binary     0.749   100 0.00362 Preprocessor1_Model02
+ 3         7 accuracy binary     0.771   100 0.00367 Preprocessor1_Model03
+ 4        10 accuracy binary     0.782   100 0.00353 Preprocessor1_Model04
+ 5        13 accuracy binary     0.787   100 0.00345 Preprocessor1_Model05
+ 6        16 accuracy binary     0.794   100 0.00329 Preprocessor1_Model06
+ 7        19 accuracy binary     0.798   100 0.00314 Preprocessor1_Model07
+ 8        22 accuracy binary     0.800   100 0.00313 Preprocessor1_Model08
+ 9        25 accuracy binary     0.802   100 0.00311 Preprocessor1_Model09
+10        28 accuracy binary     0.803   100 0.00306 Preprocessor1_Model10
 # … with 40 more rows</code></pre>
 </div>
 </div>
@@ -3701,23 +3699,23 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <pre><code># A tibble: 10 × 7
    neighbors .metric  .estimator  mean     n std_err .config              
        &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;                
- 1       103 accuracy binary     0.786   100 0.00295 Preprocessor1_Model35
- 2       106 accuracy binary     0.785   100 0.00290 Preprocessor1_Model36
- 3       100 accuracy binary     0.785   100 0.00297 Preprocessor1_Model34
- 4        91 accuracy binary     0.785   100 0.00298 Preprocessor1_Model31
- 5        94 accuracy binary     0.785   100 0.00289 Preprocessor1_Model32
- 6        61 accuracy binary     0.785   100 0.00357 Preprocessor1_Model21
- 7        88 accuracy binary     0.785   100 0.00312 Preprocessor1_Model30
- 8        64 accuracy binary     0.785   100 0.00351 Preprocessor1_Model22
- 9        67 accuracy binary     0.785   100 0.00348 Preprocessor1_Model23
-10        85 accuracy binary     0.785   100 0.00319 Preprocessor1_Model29</code></pre>
+ 1       145 accuracy binary     0.819   100 0.00321 Preprocessor1_Model49
+ 2       148 accuracy binary     0.819   100 0.00323 Preprocessor1_Model50
+ 3       142 accuracy binary     0.819   100 0.00324 Preprocessor1_Model48
+ 4       124 accuracy binary     0.818   100 0.00310 Preprocessor1_Model42
+ 5       121 accuracy binary     0.818   100 0.00309 Preprocessor1_Model41
+ 6       136 accuracy binary     0.818   100 0.00323 Preprocessor1_Model46
+ 7       139 accuracy binary     0.818   100 0.00323 Preprocessor1_Model47
+ 8       133 accuracy binary     0.818   100 0.00319 Preprocessor1_Model45
+ 9       130 accuracy binary     0.818   100 0.00316 Preprocessor1_Model44
+10       127 accuracy binary     0.818   100 0.00314 Preprocessor1_Model43</code></pre>
 </div>
 <div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="fu">select_best</span>(fits_knn_boot)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 2
   neighbors .config              
       &lt;dbl&gt; &lt;chr&gt;                
-1       103 Preprocessor1_Model35</code></pre>
+1       145 Preprocessor1_Model49</code></pre>
 </div>
 </div>
 <hr>
@@ -3733,10 +3731,10 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <pre><code># A tibble: 1 × 9
   neighbors .metric  .estimator  mean     n std_err .config               .best
       &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;                 &lt;dbl&gt;
-1       115 accuracy binary     0.783   100 0.00273 Preprocessor1_Model39 0.786
+1       148 accuracy binary     0.819   100 0.00323 Preprocessor1_Model50 0.819
   .bound
    &lt;dbl&gt;
-1  0.783</code></pre>
+1  0.816</code></pre>
 </div>
 </div>
 <hr>
@@ -3871,16 +3869,16 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <pre><code># A tibble: 10 × 7
    neighbors .metric  .estimator  mean     n std_err .config              
        &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;                
- 1        97 accuracy binary     0.785   100 0.00439 Preprocessor1_Model33
- 2        85 accuracy binary     0.785   100 0.00444 Preprocessor1_Model29
- 3        76 accuracy binary     0.785   100 0.00432 Preprocessor1_Model26
- 4       100 accuracy binary     0.785   100 0.00436 Preprocessor1_Model34
- 5        79 accuracy binary     0.784   100 0.00438 Preprocessor1_Model27
- 6        82 accuracy binary     0.784   100 0.00436 Preprocessor1_Model28
- 7        94 accuracy binary     0.784   100 0.00431 Preprocessor1_Model32
- 8        91 accuracy binary     0.784   100 0.00432 Preprocessor1_Model31
- 9        88 accuracy binary     0.784   100 0.00437 Preprocessor1_Model30
-10        73 accuracy binary     0.783   100 0.00441 Preprocessor1_Model25</code></pre>
+ 1        91 accuracy binary     0.815   100 0.00309 Preprocessor1_Model31
+ 2        97 accuracy binary     0.815   100 0.00305 Preprocessor1_Model33
+ 3       100 accuracy binary     0.815   100 0.00302 Preprocessor1_Model34
+ 4       124 accuracy binary     0.815   100 0.00299 Preprocessor1_Model42
+ 5       121 accuracy binary     0.815   100 0.00299 Preprocessor1_Model41
+ 6        88 accuracy binary     0.815   100 0.00306 Preprocessor1_Model30
+ 7        79 accuracy binary     0.815   100 0.00300 Preprocessor1_Model27
+ 8        94 accuracy binary     0.815   100 0.00302 Preprocessor1_Model32
+ 9        85 accuracy binary     0.814   100 0.00299 Preprocessor1_Model29
+10        73 accuracy binary     0.814   100 0.00309 Preprocessor1_Model25</code></pre>
 </div>
 </div>
 <hr>
@@ -3890,8 +3888,8 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_best</span>(fits_knn_boot_trn, <span class="at">n =</span> <span class="dv">10</span>)<span class="sc">$</span>mean</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code> [1] 0.7850121 0.7848970 0.7847611 0.7846467 0.7844905 0.7844872 0.7841219
- [8] 0.7838208 0.7837900 0.7833639</code></pre>
+<pre><code> [1] 0.8149497 0.8148387 0.8147184 0.8147127 0.8146859 0.8146851 0.8145969
+ [8] 0.8145515 0.8144602 0.8144509</code></pre>
 </div>
 </div>
 <ul>
@@ -3903,7 +3901,7 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <pre><code># A tibble: 1 × 2
   neighbors .config              
       &lt;dbl&gt; &lt;chr&gt;                
-1        97 Preprocessor1_Model33</code></pre>
+1        91 Preprocessor1_Model31</code></pre>
 </div>
 </div>
 <hr>
@@ -3933,11 +3931,11 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb86"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy_vec</span>(feat_test<span class="sc">$</span>disease, <span class="fu">predict</span>(fit_knn_best, feat_test)<span class="sc">$</span>.pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.7752809</code></pre>
+<pre><code>[1] 0.8333333</code></pre>
 </div>
 </div>
 <hr>
-<p>Our best estimate of how accurate a model with k = 97 would be in new data is 0.7752809.</p>
+<p>Our best estimate of how accurate a model with k = 91 would be in new data is 0.8333333.</p>
 <ul>
 <li>However, it was only fit with n = 203 (the training set).<br>
 </li>
