@@ -43,8 +43,8 @@ editor_options:
 - [Lecture 3: Single Validation/Test Set Approach](https://mediaspace.wisc.edu/media/iaml+unit+5-3/1_21l94nvt) ~ 26 mins
 - [Lecture 4: Leave One Out Cross Validation](https://mediaspace.wisc.edu/media/iaml+unit+5-4/1_uuaa5nj1) ~ 9 mins 
 - [Lecture 5: K-fold Cross Validation Approaches](https://mediaspace.wisc.edu/media/iaml+unit+5-5/1_f60kfk66) ~ 21 mins
-- [Lecture 6: Repeated and Grouped K-fold Approaches]()
-- [Lecture 6: Bootstrap Resampling]() 
+- [Lecture 6: Repeated and Grouped K-fold Approaches](https://mediaspace.wisc.edu/media/iaml+unit+5-6/1_a6yo0euq) ~ 11 mins
+- [Lecture 6: Bootstrap Resampling](https://mediaspace.wisc.edu/media/iaml+unit+5-7/1_zijywf6b) ~ 11 mins 
 - [Lecture 7: Tuning Hyperparameters via Resampling]() 
 - [Lecture 8: Resampling for Both Model Selection and Evaluation]() 
 - [Lecture 9: Nested Resampling]() 
@@ -230,7 +230,7 @@ theme_set(theme_classic())
 options(tibble.width = Inf)
 path_data <- "./data"
 
-rerun_setting <- FALSE
+rerun_setting <- FALSE 
 ``` 
 
 Let's get a dataset for this unit.  We will use the [heart disease dataset](https://archive.ics.uci.edu/ml/datasets/Heart+Disease) from the UCI Machine Learning Repository.  We will focus on the Cleveland data subset, whose variable are defined in this [data dictionary](data/cleveland_variables.pdf)
@@ -884,7 +884,7 @@ Here is a demonstration
 ```{r}
 #| eval: false
 
-rerun_setting <- FALSE
+rerun_setting <- TRUE 
 ```
 
 -----
@@ -1133,10 +1133,10 @@ Resampling is also used to get held out performance estimates to select best mod
 
 For example, we might want to select among model configurations in an explanatory scenario to have a principled approach to determine the model configuration that best matches the true DGP (and would be best to test your hypotheses).  e.g., 
 
-  - Selecting covariates to include
-  - Deciding on X transformations
-  - Outlier identification approach
-  - Statistical algorithm
+- Selecting covariates to include
+- Deciding on X transformations
+- Outlier identification approach
+- Statistical algorithm
 
 -----
 
@@ -1181,7 +1181,7 @@ rec_knn <- recipe(disease ~ ., data = data_all) |>
 
 -----
 
-2. The fitting process is what is different
+The fitting process is what is different
 
 - We set up a tibble with values of the hyperparameters to consider
 - We indicate which hyperparameters need to be tuned
@@ -1194,7 +1194,7 @@ hyper_grid
 -----  
   
 - Model configurations are fit using `tune_grid()` 
-- We need to set `grid =` now
+- We need to set `grid =` 
 ```{r fits_knn_boot}
 fits_knn_boot <- cache_rds(
   expr = {
@@ -1209,12 +1209,12 @@ fits_knn_boot <- cache_rds(
   },
   dir = "cache/",
   file = "fits_knn_boot",
-  rerun = rerun_setting)
+  rerun = FALSE)
 ```
 
 -----
 
-3. Reviewing performance of model configurations is similar to before but now with multiple configurations
+Reviewing performance of model configurations is similar to before but now with multiple configurations
 
 - We can see the average performance over folds along with its standard error using `summarize = TRUE`
 - We *could* see the performance of each configuration in EACH fold too, but there are lots of them (use `summarize = FALSE`)

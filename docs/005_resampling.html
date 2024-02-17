@@ -435,8 +435,8 @@ div.csl-indent {
 <li><a href="https://mediaspace.wisc.edu/media/iaml+unit+5-3/1_21l94nvt">Lecture 3: Single Validation/Test Set Approach</a> ~ 26 mins</li>
 <li><a href="https://mediaspace.wisc.edu/media/iaml+unit+5-4/1_uuaa5nj1">Lecture 4: Leave One Out Cross Validation</a> ~ 9 mins</li>
 <li><a href="https://mediaspace.wisc.edu/media/iaml+unit+5-5/1_f60kfk66">Lecture 5: K-fold Cross Validation Approaches</a> ~ 21 mins</li>
-<li><a href="">Lecture 6: Repeated and Grouped K-fold Approaches</a></li>
-<li><a href="">Lecture 6: Bootstrap Resampling</a></li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+5-6/1_a6yo0euq">Lecture 6: Repeated and Grouped K-fold Approaches</a> ~ 11 mins</li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+5-7/1_zijywf6b">Lecture 6: Bootstrap Resampling</a> ~ 11 mins</li>
 <li><a href="">Lecture 7: Tuning Hyperparameters via Resampling</a></li>
 <li><a href="">Lecture 8: Resampling for Both Model Selection and Evaluation</a></li>
 <li><a href="">Lecture 9: Nested Resampling</a></li>
@@ -1700,7 +1700,7 @@ So you may want to start caching the <code>fits_</code> object so you don’t ha
 <li>Put this near the top of your code with other environment settings so its easy to find</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>rerun_setting <span class="ot">&lt;-</span> <span class="cn">FALSE</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>rerun_setting <span class="ot">&lt;-</span> <span class="cn">TRUE</span> </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <ul>
@@ -3565,9 +3565,7 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <span id="cb61-5"><a href="#cb61-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_dummy</span>(<span class="fu">all_nominal_predictors</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
-<ol start="2" type="1">
-<li>The fitting process is what is different</li>
-</ol>
+<p>The fitting process is what is different</p>
 <ul>
 <li>We set up a tibble with values of the hyperparameters to consider</li>
 <li>We indicate which hyperparameters need to be tuned</li>
@@ -3632,7 +3630,7 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <hr>
 <ul>
 <li>Model configurations are fit using <code>tune_grid()</code></li>
-<li>We need to set <code>grid =</code> now</li>
+<li>We need to set <code>grid =</code></li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>fits_knn_boot <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
@@ -3648,12 +3646,10 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <span id="cb64-11"><a href="#cb64-11" aria-hidden="true" tabindex="-1"></a>  },</span>
 <span id="cb64-12"><a href="#cb64-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/"</span>,</span>
 <span id="cb64-13"><a href="#cb64-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_knn_boot"</span>,</span>
-<span id="cb64-14"><a href="#cb64-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb64-14"><a href="#cb64-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
-<ol start="3" type="1">
-<li>Reviewing performance of model configurations is similar to before but now with multiple configurations</li>
-</ol>
+<p>Reviewing performance of model configurations is similar to before but now with multiple configurations</p>
 <ul>
 <li>We can see the average performance over folds along with its standard error using <code>summarize = TRUE</code></li>
 <li>We <em>could</em> see the performance of each configuration in EACH fold too, but there are lots of them (use <code>summarize = FALSE</code>)</li>
