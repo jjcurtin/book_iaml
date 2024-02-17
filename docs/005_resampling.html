@@ -357,7 +357,7 @@ div.csl-indent {
   <li><a href="#bootstrap-with-test-set" id="toc-bootstrap-with-test-set" class="nav-link" data-scroll-target="#bootstrap-with-test-set"><span class="toc-section-number">5.11.1</span>  Bootstrap with Test Set</a></li>
   </ul></li>
   <li><a href="#nested-resampling" id="toc-nested-resampling" class="nav-link" data-scroll-target="#nested-resampling"><span class="toc-section-number">5.12</span>  Nested Resampling</a></li>
-  <li><a href="#data-exploration-in-a-nested-world." id="toc-data-exploration-in-a-nested-world." class="nav-link" data-scroll-target="#data-exploration-in-a-nested-world."><span class="toc-section-number">5.13</span>  Data Exploration in a Nested World….</a></li>
+  <li><a href="#data-exploration-with-advanced-resampling-methods" id="toc-data-exploration-with-advanced-resampling-methods" class="nav-link" data-scroll-target="#data-exploration-with-advanced-resampling-methods"><span class="toc-section-number">5.13</span>  Data Exploration with Advanced Resampling Methods</a></li>
   <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion"><span class="toc-section-number">5.14</span>  Discussion</a>
   <ul class="collapse">
   <li><a href="#and-the-winner-is.." id="toc-and-the-winner-is.." class="nav-link" data-scroll-target="#and-the-winner-is.."><span class="toc-section-number">5.14.1</span>  and the winner is…..</a></li>
@@ -436,10 +436,10 @@ div.csl-indent {
 <li><a href="https://mediaspace.wisc.edu/media/iaml+unit+5-4/1_uuaa5nj1">Lecture 4: Leave One Out Cross Validation</a> ~ 9 mins</li>
 <li><a href="https://mediaspace.wisc.edu/media/iaml+unit+5-5/1_f60kfk66">Lecture 5: K-fold Cross Validation Approaches</a> ~ 21 mins</li>
 <li><a href="https://mediaspace.wisc.edu/media/iaml+unit+5-6/1_a6yo0euq">Lecture 6: Repeated and Grouped K-fold Approaches</a> ~ 11 mins</li>
-<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+5-7/1_zijywf6b">Lecture 6: Bootstrap Resampling</a> ~ 11 mins</li>
-<li><a href="">Lecture 7: Tuning Hyperparameters via Resampling</a></li>
-<li><a href="">Lecture 8: Resampling for Both Model Selection and Evaluation</a></li>
-<li><a href="">Lecture 9: Nested Resampling</a></li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+5-7/1_zijywf6b">Lecture 7: Bootstrap Resampling</a> ~ 11 mins</li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+5-8/1_0sxcqnj4">Lecture 8: Using Resampling to Select Best Model Configurations</a> ~ 17 mins</li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+5-9/1_b8abgszd">Lecture 9: Resampling for Both Model Selection and Evaluation</a> ~ 11 mins</li>
+<li><a href="">Lecture 10: Nested Resampling</a></li>
 </ul>
 <p>Post questions or discuss readings or lectures on Slack</p>
 <hr>
@@ -3522,7 +3522,10 @@ The remaining 36.8% of the observations are often called the “out of bag” (O
 <h2 data-number="5.10" class="anchored" data-anchor-id="using-resampling-to-select-best-model-configurations"><span class="header-section-number">5.10</span> Using Resampling to Select Best Model Configurations</h2>
 <p>In all of the previous examples, we have used various resampling methods only to evaluate the performance of a single model configuration in new data. In these instances, we were treating the held-out sets as test sets.<br>
 <br>
-Resampling is also used to get held out performance estimates to select best model configurations. <strong>Best</strong> means the model configuration that performs the best in new data and therefore is closest to the true DGP for the data</p>
+Resampling is also used to get held out performance estimates to select best model configurations.<br>
+<br>
+<br>
+<strong>Best</strong> means the model configuration that performs the best in new data and therefore is closest to the true DGP for the data</p>
 <hr>
 <p>For example, we might want to select among model configurations in an explanatory scenario to have a principled approach to determine the model configuration that best matches the true DGP (and would be best to test your hypotheses). e.g.,</p>
 <ul>
@@ -3538,7 +3541,7 @@ Resampling is also used to get held out performance estimates to select best mod
 <li>We select the model configuration with the best mean (or median?) across our resampled validation sets on the relevant performance metric.</li>
 </ul>
 <hr>
-<p>One additional common scenario where you will do model selection across many model configurations is when “tuning” (picking) the best values for hyperparameters for a statistical algorithm (e.g., k in KNN).</p>
+<p>One additional common scenario where you will do model selection across many model configurations is when “tuning” (i.e., selecting) the best values for hyperparameters for a statistical algorithm (e.g., k in KNN).</p>
 <hr>
 <p><code>tidymodels</code> makes this easy and it follows a very similar workflow as earlier with a few changes</p>
 <ul>
@@ -3554,7 +3557,7 @@ We can use the same splits are established as before (<code>splits_boot</code>)<
 <br>
 We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <ul>
-<li>We have to scale (lets range correct) the numeric predictors</li>
+<li>We have to scale (lets range correct) the features</li>
 <li>No need to do this to the dummy features. They are already range corrected</li>
 </ul>
 <div class="cell">
@@ -3629,7 +3632,8 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 </div>
 <hr>
 <ul>
-<li>Model configurations are fit using <code>tune_grid()</code></li>
+<li>When model configurations differ by features or statistical algorithms, we have to use <code>fit_resamples()</code> multiple times to estimate performance of those different configurations</li>
+<li>Held out performance estimates for model configurations that differ by hyperparameter values are obtained in one step using <code>tune_grid()</code></li>
 <li>We need to set <code>grid =</code></li>
 </ul>
 <div class="cell">
@@ -3646,7 +3650,7 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <span id="cb64-11"><a href="#cb64-11" aria-hidden="true" tabindex="-1"></a>  },</span>
 <span id="cb64-12"><a href="#cb64-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/"</span>,</span>
 <span id="cb64-13"><a href="#cb64-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_knn_boot"</span>,</span>
-<span id="cb64-14"><a href="#cb64-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb64-14"><a href="#cb64-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <p>Reviewing performance of model configurations is similar to before but now with multiple configurations</p>
@@ -3772,14 +3776,21 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <hr>
 <ul>
 <li><p>If you use your held-out resamples to select the best model among a number of model configurations then the same held-out resamples cannot also be used to evaluate the performance of that same best model</p></li>
-<li><p>If it is, the performance metric will have ‘optimization bias’. To the degree that there is any noise (i.e., variance) in the measurement of performance, selecting the best model configuration will capitalize on this noise.</p></li>
+<li><p>If it is, the performance metric will have <strong>optimization bias</strong>. To the degree that there is any noise (i.e., variance) in the measurement of performance, selecting the best model configuration will capitalize on this noise.</p></li>
 <li><p>You need to use one set of held out resamples (validation sets) to select the best model. Then you need a DIFFERENT set of held out resamples (test sets) to evaluate that best model.</p></li>
 </ul>
 <hr>
 <p>There are two strategies for this:</p>
 <ul>
-<li><p>Strategy 1: First, hold out a test set for final/best model evaluation. Then use one of the above resampling methods (single validation set approach, k-fold, or bootstrap) to select the best model configuration. Bootstrap is likely best option b/c it is typically more precise (though biased)</p></li>
-<li><p>Strategy 2: Nested resampling. More on this in a moment</p></li>
+<li>Strategy 1:
+<ul>
+<li>First, hold out a test set for final/best model evaluation (using <code>initial_split()</code>).<br>
+</li>
+<li>Then use one of the above resampling methods (single validation set approach, k-fold, or bootstrap) to select the best model configuration.<br>
+</li>
+<li>Bootstrap is likely best option b/c it is typically more precise (though biased)</li>
+</ul></li>
+<li>Strategy 2: Nested resampling. More on this in a moment</li>
 </ul>
 <hr>
 <p>Other Observations about Common Practices:</p>
@@ -3787,7 +3798,7 @@ We need a slightly different recipe for KNN vs.&nbsp;logistic regression</p>
 <li>Simple resampling methods with the full sample (and no held-out test set) to both select AND evaluate are still common</li>
 <li>Failure by some (even Kuhn) to appreciate the degree of optimization bias</li>
 <li>Particular problem in Psychology because of small n (high variance in our performance metric)?</li>
-<li>Can be fine if you just want to find the best model configuration but don’t need to evaluate its performance rigorously</li>
+<li>Can be fine if you just want to find the best model configuration but don’t need to evaluate its performance rigorously (i.e., you don’t really care that much about validity of your performance estimate of your final model and are fine with it being a bit optimistic)</li>
 </ul>
 <hr>
 <section id="bootstrap-with-test-set" class="level3" data-number="5.11.1">
@@ -4035,19 +4046,20 @@ Question: Why bootstrap on inner loop and k-fold on outer loop?
 </div>
 <hr>
 </section>
-<section id="data-exploration-in-a-nested-world." class="level2" data-number="5.13">
-<h2 data-number="5.13" class="anchored" data-anchor-id="data-exploration-in-a-nested-world."><span class="header-section-number">5.13</span> Data Exploration in a Nested World….</h2>
+<section id="data-exploration-with-advanced-resampling-methods" class="level2" data-number="5.13">
+<h2 data-number="5.13" class="anchored" data-anchor-id="data-exploration-with-advanced-resampling-methods"><span class="header-section-number">5.13</span> Data Exploration with Advanced Resampling Methods</h2>
 <p>Final words on resampling:</p>
 <ul>
 <li><p>Iterative methods (K-fold, bootstrap) are superior to single validation set approach wrt bias-variance trade-off in performance measurement</p></li>
 <li><p>K-Fold resampling should be used if you looking for a performance estimate of a single model configuration</p></li>
 <li><p>Bootstrap resampling should be used if you are looking only to choose among model configurations but don’t need an independent assessment of that final model</p></li>
 <li><p>Bootstrap resampling + Test set or Nested Resampling should be used when you plan to both select among model configurations AND evaluate the best model</p></li>
-<li><p>Nested resampling must be handled very carefully wrt modeling EDA b/c it uses all the data</p>
+</ul>
+<p>In scenarios where you will not have one test set but will eventually use all the data as test ast some point (i.e., k-fold for evaluation of a single model configuration or Nested CV)</p>
 <ul>
-<li>Can use eyeball sample (10-20% of data) without much affect on performance measurement</li>
-<li>If you plan to do a lot of exploration (e.g., lots of feature engineering and feature selection), you should probably use Bootstrap resampling + Test set</li>
-</ul></li>
+<li>Think carefully about how you do EDA</li>
+<li>Resampling reduces overfitting in the model selection process</li>
+<li>Can use eyeball sample (10-20% of full data) with little impact on final performance measure</li>
 </ul>
 </section>
 <section id="discussion" class="level2" data-number="5.14">
