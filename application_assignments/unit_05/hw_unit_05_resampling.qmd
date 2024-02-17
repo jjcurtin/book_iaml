@@ -15,7 +15,7 @@ editor_options:
 
 To begin, download the following from the course web book (Unit 5):
 
-- `hw_unit_5_resampling.qmd` (Markdown shell for this assignment)
+- `hw_unit_5_resampling.qmd` (notebook for this assignment)
 
 - `smoking_ema.csv` (data for this assignment)
 
@@ -49,6 +49,7 @@ Let's get started!
 ```
 
 ### Specify other global settings
+If you are going to use `cache_rds(), you might include `rerun_setting <- FALSE` in this chunk
 ```{r}
 
 ```
@@ -68,7 +69,7 @@ data <-
 
 ## Part 1: Selecting among model configurations with k-fold cross-validation
 
-In this portion of the assignment, you will be using k-fold cross-validation to select among two different model configurations (Feature set 1 and Feature set 2). These model configurations will differ only on feature set (no hyperparameter tuning yet!). They will also both use LM logistic regression as the statistical algorithm. 
+In this portion of the assignment, you will be using k-fold cross-validation to select among two different model configurations (Feature set 1 and Feature set 2). These model configurations will differ only on feature set (no hyperparameter tuning yet!). They will also both use LM logistic regression as the statistical algorithm. At this point, you will ignore the fact that there are repeated observations, grouped by subid until we tell you to address that.
 
 ### Split data
 
@@ -84,6 +85,7 @@ Build a recipe with the following specifications:
 
 - Use `cigs` as the outcome variable regressed on `craving`.  
 - Set up the outcome as a factor with the positive class ("yes") as the second level.
+- Use craving as a predictor by simply transforming this ordinal variable to numeric based on the order of its scores.
 
 ```{r}
 rec_kfold_1 <- 
@@ -94,7 +96,7 @@ Fit the model with k-fold cross-validation. Use logistic regression as your stat
 fits_kfold_1 <- 
 ```
 
-Examine performance estimates. Use the `collect_metrics()` function to make a table of the cross-validated results.
+Examine performance estimates. Use the `collect_metrics()` function to make a table of the held-out performance estimates from the 10 folds
 ```{r}
 metrics_kfold_1 <- 
 ```
@@ -129,7 +131,7 @@ Fit the model with k-fold cross-validation. Use logistic regression as your stat
 fits_kfold_2 <- 
 ```
 
-Examine performance estimates. Use the `collect_metrics()` function to make a table of the cross-validated results.
+Examine performance estimates. Use the `collect_metrics()` function to make a table of the held-out performance estimates.
 ```{r}
 metrics_kfold_2 <- 
 ```
@@ -177,7 +179,7 @@ Build a recipe with the following specifications:
 
 - Use `cigs` as the outcome variable regressed on `craving`.  
 - Set up the outcome as a factor with the positive class ("yes") as the second level.
-- **Take appropriate normalizing steps for `craving` to be able to fit KNN requirements.**
+- Use the same numeric transformation of craving as before
 
 
 ```{r}
@@ -189,7 +191,7 @@ Tune the model with bootstrapping for cross-validation. Use KNN classification a
 tune_boot_1 <- 
 ```
 
-Examine performance estimates. Print the average performance for each configuration with the `collect_metrics()` function and the `summarize = TRUE` argument. Remember that you will now see one estimate per hyperparameter value, averaged across bootstraps.
+Examine performance estimates across the OOB held-out sets. Print the average performance for each configuration with the `collect_metrics()` function and the `summarize = TRUE` argument. Remember that you will now see one estimate per hyperparameter value, averaged across bootstraps.
 ```{r }
 
 ```
@@ -219,7 +221,7 @@ Build a second recipe with the following specifications:
 - Apply dummy coding.
 - Create an interaction between `stressful_event` and `lag`.
 - Remove the `subid` variable with `step_rm()`
-- **Take appropriate normalizing steps for numeric predictors to be able to fit KNN requirements.**
+- **Take appropriate scaling steps for features to be able to fit KNN requirements.**
 
 ```{r}
 rec_boot_2 <- 
@@ -269,7 +271,7 @@ Fit the first set of models with grouped k-fold cross-validation. Use logistic r
 fits_group_kfold_1 <- 
 ```
 
-Examine performance estimates. Use the `collect_metrics()` function to make a table of the cross-validated results.
+Examine performance estimates. Use the `collect_metrics()` function to make a table of the held-out performance estimates.
 ```{r}
 metrics_group_kfold_1 <- 
 ```
@@ -291,7 +293,7 @@ Fit the second model with grouped k-fold cross-validation. Use logistic regressi
 fits_group_kfold_2 <- 
 ```
 
-Examine performance estimates. Use the `collect_metrics()` function to make a table of the cross-validated results.
+Examine performance estimates. Use the `collect_metrics()` function to make a table of the held-out performance estimates.
 ```{r}
 metrics_group_kfold_2 <- 
 ```
@@ -313,8 +315,8 @@ Look back at your two average performance estimates for each model configuration
 *Type your response here*
 
 
-## Save & knit
+## Save & render 
 
-Save this .qmd file with your last name at the end (e.g., `hw_unit_5_resampling_wyant`). Make sure you changed "Your name here" at the top of the file to be your own name. Knit the file to .html, and upload the knitted file to Canvas. 
+Save this .qmd file with your last name at the end (e.g., `hw_unit_5_resampling_wyant`). Make sure you changed "Your name here" at the top of the file to be your own name. Render the file to .html, and upload the html file to Canvas. 
 
 **Way to go!!**
