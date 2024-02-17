@@ -4,44 +4,1232 @@
 
 **Learning Objectives**
 
-* Subsetting approaches: Forward, Backward, Best Subset (covered in reading only)
-* Cost and Loss functions
-  * What are they and how are they used
-  * What are the specific formulas for linear model, logistic regression, and variants of glmnet (ridge, LASSO, full elasticnet)
-* What is regularization
-  * What are its benefits?
-  * What are its costs?
-* How does lambda affect bias-variance trade-off in glmnet
-* What does alpha do?
-* Feature engineering approaches for dimensionality reduction: PCA (covered in reading only)
-* Other algorithms that do feature selection/dimensionality reduction: PCR and PLS (covered in reading only)
-* Contrasts of PCA, PCR, PLS, and glmnet/LASSO for dimensionality reduction (covered in reading only)
+- Subsetting approaches: Forward, Backward, Best Subset (covered in reading only)
+- Cost and Loss functions
+  - What are they and how are they used
+  - What are the specific formulas for linear model, logistic regression, and variants of glmnet (ridge, LASSO, full elasticnet)
+- What is regularization
+  - What are its benefits?
+  - What are its costs?
+- How does lambda affect bias-variance trade-off in glmnet
+- What does alpha do?
+- Feature engineering approaches for dimensionality reduction: PCA (covered in reading only)
+- Other algorithms that do feature selection/dimensionality reduction: PCR and PLS (covered in reading only)
+- Contrasts of PCA, PCR, PLS, and glmnet/LASSO for dimensionality reduction (covered in reading only)
 
 **Readings**
 
-* @ISL [Chapter 6, pp 225 - 267](https://dionysus.psych.wisc.edu/iaml/pdfs/ISLRv2.pdf)
+- @ISL [Chapter 6, pp 225 - 267](https://dionysus.psych.wisc.edu/iaml/pdfs/ISLRv2.pdf)
 
 **Lecture Videos**
 
-* [Lecture 1: An Introduction to Penalized/Regularized Algorithms]()
-* [Lecture 2: Cost Functions]()
-* [Lecture 3: Ridge Regression]()
-* [Lecture 4: LASSO]()
-* [Lecture 5: The Elastic net]()
-* [Lecture 6: Emprical Example - Many good predictors]()
-* [Lecture 7: Emprical Example - Good and zero predictors]()
-* [Lecture 8: Emprical Example - LASSO for covariate selection]()
+- [Lecture 1: An Introduction to Penalized/Regularized Algorithms]()
+- [Lecture 2: Cost Functions]()
+- [Lecture 3: Ridge Regression]()
+- [Lecture 4: LASSO]()
+- [Lecture 5: The Elastic net]()
+- [Lecture 6: Emprical Example - Many good predictors]()
+- [Lecture 7: Emprical Example - Good and zero predictors]()
+- [Lecture 8: Emprical Example - LASSO for covariate selection]()
 
-* [Discussion]()
+- [Discussion]()
 
 **Coding Assignment**
 
-* [data](homework/unit_6/ames_full_cln.csv)
-* [data dictionary](homework/unit_6/ames_data_dictionary)
-* [rmd shell](homework/unit_6/hw_unit_6_regularization.Rmd)
-* [fun_modeling.R](https://dionysus.psych.wisc.edu:5001/sharing/4KTOoge00)
-* [solution](homework/unit_6/key_unit_6_regularization.html) 
+- [data](homework/unit_6/ames_full_cln.csv)
+- [data dictionary](homework/unit_6/ames_data_dictionary)
+- [rmd shell](homework/unit_6/hw_unit_6_regularization.Rmd)
+- [fun_modeling.R](https://dionysus.psych.wisc.edu:5001/sharing/4KTOoge00)
+- [solution](homework/unit_6/key_unit_6_regularization.html) 
 
 
 Submit the application assignment [here](https://canvas.wisc.edu/courses/395546/assignments/2187691) and complete the [unit quiz](https://canvas.wisc.edu/courses/395546/quizzes/514047) by 8 pm on Wednesday, February 28th :w
 
+## Understanding Penalized/Regularized Statistical Algorithms
+
+Complex (e.g., flexible) models increase the chance of overfitting to the training set.  This leads to:
+
+- Poor prediction
+- Burdensome prediction models for implementation (need to measure lots of predictors)
+- Low power to test hypothesis about predictor effects
+
+Complex models are difficult to interpret
+
+-----
+
+Regularization is technique that:
+
+ - Reduces overfitting
+ - Allows for p >> n (!!!)
+ - May yield more interpretable models (LASSO, Elastic Net)
+ - May reduce implementation burden (LASSO, Elastic Net)
+
+-----
+
+Regularization does this by applying a penalty to the parametric model coefficients (parameter estimates)
+
+This constrains/shrinks these coefficients to yield a simpler/less overfit model
+
+Some types of penalties shrink the coefficients to zero (feature selection)
+
+We will consider three approaches to regularization
+
+- L2 (Ridge)
+- L1 (LASSO)
+- Elastic net
+
+These approaches are available for both regression and classification problems and for a variety of parametric statistical algorithms
+
+-----
+
+### Cost functions
+
+To understand regularization, we need to first explicitly consider **loss/cost functions** for the parametric statistical models we have been using.
+
+A **loss function** quantifies the error between a single predicted and observed outcome within some statistical model.  
+
+A **cost function** is simply the aggregate of the loss across all observations in the training sample.
+
+Optimization procedures (least squares, maximum likelihood, **gradient descent**) seek to determine a set of parameter estimates that minimize some specific cost function for the training sample.
+
+-----
+
+The cost function for the linear model is the mean squared error (squared loss): 
+
+$\frac{1}{n}\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}$
+
+No constraints or penalties are placed on the parameter estimates ($\beta_k$)
+
+They can take on any values with the only goal to minimize the MSE in the training sample
+
+-----
+
+The cost function for logistic regression is log loss:
+
+$\frac{1}{n}\sum_{i = 1}^{n} -Y_ilog(\hat{Y_i}) - (1-Y_i)log(1-\hat{Y_i})$
+
+where $Y_i$ is coded 0,1 and $\hat{Y_i}$ is the predicted probability that Y = 1
+
+```{r u6-understand-1, fig.align="center", echo = FALSE} 
+knitr::include_graphics("figs/unit5_log_loss.png")
+```
+
+Again, no constraints or penalties are placed on the parameter estimates ($\beta_k$)
+
+They can take on any values with the only goal to minimize the sum of the log loss in the training sample
+
+-----
+
+### Intuitions about Penalized Cost Functions and Regularization 
+
+This is an example from a series of wonderfully clear lectures in a [machine learning course](https://www.youtube.com/watch?v=PPLop4L2eGk&list=PLLssT5z_DsK-h9vYZkQkYNWcItqhlRJLN) by Andrew Ng in Coursera.
+
+- [Regularization: The Problem Of Overfitting](https://www.youtube.com/watch?v=u73PU6Qwl1I)
+- [Regularization: Cost Functions](https://www.youtube.com/watch?v=KvtGD37Rm5I)
+
+-----
+
+Lets imagine a training set:
+
+- House sale price predicted by house size
+- True DGP is quadratic.  Diminishing increase in sale price as size increases
+- N = 5 in training set
+
+```{r u6-understand-2, fig.align="center", echo=FALSE} 
+knitr::include_graphics("figs/unit5_ng1.png")
+```
+
+-----
+
+If we fit a linear model with size as the only predictor...
+
+$\hat{sale\_price_i} = \beta_0 + \beta_1 * size$
+
+In this training set, we might get the following model (in blue)
+
+This is a biased model (predicts too high for low and high house sizes; predicts too low for moderate size houses)
+
+If we took this model to new data from the same quadratic DGP, it would clearly not predict very well
+
+```{r  u6-understand-3, fig.align="center", echo=FALSE} 
+knitr::include_graphics("figs/unit5_ng2.png")
+```
+
+-----
+
+Lets consider the other extreme
+
+If we fit a 4th order polynomial model using size...
+
+$\hat{sale\_price_i} = \beta_0 + \beta_1 * size + \beta_2 * size^2 + \beta_3 * size^3 + \beta_4 * size^4$
+
+In this training set, we would get the following model (in blue)
+
+This is model is overfit to this training set.  It would not predict well in new data from the same quadratic DGP
+
+Also, the model would have high variance (if we estimated the parameters in another N = 5 training set, they would be very different)
+
+```{r  u6-understand-4, fig.align="center", echo=FALSE} 
+knitr::include_graphics("figs/unit5_ng3.png")
+```
+
+-----
+
+This problem with overfitting and variance isn't limited to polynomial regression.
+
+We would have the same problem (perfect fit in training with poor fit in new val data) if we predicted housing prices with many predictors when the training N = 5.  e.g.,
+
+$\hat{sale\_price_i} = \beta_0 + \beta_1 * size + \beta_2 * year\_built + \beta_3 * num\_garages + \beta_4 * quality$
+
+-----
+
+Obviously, the correct model to fit is a second order polynomial model with size
+
+$\hat{sale\_price_i} = \beta_0 + \beta_1 * size + \beta_2 * size^2$
+
+```{r  u6-understand-5, fig.align="center", echo=FALSE} 
+knitr::include_graphics("figs/unit5_ng4.png")
+```
+
+But we couldn't know this with real data because we wouldn't know the underlying DGP
+
+When we don't know the underlying DGP, we need to be able to consider potentially complex models with many predictors in some way that diminishes the potential problem with overfitting/model variance
+
+-----
+
+Lets consider this intuition:
+
+What if we still fit a fourth order polynomial but changed the cost function to penalize the absolute value of $\beta_3$ and $\beta_4$ parameter estimates?
+
+**Typical cost based on MSE/squared loss:**
+
+$\frac{1}{n}\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}$
+
+
+**Our new cost function:**
+
+$[\frac{1}{n}\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}] +  [1000 * \beta_3 + 1000 * \beta_4]$
+
+-----
+
+$[\frac{1}{n}\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}] + [1000 * \beta_3 + 1000 * \beta_4]$
+
+The only way to make the value of this new cost function small is to make $\beta_3$ and $\beta_4$ small
+
+If we made the penalty applied to $\beta_3$ and $\beta_4$ was large (e.g., 1000 as above), we will end up with the  parameter estimates for these two features at approximately 0.
+
+With a sufficient penalty applied, their parameter estimates will only change from zero to the degree that these changes accounted for a large enough drop in MSE to offset this penalty in the overall aggregate cost function.
+
+-----
+
+$[\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}] + 1000 * \beta_3 + 1000 * \beta_4$
+
+With this penalty in place, our final model might shift from the blue model to the pink model below.  The pink model is mostly quadratic but with a few extra "wiggles" if $\beta_3$ and $\beta_4$ are not exactly 0.
+
+```{r  u6-understand-6, fig.align="center", echo=FALSE} 
+knitr::include_graphics("figs/unit5_ng5.png")
+```
+
+-----
+
+Of course, we don't typically know in advance which parameter estimates to penalize. 
+
+Instead, we apply some penalty to all the parameter estimates (except $\beta_0$)
+
+This shrinks the parameter estimates for all the predictors to some degree
+
+However, predictors that do reduce MSE meaningfully will be "worth" including with non-zero parameter estimates
+
+You can also control the shrinkage by controlling the size of the penalty
+
+-----
+
+In general, regularization produces models that: 
+
+- Are simpler (e.g. smoother, smaller coefficients/parameter estimates)
+- Are less prone to overfitting
+- Allow for models with p >> n
+- Are sometimes more interpretable (LASSO, Elastic Net)
+
+These benefits are provided by the introduction of some bias into the parameter estimates
+
+This allows for a bias-variance trade-off where some bias is introduced for a big reduction in variance of model fit
+
+-----
+
+We will now consider three regularization approaches that introduce different types of penalties to shrink the parameter estimates
+
+- L2 (Ridge)
+- L1 (LASSO)
+- Elastic net
+
+These approaches are available for both regression and classification problems and for a variety of parametric statistical algorithms
+
+A fourth common regularized classification model (also sometimes used for regression) is the support vector machine (not covered in class but commonly used as well and easy to understand with this foundation)
+
+Each of these approaches uses a different specific penalty, which has implications for how the model performs in different settings
+
+## Ridge Regression
+
+The cost function for Ridge Regression is:
+
+$\frac{1}{n}([\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}] + [\:\lambda\sum_{j = 1}^{p} \beta_j^{2}\:])$
+It has two components:
+
+- Inside the left brackets is the SSE from linear regression
+- Inside the right brackets is the **Ridge penalty**.  This penalty:
+  - Includes the sum of the squared parameter estimates (excluding $\beta_0$).  Squaring removes the sign of these parameter estimates.
+  - This sum is multiplied by $\lambda$, a hyperparameter in Ridge regression.  Lambda allows us to tune the size of the penalty.
+  - This is an application of the L2 norm (matrix algebra) to the vector of parameter estimates
+
+-----
+
+$\frac{1}{n}([\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}] + [\:\lambda\sum_{j = 1}^{p} \beta_j^{2}\:])$
+
+`r colorize("What will happen to a Ridge regression model's parameter estimates and its performance (i.e., its bias & variance) as lambda increases/decreases?", "red")` 
+^[As lambda increases, the model becomes less flexible b/c its parameter estimates become constrained/shrunk.  This will increase bias but decrease variance for model performance.]
+
+
+`r colorize("What is the special case of Ridge regression when lambda = 0?", "red")` 
+^[The OLS regression is a special case where lambda = 0 (i.e., no penalty is applied).  This is the most flexible. It is unbiased but with higher variance than for non-zero values of lambda]
+
+-----
+
+Lets compare Ridge regression to OLS (ordinary least squares with squared loss cost function) linear regression
+
+- Ridge parameter estimates are biased but have lower variance (smaller SE) than OLS
+
+- Ridge may predict better in new data
+  - This depends on the value of $\lambda$ selected and its impact on bias-variance trade-off in Ridge regression vs. OLS
+  - There does exist a value of $\lambda$ for which Ridge predicts better than OLS in new data
+
+- Ridge regression (but not OLS) allows for p > (or even >>) than n
+
+- Ridge regression (but not OLS) accommodates highly correlated (or even perfectly multi-collinear) predictors
+
+- OLS (but not Ridge regression) is scale invariant
+  - You should scale (mean and standard deviation correct) predictors for use with Ridge regression
+
+-----
+
+$\frac{1}{n}([\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}] + [\:\lambda\sum_{j = 1}^{p} \beta_j^{2}\:])$
+
+`r colorize("Why does the scale of the predictors matter for Ridge regression?", "red")` 
+^[Predictors with bigger SDs will have smaller $\beta$s.  Therefore they will be less affected by the penalty.]
+
+- Unless the predictors are on the same scale to start, you should standardize them for all applications (regression and classification) of Ridge (and also LASSO and elastic net).  You can handle this during feature engineering in the recipe.
+
+
+## LASSO Regression
+LASSO is an acronym for Least Absolute Shrinkage and Selection Operator
+
+The cost function for LASSO Regression is:
+
+$\frac{1}{n}([\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}] + [\:\lambda\sum_{j = 1}^{p} |\beta_j|\:])$
+It has two components:
+
+- Inside the left brackets is the SSE from linear regression
+- Inside the right brackets is the **LASSO penalty**.  This penalty:
+  - Includes the sum of the absolute value of the parameter estimates (excluding $\beta_0$).  The absolute value removes the sign of these parameter estimates.
+  - This sum is multiplied by $\lambda$, a hyperparameter in LASSO regression.  Lambda allows us to tune the size of the penalty.
+  - This is an application of the L1 norm to the vector of parameter estimates
+
+### LASSO vs. Ridge Comparison
+
+With respect to the parameter estimates: 
+
+- LASSO yields sparse solution (some parameter estimates set to **exactly zero**)
+
+- Ridge tends to retain all predictors (parameter estimates don't get set to exactly zero)
+
+- LASSO selects one predictor among correlated group and sets others to zero
+
+- Ridge shrinks all parameter estimates for correlated predictors
+
+Ridge tends to outperform LASSO wrt prediction in new data.  There are cases where LASSO can predict better (most predictors have zero effect and only a few are non-zero) but even in those cases, Ridge is competitive.  
+
+-----
+
+Advantages of LASSO
+
+- Does feature selection (sets parameter estimates to exactly 0)
+  - Yields a sparse solution
+  - Sparse model is more interpretable?
+  - Sparse model is easier to implement? (fewer predictors included so don’t need to measure as many)
+
+- More robust to outliers (similar to LAD vs. OLS)
+
+- Tends to do better when there are a small number of robust predictors and the others are close to zero or zero
+
+-----
+
+Advantages of Ridge
+
+- Computationally superior (closed form solution vs. iterative;  Only one solution to minimize the cost function)
+- More robust to measurement error in predictors (remember no measurement error is an assumption for unbiased estimates in OLS regression)
+- Tends to do better when there are many predictors with large (and comparable) effects (i.e., most predictors are related to the outcome)
+
+
+
+## Elastic Net Regression
+
+The Elastic Net blends the L1 and L2 penalties to obtain the benefits of each of those approaches.
+
+We will use the implementation of the Elastic Net in [glmnet](https://cran.r-project.org/web/packages/glmnet/glmnet.pdf) in R.  
+
+You can also read additional [introductory documentation](https://cran.r-project.org/web/packages/glmnet/vignettes/glmnet.pdf) for this package
+
+-----
+
+In the Gaussian regression context, the Elastic Net cost function is:
+
+$\frac{1}{n}([\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}] + [\:\lambda (\alpha\sum_{j = 1}^{p} |\beta_j| + (1-\alpha)\sum_{j = 1}^{p} \beta_j^{2})\:])$
+
+This model has two hyper-parameters
+
+- $\lambda$ controls the degree of regularization as before
+- $\alpha$ is a "mixing" parameter that blends the degree of L1 and L2 contributions to the aggregate penalty. (Proportion of LASSO penalty)
+  - $\alpha$ = 1 results in the LASSO model
+  - $\alpha$ = 0 results in the Ridge model
+  - Intermediate values for $\alpha$ blend these penalties together proportionally to include more or less LASSO penalty
+
+
+As before (e.g., KNN), best values of $\lambda$ (and $\alpha$) can be selected using resampling using `tune_grid()`
+
+The grid needs to have crossed values of both `penalty` ($lambda$) and `mixture` ($alpha$) for glmnet
+
+  - Can use `expand_grid()`
+  - Only penalty is needed in grid if fitting a Ridge or LASSO model.
+
+
+## Empirical Examples
+
+```{r}
+#| include: false
+
+# set up environment.  Now hidden from view
+
+options(conflicts.policy = "depends.ok")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+tidymodels_conflictRules()
+
+library(tidyverse) # for general data wrangling
+library(tidymodels) # for modeling
+library(xfun, include.only = "cache_rds")
+
+cl <- parallel::makePSOCKcluster(parallel::detectCores(logical = FALSE))
+doParallel::registerDoParallel(cl)
+
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+
+theme_set(theme_classic())
+options(tibble.width = Inf)
+path_data <- "./data"
+
+rerun_setting <- FALSE 
+``` 
+
+
+### Many "good" but correlated predictors
+
+For the first example, we will simulate data with:
+
+- Many correlated predictors
+- All related to outcome
+- Get a small training sample
+- Get a big validation sample (for more precise evaluation of our fitted models)
+
+First we set the parameters for our simulation
+```{r}
+# set parameters
+n_cases_trn <- 100
+n_cases_val <- 1000
+n_x <- 20
+covs_x <- 50
+vars_x <- 100
+b_x <- rep(1, n_x) # one unit change in y for 1 unit change in x
+y_error <- 100
+```
+
+Then we draw samples from population
+```{r}
+set.seed(12345)
+mu <- rep(0, n_x)  # means for all variables = 0
+sigma <- matrix(covs_x, nrow = n_x, ncol = n_x)
+diag(sigma) <- vars_x  
+sigma
+
+data_trn <- MASS::mvrnorm(n = n_cases_trn, mu, sigma) |> 
+  magrittr::set_colnames(str_c("x_", 1:n_x)) |>
+  as_tibble() |> 
+  mutate(y = rnorm(n_cases_trn, (as.matrix(.) %*% b_x), y_error)) |> 
+  glimpse()
+
+data_val <- MASS::mvrnorm(n = n_cases_val, mu, sigma) |> 
+  magrittr::set_colnames(str_c("x_", 1:n_x)) |>
+  as_tibble() |> 
+  mutate(y = rnorm(n_cases_val, (as.matrix(.) %*% b_x), y_error))
+```
+
+-----
+
+Set up a tibble to track model performance in train and validation sets  (not evaluating the final model configuration) 
+
+```{r u6-examples-1-2}
+error_ex1 <- tibble(model = character(), rmse_trn = numeric(), rmse_val = numeric()) |> 
+  glimpse()
+```
+
+#### Fit a standard (OLS) linear regression
+
+Fit the linear model
+
+- No feature engineering needed. Can use raw predictors
+- No resampling needed b/c there are no hyperparameters
+
+```{r u6-examples-1-3}
+fit_lm <- 
+  linear_reg() |> 
+  set_engine("lm") |> 
+  fit(y ~ ., data = data_trn)
+
+fit_lm |> 
+  tidy() |> 
+  print()
+```
+
+-----
+
+Irreducible error was set by `y_error` (`r y_error`)
+
+- Overfit to train
+- Much worse in val
+```{r u6-examples-1-4}
+rmse_vec(truth = data_trn$y, 
+         estimate = predict(fit_lm, data_trn)$.pred)
+
+rmse_vec(truth = data_val$y, 
+         estimate = predict(fit_lm, data_val)$.pred)
+
+error_ex1 <- error_ex1 |> 
+  bind_rows(tibble(model = "linear model",                       
+                   rmse_trn = rmse_vec(truth = data_trn$y, 
+                                       estimate = predict(fit_lm, data_trn)$.pred),
+                   rmse_val = rmse_vec(truth = data_val$y, 
+                                        estimate = predict(fit_lm, data_val)$.pred)))
+```
+
+#### Fit LASSO
+
+LASSO, Ridge, and glmnet all need predictors on same scale to apply penalty consistently
+
+- Use `step_normalize()`.  This sets mean = 0, sd = 1
+- Can use same recipe for LASSO, Ridge, and glmnet
+- Can use same train and validate feature matrices as well
+- Added `glimpse_it` argument to `make_features()`
+  
+```{r u6-examples-1-5}
+rec <- recipe(y ~ ., data = data_trn) |> 
+  step_normalize(all_predictors())
+
+feat_trn <- rec |> 
+  make_features(data_trn, data_trn)
+
+feat_val <- rec |> 
+  make_features(data_trn, data_val, glimpse_it = FALSE)
+```
+
+-----
+
+Set up splits for resampling for tuning hyperparameters
+
+- Use bootstrap for more  precise estimation (even if more biased).  Good for selection
+- Can use same bootstrap splits for LASSO, Ridge, and glmnet
+```{r u6-examples-1-6}
+set.seed(20140102)
+splits_boot <- data_trn |> 
+   bootstraps(times = 100, strata = "y")  
+```
+
+-----
+
+Now onto the LASSO....
+
+We need to tune $\lambda$ (tidymodels calls this `penalty`)
+
+- $\alpha$ = 1 (tidymodels calls this `mixture`)
+- Set up grid with exponential values for `penalty`
+- `glmnet` uses warm starts so can fit lots of values for $\lambda$ quickly
+- Could also use `cv.glmnet()` directly in `glmnet` package to find good values.  See `get_lamdas()` in fun_modeling.R
+
+```{r u6-examples-1-7a}
+grid_penalty <- expand_grid(penalty = exp(seq(-4, 4, length.out = 500)))
+```
+
+```{r u6-examples-1-7}
+fits_lasso <- xfun::cache_rds({
+  
+  linear_reg(penalty = tune(), 
+               mixture = 1) |> 
+    set_engine("glmnet") |> 
+    tune_grid(preprocessor = rec, 
+              resamples = splits_boot, grid = grid_penalty, 
+              metrics = metric_set(rmse))
+
+},
+rerun = FALSE,
+dir = "cache/",
+file = "u6-examples-1-7.rds")
+```
+
+-----
+
+Evaluate model performance in validation sets (OOB)
+
+Make sure that you have hit a clear minimum (bottom of U or at least an asymptote)
+
+```{r u6-examples-1-8}
+plot_hyperparameters(fits_lasso, hp1 = "penalty", metric = "rmse")
+```
+
+-----
+
+Fit best configuration (i.e., best lambda) to full train set
+
+- Use `select_best()`
+- Don't forget to indicate which column ($penalty$)
+- Notice that LASSO sets some $\beta$ to 0 even though none are 0 in DGP
+```{r u6-examples-1-9}
+fit_lasso <-
+  linear_reg(penalty = select_best(fits_lasso)$penalty, 
+             mixture = 1) |>
+  set_engine("glmnet") |> 
+  fit(y ~ ., data = feat_trn)
+
+fit_lasso |> 
+  tidy() |> 
+  print()
+```
+
+-----
+
+Irreducible error was set by `y_error` (`r y_error`)
+
+- Somewhat overfit to train
+- Somewhat better in val
+```{r u6-examples-1-10}
+(error_ex1 <- error_ex1 |> 
+  bind_rows(tibble(model = "LASSO model",                       
+                   rmse_trn = rmse_vec(truth = feat_trn$y, 
+                                       estimate = predict(fit_lasso,
+                                                          feat_trn)$.pred),
+                   rmse_val = rmse_vec(truth = feat_val$y, 
+                                        estimate = predict(fit_lasso,
+                                                           feat_val)$.pred))))
+```
+
+#### Fit Ridge
+
+Fit Ridge algorithm
+
+- Tune $\lambda$ (`penalty`)
+- $\alpha$ = 0 (`mixture`)
+- Evaluate model configurations in OOB validation sets
+```{r u6-examples-1-11}
+grid_penalty <- expand_grid(penalty = exp(seq(-1, 7, length.out = 500)))
+
+fits_ridge <- xfun::cache_rds({
+  
+  linear_reg(penalty = tune(), 
+               mixture = 0) |> 
+    set_engine("glmnet") |> 
+    tune_grid(preprocessor = rec, 
+              resamples = splits_boot, grid = grid_penalty, 
+              metrics = metric_set(rmse))
+
+},
+rerun = FALSE,
+dir = "cache/",
+file = "u6-examples-1-11.rds")
+
+plot_hyperparameters(fits_ridge, hp1 = "penalty", metric = "rmse")
+```
+
+-----
+
+Fit best model configuration (i.e., best lambda) in full train set
+
+- Notice that no $\beta$ are exactly 0
+```{r u6-examples-1-12}
+fit_ridge <-
+  linear_reg(penalty = select_best(fits_ridge)$penalty, 
+             mixture = 0) |>
+  set_engine("glmnet") |> 
+  fit(y ~ ., data = feat_trn)
+
+fit_ridge |> 
+  tidy() |> 
+  print()
+```
+
+-----
+
+Irreducible error was set by `y_error` (`r y_error`)
+
+- Much less overfit to train
+- Still not bad in val
+```{r u6-examples-1-13}
+(error_ex1 <- error_ex1 |> 
+  bind_rows(tibble(model = "Ridge model",   
+                   rmse_trn = rmse_vec(truth = feat_trn$y, 
+                                       estimate = predict(fit_ridge,
+                                                          feat_trn)$.pred),
+                   rmse_val = rmse_vec(truth = feat_val$y, 
+                                        estimate = predict(fit_ridge,
+                                                           feat_val)$.pred))))
+```
+
+#### Fit glmnet
+
+Now we need to tune both
+
+- $\lambda$ (`penalty`)
+- $\alpha$ (`mixture`)
+- Typical to only evaluate a small number of $alpha$
+- Warm starts across $\lambda$ (but I don't think $\alpha$)
+
+```{r u6-examples-1-14a}
+grid_glmnet <- expand_grid(penalty = exp(seq(0, 6, length.out = 200)),
+                           mixture = seq(0, 1, length.out = 6))
+```
+
+```{r u6-examples-1-14}
+fits_glmnet <- xfun::cache_rds({
+  
+  linear_reg(penalty = tune(), 
+               mixture = tune()) |> 
+    set_engine("glmnet") |> 
+    tune_grid(preprocessor = rec, 
+              resamples = splits_boot, grid = grid_glmnet, 
+              metrics = metric_set(rmse))
+  
+},
+rerun = FALSE,
+dir = "cache/",
+file = "u6-examples-1-14.rds")
+```
+
+```{r u6-examples-1-15a}
+plot_hyperparameters(fits_glmnet, hp1 = "penalty", hp2 = "mixture", metric = "rmse")
+```
+
+-----
+
+Fit best configuration in full train set
+
+- Can use `select_best()` for both hyperparameters, separately
+- Ridge was best
+```{r u6-examples-1-15}
+select_best(fits_glmnet)
+
+fit_glmnet <-
+  linear_reg(penalty = select_best(fits_glmnet)$penalty, 
+             mixture = select_best(fits_glmnet)$mixture) |>
+  set_engine("glmnet") |> 
+  fit(y ~ ., data = feat_trn)
+
+fit_glmnet |> 
+  tidy() |> 
+  print()
+```
+
+-----
+
+A final comparison of training and val error for the four statistical algorithms
+```{r u6-examples-1-16}
+(error_ex1 <- error_ex1 |> 
+  bind_rows(tibble(model = "glmnet model",   
+                   rmse_trn = rmse_vec(truth = feat_trn$y, 
+                                       estimate = predict(fit_glmnet,
+                                                          feat_trn)$.pred),
+                   rmse_val = rmse_vec(truth = feat_val$y, 
+                                        estimate = predict(fit_glmnet,
+                                                           feat_val)$.pred))))
+```
+
+
+
+### Good and Zero Predictors
+For the second example, we will simulate data with:
+
+- Two sets of correlated predictors
+- First set related to outcome
+- Second set unrelated to outcome
+- Get a small training sample
+- Get a big val sample (for more precise estimates of performance of our fitted models)
+
+```{r u6-examples-2-1}
+#set parameters
+n_cases_trn <- 100
+n_cases_val <- 1000
+n_x <- 20
+covs_x <- 50
+vars_x <- 100
+b_x <- rep(c(1,0), each = n_x / 2)
+y_error <- 100
+
+#draw samples from population
+set.seed(2468)
+mu <- rep(0, n_x)  # means for all variables = 0
+sigma <- matrix(0, nrow = n_x, ncol = n_x)
+for (i in 1:(n_x/2)){
+  for(j in 1:(n_x/2)){
+    sigma[i, j] <- covs_x
+  }
+} 
+for (i in (n_x/2 + 1):n_x){
+  for(j in (n_x/2 + 1):n_x){
+    sigma[i, j] <- covs_x
+  }
+} 
+
+diag(sigma) <- vars_x  
+sigma
+
+data_trn <- MASS::mvrnorm(n = n_cases_trn, mu, sigma) |> 
+  magrittr::set_colnames(str_c("x_", 1:n_x)) |>
+  as_tibble() |> 
+  mutate(y = rnorm(n_cases_trn, (as.matrix(.) %*% b_x), y_error))
+
+data_val <- MASS::mvrnorm(n = n_cases_val, mu, sigma) |> 
+  magrittr::set_colnames(str_c("x_", 1:n_x)) |>
+  as_tibble() |> 
+  mutate(y = rnorm(n_cases_val, (as.matrix(.) %*% b_x), y_error))
+```
+
+-----
+
+Set up a tibble to track model performance in train and val
+```{r u6-examples-2-2}
+error_ex2 <- tibble(model = character(), rmse_trn = numeric(), rmse_val = numeric()) |> 
+  glimpse()
+```
+
+#### Fit a standard (OLS) linear regression
+
+Fit and evaluate the linear model
+```{r u6-examples-2-3}
+fit_lm <- 
+  linear_reg() |> 
+  set_engine("lm") |> 
+  fit(y ~ ., data = data_trn)
+
+fit_lm |> 
+  tidy() |> 
+  print(n = Inf)
+```
+
+-----
+
+Irreducible error was set by `y_error` (`r y_error`)
+
+- Very overfit to train
+- Very  poor performance in val
+```{r u6-examples-2-4}
+(error_ex2 <- error_ex2 |> 
+  bind_rows(tibble(model = "linear model",                       
+                   rmse_trn = rmse_vec(truth = data_trn$y, 
+                                       estimate = predict(fit_lm,
+                                                          data_trn)$.pred),
+                   rmse_val = rmse_vec(truth = data_val$y, 
+                                        estimate = predict(fit_lm,
+                                                           data_val)$.pred))))
+```
+
+#### Fit LASSO
+
+For all glmnet algorithms, set up:
+
+- Recipe
+- Feature matrices
+- Bootstraps for model configuration selection (tuning)
+```{r u6-examples-2-5}
+rec <- recipe(y ~ ., data = data_trn) |> 
+  step_normalize(all_predictors())
+
+feat_trn <- rec |> 
+  make_features(data_trn, data_trn, FALSE)
+
+feat_val <- rec |> 
+  make_features(data_trn, data_val, FALSE)
+
+set.seed(20140102)
+splits_boot <- data_trn |> 
+   bootstraps(times = 100, strata = "y") 
+```
+
+-----
+
+Tune $\lambda$ for LASSO
+
+```{r u6-examples-2-6a}
+grid_penalty <- expand_grid(penalty = exp(seq(-3, 4, length.out = 500)))
+```
+
+```{r u6-examples-2-6}
+fits_lasso <- xfun::cache_rds({
+  
+  linear_reg(penalty = tune(), 
+               mixture = 1) |> 
+    set_engine("glmnet") |> 
+    tune_grid(preprocessor = rec, 
+              resamples = splits_boot, grid = grid_penalty, 
+              metrics = metric_set(rmse))
+
+},
+rerun = FALSE,
+dir = "cache/",
+file = "u6-examples-2-6.rds")
+
+
+plot_hyperparameters(fits_lasso, hp1 = "penalty", metric = "rmse")
+```
+
+-----
+
+Fit Best LASSO to full training set
+
+- Notice the many $\beta$ = 0
+- It did set some of the "good" predictors to 0 as well
+```{r u6-examples-2-7}
+fit_lasso <-
+  linear_reg(penalty = select_best(fits_lasso)$penalty, 
+             mixture = 1) |>
+  set_engine("glmnet") |> 
+  fit(y ~ ., data = feat_trn)
+
+fit_lasso |> 
+  tidy() |> 
+  print()
+```
+
+-----
+
+Irreducible error was set by `y_error` (`r y_error`)
+
+- Somewhat overfit to train
+- Good in val
+```{r u6-examples-2-8}
+error_ex2 <- error_ex2 |> 
+  bind_rows(tibble(model = "LASSO model",                       
+                   rmse_trn = rmse_vec(truth = feat_trn$y, 
+                                       estimate = predict(fit_lasso,
+                                                          feat_trn)$.pred),
+                   rmse_val = rmse_vec(truth = feat_val$y, 
+                                        estimate = predict(fit_lasso,
+                                                           feat_val)$.pred)))
+```
+
+#### Fit Ridge
+
+Tune $\lambda$ for Ridge
+
+```{r u6-examples-2-9a}
+grid_penalty <- expand_grid(penalty = exp(seq(0, 7, length.out = 500)))
+```
+
+```{r u6-examples-2-9}
+fits_ridge <- xfun::cache_rds({
+  
+  linear_reg(penalty = tune(), 
+               mixture = 0) |> 
+    set_engine("glmnet") |> 
+    tune_grid(preprocessor = rec, 
+              resamples = splits_boot, grid = grid_penalty, 
+              metrics = metric_set(rmse))
+
+},
+rerun = FALSE,
+dir = "cache/",
+file = "u6-examples-2-9.rds")
+```
+
+```{r u6-examples-2-10a}
+plot_hyperparameters(fits_ridge, hp1 = "penalty", metric = "rmse")
+```
+
+-----
+
+Fit Best Ridge to full training set
+
+- Notice no $\beta$ = 0
+```{r u6-examples-2-10}
+fit_ridge <-
+  linear_reg(penalty = select_best(fits_ridge)$penalty, 
+             mixture = 0) |>
+  set_engine("glmnet") |> 
+  fit(y ~ ., data = feat_trn)
+
+fit_ridge |> 
+  tidy() |> 
+  print()
+```
+
+-----
+
+Irreducible error was set by `y_error` (`r y_error`)
+
+- Somewhat overfit to train
+- Still slightly better than LASSO in val
+```{r u6-examples-2-11}
+(error_ex2 <- error_ex2 |> 
+  bind_rows(tibble(model = "Ridge model",                       
+                   rmse_trn = rmse_vec(truth = feat_trn$y, 
+                                       estimate = predict(fit_ridge,
+                                                          feat_trn)$.pred),
+                   rmse_val = rmse_vec(truth = feat_val$y, 
+                                        estimate = predict(fit_ridge,
+                                                           feat_val)$.pred))))
+```
+
+#### Fit Complete glmnet
+
+Tune $\lambda$ and $\alpha$ for glmnet
+
+```{r u6-examples-2-12a}
+grid_glmnet <- expand_grid(penalty = exp(seq(0, 6, length.out = 200)),
+                           mixture = seq(0, 1, length.out = 6))
+```
+
+```{r u6-examples-2-12}
+fits_glmnet <- xfun::cache_rds({
+  
+  linear_reg(penalty = tune(), 
+               mixture = tune()) |> 
+    set_engine("glmnet") |> 
+    tune_grid(preprocessor = rec, 
+              resamples = splits_boot, grid = grid_glmnet, 
+              metrics = metric_set(rmse))
+
+},
+rerun = FALSE,
+dir = "cache/",
+file = "u6-examples-2-12.rds")
+```
+
+```{r u6-examples-2-13a}
+plot_hyperparameters(fits_glmnet, hp1 = "penalty", hp2 = "mixture", metric = "rmse")
+```
+
+-----
+
+Fit Best glmnet in full train set
+
+- Still Ridge (but won't always be)
+```{r u6-examples-2-13}
+select_best(fits_glmnet)
+
+fit_glmnet <-
+  linear_reg(penalty = select_best(fits_glmnet)$penalty, 
+             mixture = select_best(fits_glmnet)$mixture) |>
+  set_engine("glmnet") |> 
+  fit(y ~ ., data = feat_trn)
+
+fit_glmnet |> 
+  tidy() |> 
+  print(n = Inf)
+```
+
+-----
+
+Irreducible error was set by `y_error` (`r y_error`)
+
+- Somewhat overfit to train
+- Still not bad in validate
+```{r u6-examples-2-14}
+(error_ex1 <- error_ex1 |> 
+  bind_rows(tibble(model = "glmnet model",   
+                   rmse_trn = rmse_vec(truth = feat_trn$y, 
+                                       estimate = predict(fit_glmnet,
+                                                          feat_trn)$.pred),
+                   rmse_val = rmse_vec(truth = feat_val$y, 
+                                        estimate = predict(fit_glmnet,
+                                                           feat_val)$.pred))))
+```
+
+
+### LASSO for Feature (e.g., Covariate) Selection?
+
+Lets consider a typical explanatory setting in Psychology
+
+- A focal dichotomous IV (your experimental manipulation)
+- A number of covariates (some good, some bad)
+- A quantitative outcome (y)
+- Covariates are uncorrelated with IV b/c IV is manipulated
+
+Let's pretend the previous 20 `x`s were your covariates
+
+Let's add in an IV
+```{r u6-examples-3-1}
+eff_iv <- 0.5
+data_trn <- data_trn |> 
+  mutate(iv = rep(c(0,1), nrow(data_trn) / 2),
+         y = y + eff_iv * iv) |> 
+  glimpse()
+```
+
+-----
+
+What are your options to test `iv` prior to this course?
+
+- You want to use covariates to increase power 
+
+- BUT you don't know which covariates to use
+
+  - You might use all of them
+
+  - Or you might use none of them (a clear lost opportunity)
+
+  - Or you might hack it by using those increase your focal IV effect (very bad!)
+
+NOW, We might use the feature selection characteristics for LASSO to select which covariates are included.
+
+There are two possibilities that occur to me
+
+-----
+
+1.  Use LASSO to build best DGP for a covariates only model
+
+    - Bootstrap the full data set (train from above) to select the best value for $lambda$
+      - Could be liberal (more inclusive of covariates) using best performance in OOB (validation sets)
+      - Could be more conservative (fewer covariates) by using within 1 SE of best performance but less flexible (i.e., will set more parameter estimates to 0)
+      
+    - Follow up with a linear model (using $lm$), regressing y on $iv$ and covariates from LASSO that are non-zero
+
+```{r u6-examples-3-2}
+fit_lasso |> 
+  tidy() |> 
+  print()
+```
+
+  - You increased your best guess on covariates from 50% to 80%
+  - You will regress y on `iv` and the 8 covariates with non-zero effects
+
+-----
+
+2. Use LASSO to build best DGP including `iv` and covariates but don't penalize `iv`
+
+  - Look at `penalty.factor = rep(1, nvars)` argument in `glmnet()`
+  - Can fit LASSO with unbiased? estimate of `iv`
+  - Need to bootstrap for SE for `iv` (next unit)
+  - Only appropriate if IV is manipulated
+
+Should really conduct simulation study of both of these options (vs. all and no covariates).  I want to.  Want to do the study with me?
+
+
+## Ridge, LASSO, and Elastic net models for other Y distributions
+
+These penalties can be added to the cost functions of other generalized linear models to yield regularized/penalized versions of those models as well
+
+For example
+
+L1 penalized (LASSO) logistic regression (w/ labels coded 0,1):
+
+
+$\frac{1}{n}([\:\sum_{i = 1}^{n} -Y_ilog(\hat{Y_i}) - (1-Y_i)log(1-\hat{Y_i})\:]\:+\:[\:\lambda\sum_{j = 1}^{p} |\beta_j|\:]$
+
+For L2 penalized (Ridge) logistic regression (w/ labels coded 0,1)
+
+
+$\frac{1}{n}([\:\sum_{i = 1}^{n} -Y_ilog(\hat{Y_i}) - (1-Y_i)log(1-\hat{Y_i})\:]\:+\:[\:\lambda\sum_{j = 1}^{p} \beta_j^{2}\:]$
+
+
+`glmnet` implements: 
+
+- `family = c("gaussian", "binomial", "poisson", "multinomial", "cox", "mgaussian")`
+- Full range of $\alpha$ to mix two types of penalties
+
+
+
+## Discussion
+
+### Announcements
+
+- Midterm - application and conceptual parts
+
+- No lab this week
+
+- Can we have a midterm review session?
+
+- Workshops outside of class (simulations; use of CHTC)
+
+### Questions
+
+**General**
+
+- Resampling simulations (a work in progress; stay tuned for more text)
+- Reading csv files, classing factors, and `step_string2factor()` and `step_num2factor()`  (updated code in previous units and appendix 2)
+- Predictors vs. features and recipes
+
+**Stepwise questions**
+
+- Could you go over Forward, Backward, and Best Subset subsetting? I think I understand the algorithm they use, but I do not understand the penalty function they use for picking the "best" model. In the book, it looks like it uses R-squared to pick the best model, but wouldn't the full model always have the greatest R-squared?
+
+- I would like to hear your perspectives on forward and backward stepwise selection, and the cases we might use it for (if ever).
+
+- When do we want to apply a forward vs backward selection approach?
+
+- Training vs. val/val error in stepwise approaches.   
+
+- Use of AIC, BIC, Cp, and adjusted R2 vs. cross-validation
+
+**Cost functions and optimization algorithms**
+
+- What is Cost function
+
+- Cost function in ridge (L2) and LASSO (L1)
+
+- Since Ridge is the square version, is there cubic version of regularization?
+
+- In glmnet, the parameter lambda controls the amount of regularization applied to the coefficients in the model. Regularization shrinks the coefficients towards zero, which can help reduce overfitting by decreasing the variance of the model.  Could you please explain more about regularization shrinks the coefficients toward zero?
+
+- In optimization procedures, what are the maximum likelihood and the gradient descent? Where can we apply them?
+
+**LASSO, Ridge, and glmnet questions**
+
+- It seems like GLMNET is the best method to use, unless we have some computational concerns during implementation with big data, in that case LASSO would be preferred. Is it correct to assume that GLMNET will typically output parameter estimates that are shrunk over parameter estimates set to 0? 
+
+- I think I understand Ridge and LASSO relatively well, but I am unsure about what Elastic Net is really doing and its potential benefits.
+
+- The pros and cons of Lasso and Ridge vs. Elastic Net
+
+- I'm still a little confused as to why you would ever use Ridge or LASSO separately when you can just selectively use one or the other through elastic net. Wouldn't it make sense to just always use elastic net and then change the penalty accordingly for when you wanted to use a Ridge or LASSO regression approach?
+
+- A conceptual issue, but specifically related to the application assignment: When running the LASSO regression model in the application assignment, the best model ended up being the one with the highest lambda in the range of lambda values we tested. This made sense to me, in that it seemed like we needed a model that was much less flexible than OLS regression to address multicollinearity and overfitting. However, when running the elastic net regression model, the best model ended up being a pure ridge model (which made sense), but with the *lowest* lambda value in the range of lambda values we tested. Why would this be, when intuitively it seemed like (and the LASSO model suggested) there would be a lot of regularization needed to address multicollinearity and overfitting?
+
+
+
+**Explanatory goals**
+
+- In practice, what elements should be considered before selecting IVs and covariates?
+
+- If we only care about understanding the DGP for model configuration, and not making future predictions, how do we measure goodness of fit?
+
+- Can LASSO be used for variable selection when engaging in cross sectional data analysis to identify which variables in a large set of Xs are important for a particular outcome? 
+ 
+**Other questions**
+
+- How is the **curse of dimensionality** related to **multicollinearity** in high dimension feature space? Does it increase collinearity between predictors so that its hard to identify the best coefficient for the regression model?
+
+- What are the different underlying assumptions of all the mentioned approaches? 
+
+- Could you talk about when to use R-squared and when to use adjusted R-squared? 
+
+- When do you consider models more sparse? If some models have over 200 predictors, is it worth to drop 40 of them? Does that make the model more interpretable?
+
+- Can we examine our predictors in EDA and decide what penalties to apply to our predictors?
+
+- Is there some situation that OLS are more outstanding than others?
+
+- If possible, could you please share more about the branch-and-bound techniques? 
