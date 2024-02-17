@@ -45,8 +45,8 @@ editor_options:
 - [Lecture 5: K-fold Cross Validation Approaches](https://mediaspace.wisc.edu/media/iaml+unit+5-5/1_f60kfk66) ~ 21 mins
 - [Lecture 6: Repeated and Grouped K-fold Approaches](https://mediaspace.wisc.edu/media/iaml+unit+5-6/1_a6yo0euq) ~ 11 mins
 - [Lecture 7: Bootstrap Resampling](https://mediaspace.wisc.edu/media/iaml+unit+5-7/1_zijywf6b) ~ 11 mins 
-- [Lecture 8: Tuning Hyperparameters via Resampling]() 
-- [Lecture 9: Resampling for Both Model Selection and Evaluation]() 
+- [Lecture 8: Using Resampling to Select Best Model Configurations](https://mediaspace.wisc.edu/media/iaml+unit+5-8/1_0sxcqnj4) ~ 17 mins
+- [Lecture 9: Resampling for Both Model Selection and Evaluation](https://mediaspace.wisc.edu/media/iaml+unit+5-9/1_b8abgszd) ~ 11 mins
 - [Lecture 10: Nested Resampling]() 
 
 Post questions or discuss readings or lectures on Slack
@@ -1127,7 +1127,10 @@ Relevant comparisons, strengths/weaknesses for bootstrap for resampling
 In all of the previous examples, we have used various resampling methods only to evaluate the performance of a single model configuration in new data.  In these instances, we were treating the held-out sets as test sets.
 \
 \
-Resampling is also used to get held out performance estimates to select best model configurations.  **Best** means the model configuration that performs the best in new data and therefore is closest to the true DGP for the data
+Resampling is also used to get held out performance estimates to select best model configurations.  
+\
+\
+**Best** means the model configuration that performs the best in new data and therefore is closest to the true DGP for the data
 
 -----
 
@@ -1147,7 +1150,7 @@ We can simply get performance estimates for each configuration using one of the 
 
 -----
 
-One additional common scenario where you will do model selection across many model configurations is when "tuning" (picking) the best values for hyperparameters for a statistical algorithm (e.g., k in KNN).  
+One additional common scenario where you will do model selection across many model configurations is when "tuning" (i.e., selecting) the best values for hyperparameters for a statistical algorithm (e.g., k in KNN).  
 
 -----
 
@@ -1168,7 +1171,7 @@ We can use the same splits are established as before (`splits_boot`)
 \
 We need a slightly different recipe for KNN vs. logistic regression
 
-- We have to scale (lets range correct) the numeric predictors
+- We have to scale (lets range correct) the features 
 - No need to do this to the dummy features.  They are already range corrected
 
 ```{r}
@@ -1192,8 +1195,9 @@ hyper_grid
 ```
   
 -----  
-  
-- Model configurations are fit using `tune_grid()` 
+
+- When model configurations differ by features or statistical algorithms, we have to use `fit_resamples()` multiple times to estimate performance of those different configurations
+- Held out performance estimates for model configurations that differ by hyperparameter values are obtained in one step using `tune_grid()` 
 - We need to set `grid =` 
 ```{r fits_knn_boot}
 fits_knn_boot <- cache_rds(
@@ -1209,7 +1213,7 @@ fits_knn_boot <- cache_rds(
   },
   dir = "cache/",
   file = "fits_knn_boot",
-  rerun = FALSE)
+  rerun = rerun_setting)
 ```
 
 -----
@@ -1300,7 +1304,7 @@ Resampling methods can be used to get model performance estimates to **select** 
 
 - If you use your held-out resamples to select the best model among a number of model configurations then the same held-out resamples cannot also be used to evaluate the performance of that same best model
 
-- If it is, the performance metric will have 'optimization bias'.  To the degree that there is any noise (i.e., variance) in the measurement of performance, selecting the best model configuration will capitalize on this noise.
+- If it is, the performance metric will have **optimization bias**.  To the degree that there is any noise (i.e., variance) in the measurement of performance, selecting the best model configuration will capitalize on this noise.
 
 - You need to use one set of held out resamples (validation sets) to select the best model.  Then you need a DIFFERENT set of held out resamples (test sets) to evaluate that best model.   
 
@@ -1308,7 +1312,10 @@ Resampling methods can be used to get model performance estimates to **select** 
 
 There are two strategies for this: 
 
-- Strategy 1: First, hold out a test set for final/best model evaluation.  Then use one of the above resampling methods (single validation set approach, k-fold, or bootstrap) to select the best model configuration.  Bootstrap is likely best option b/c it is typically more precise (though biased)
+- Strategy 1: 
+    - First, hold out a test set for final/best model evaluation (using `initial_split()`).  
+    - Then use one of the above resampling methods (single validation set approach, k-fold, or bootstrap) to select the best model configuration.  
+    - Bootstrap is likely best option b/c it is typically more precise (though biased)
   
 - Strategy 2: Nested resampling.  More on this in a moment
 
@@ -1319,7 +1326,7 @@ Other Observations about Common Practices:
 - Simple resampling methods with the full sample (and no held-out test set) to both select AND evaluate are still common
 - Failure by some (even Kuhn) to appreciate the degree of optimization bias
 - Particular problem in Psychology because of small n (high variance in our performance metric)?
-- Can be fine if you just want to find the best model configuration but don't need to evaluate its performance rigorously
+- Can be fine if you just want to find the best model configuration but don't need to evaluate its performance rigorously (i.e., you don't really care that much about validity of your performance estimate of your final  model and are fine with it being a bit optimistic)
 
 -----
 
