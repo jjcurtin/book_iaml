@@ -469,7 +469,8 @@ The grid needs to have crossed values of both `penalty` ($lambda$) and `mixture`
 
 -----
 
-## Empirical Examples
+
+### Empirical Example 1: Many "good" but correlated predictors
 
 ```{r}
 #| include: false
@@ -497,22 +498,19 @@ path_data <- "./data"
 rerun_setting <- FALSE 
 ``` 
 
-
-### Many "good" but correlated predictors
-
 For the first example, we will simulate data with:
 
 - Many correlated predictors
 - All related to outcome
 - Get a small training sample
-- Get a big validation sample (for more precise evaluation of our fitted models)
+- Get a big test sample (for more precise estimate of model performance)
 
 -----
 
-First we set the parameters for our simulation
+First we set the predictors for our simulation
 ```{r}
 n_cases_trn <- 100
-n_cases_val <- 1000
+n_cases_test <- 1000
 n_x <- 20
 covs_x <- 50
 vars_x <- 100
@@ -530,28 +528,38 @@ sigma <- matrix(covs_x, nrow = n_x, ncol = n_x)
 diag(sigma) <- vars_x  
 sigma
 
-data_trn <- MASS::mvrnorm(n = n_cases_trn, mu, sigma) |> 
+x <- MASS::mvrnorm(n = n_cases_trn, mu, sigma) |> 
   magrittr::set_colnames(str_c("x_", 1:n_x)) |>
-  as_tibble() |> 
-  mutate(y = rnorm(n_cases_trn, (as.matrix(.) %*% b_x), y_error)) |> 
+  as_tibble()
+data_trn_1 <- x |> 
+  mutate(y = rowSums(t(t(x)*b_x)) + rnorm(n_cases_trn, 0, y_error)) |>  
   glimpse()
 
-data_val <- MASS::mvrnorm(n = n_cases_val, mu, sigma) |> 
+x <- MASS::mvrnorm(n = n_cases_test, mu, sigma) |> 
   magrittr::set_colnames(str_c("x_", 1:n_x)) |>
-  as_tibble() |> 
-  mutate(y = rnorm(n_cases_val, (as.matrix(.) %*% b_x), y_error))
+  as_tibble() 
+data_test_1 <- x |> 
+  mutate(y = rowSums(t(t(x)*b_x)) + rnorm(n_cases_test, 0, y_error))
 ```
 
 -----
 
-Set up a tibble to track model performance in train and validation sets  (No need for test because we are not evaluating the final model configuration) 
+Set up a tibble to track model performance in train, val, and test sets
 
-```{r u6-examples-1-2}
-error_ex1 <- tibble(model = character(), rmse_trn = numeric(), rmse_val = numeric()) |> 
+- We are using test to repeatedly to get rigorous held-out performance seperate from model selection process.  
+- Just for our understanding 
+- We would not choose a model configuration based on test set error.
+
+```{r}
+error_ex1 <- tibble(model = character(), 
+                    rmse_trn = numeric(), 
+                    rmse_test = numeric()) |> 
   glimpse()
 ```
 
-#### Fit a standard (OLS) linear regression
+-----
+
+### Fit a standard (OLS) linear regression
 
 Fit the linear model
 
@@ -559,14 +567,14 @@ Fit the linear model
 - No resampling needed b/c there are no hyperparameters
 
 ```{r u6-examples-1-3}
-fit_lm <- 
+fit_lm_1 <- 
   linear_reg() |> 
   set_engine("lm") |> 
-  fit(y ~ ., data = data_trn)
+  fit(y ~ ., data = data_trn_1)
 
-fit_lm |> 
+fit_lm_1 |> 
   tidy() |> 
-  print()
+  print(n = 21)
 ```
 
 -----
@@ -576,49 +584,61 @@ Irreducible error was set by `y_error` (`r y_error`)
 - Overfit to train
 - Much worse in val
 ```{r u6-examples-1-4}
-rmse_vec(truth = data_trn$y, 
-         estimate = predict(fit_lm, data_trn)$.pred)
+rmse_vec(truth = data_trn_1$y, 
+         estimate = predict(fit_lm_1, data_trn_1)$.pred)
+```
 
-rmse_vec(truth = data_val$y, 
-         estimate = predict(fit_lm, data_val)$.pred)
+
+```{r}
+rmse_vec(truth = data_test$y, 
+         estimate = predict(fit_lm_1, data_test_1)$.pred)
+```
+
+
+```{r}
+#| echo: false
 
 error_ex1 <- error_ex1 |> 
   bind_rows(tibble(model = "linear model",                       
-                   rmse_trn = rmse_vec(truth = data_trn$y, 
-                                       estimate = predict(fit_lm, data_trn)$.pred),
-                   rmse_val = rmse_vec(truth = data_val$y, 
-                                        estimate = predict(fit_lm, data_val)$.pred)))
+                   rmse_trn = rmse_vec(truth = data_trn_1$y, 
+                                       estimate = predict(fit_lm_1, data_trn_1)$.pred),
+                   rmse_test = rmse_vec(truth = data_test_1$y, 
+                                        estimate = predict(fit_lm_1, data_test_1)$.pred)))
 ```
 
-#### Fit LASSO
+-----
 
-LASSO, Ridge, and glmnet all need predictors on same scale to apply penalty consistently
+### Fit LASSO
 
-- Use `step_normalize()`.  This sets mean = 0, sd = 1
+LASSO, Ridge, and glmnet all need features on same scale to apply penalty consistently
+
+- Use `step_normalize()`.  This sets mean = 0, sd = 1 (NOTE: Bad name as it does NOT channge shape of distribution!)
 - Can use same recipe for LASSO, Ridge, and glmnet
 - Can use same train and validate feature matrices as well
-- Added `glimpse_it` argument to `make_features()`
   
-```{r u6-examples-1-5}
-rec <- recipe(y ~ ., data = data_trn) |> 
+```{r}
+rec_1 <- recipe(y ~ ., data = data_trn) |> 
   step_normalize(all_predictors())
 
-feat_trn <- rec |> 
-  make_features(data_trn, data_trn)
+rec_prep_1 <- rec_1 |> 
+  prep(data_trn_1)
 
-feat_val <- rec |> 
-  make_features(data_trn, data_val, glimpse_it = FALSE)
+feat_trn_1 <- rec_prep_1 |> 
+  bake(data_trn_1)
+
+feat_test_1 <- rec_prep_1 |> 
+  bake(data_test_1)
 ```
 
 -----
 
 Set up splits for resampling for tuning hyperparameters
 
-- Use bootstrap for more  precise estimation (even if more biased).  Good for selection
+- Use bootstrap for more precise estimation (even if more biased).  Good for selection
 - Can use same bootstrap splits for LASSO, Ridge, and glmnet
-```{r u6-examples-1-6}
+```{r}
 set.seed(20140102)
-splits_boot <- data_trn |> 
+splits_boot_1 <- data_trn |> 
    bootstraps(times = 100, strata = "y")  
 ```
 
@@ -633,24 +653,24 @@ We need to tune $\lambda$ (tidymodels calls this `penalty`)
 - `glmnet` uses warm starts so can fit lots of values for $\lambda$ quickly
 - Could also use `cv.glmnet()` directly in `glmnet` package to find good values.  See `get_lamdas()` in fun_modeling.R
 
-```{r u6-examples-1-7a}
-grid_penalty <- expand_grid(penalty = exp(seq(-4, 4, length.out = 500)))
+```{r}
+grid_penalty_lasso <- expand_grid(penalty = exp(seq(-4, 4, length.out = 500)))
 ```
 
-```{r u6-examples-1-7}
-fits_lasso <- xfun::cache_rds({
-  
+```{r}
+fits_lasso_1 <- xfun::cache_rds(
+  expr = {
   linear_reg(penalty = tune(), 
                mixture = 1) |> 
     set_engine("glmnet") |> 
-    tune_grid(preprocessor = rec, 
-              resamples = splits_boot, grid = grid_penalty, 
+    tune_grid(preprocessor = rec_1, 
+              resamples = splits_boot_1, grid = grid_penalty_lasso, 
               metrics = metric_set(rmse))
 
-},
-rerun = FALSE,
-dir = "cache/",
-file = "u6-examples-1-7.rds")
+   },
+   rerun = rerun_setting,
+   dir = "cache/006/",
+   file = "fits_lasso_1")
 ```
 
 -----
@@ -660,7 +680,7 @@ Evaluate model performance in validation sets (OOB)
 Make sure that you have hit a clear minimum (bottom of U or at least an asymptote)
 
 ```{r u6-examples-1-8}
-plot_hyperparameters(fits_lasso, hp1 = "penalty", metric = "rmse")
+plot_hyperparameters(fits_lasso_1, hp1 = "penalty", metric = "rmse")
 ```
 
 -----
@@ -669,17 +689,32 @@ Fit best configuration (i.e., best lambda) to full train set
 
 - Use `select_best()`
 - Don't forget to indicate which column ($penalty$)
-- Notice that LASSO sets some $\beta$ to 0 even though none are 0 in DGP
 ```{r u6-examples-1-9}
-fit_lasso <-
-  linear_reg(penalty = select_best(fits_lasso)$penalty, 
+fit_lasso_1 <-
+  linear_reg(penalty = select_best(fits_lasso_1)$penalty, 
              mixture = 1) |>
   set_engine("glmnet") |> 
-  fit(y ~ ., data = feat_trn)
+  fit(y ~ ., data = feat_trn_1)
+```
 
-fit_lasso |> 
+-----
+
+We can now use `tidy()` to look at the LASSO parameter estimates
+
+- `tidy()`  using `Matrix` package, which has conflicts with `tidyr`.  Load the package without those conflicting functions
+
+```{r}
+library(Matrix, exclude = c("expand", "pack", "unpack"))
+```
+
+Now call `tidy()`
+
+- Notice that LASSO sets some $\beta$ to 0 even though none are 0 in DGP
+- LASSO is not great at reproducing the DGP!
+```{r}
+fit_lasso_1 |> 
   tidy() |> 
-  print()
+  print(n = 21)
 ```
 
 -----
@@ -687,43 +722,51 @@ fit_lasso |>
 Irreducible error was set by `y_error` (`r y_error`)
 
 - Somewhat overfit to train
-- Somewhat better in val
-```{r u6-examples-1-10}
+- Somewhat better in test 
+```{r}
 (error_ex1 <- error_ex1 |> 
   bind_rows(tibble(model = "LASSO model",                       
-                   rmse_trn = rmse_vec(truth = feat_trn$y, 
-                                       estimate = predict(fit_lasso,
-                                                          feat_trn)$.pred),
-                   rmse_val = rmse_vec(truth = feat_val$y, 
-                                        estimate = predict(fit_lasso,
-                                                           feat_val)$.pred))))
+                   rmse_trn = rmse_vec(truth = feat_trn_1$y, 
+                                       estimate = predict(fit_lasso_1,
+                                                          feat_trn_1)$.pred),
+                   rmse_test = rmse_vec(truth = feat_test_1$y, 
+                                        estimate = predict(fit_lasso_1,
+                                                           feat_test_1)$.pred))))
 ```
 
-#### Fit Ridge
+-----
+
+### Fit Ridge
 
 Fit Ridge algorithm
 
 - Tune $\lambda$ (`penalty`)
+- May need to experiment to get right range of values for lambda
 - $\alpha$ = 0 (`mixture`)
 - Evaluate model configurations in OOB validation sets
-```{r u6-examples-1-11}
-grid_penalty <- expand_grid(penalty = exp(seq(-1, 7, length.out = 500)))
+```{r}
+grid_penalty_ridge <- expand_grid(penalty = exp(seq(-1, 7, length.out = 500)))
 
-fits_ridge <- xfun::cache_rds({
-  
-  linear_reg(penalty = tune(), 
+fits_ridge_1 <- xfun::cache_rds(
+  expr = {
+    linear_reg(penalty = tune(), 
                mixture = 0) |> 
     set_engine("glmnet") |> 
-    tune_grid(preprocessor = rec, 
-              resamples = splits_boot, grid = grid_penalty, 
+    tune_grid(preprocessor = rec_1, 
+              resamples = splits_boot_1, grid = grid_penalty_ridge, 
               metrics = metric_set(rmse))
 
-},
-rerun = FALSE,
-dir = "cache/",
-file = "u6-examples-1-11.rds")
+  },
+  rerun = rerun_setting,
+  dir = "cache/006/",
+  file = "fits_ridge_1")
+```
 
-plot_hyperparameters(fits_ridge, hp1 = "penalty", metric = "rmse")
+-----
+
+Review hyperparameter plot
+```{r}
+plot_hyperparameters(fits_ridge_1, hp1 = "penalty", metric = "rmse")
 ```
 
 -----
@@ -731,16 +774,17 @@ plot_hyperparameters(fits_ridge, hp1 = "penalty", metric = "rmse")
 Fit best model configuration (i.e., best lambda) in full train set
 
 - Notice that no $\beta$ are exactly 0
-```{r u6-examples-1-12}
-fit_ridge <-
-  linear_reg(penalty = select_best(fits_ridge)$penalty, 
+- Why are parameter estimates not near 1 for LASSO and Ridge?{.red}
+```{r}
+fit_ridge_1 <-
+  linear_reg(penalty = select_best(fits_ridge_1)$penalty, 
              mixture = 0) |>
   set_engine("glmnet") |> 
-  fit(y ~ ., data = feat_trn)
+  fit(y ~ ., data = feat_trn_1)
 
-fit_ridge |> 
+fit_ridge_1 |> 
   tidy() |> 
-  print()
+  print(n = 21)
 ```
 
 -----
@@ -748,17 +792,19 @@ fit_ridge |>
 Irreducible error was set by `y_error` (`r y_error`)
 
 - Much less overfit to train
-- Still not bad in val
-```{r u6-examples-1-13}
+- Still not bad in test 
+```{r}
 (error_ex1 <- error_ex1 |> 
   bind_rows(tibble(model = "Ridge model",   
-                   rmse_trn = rmse_vec(truth = feat_trn$y, 
-                                       estimate = predict(fit_ridge,
-                                                          feat_trn)$.pred),
-                   rmse_val = rmse_vec(truth = feat_val$y, 
-                                        estimate = predict(fit_ridge,
-                                                           feat_val)$.pred))))
+                   rmse_trn = rmse_vec(truth = feat_trn_1$y, 
+                                       estimate = predict(fit_ridge_1,
+                                                          feat_trn_1)$.pred),
+                   rmse_test = rmse_vec(truth = feat_test_1$y, 
+                                        estimate = predict(fit_ridge_1,
+                                                           feat_test_1)$.pred))))
 ```
+
+-----
 
 #### Fit glmnet
 
@@ -767,31 +813,33 @@ Now we need to tune both
 - $\lambda$ (`penalty`)
 - $\alpha$ (`mixture`)
 - Typical to only evaluate a small number of $alpha$
-- Warm starts across $\lambda$ (but I don't think $\alpha$)
+- Warm starts across $\lambda$
 
-```{r u6-examples-1-14a}
+```{r}
 grid_glmnet <- expand_grid(penalty = exp(seq(0, 6, length.out = 200)),
                            mixture = seq(0, 1, length.out = 6))
 ```
 
-```{r u6-examples-1-14}
-fits_glmnet <- xfun::cache_rds({
-  
-  linear_reg(penalty = tune(), 
+```{r}
+fits_glmnet_1 <- xfun::cache_rds(
+  expr = {
+    linear_reg(penalty = tune(), 
                mixture = tune()) |> 
     set_engine("glmnet") |> 
-    tune_grid(preprocessor = rec, 
-              resamples = splits_boot, grid = grid_glmnet, 
+    tune_grid(preprocessor = rec_1, 
+              resamples = splits_boot_1, grid = grid_glmnet, 
               metrics = metric_set(rmse))
   
-},
-rerun = FALSE,
-dir = "cache/",
-file = "u6-examples-1-14.rds")
+  },
+  rerun = rerun_setting,
+  dir = "cache/006/",
+  file = "fits_glmnet_1")
 ```
 
+-----
+
 ```{r u6-examples-1-15a}
-plot_hyperparameters(fits_glmnet, hp1 = "penalty", hp2 = "mixture", metric = "rmse")
+plot_hyperparameters(fits_glmnet_1, hp1 = "penalty", hp2 = "mixture", metric = "rmse")
 ```
 
 -----
@@ -799,59 +847,69 @@ plot_hyperparameters(fits_glmnet, hp1 = "penalty", hp2 = "mixture", metric = "rm
 Fit best configuration in full train set
 
 - Can use `select_best()` for both hyperparameters, separately
-- Ridge was best
-```{r u6-examples-1-15}
-select_best(fits_glmnet)
+- Ridge was best (but cool that glmnet could determine that empirically!)
+```{r}
+select_best(fits_glmnet_1)
 
-fit_glmnet <-
-  linear_reg(penalty = select_best(fits_glmnet)$penalty, 
-             mixture = select_best(fits_glmnet)$mixture) |>
+fit_glmnet_1 <-
+  linear_reg(penalty = select_best(fits_glmnet_1)$penalty, 
+             mixture = select_best(fits_glmnet_1)$mixture) |>
   set_engine("glmnet") |> 
-  fit(y ~ ., data = feat_trn)
-
-fit_glmnet |> 
-  tidy() |> 
-  print()
+  fit(y ~ ., data = feat_trn_1)
 ```
 
 -----
 
-A final comparison of training and val error for the four statistical algorithms
-```{r u6-examples-1-16}
+
+```{r}
+fit_glmnet_1 |> 
+  tidy() |> 
+  print(n = 21)
+```
+
+-----
+
+A final comparison of training and test error for the four statistical algorithms
+```{r}
 (error_ex1 <- error_ex1 |> 
   bind_rows(tibble(model = "glmnet model",   
-                   rmse_trn = rmse_vec(truth = feat_trn$y, 
-                                       estimate = predict(fit_glmnet,
-                                                          feat_trn)$.pred),
-                   rmse_val = rmse_vec(truth = feat_val$y, 
-                                        estimate = predict(fit_glmnet,
-                                                           feat_val)$.pred))))
+                   rmse_trn = rmse_vec(truth = feat_trn_1$y, 
+                                       estimate = predict(fit_glmnet_1,
+                                                          feat_trn_1)$.pred),
+                   rmse_test = rmse_vec(truth = feat_test_1$y, 
+                                        estimate = predict(fit_glmnet_1,
+                                                           feat_test_1)$.pred))))
 ```
 
 
+-----
 
-### Good and Zero Predictors
+## Empirical Example 2: Good and Zero Predictors
+
 For the second example, we will simulate data with:
 
 - Two sets of correlated predictors
 - First set related to outcome
 - Second set unrelated to outcome
 - Get a small training sample
-- Get a big val sample (for more precise estimates of performance of our fitted models)
+- Get a big test sample (for more precise estimates of performance of our model configurations)
 
-```{r u6-examples-2-1}
-#set parameters
+-----
+
+Set up simulation parameters 
+```{r}
 n_cases_trn <- 100
-n_cases_val <- 1000
+n_cases_test <- 1000
 n_x <- 20
-covs_x <- 50
+covs_x <- 50 
 vars_x <- 100
 b_x <- rep(c(1,0), each = n_x / 2)
 y_error <- 100
+```
 
-#draw samples from population
-set.seed(2468)
-mu <- rep(0, n_x)  # means for all variables = 0
+```{r}
+mu <- rep(0, n_x)  
+
 sigma <- matrix(0, nrow = n_x, ncol = n_x)
 for (i in 1:(n_x/2)){
   for(j in 1:(n_x/2)){
@@ -865,39 +923,51 @@ for (i in (n_x/2 + 1):n_x){
 } 
 
 diag(sigma) <- vars_x  
-sigma
+```
 
-data_trn <- MASS::mvrnorm(n = n_cases_trn, mu, sigma) |> 
-  magrittr::set_colnames(str_c("x_", 1:n_x)) |>
-  as_tibble() |> 
-  mutate(y = rnorm(n_cases_trn, (as.matrix(.) %*% b_x), y_error))
+-----
 
-data_val <- MASS::mvrnorm(n = n_cases_val, mu, sigma) |> 
+Simulate predictors and Y
+```{r}
+set.seed(2468)
+
+x <- MASS::mvrnorm(n = n_cases_trn, mu, sigma) |> 
   magrittr::set_colnames(str_c("x_", 1:n_x)) |>
-  as_tibble() |> 
-  mutate(y = rnorm(n_cases_val, (as.matrix(.) %*% b_x), y_error))
+  as_tibble()
+data_trn_2 <- x |> 
+  mutate(y = rowSums(t(t(x)*b_x)) + rnorm(n_cases_trn, 0, y_error)) |>  
+  glimpse()
+
+x <- MASS::mvrnorm(n = n_cases_test, mu, sigma) |> 
+  magrittr::set_colnames(str_c("x_", 1:n_x)) |>
+  as_tibble()
+data_test_2 <- x |> 
+  mutate(y = rowSums(t(t(x)*b_x)) + rnorm(n_cases_test, 0, y_error)) |>  
+  glimpse()
 ```
 
 -----
 
 Set up a tibble to track model performance in train and val
 ```{r u6-examples-2-2}
-error_ex2 <- tibble(model = character(), rmse_trn = numeric(), rmse_val = numeric()) |> 
+error_ex2 <- tibble(model = character(), rmse_trn = numeric(), rmse_test = numeric()) |> 
   glimpse()
 ```
+
+-----
 
 #### Fit a standard (OLS) linear regression
 
 Fit and evaluate the linear model
-```{r u6-examples-2-3}
-fit_lm <- 
+```{r}
+fit_lm_2 <- 
   linear_reg() |> 
   set_engine("lm") |> 
-  fit(y ~ ., data = data_trn)
+  fit(y ~ ., data = data_trn_2)
 
-fit_lm |> 
+fit_lm_2 |> 
   tidy() |> 
-  print(n = Inf)
+  print(n = 21)
 ```
 
 -----
@@ -905,19 +975,21 @@ fit_lm |>
 Irreducible error was set by `y_error` (`r y_error`)
 
 - Very overfit to train
-- Very  poor performance in val
-```{r u6-examples-2-4}
+- Very poor performance in test 
+```{r}
 (error_ex2 <- error_ex2 |> 
   bind_rows(tibble(model = "linear model",                       
-                   rmse_trn = rmse_vec(truth = data_trn$y, 
-                                       estimate = predict(fit_lm,
-                                                          data_trn)$.pred),
-                   rmse_val = rmse_vec(truth = data_val$y, 
-                                        estimate = predict(fit_lm,
-                                                           data_val)$.pred))))
+                   rmse_trn = rmse_vec(truth = data_trn_2$y, 
+                                       estimate = predict(fit_lm_2,
+                                                          data_trn_2)$.pred),
+                   rmse_test = rmse_vec(truth = data_test_2$y, 
+                                        estimate = predict(fit_lm_2,
+                                                           data_test_2)$.pred))))
 ```
 
-#### Fit LASSO
+-----
+
+### Fit LASSO
 
 For all glmnet algorithms, set up:
 
@@ -925,17 +997,20 @@ For all glmnet algorithms, set up:
 - Feature matrices
 - Bootstraps for model configuration selection (tuning)
 ```{r u6-examples-2-5}
-rec <- recipe(y ~ ., data = data_trn) |> 
+rec_2 <- recipe(y ~ ., data = data_trn_2) |> 
   step_normalize(all_predictors())
 
-feat_trn <- rec |> 
-  make_features(data_trn, data_trn, FALSE)
+rec_prep_2 <- rec_2 |> 
+  prep(data_trn_2)
 
-feat_val <- rec |> 
-  make_features(data_trn, data_val, FALSE)
+feat_trn_2 <- rec_prep_2 |> 
+  bake(data_trn_2)
+
+feat_test_2 <- rec_prep_2 |> 
+  bake(data_test_2)
 
 set.seed(20140102)
-splits_boot <- data_trn |> 
+splits_boot_2 <- data_trn_2 |> 
    bootstraps(times = 100, strata = "y") 
 ```
 
@@ -943,27 +1018,29 @@ splits_boot <- data_trn |>
 
 Tune $\lambda$ for LASSO
 
-```{r u6-examples-2-6a}
-grid_penalty <- expand_grid(penalty = exp(seq(-3, 4, length.out = 500)))
-```
+- We can use sample penalty grids from earlier example because sample size and number of features hasnt changed so likely still good
 
-```{r u6-examples-2-6}
-fits_lasso <- xfun::cache_rds({
-  
-  linear_reg(penalty = tune(), 
+```{r}
+fits_lasso_2 <- xfun::cache_rds(
+  expr = {
+    linear_reg(penalty = tune(), 
                mixture = 1) |> 
     set_engine("glmnet") |> 
-    tune_grid(preprocessor = rec, 
-              resamples = splits_boot, grid = grid_penalty, 
+    tune_grid(preprocessor = rec_2, 
+              resamples = splits_boot_2, 
+              grid = grid_penalty_lasso, 
               metrics = metric_set(rmse))
 
-},
-rerun = FALSE,
-dir = "cache/",
-file = "u6-examples-2-6.rds")
+  },
+  rerun = rerun_setting,
+  dir = "cache/006/",
+  file = "fits_lasso_2")
+```
 
+-----
 
-plot_hyperparameters(fits_lasso, hp1 = "penalty", metric = "rmse")
+```{r}
+plot_hyperparameters(fits_lasso_2, hp1 = "penalty", metric = "rmse")
 ```
 
 -----
@@ -972,16 +1049,16 @@ Fit Best LASSO to full training set
 
 - Notice the many $\beta$ = 0
 - It did set some of the "good" predictors to 0 as well
-```{r u6-examples-2-7}
-fit_lasso <-
-  linear_reg(penalty = select_best(fits_lasso)$penalty, 
+```{r}
+fit_lasso_2 <-
+  linear_reg(penalty = select_best(fits_lasso_2)$penalty, 
              mixture = 1) |>
   set_engine("glmnet") |> 
-  fit(y ~ ., data = feat_trn)
+  fit(y ~ ., data = feat_trn_2)
 
-fit_lasso |> 
+fit_lasso_2 |> 
   tidy() |> 
-  print()
+  print(n = 21)
 ```
 
 -----
@@ -990,29 +1067,27 @@ Irreducible error was set by `y_error` (`r y_error`)
 
 - Somewhat overfit to train
 - Good in val
-```{r u6-examples-2-8}
-error_ex2 <- error_ex2 |> 
+```{r}
+(error_ex2 <- error_ex2 |> 
   bind_rows(tibble(model = "LASSO model",                       
-                   rmse_trn = rmse_vec(truth = feat_trn$y, 
-                                       estimate = predict(fit_lasso,
-                                                          feat_trn)$.pred),
-                   rmse_val = rmse_vec(truth = feat_val$y, 
-                                        estimate = predict(fit_lasso,
-                                                           feat_val)$.pred)))
+                   rmse_trn = rmse_vec(truth = feat_trn_2$y, 
+                                       estimate = predict(fit_lasso_2,
+                                                          feat_trn_2)$.pred),
+                   rmse_test = rmse_vec(truth = feat_test_2$y, 
+                                        estimate = predict(fit_lasso_2,
+                                                           feat_test_2)$.pred))))
 ```
 
 #### Fit Ridge
 
 Tune $\lambda$ for Ridge
 
-```{r u6-examples-2-9a}
-grid_penalty <- expand_grid(penalty = exp(seq(0, 7, length.out = 500)))
-```
+- can use ridge penalty grid from example 1
 
 ```{r u6-examples-2-9}
-fits_ridge <- xfun::cache_rds({
-  
-  linear_reg(penalty = tune(), 
+fits_ridge <- xfun::cache_rds(
+  expr = {
+    linear_reg(penalty = tune(), 
                mixture = 0) |> 
     set_engine("glmnet") |> 
     tune_grid(preprocessor = rec, 
@@ -1021,7 +1096,7 @@ fits_ridge <- xfun::cache_rds({
 
 },
 rerun = FALSE,
-dir = "cache/",
+dir = "cache/006/",
 file = "u6-examples-2-9.rds")
 ```
 
@@ -1058,9 +1133,9 @@ Irreducible error was set by `y_error` (`r y_error`)
                    rmse_trn = rmse_vec(truth = feat_trn$y, 
                                        estimate = predict(fit_ridge,
                                                           feat_trn)$.pred),
-                   rmse_val = rmse_vec(truth = feat_val$y, 
+                   rmse_test = rmse_vec(truth = feat_test$y, 
                                         estimate = predict(fit_ridge,
-                                                           feat_val)$.pred))))
+                                                           feat_test)$.pred))))
 ```
 
 #### Fit Complete glmnet
@@ -1084,7 +1159,7 @@ fits_glmnet <- xfun::cache_rds({
 
 },
 rerun = FALSE,
-dir = "cache/",
+dir = "cache/006/",
 file = "u6-examples-2-12.rds")
 ```
 
@@ -1123,9 +1198,9 @@ Irreducible error was set by `y_error` (`r y_error`)
                    rmse_trn = rmse_vec(truth = feat_trn$y, 
                                        estimate = predict(fit_glmnet,
                                                           feat_trn)$.pred),
-                   rmse_val = rmse_vec(truth = feat_val$y, 
+                   rmse_test = rmse_vec(truth = feat_test$y, 
                                         estimate = predict(fit_glmnet,
-                                                           feat_val)$.pred))))
+                                                           feat_test)$.pred))))
 ```
 
 
