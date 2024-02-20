@@ -36,6 +36,9 @@ Let's get started!
 ### Handle conflicts
 ```{r}
 
+
+# We also will need to resolve a new conflict using the following code
+conflictRules("Matrix", mask.ok = c("expand", "pack", "unpack"))
 ```
 
 ### Load required packages 
@@ -71,9 +74,14 @@ Read in the `ames_full_cln.csv` data file
 data_all <- 
 ```
 
-### Set classes
+### Set variable classes
 
-Set all variables to factor or numeric classes. Here is where you will also want to explicitly set factor levels for those with low frequency count levels (e.g., `neighbohood`, `ms_sub_class`)
+Set all variables to factor or numeric classes. Here is where you will also want to explicitly set factor levels for those with low frequency count levels (e.g., `neighbohood`, `ms_sub_class`) and do any ordering of factor levels.
+
+```{r}
+
+```
+
 
 ## Set up splits
 
@@ -116,8 +124,18 @@ You will build one recipe that can be used across three model fits. Please follo
 * Apply dummy coding to all factor predictors
 
 
+
 ```{r recipe}
 rec <- 
+```
+
+## Create error tracking tibble
+
+```{r}
+track_rmse <- tibble(model = character(),
+                     rmse_trn = numeric(),
+                     rmse_test = numeric(),
+                     n_features = numeric())
 ```
 
 -----
@@ -126,21 +144,47 @@ rec <-
 
 ### Fit a regression model in the full training set
 
-No resampling is needed because there are no hyperparameters to tune.
+Make a feature matrix for training data and for test data.
+```{r}
+
+```
+
+Fit linear regression model. No resampling is needed because there are no hyperparameters to tune.
 ```{r}
 fit_linear <- 
 ```
 
 ### Get RMSE in train & test 
 
-Use `rmse_vec()` to get error in data_trn
-```{r}
+Use `rmse_vec()` to get error in `feat_trn`  
 
+*Notice the warnings we get when making these predictions. R is telling us that our models are rank-deficient - this means that this model may not have determined a unique set of parameter estimates to minimize the cost function. This can occur for a variety of reasons, some of which are real problems and other time for reasons that are not a problem. For now continue on!*
+```{r}
+lin_trn_rmse <- 
 ```
 
-Use `rmse_vec()` to get error in data_test
+Use `rmse_vec()` to get error in `feat_test`
 ```{r}
+lin_test_rmse <- 
+```
 
+Get number of features
+```{r}
+lin_n_feat <- fit_linear |> 
+  tidy() |> 
+  filter(estimate != 0 & term != "(Intercept)") |> 
+  nrow()
+```
+
+Add to tracking tibble
+```{r}
+track_rmse <- add_row(track_rmse,
+                      model = "OLS",
+                      rmse_trn = lin_trn_rmse,
+                      rmse_test = lin_test_rmse,
+                      n_features = lin_n_feat)
+
+track_rmse
 ```
 
 How does performance compare in training and test? Type your response between the asterisks.
@@ -155,7 +199,7 @@ How does performance compare in training and test? Type your response between th
 
 In the LASSO, the mixture hyperparameter ($\alpha$) will be set to 1, but we'll need to tune the penalty hyperparameter ($\lambda$). 
 ```{r}
-grid_penalty <- expand_grid(penalty = exp(seq(-4, 4, length.out = 25)))
+grid_penalty <- expand_grid(penalty = exp(seq(-6, 8, length.out = 500)))
 ```
 
 ### Tune a LASSO regression
@@ -185,23 +229,36 @@ fit_lasso <-
 
 ```
 
-How many features were retained (i.e., parameter estimates not dropped to zero) in this model? How does this compare to the OLS linear regression? Type your response between the asterisks.
-
-*Type your response here*
 
 ### Get RMSE in train & test 
 
-Use `rmse_vec()` to get error in data_trn
+Use `rmse_vec()` to get error in `feat_trn`
 ```{r}
 
 ```
 
-Use `rmse_vec()` to get error in data_test
+Use `rmse_vec()` to get error in `feat_test`
 ```{r}
 
 ```
+
+Get number of features
+```{r}
+
+```
+
+
+Add to `track_rmse`
+```{r}
+
+```
+
 
 How does performance compare in training and test for LASSO? Type your response between the asterisks.
+
+*Type your response here*
+
+How many features were retained (i.e., parameter estimates not dropped to zero) in this model? How does this compare to the OLS linear regression? Type your response between the asterisks.
 
 *Type your response here*
 
@@ -213,11 +270,11 @@ How does performance compare in training and test for LASSO? Type your response 
 
 Now we'll need to tune both the mixture hyperparameter ($\alpha$) and the penalty hyperparameter ($\lambda$). 
 ```{r}
-grid_glmnet <- expand_grid(penalty = exp(seq(-4, 4, length.out = 25)),
-                           mixture = seq(0, 1, length.out = 6))
+grid_glmnet <- expand_grid(penalty = exp(seq(-10, 11, length.out = 250)),
+                           mixture = seq(0, 1, length.out = 11))
 ```
 
-### Tune a LASSO regression
+### Tune an elasticnet regression
 
 Use `linear_reg()`, `set_engine("glmnet")`, and `tune_grid()` to fit your LASSO models.
 ```{r}
@@ -244,26 +301,39 @@ fit_glmnet <-
 
 ```
 
-How many features were retained (i.e., parameter estimates not dropped to zero) in this model? How does this compare to the LASSO? Type your response between the asterisks.
-
-*Type your response here*
 
 
 ### Get RMSE in train & test  
 
-Use `rmse_vec()` to get error in `data_trn`
+Use `rmse_vec()` to get error in `feat_trn`
 ```{r}
 
 ```
 
-Use `rmse_vec()` to get error in `data_test`
+Use `rmse_vec()` to get error in `feat_test`
 ```{r}
 
 ```
 
-How does performance compare in training and test for the glmnet? Type your response between the asterisks.
+Get number of features
+```{r}
+
+```
+
+
+Add to `track_rmse`
+```{r}
+
+```
+
+How does performance compare in training and test for LASSO? Type your response between the asterisks.
 
 *Type your response here*
+
+How many features were retained (i.e., parameter estimates not dropped to zero) in this model? How does this compare to the OLS linear regression? Type your response between the asterisks.
+
+*Type your response here*
+
 
 Looking back across the OLS linear regression, the LASSO regression, and the elastic net regression, what comparisons can you make about performance in training, performance in test, evidence of overfitting, etc.? Which model configuration would you select and why? Type your response between the asterisks.
 
