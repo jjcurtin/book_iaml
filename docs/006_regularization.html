@@ -697,7 +697,12 @@ Each of these approaches uses a different specific penalty, which has implicatio
 <br>
 </li>
 </ul>
-<p>This penalty: - Includes the sum of the squared parameter estimates (excluding <span class="math inline">\(\beta_0\)</span>). Squaring removes the sign of these parameter estimates. - This sum is multiplied by <span class="math inline">\(\lambda\)</span>, a hyperparameter in Ridge regression. Lambda allows us to tune the size of the penalty. - This is an application of the L2 norm (matrix algebra) to the vector of parameter estimates</p>
+<p>This penalty:</p>
+<ul>
+<li>Includes the sum of the squared parameter estimates (excluding <span class="math inline">\(\beta_0\)</span>). Squaring removes the sign of these parameter estimates.</li>
+<li>This sum is multiplied by <span class="math inline">\(\lambda\)</span>, a hyperparameter in Ridge regression. Lambda allows us to tune the size of the penalty.</li>
+<li>This is an application of the L2 norm (matrix algebra) to the vector of parameter estimates</li>
+</ul>
 <hr>
 <p><span class="math inline">\(\frac{1}{n}([\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}] + [\:\lambda\sum_{j = 1}^{p} \beta_j^{2}\:])\)</span><br>
 <br>
@@ -817,7 +822,12 @@ The cost function for LASSO Regression is:</p>
 <br>
 </li>
 </ul>
-<p>This penalty: - Includes the sum of the absolute value of the parameter estimates (excluding <span class="math inline">\(\beta_0\)</span>). The absolute value removes the sign of these parameter estimates. - This sum is multiplied by <span class="math inline">\(\lambda\)</span>, a hyperparameter in LASSO regression. Lambda allows us to tune the size of the penalty. - This is an application of the L1 norm to the vector of parameter estimates</p>
+<p>This penalty:</p>
+<ul>
+<li>Includes the sum of the absolute value of the parameter estimates (excluding <span class="math inline">\(\beta_0\)</span>). The absolute value removes the sign of these parameter estimates.</li>
+<li>This sum is multiplied by <span class="math inline">\(\lambda\)</span>, a hyperparameter in LASSO regression. Lambda allows us to tune the size of the penalty.</li>
+<li>This is an application of the L1 norm to the vector of parameter estimates</li>
+</ul>
 <hr>
 <section id="lasso-vs.-ridge-comparison" class="level3" data-number="6.6.1">
 <h3 data-number="6.6.1" class="anchored" data-anchor-id="lasso-vs.-ridge-comparison"><span class="header-section-number">6.6.1</span> LASSO vs.&nbsp;Ridge Comparison</h3>
@@ -1002,9 +1012,9 @@ $ y    &lt;dbl&gt; -145.635298, 4.810920, -41.803024, 175.580620, 52.932735, 267
 <span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">y =</span> <span class="fu">rowSums</span>(<span class="fu">t</span>(<span class="fu">t</span>(x)<span class="sc">*</span>b_x)) <span class="sc">+</span> <span class="fu">rnorm</span>(n_cases_test, <span class="dv">0</span>, y_error))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
-<p>Set up a tibble to track model performance in train, val, and test sets</p>
+<p>Set up a tibble to track model performance in train and test sets</p>
 <ul>
-<li>We are using test to repeatedly to get rigorous held-out performance seperate from model selection process.<br>
+<li>We are using test to repeatedly to get rigorous held-out performance separate from model selection process.<br>
 </li>
 <li>Just for our understanding</li>
 <li>We would not choose a model configuration based on test set error.</li>
@@ -1714,7 +1724,7 @@ $ rmse_test &lt;dbl&gt; </code></pre>
 </div>
 </div>
 <hr>
-<p>Fit Best LASSO to full training set</p>
+<p>Fit best LASSO to full training set</p>
 <ul>
 <li>Notice the many <span class="math inline">\(\beta\)</span> = 0</li>
 <li>It did set some of the “good” predictors to 0 as well</li>
@@ -2013,12 +2023,10 @@ There are two possibilities that occur to me</p>
 </li>
 </ol>
 <ul>
-<li>Bootstrap the full data set (train from above) to select the best value for <span class="math inline">\(lambda\)</span>
-<ul>
-<li><p>Could be liberal (more inclusive of covariates) using best performance in OOB (validation sets)</p></li>
-<li><p>Could be more conservative (fewer covariates) by using within 1 SE of best performance but less flexible (i.e., will set more parameter estimates to 0)</p></li>
-<li><p>Follow up with a linear model (using <span class="math inline">\(lm\)</span>), regressing y on <span class="math inline">\(iv\)</span> and covariates from LASSO that are non-zero</p></li>
-</ul></li>
+<li>Bootstrap the full data set (train from above) to select the best value for <span class="math inline">\(lambda\)</span></li>
+<li>Could be liberal (more inclusive of covariates) using best performance in OOB (validation sets)</li>
+<li>Could be more conservative (fewer covariates) by using within 1 SE of best performance but less flexible (i.e., will set more parameter estimates to 0)</li>
+<li>Follow up with a linear model (using <span class="math inline">\(lm\)</span>), regressing y on <span class="math inline">\(iv\)</span> and covariates from LASSO that are non-zero</li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a>fit_lasso_2 <span class="sc">|&gt;</span> </span>
