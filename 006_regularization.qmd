@@ -482,7 +482,7 @@ The grid needs to have crossed values of both `penalty` ($lambda$) and `mixture`
 -----
 
 
-### Empirical Example 1: Many "good" but correlated predictors
+## Empirical Example 1: Many "good" but correlated predictors
 
 ```{r}
 #| include: false
@@ -629,7 +629,7 @@ LASSO, Ridge, and glmnet all need features on same scale to apply penalty consis
 - Can use same train and test feature matrices as well
   
 ```{r}
-rec_1 <- recipe(y ~ ., data = data_trn) |> 
+rec_1 <- recipe(y ~ ., data = data_trn_1) |> 
   step_normalize(all_predictors())
 
 rec_prep_1 <- rec_1 |> 
@@ -650,7 +650,7 @@ Set up splits for resampling for tuning hyperparameters
 - Can use same bootstrap splits for LASSO, Ridge, and glmnet
 ```{r}
 set.seed(20140102)
-splits_boot_1 <- data_trn |> 
+splits_boot_1 <- data_trn_1 |> 
    bootstraps(times = 100, strata = "y")  
 ```
 
@@ -820,7 +820,7 @@ Irreducible error was set by `y_error` (`r y_error`)
 
 -----
 
-#### Fit glmnet
+### Fit glmnet
 
 Now we need to tune both
 
@@ -970,7 +970,7 @@ error_ex2 <- tibble(model = character(), rmse_trn = numeric(), rmse_test = numer
 
 -----
 
-#### Fit a standard (OLS) linear regression
+### Fit a standard (OLS) linear regression
 
 Fit and evaluate the linear model
 ```{r}
@@ -1053,6 +1053,7 @@ fits_lasso_2 <- xfun::cache_rds(
 
 -----
 
+Plot hyperparameters
 ```{r}
 plot_hyperparameters(fits_lasso_2, hp1 = "penalty", metric = "rmse")
 ```
@@ -1092,29 +1093,34 @@ Irreducible error was set by `y_error` (`r y_error`)
                                                            feat_test_2)$.pred))))
 ```
 
-#### Fit Ridge
+-----
+
+### Fit Ridge
 
 Tune $\lambda$ for Ridge
 
 - can use ridge penalty grid from example 1
 
-```{r u6-examples-2-9}
-fits_ridge <- xfun::cache_rds(
+```{r}
+fits_ridge_2 <- xfun::cache_rds(
   expr = {
     linear_reg(penalty = tune(), 
                mixture = 0) |> 
     set_engine("glmnet") |> 
-    tune_grid(preprocessor = rec, 
+    tune_grid(preprocessor = rec_2, 
               resamples = splits_boot, grid = grid_penalty, 
               metrics = metric_set(rmse))
 
-},
-rerun = FALSE,
-dir = "cache/006/",
-file = "u6-examples-2-9.rds")
+  },
+  rerun = FALSE,
+  dir = "cache/006/",
+  file = "fits_ridge_2")
 ```
 
-```{r u6-examples-2-10a}
+-----
+
+Plot hyperparameters
+```{r}
 plot_hyperparameters(fits_ridge, hp1 = "penalty", metric = "rmse")
 ```
 
@@ -1123,14 +1129,14 @@ plot_hyperparameters(fits_ridge, hp1 = "penalty", metric = "rmse")
 Fit Best Ridge to full training set
 
 - Notice no $\beta$ = 0
-```{r u6-examples-2-10}
-fit_ridge <-
-  linear_reg(penalty = select_best(fits_ridge)$penalty, 
+```{r}
+fit_ridge_2 <-
+  linear_reg(penalty = select_best(fits_ridge_2)$penalty, 
              mixture = 0) |>
   set_engine("glmnet") |> 
-  fit(y ~ ., data = feat_trn)
+  fit(y ~ ., data = feat_trn_2)
 
-fit_ridge |> 
+fit_ridge_2 |> 
   tidy() |> 
   print()
 ```
@@ -1141,15 +1147,15 @@ Irreducible error was set by `y_error` (`r y_error`)
 
 - Somewhat overfit to train
 - Still slightly better than LASSO in val
-```{r u6-examples-2-11}
+```{r}
 (error_ex2 <- error_ex2 |> 
   bind_rows(tibble(model = "Ridge model",                       
-                   rmse_trn = rmse_vec(truth = feat_trn$y, 
-                                       estimate = predict(fit_ridge,
-                                                          feat_trn)$.pred),
-                   rmse_test = rmse_vec(truth = feat_test$y, 
-                                        estimate = predict(fit_ridge,
-                                                           feat_test)$.pred))))
+                   rmse_trn = rmse_vec(truth = feat_trn_2$y, 
+                                       estimate = predict(fit_ridge_2,
+                                                          feat_trn_2)$.pred),
+                   rmse_test = rmse_vec(truth = feat_test_2$y, 
+                                        estimate = predict(fit_ridge_2,
+                                                           feat_test_2)$.pred))))
 ```
 
 -----
@@ -1158,14 +1164,10 @@ Irreducible error was set by `y_error` (`r y_error`)
 
 Tune $\lambda$ and $\alpha$ for glmnet
 
-```{r u6-examples-2-12a}
-grid_glmnet <- expand_grid(penalty = exp(seq(0, 6, length.out = 200)),
-                           mixture = seq(0, 1, length.out = 6))
-```
 
-```{r u6-examples-2-12}
-fits_glmnet <- xfun::cache_rds({
-  
+```{r}
+fits_glmnet_2 <- xfun::cache_rds(
+  expr = {
   linear_reg(penalty = tune(), 
                mixture = tune()) |> 
     set_engine("glmnet") |> 
@@ -1173,15 +1175,16 @@ fits_glmnet <- xfun::cache_rds({
               resamples = splits_boot, grid = grid_glmnet, 
               metrics = metric_set(rmse))
 
-},
-rerun = FALSE,
-dir = "cache/006/",
-file = "u6-examples-2-12.rds")
+  },
+  rerun = FALSE,
+  dir = "cache/006/",
+  file = "fits_glment_2")
 ```
 
 -----
 
-```{r u6-examples-2-13a}
+Plot hyperparameters
+```{r}
 plot_hyperparameters(fits_glmnet, hp1 = "penalty", hp2 = "mixture", metric = "rmse")
 ```
 
@@ -1190,18 +1193,18 @@ plot_hyperparameters(fits_glmnet, hp1 = "penalty", hp2 = "mixture", metric = "rm
 Fit Best glmnet in full train set
 
 - Still Ridge (but won't always be)
-```{r u6-examples-2-13}
-select_best(fits_glmnet)
+```{r}
+select_best(fits_glmnet_2)
 
-fit_glmnet <-
-  linear_reg(penalty = select_best(fits_glmnet)$penalty, 
-             mixture = select_best(fits_glmnet)$mixture) |>
+fit_glmnet_2 <-
+  linear_reg(penalty = select_best(fits_glmnet_2)$penalty, 
+             mixture = select_best(fits_glmnet_2)$mixture) |>
   set_engine("glmnet") |> 
-  fit(y ~ ., data = feat_trn)
+  fit(y ~ ., data = feat_trn_2)
 
-fit_glmnet |> 
+fit_glmnet_2 |> 
   tidy() |> 
-  print(n = Inf)
+  print(n = 21)
 ```
 
 -----
@@ -1210,19 +1213,20 @@ Irreducible error was set by `y_error` (`r y_error`)
 
 - Somewhat overfit to train
 - Still not bad in validate
-```{r u6-examples-2-14}
-(error_ex1 <- error_ex1 |> 
+```{r}
+(error_ex2 <- error_ex2 |> 
   bind_rows(tibble(model = "glmnet model",   
-                   rmse_trn = rmse_vec(truth = feat_trn$y, 
-                                       estimate = predict(fit_glmnet,
-                                                          feat_trn)$.pred),
-                   rmse_test = rmse_vec(truth = feat_test$y, 
-                                        estimate = predict(fit_glmnet,
-                                                           feat_test)$.pred))))
+                   rmse_trn = rmse_vec(truth = feat_trn_2$y, 
+                                       estimate = predict(fit_glmnet_2,
+                                                          feat_trn_2)$.pred),
+                   rmse_test = rmse_vec(truth = feat_test_2$y, 
+                                        estimate = predict(fit_glmnet_2,
+                                                           feat_test_2)$.pred))))
 ```
 
+-----
 
-### LASSO for Feature (e.g., Covariate) Selection?
+## LASSO for Feature (e.g., Covariate) Selection?
 
 Lets consider a typical explanatory setting in Psychology
 
@@ -1232,15 +1236,6 @@ Lets consider a typical explanatory setting in Psychology
 - Covariates are uncorrelated with IV b/c IV is manipulated
 
 Let's pretend the previous 20 `x`s were your covariates
-
-Let's add in an IV
-```{r u6-examples-3-1}
-eff_iv <- 0.5
-data_trn <- data_trn |> 
-  mutate(iv = rep(c(0,1), nrow(data_trn) / 2),
-         y = y + eff_iv * iv) |> 
-  glimpse()
-```
 
 -----
 
@@ -1266,30 +1261,34 @@ There are two possibilities that occur to me
 -----
 
 1.  Use LASSO to build best DGP for a covariates only model
+\
+\
 
-    - Bootstrap the full data set (train from above) to select the best value for $lambda$
-      - Could be liberal (more inclusive of covariates) using best performance in OOB (validation sets)
-      - Could be more conservative (fewer covariates) by using within 1 SE of best performance but less flexible (i.e., will set more parameter estimates to 0)
+- Bootstrap the full data set (train from above) to select the best value for $lambda$
+  - Could be liberal (more inclusive of covariates) using best performance in OOB (validation sets)
+  - Could be more conservative (fewer covariates) by using within 1 SE of best performance but less flexible (i.e., will set more parameter estimates to 0)
       
-    - Follow up with a linear model (using $lm$), regressing y on $iv$ and covariates from LASSO that are non-zero
+  - Follow up with a linear model (using $lm$), regressing y on $iv$ and covariates from LASSO that are non-zero
 
-```{r u6-examples-3-2}
+```{r}
 fit_lasso |> 
   tidy() |> 
   print()
 ```
 
-  - You increased your best guess on covariates from 50% to 80%
-  - You will regress y on `iv` and the 8 covariates with non-zero effects
+  - You clearly improved your best guess on covariates to include 
+  - You will regress y on `iv` and the 11 covariates with non-zero effects
 
 -----
 
 2. Use LASSO to build best DGP including `iv` and covariates but don't penalize `iv`
+\
+\
 
-  - Look at `penalty.factor = rep(1, nvars)` argument in `glmnet()`
-  - Can fit LASSO with unbiased? estimate of `iv`
-  - Need to bootstrap for SE for `iv` (next unit)
-  - Only appropriate if IV is manipulated
+- Look at `penalty.factor = rep(1, nvars)` argument in `glmnet()`
+- Can fit LASSO with unbiased? estimate of `iv`
+- Need to bootstrap for SE for `iv` (next unit)
+- Only appropriate if IV is manipulated
 \
 \
 
@@ -1302,20 +1301,21 @@ Should really conduct simulation study of both of these options (vs. all and no 
 
 ## Ridge, LASSO, and Elastic net models for other Y distributions
 
-These penalties can be added to the cost functions of other generalized linear models to yield regularized/penalized versions of those models as well
+These penalties can be added to the cost functions of other generalized linear models to yield regularized/penalized versions of those models as well.  For example
 
-For example
 
 L1 penalized (LASSO) logistic regression (w/ labels coded 0,1):
 
 
-$\frac{1}{n}([\:\sum_{i = 1}^{n} -Y_ilog(\hat{Y_i}) - (1-Y_i)log(1-\hat{Y_i})\:]\:+\:[\:\lambda\sum_{j = 1}^{p} |\beta_j|\:]$
+- $\frac{1}{n}([\:\sum_{i = 1}^{n} -Y_ilog(\hat{Y_i}) - (1-Y_i)log(1-\hat{Y_i})\:]\:+\:[\:\lambda\sum_{j = 1}^{p} |\beta_j|\:]$
+\
+\
 
 For L2 penalized (Ridge) logistic regression (w/ labels coded 0,1)
 
-
-$\frac{1}{n}([\:\sum_{i = 1}^{n} -Y_ilog(\hat{Y_i}) - (1-Y_i)log(1-\hat{Y_i})\:]\:+\:[\:\lambda\sum_{j = 1}^{p} \beta_j^{2}\:]$
-
+- $\frac{1}{n}([\:\sum_{i = 1}^{n} -Y_ilog(\hat{Y_i}) - (1-Y_i)log(1-\hat{Y_i})\:]\:+\:[\:\lambda\sum_{j = 1}^{p} \beta_j^{2}\:]$
+\
+\
 
 `glmnet` implements: 
 
