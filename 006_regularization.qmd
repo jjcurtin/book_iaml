@@ -300,6 +300,7 @@ It has two components:
 \
 
 This penalty:
+
 - Includes the sum of the squared parameter estimates (excluding $\beta_0$).  Squaring removes the sign of these parameter estimates.
 - This sum is multiplied by $\lambda$, a hyperparameter in Ridge regression.  Lambda allows us to tune the size of the penalty.
 - This is an application of the L2 norm (matrix algebra) to the vector of parameter estimates
@@ -398,6 +399,7 @@ It has two components:
 \
 
 This penalty:
+
   - Includes the sum of the absolute value of the parameter estimates (excluding $\beta_0$).  The absolute value removes the sign of these parameter estimates.
   - This sum is multiplied by $\lambda$, a hyperparameter in LASSO regression.  Lambda allows us to tune the size of the penalty.
   - This is an application of the L1 norm to the vector of parameter estimates
@@ -556,9 +558,9 @@ data_test_1 <- x |>
 
 -----
 
-Set up a tibble to track model performance in train, val, and test sets
+Set up a tibble to track model performance in train and test sets
 
-- We are using test to repeatedly to get rigorous held-out performance seperate from model selection process.  
+- We are using test to repeatedly to get rigorous held-out performance separate from model selection process.  
 - Just for our understanding 
 - We would not choose a model configuration based on test set error.
 
@@ -1066,7 +1068,7 @@ plot_hyperparameters(fits_lasso_2, hp1 = "penalty", metric = "rmse")
 
 -----
 
-Fit Best LASSO to full training set
+Fit best LASSO to full training set
 
 - Notice the many $\beta$ = 0
 - It did set some of the "good" predictors to 0 as well
@@ -1273,10 +1275,9 @@ There are two possibilities that occur to me
 \
 
 - Bootstrap the full data set (train from above) to select the best value for $lambda$
-  - Could be liberal (more inclusive of covariates) using best performance in OOB (validation sets)
-  - Could be more conservative (fewer covariates) by using within 1 SE of best performance but less flexible (i.e., will set more parameter estimates to 0)
-      
-  - Follow up with a linear model (using $lm$), regressing y on $iv$ and covariates from LASSO that are non-zero
+- Could be liberal (more inclusive of covariates) using best performance in OOB (validation sets)
+- Could be more conservative (fewer covariates) by using within 1 SE of best performance but less flexible (i.e., will set more parameter estimates to 0)
+- Follow up with a linear model (using $lm$), regressing y on $iv$ and covariates from LASSO that are non-zero
 
 ```{r}
 fit_lasso_2 |> 
@@ -1284,8 +1285,8 @@ fit_lasso_2 |>
   print()
 ```
 
-  - You clearly improved your best guess on covariates to include 
-  - You will regress y on `iv` and the 11 covariates with non-zero effects
+- You clearly improved your best guess on covariates to include 
+- You will regress y on `iv` and the 11 covariates with non-zero effects
 
 -----
 
@@ -1313,7 +1314,6 @@ These penalties can be added to the cost functions of other generalized linear m
 
 
 L1 penalized (LASSO) logistic regression (w/ labels coded 0,1):
-
 
 - $\frac{1}{n}([\:\sum_{i = 1}^{n} -Y_ilog(\hat{Y_i}) - (1-Y_i)log(1-\hat{Y_i})\:]\:+\:[\:\lambda\sum_{j = 1}^{p} |\beta_j|\:]$
 \
