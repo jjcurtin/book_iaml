@@ -1,0 +1,347 @@
+---
+title: "Homework Unit 6: Regularization and Penalized Models"
+author: "Your name here"
+date: "`r lubridate::today()`"
+format: 
+  html: 
+    embed-resources: true
+    toc: true 
+    toc_depth: 4
+editor_options: 
+  chunk_output_type: console
+---   
+
+## Introduction
+
+To begin, download the following from the course web book (Unit 6):
+
+* `hw_unit_06_regularization.qmd` (notebook for this assignment)
+
+* `ames_full_cln.csv` (data for this assignment)
+
+* `ames_data_dictionary.pdf` (data dictionary for the ames dataset)
+
+The data for this week's assignment are the Ames housing price data you've seen in class and worked with in previous homework assignments. However, this week you're working with all 81 variables. 
+
+The data are already cleaned (i.e., variable names tidied, levels of categorical variables tidied, "none" put in for missing values where indicated in the data dictionary). You don't need to do any modeling EDA because we're describing for you the specific steps to implement in the recipe. Of course you **normally** would do modeling EDA before fitting any models, but we're trying to keep the assignment from getting too long!
+
+In this assignment, you will practice tuning regularization hyperparameters ($\alpha$ and $\lambda$) and selecting among model configurations using resampling methods. Like last week, **fitting models will take a little longer**. We've kept the active coding component of the assignment to a reasonable length, but please try to plan for the increased run time! Remember that setting up parallel processing will dramatically reduce your run times.
+
+Let's get started!
+
+-----
+
+## Setup
+
+### Handle conflicts
+```{r}
+
+
+# We also will need to resolve a new conflict using the following code
+conflictRules("Matrix", mask.ok = c("expand", "pack", "unpack"))
+```
+
+### Load required packages 
+```{r}
+
+```
+
+### Source function scripts (John's or your own)
+```{r}
+
+```
+
+### Specify other global settings
+If you are going to use `cache_rds(), you might include `rerun_setting <- FALSE` in this chunk
+```{r}
+
+```
+
+### Paths
+```{r}
+path_data <- 
+```
+
+### Set up parallel processing
+```{r}
+
+```
+
+### Read in data
+
+Read in the `ames_full_cln.csv` data file   
+```{r}
+data_all <- 
+```
+
+### Set variable classes
+
+Set all variables to factor or numeric classes. Here is where you will also want to explicitly set factor levels for those with low frequency count levels (e.g., `neighbohood`, `ms_sub_class`) and do any ordering of factor levels.
+
+```{r}
+
+```
+
+
+## Set up splits
+
+### Divide data into train and test
+
+Hold out 25% of the data as `data_test` for evaluation using the `initial_split()` function. Stratify on `sale_price`. Don't forget to set a seed!
+
+```{r}
+splits_test <- 
+  
+data_trn <- 
+  
+data_test <-
+```
+
+### Make splits
+
+For parts 2 and 3, you'll need splits within `data_trn` to select among among model configurations using held out data. Create 100 bootstrap splits stratified on `sale_price`. You do not need to set a new seed.
+
+```{r}
+splits_boot <- 
+```
+
+## Build recipe
+
+You will build one recipe that can be used across three model fits. Please follow these instructions to build your recipe:
+
+* Regress the outcome `sale_price` on all predictors 
+
+* Remove the ID variable (`pid`) with `step_rm()` 
+
+* Use `step_impute_median()` to impute the median for any missing values in numeric predictors
+
+* Use `step_impute_mode()` to impute the mode for any missing values in the factor predictors
+
+* Use `step_YeoJohnson()` to apply Yeo-Johnson transformations to all numeric predictors
+
+* Use `step_normalize()` to normalize all numeric predictors (necessary for regularized models)
+
+* Apply dummy coding to all factor predictors
+
+
+
+```{r recipe}
+rec <- 
+```
+
+## Create error tracking tibble
+
+```{r}
+track_rmse <- tibble(model = character(),
+                     rmse_trn = numeric(),
+                     rmse_test = numeric(),
+                     n_features = numeric())
+```
+
+-----
+
+## Part 1: Fitting an OLS linear regression
+
+### Fit a regression model in the full training set
+
+Make a feature matrix for training data and for test data.
+```{r}
+
+```
+
+Fit linear regression model. No resampling is needed because there are no hyperparameters to tune.
+```{r}
+fit_linear <- 
+```
+
+### Get RMSE in train & test 
+
+Use `rmse_vec()` to get error in `feat_trn`  
+
+*Notice the warnings we get when making these predictions. R is telling us that our models are rank-deficient - this means that this model may not have determined a unique set of parameter estimates to minimize the cost function. This can occur for a variety of reasons, some of which are real problems and other time for reasons that are not a problem. For now continue on!*
+```{r}
+lin_trn_rmse <- 
+```
+
+Use `rmse_vec()` to get error in `feat_test`
+```{r}
+lin_test_rmse <- 
+```
+
+Get number of features
+```{r}
+lin_n_feat <- fit_linear |> 
+  tidy() |> 
+  filter(estimate != 0 & term != "(Intercept)") |> 
+  nrow()
+```
+
+Add to tracking tibble
+```{r}
+track_rmse <- add_row(track_rmse,
+                      model = "OLS",
+                      rmse_trn = lin_trn_rmse,
+                      rmse_test = lin_test_rmse,
+                      n_features = lin_n_feat)
+
+track_rmse
+```
+
+How does performance compare in training and test? Type your response between the asterisks.
+
+*Type your response here*
+
+-----
+
+## Part 2: Fitting a LASSO regression
+
+### Set up a hyperparameter grid
+
+In the LASSO, the mixture hyperparameter ($\alpha$) will be set to 1, but we'll need to tune the penalty hyperparameter ($\lambda$). 
+```{r}
+grid_penalty <- expand_grid(penalty = exp(seq(-6, 8, length.out = 500)))
+```
+
+### Tune a LASSO regression
+
+Use `linear_reg()`, `set_engine("glmnet")`, and `tune_grid()` to fit your LASSO models.
+```{r}
+fits_lasso <- 
+```
+
+### Plot performance in the validation sets by hyperparameter
+
+Use the `plot_hyperparameters()` function in `fun_ml.R` or your own code.
+```{r}
+
+```
+
+### Fit your best configuration in data_trn
+
+Use your best configuration (i.e., your best $\lambda$ value) to fit a model in the full training set (`data_trn`) using `select_best()`.
+```{r}
+fit_lasso <- 
+```
+
+### Examine parameter estimates
+
+```{r}
+
+```
+
+
+### Get RMSE in train & test 
+
+Use `rmse_vec()` to get error in `feat_trn`
+```{r}
+
+```
+
+Use `rmse_vec()` to get error in `feat_test`
+```{r}
+
+```
+
+Get number of features
+```{r}
+
+```
+
+
+Add to `track_rmse`
+```{r}
+
+```
+
+
+How does performance compare in training and test for LASSO? Type your response between the asterisks.
+
+*Type your response here*
+
+How many features were retained (i.e., parameter estimates not dropped to zero) in this model? How does this compare to the OLS linear regression? Type your response between the asterisks.
+
+*Type your response here*
+
+-----
+
+## Part 3: Fitting an Elastic Net regression
+
+### Set up a hyperparameter grid
+
+Now we'll need to tune both the mixture hyperparameter ($\alpha$) and the penalty hyperparameter ($\lambda$). 
+```{r}
+grid_glmnet <- expand_grid(penalty = exp(seq(-10, 11, length.out = 250)),
+                           mixture = seq(0, 1, length.out = 11))
+```
+
+### Tune an elasticnet regression
+
+Use `linear_reg()`, `set_engine("glmnet")`, and `tune_grid()` to fit your LASSO models.
+```{r}
+fits_glmnet <- 
+```
+
+### Plot performance in the validation sets by hyperparameter
+
+Use the `plot_hyperparameters()` function or your own code.
+```{r}
+
+```
+
+### Fit your best configuration in training data
+
+Use your best configuration (i.e., your best combination of $\alpha$ & $\lambda$ values) to fit a model in the full training set (`data_trn`) using `select_best()`.
+```{r}
+fit_glmnet <- 
+```
+
+### Examine parameter estimates
+
+```{r}
+
+```
+
+
+
+### Get RMSE in train & test  
+
+Use `rmse_vec()` to get error in `feat_trn`
+```{r}
+
+```
+
+Use `rmse_vec()` to get error in `feat_test`
+```{r}
+
+```
+
+Get number of features
+```{r}
+
+```
+
+
+Add to `track_rmse`
+```{r}
+
+```
+
+How does performance compare in training and test for LASSO? Type your response between the asterisks.
+
+*Type your response here*
+
+How many features were retained (i.e., parameter estimates not dropped to zero) in this model? How does this compare to the OLS linear regression? Type your response between the asterisks.
+
+*Type your response here*
+
+
+Looking back across the OLS linear regression, the LASSO regression, and the elastic net regression, what comparisons can you make about performance in training, performance in test, evidence of overfitting, etc.? Which model configuration would you select and why? Type your response between the asterisks.
+
+*Type your response here*
+
+
+## Save & render
+
+Save this .qmd file with your last name at the end (e.g., hw_unit_6_regularization_wyant). Make sure you changed "Your name here" at the top of the file to be your own name. Render the file to .html, and upload the rendered file to Canvas. 
+
+**Way to go!!**

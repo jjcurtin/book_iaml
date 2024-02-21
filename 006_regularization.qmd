@@ -50,7 +50,7 @@ Post questions to the video-lectures channel in Slack
 
 - [data](application_assignments/unit_06/ames_full_cln.csv)
 - [data dictionary](application_assignments/unit_06/ames_data_dictionary)
-- [qmd shell](application_assignments/unit_06/hw_unit_6_regularization.qmd)
+- [qmd shell](application_assignments/unit_06/hw_unit_06_regularization.qmd)
 - [solution]() 
 
 Post questions to application-assignments Slack channel
@@ -666,7 +666,7 @@ We need to tune $\lambda$ (tidymodels calls this `penalty`)
 - Could also use `cv.glmnet()` directly in `glmnet` package to find good values.  See `get_lamdas()` in fun_modeling.R
 
 ```{r}
-grid_penalty_lasso <- expand_grid(penalty = exp(seq(-4, 4, length.out = 500)))
+grid_lasso <- expand_grid(penalty = exp(seq(-4, 4, length.out = 500)))
 ```
 
 ```{r}
@@ -676,7 +676,8 @@ fits_lasso_1 <- xfun::cache_rds(
                mixture = 1) |> 
     set_engine("glmnet") |> 
     tune_grid(preprocessor = rec_1, 
-              resamples = splits_boot_1, grid = grid_penalty_lasso, 
+              resamples = splits_boot_1, 
+              grid = grid_lasso, 
               metrics = metric_set(rmse))
 
    },
@@ -758,16 +759,20 @@ Fit Ridge algorithm
 - May need to experiment to get right range of values for lambda
 - $\alpha$ = 0 (`mixture`)
 - Evaluate model configurations in OOB validation sets
-```{r}
-grid_penalty_ridge <- expand_grid(penalty = exp(seq(-1, 7, length.out = 500)))
 
+```{r}
+grid_ridge <- expand_grid(penalty = exp(seq(-1, 7, length.out = 500)))
+```
+
+```{r}
 fits_ridge_1 <- xfun::cache_rds(
   expr = {
     linear_reg(penalty = tune(), 
                mixture = 0) |> 
     set_engine("glmnet") |> 
     tune_grid(preprocessor = rec_1, 
-              resamples = splits_boot_1, grid = grid_penalty_ridge, 
+              resamples = splits_boot_1, 
+              grid = grid_ridge, 
               metrics = metric_set(rmse))
 
   },
@@ -830,7 +835,7 @@ Now we need to tune both
 - Warm starts across $\lambda$
 
 ```{r}
-grid_glmnet <- expand_grid(penalty = exp(seq(0, 6, length.out = 200)),
+grid_glmnet <- expand_grid(penalty = exp(seq(-1, 7, length.out = 500)),
                            mixture = seq(0, 1, length.out = 6))
 ```
 
@@ -841,7 +846,8 @@ fits_glmnet_1 <- xfun::cache_rds(
                mixture = tune()) |> 
     set_engine("glmnet") |> 
     tune_grid(preprocessor = rec_1, 
-              resamples = splits_boot_1, grid = grid_glmnet, 
+              resamples = splits_boot_1, 
+              grid = grid_glmnet, 
               metrics = metric_set(rmse))
   
   },
@@ -1042,7 +1048,7 @@ fits_lasso_2 <- xfun::cache_rds(
     set_engine("glmnet") |> 
     tune_grid(preprocessor = rec_2, 
               resamples = splits_boot_2, 
-              grid = grid_penalty_lasso, 
+              grid = grid_lasso, 
               metrics = metric_set(rmse))
 
   },
@@ -1108,11 +1114,12 @@ fits_ridge_2 <- xfun::cache_rds(
                mixture = 0) |> 
     set_engine("glmnet") |> 
     tune_grid(preprocessor = rec_2, 
-              resamples = splits_boot, grid = grid_penalty, 
+              resamples = splits_boot_2, 
+              grid = grid_ridge, 
               metrics = metric_set(rmse))
 
   },
-  rerun = FALSE,
+  rerun = rerun_setting,
   dir = "cache/006/",
   file = "fits_ridge_2")
 ```
@@ -1121,7 +1128,7 @@ fits_ridge_2 <- xfun::cache_rds(
 
 Plot hyperparameters
 ```{r}
-plot_hyperparameters(fits_ridge, hp1 = "penalty", metric = "rmse")
+plot_hyperparameters(fits_ridge_2, hp1 = "penalty", metric = "rmse")
 ```
 
 -----
@@ -1171,12 +1178,13 @@ fits_glmnet_2 <- xfun::cache_rds(
   linear_reg(penalty = tune(), 
                mixture = tune()) |> 
     set_engine("glmnet") |> 
-    tune_grid(preprocessor = rec, 
-              resamples = splits_boot, grid = grid_glmnet, 
+    tune_grid(preprocessor = rec_2, 
+              resamples = splits_boot_2, 
+              grid = grid_glmnet, 
               metrics = metric_set(rmse))
 
   },
-  rerun = FALSE,
+  rerun = rerun_setting,
   dir = "cache/006/",
   file = "fits_glment_2")
 ```
@@ -1185,7 +1193,7 @@ fits_glmnet_2 <- xfun::cache_rds(
 
 Plot hyperparameters
 ```{r}
-plot_hyperparameters(fits_glmnet, hp1 = "penalty", hp2 = "mixture", metric = "rmse")
+plot_hyperparameters(fits_glmnet_2, hp1 = "penalty", hp2 = "mixture", metric = "rmse")
 ```
 
 -----
@@ -1271,7 +1279,7 @@ There are two possibilities that occur to me
   - Follow up with a linear model (using $lm$), regressing y on $iv$ and covariates from LASSO that are non-zero
 
 ```{r}
-fit_lasso |> 
+fit_lasso_2 |> 
   tidy() |> 
   print()
 ```
