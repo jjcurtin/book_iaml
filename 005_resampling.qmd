@@ -1564,61 +1564,115 @@ In scenarios where you will not have one test set but will eventually use all th
 
 ## Discussion
 
-### and the winner is.....
+### Announcements
 
-```
-student      n correct_predictions accuracy
-   <chr>    <int>               <dbl>    <dbl>
- 1 vachuska   327                 262    0.801 (Karl)
- 2 hou        327                 257    0.786 (Lihao)
- 3 dubree     327                 256    0.783 (Will)
- 4 cheung     327                 253    0.774 (Alex)
- 5 stein      327                 253    0.774 (Andrea)
- 6 ma         327                 251    0.768 (Yuanxue)
+- Starting Unit 6 (Regularization/Penalized models) at end of class today; All set!
+- Unit 7 is Mid-term Exam unit
+  - No readings, lecture or quiz
+  - Application assignment as exam (due at normal application assignment day/time; Weds, March 6th at 8pm)
+  - Conceptual exam during discussion meeting (Thursday March 7th at 11 am) 
+- Room assignments; 121 next week but staying in 338;  Thanks for the feedback!
+- EDA with new datasets (and the last application assignment)
 
-0.758
-0.755
-0.755
-0.734
-0.731
-0.716
-0.688
-0.676
-0.676
-```
+-----
 
-### Other announcements
-- Mid-term Exam
+### Bias and Variance
 
-- I understand if this isn't possible, but I've noticed that for the most part, only TAs and John respond to errors in Slack, which is fine but creates more work for them. Maybe if there was more motivation (like extra credit) or something to answer people's questions in the Slack, more people might do it?
+- General definitions - need to think about repeated estimation of something
+- Examples for our models ($\hat{f}$, $\hat{DGP}$)
+- Examples for our performance estimates ($\hat{accuracy}$, $\hat(rmse)$)
 
-- Midnight deadlines?   8 pm?
+-----
 
-- It would be great if there was any easy way to download each section of the web book in a format that could be annotated
+### Describe process to use resampling to get a performance estimate to evaluate of a single model configuration
 
-- Can you upload previous videos (unit 1 - 3) to uw-madison site? As second language student, subtitles are really helpful.
+- Which method? 
+- Use held-in/held-out terminology in addition to train/test    
+- Discuss the bias and variance of the performance estimate of this configuration.  Consider implications of:
+  - The method
+  - size of the held-in data
+  - size of held out data
 
-### Questions
+-----
 
-- Resampling methods to EITHER select best model OR evaluate best model
-  - Single validation set
+### Describe process to use resampling to get performance estimates to select a best model configuration among many (explanatory setting?)
+
+- When done (what are you selecting among)?
+- Which method? 
+- Use held-in/held-out terminology in addition to train/val
+- Discuss the bias and variance of the performance estimate of this configuration
+- Discuss the bias and variance of the performance estimate used to select the best configuration.  Consider implications of:
+  - The method
+  - size of the held-in data
+  - size of held out data
+- What are the implications if you use that same performance estimate to evaluate that best model configuration (i.e., estimate its performance in new data)?
+
+-----
+
+### Describe process to use resampling (other than nested) to get performance estimates to both select best configuration and evaluate it in new data
+
+- Which method?
+- Describe how to do it using held-in/held-out terminology in addition to train/val/test
+- Discuss the bias and variance of the performance estimate used to select the best configuration.  Consider implications of:
+  - The method
+  - size of the held-in data
+  - size of held out data
+- Discuss the bias and variance of the performance estimate used to evaluate that best configuration.  Consider implications of:
+  - The method
+  - size of the held-in data
+  - size of held out data
+
+### Describe process to use Nested CV to get performance estimates to both select best configuration and evaluate it in new data
+
+- When used?
+- Describe how to do it using held-in/held-out terminology in addition to train/val/test
+- Discuss the bias and variance of the performance estimate used to select the best configuration.  Consider implications of:
+  - The method
+  - size of the held-in data
+  - size of held out data
+- Discuss the bias and variance of the performance estimate used to evaluate that best configuration.  Consider implications of:
+  - The method
+  - size of the held-in data
+  - size of held out data
+
+-----
+
+### Methods to EITHER select best model configuration (among many) OR evaluate a single best model configuration
+
+What are pros, cons, and when to use?
+
+  - Single validation (or test) set
   - LOOCV
   - K-fold
   - Repeated k-fold
   - Bootstrap
 
   - ALSO: grouped k-fold
-  
-- What about when we need to do both selection and evaluation?
-  - What is optimization bias?
-  - Combine above method with held out test set
-  - Nested CV (see [tutorial](https://www.tidymodels.org/learn/work/nested-resampling/))
 
-- Model selection by resampling to "tune" hyperparameters
 
-- Model selection by resampling for explanatory purposes
+### Methods to BOTH select best model configuration and evaluate that best configuration
 
-- Data leakage
+- What is optimization bias (its just a form of bias but given a fancy name due to its source)?
+- Combine above method with held out test set
+- Nested CV (see [tutorial](https://www.tidymodels.org/learn/work/nested-resampling/))
 
-- How does parallel processing work?
+-----
 
+### Discuss data leakage with resampling
+
+- Why is data leakage a problem?
+- How does noise factor into the problem?
+- Why does resampling substantially reduce data leakage?
+- How to use eyeball sample with single held out test set
+
+-----
+
+### A final interesting question.....
+
+Biased estimate of model performance has troubled me in the last assignment. I did repeated k-fold cross validation with a KNN model where k = 5. The effective sample size was n ~ 800 during model selection. Then I refit the model with the full training data where n ~ 1000 and submitted my predictions for the test set. After some testing with one of the TAs, I figured that my submitted model with a larger N performed worse than the model evaluated with resamples, if I used the same K determined via resampling (number of nearest neighbors). My hunch was that the optimal K (number of nearest neighbors) was different in a model trained with n ~ 800 than a model trained with n ~ 1000. Is this a possible explanation? If so, would LOOCV better serve the purpose of selecting a K for the final KNN model (so that the training set for selecting K is very much the same as the training set used for the final model)?
+
+- On average, what do you expect about the performance estimate of your final model configuration in test vs. the performance estimates used to select the best model configuration?
+- What if you used bootstrap to select best configuration?
+- ...but, what about choosing k from train and then using that k in a model fit to train and val?
+  - best k, 
+  - best k within +- 1 SE (lower limit or higher limit)
