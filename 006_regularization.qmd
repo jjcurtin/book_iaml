@@ -164,7 +164,7 @@ Lets imagine a training set:
 
 -----
 
-If we fit a linear model with size as the only predictor...
+If we fit a linear model with size as the only feature...
 
 - $\hat{sale\_price_i} = \beta_0 + \beta_1 * size$
 
@@ -244,7 +244,7 @@ $[\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}] + 1000 * \beta_3 + 1000 * \beta_4$
 Of course, we don't typically know in advance which parameter estimates to penalize. 
 
 - Instead, we apply some penalty to all the parameter estimates (except $\beta_0$)
-- This shrinks the parameter estimates for all the predictors to some degree
+- This shrinks the parameter estimates for all the features to some degree
 - However, features that do reduce MSE meaningfully will be "worth" including with non-zero parameter estimates
 - You can also control the shrinkage by controlling the size of the penalty
 
@@ -412,11 +412,11 @@ With respect to the parameter estimates:
 
 - LASSO yields sparse solution (some parameter estimates set to **exactly zero**)
 
-- Ridge tends to retain all predictors (parameter estimates don't get set to exactly zero)
+- Ridge tends to retain all features (parameter estimates don't get set to exactly zero)
 
-- LASSO selects one predictor among correlated group and sets others to zero
+- LASSO selects one feature among correlated group and sets others to zero
 
-- Ridge shrinks all parameter estimates for correlated predictors
+- Ridge shrinks all parameter estimates for correlated features 
 \
 \
 
@@ -1077,7 +1077,7 @@ plot_hyperparameters(fits_lasso_2, hp1 = "penalty", metric = "rmse")
 Fit best LASSO to full training set
 
 - Notice the many $\beta$ = 0
-- It did set some of the "good" predictors to 0 as well
+- It did set some of the "good" features to 0 as well
 ```{r}
 fit_lasso_2 <-
   linear_reg(penalty = select_best(fits_lasso_2)$penalty, 

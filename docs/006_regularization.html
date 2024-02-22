@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.3.433">
+<meta name="generator" content="quarto-1.4.549">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -22,7 +22,7 @@ ul.task-list li input[type="checkbox"] {
 }
 /* CSS for syntax highlighting */
 pre > code.sourceCode { white-space: pre; position: relative; }
-pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span { line-height: 1.25; }
 pre > code.sourceCode > span:empty { height: 1.2em; }
 .sourceCode { overflow: visible; }
 code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -58,6 +58,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 div.csl-bib-body { }
 div.csl-entry {
   clear: both;
+  margin-bottom: 0em;
 }
 .hanging-indent div.csl-entry {
   margin-left:2em;
@@ -100,7 +101,13 @@ div.csl-indent {
   "collapse-after": 3,
   "panel-placement": "start",
   "type": "textbox",
-  "limit": 20,
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
   "language": {
     "search-no-results-text": "No results",
     "search-matching-documents-text": "matching documents",
@@ -109,6 +116,7 @@ div.csl-indent {
     "search-more-match-text": "more match in this document",
     "search-more-matches-text": "more matches in this document",
     "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
     "search-detached-cancel-button-title": "Cancel",
     "search-submit-button-title": "Submit",
     "search-label": "Search"
@@ -117,6 +125,33 @@ div.csl-indent {
 
   <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
   <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="book.css">
 </head>
@@ -127,12 +162,12 @@ div.csl-indent {
   <header id="quarto-header" class="headroom fixed-top">
   <nav class="quarto-secondary-nav">
     <div class="container-fluid d-flex">
-      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./006_regularization.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Regularization and Penalized Models</span></a></li></ol></nav>
-      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
-      </a>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./006_regularization.html"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Regularization and Penalized Models</span></a></li></ol></nav>
+        <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
         <i class="bi bi-search"></i>
       </button>
@@ -142,12 +177,12 @@ div.csl-indent {
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation floating overflow-auto">
     <div class="pt-lg-2 mt-2 text-left sidebar-header">
     <div class="sidebar-title mb-0 py-0">
       <a href="./">Introduction to Applied Machine Learning</a> 
         <div class="sidebar-tools-main tools-wide">
-    <a href="https://github.com/jjcurtin/book_iaml" rel="" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
+    <a href="https://github.com/jjcurtin/book_iaml" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
     <div class="dropdown">
       <a href="" title="Share" id="quarto-navigation-tool-dropdown-0" class="quarto-navigation-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Share"><i class="bi bi-share"></i></a>
       <ul class="dropdown-menu" aria-labelledby="quarto-navigation-tool-dropdown-0">
@@ -326,7 +361,7 @@ div.csl-indent {
     </ul>
     </div>
 </nav>
-<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
         <nav id="TOC" role="doc-toc" class="toc-active">
@@ -377,7 +412,7 @@ div.csl-indent {
   <li><a href="#questions" id="toc-questions" class="nav-link" data-scroll-target="#questions"><span class="header-section-number">6.12.2</span> Questions</a></li>
   </ul></li>
   </ul>
-<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/jjcurtin/book_iaml/edit/main/006_regularization.qmd" class="toc-action">Edit this page</a></p></div></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/jjcurtin/book_iaml/edit/main/006_regularization.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
@@ -397,7 +432,9 @@ div.csl-indent {
   </div>
   
 
+
 </header>
+
 
 <section id="overview-of-unit" class="level2" data-number="6.1">
 <h2 data-number="6.1" class="anchored" data-anchor-id="overview-of-unit"><span class="header-section-number">6.1</span> Overview of Unit</h2>
@@ -434,13 +471,13 @@ div.csl-indent {
 <h3 data-number="6.1.3" class="anchored" data-anchor-id="lecture-videos"><span class="header-section-number">6.1.3</span> Lecture Videos</h3>
 <ul>
 <li><a href="https://mediaspace.wisc.edu/media/iaml+unit+6-1/1_dqafjta6">Lecture 1: An Introduction to Penalized/Regularized Algorithms</a> ~ 15 mins</li>
-<li>[Lecture 2: <a href="">Intuitions about Penalized Cost Functions and Regularization</a></li>
-<li><a href="">Lecture 3: Ridge Regression</a></li>
-<li><a href="">Lecture 4: LASSO</a></li>
-<li><a href="">Lecture 5: The Elastic net</a></li>
-<li><a href="">Lecture 6: Emprical Example - Many good predictors</a></li>
-<li><a href="">Lecture 7: Emprical Example - Good and zero predictors</a></li>
-<li><a href="">Lecture 8: Emprical Example - LASSO for covariate selection</a></li>
+<li>[Lecture 2: <a href="https://mediaspace.wisc.edu/media/iaml+unit+6-2/1_uxp8w6am">Intuitions about Penalized Cost Functions and Regularization</a> ~ 11 mins</li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+6-3/1_hcghfpo3">Lecture 3: Ridge Regression</a> ~ 9 mins</li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+6-4/1_803c42m3">Lecture 4: LASSO</a> ~ 8 mins</li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+6-5/1_r4xy5dws">Lecture 5: The Elastic net</a> ~ 4 mins</li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+6-6/1_2608sidm">Lecture 6: Emprical Example - Many good predictors</a> ~ 23 mins</li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+6-7/1_xmgkkr8t">Lecture 7: Emprical Example - Good and zero predictors</a> ~ 9 mins</li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+6-8/1_hlknwl7m">Lecture 8: Emprical Example - LASSO for covariate selection</a> ~ 8 mins</li>
 </ul>
 <p>Post questions to the video-lectures channel in Slack</p>
 <hr>
@@ -549,7 +586,7 @@ div.csl-indent {
 </p>
 <p><img src="figs/unit5_ng1.png" style="height:5in"></p>
 <hr>
-<p>If we fit a linear model with size as the only predictor…</p>
+<p>If we fit a linear model with size as the only feature…</p>
 <ul>
 <li><p><span class="math inline">\(\hat{sale\_price_i} = \beta_0 + \beta_1 * size\)</span></p></li>
 <li><p>In this training set, we might get the model below (in blue)</p></li>
@@ -592,7 +629,7 @@ div.csl-indent {
 </ul>
 <p><strong>Our new cost function:</strong></p>
 <ul>
-<li><span class="math inline">\([\frac{1}{n}\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}] + [1000 * \beta_3 + 1000 * \beta_4]\)</span></li>
+<li><span class="math inline">\([\frac{1}{n}\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}] +  [1000 * \beta_3 + 1000 * \beta_4]\)</span></li>
 </ul>
 <hr>
 <p><span class="math inline">\([\frac{1}{n}\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}] + [1000 * \beta_3 + 1000 * \beta_4]\)</span></p>
@@ -611,7 +648,7 @@ div.csl-indent {
 <p>Of course, we don’t typically know in advance which parameter estimates to penalize.</p>
 <ul>
 <li>Instead, we apply some penalty to all the parameter estimates (except <span class="math inline">\(\beta_0\)</span>)</li>
-<li>This shrinks the parameter estimates for all the predictors to some degree</li>
+<li>This shrinks the parameter estimates for all the features to some degree</li>
 <li>However, features that do reduce MSE meaningfully will be “worth” including with non-zero parameter estimates</li>
 <li>You can also control the shrinkage by controlling the size of the penalty</li>
 </ul>
@@ -683,7 +720,7 @@ Question: What will happen to a Ridge regression model’s parameter estimates a
 <div id="callout-1" class="callout-1-contents callout-collapse collapse show">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Show Answer</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>As lambda increases, the model becomes less flexible b/c its parameter estimates </span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>become constrained/shrunk.  This will increase bias but decrease variance for model </span>
@@ -710,7 +747,7 @@ Question: What is the special case of Ridge regression when lambda = 0?
 <div id="callout-2" class="callout-2-contents callout-collapse collapse show">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Show Answer</summary>
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>The OLS regression is a special case where lambda = 0 (i.e., no penalty is applied).  </span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>This is the most flexible. It is unbiased but with higher variance than for </span>
@@ -753,7 +790,7 @@ Question: Why does the scale of the features matter for Ridge regression?
 <div id="callout-3" class="callout-3-contents callout-collapse collapse show">
 <div class="callout-body-container callout-body">
 <div class="cell">
-<details>
+<details class="code-fold">
 <summary>Show Answer</summary>
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>Features with bigger SDs will have smaller parameter estimates.  Therefore they </span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>will be less affected by the penalty.</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -797,9 +834,9 @@ The cost function for LASSO Regression is:</p>
 <p>With respect to the parameter estimates:</p>
 <ul>
 <li><p>LASSO yields sparse solution (some parameter estimates set to <strong>exactly zero</strong>)</p></li>
-<li><p>Ridge tends to retain all predictors (parameter estimates don’t get set to exactly zero)</p></li>
-<li><p>LASSO selects one predictor among correlated group and sets others to zero</p></li>
-<li><p>Ridge shrinks all parameter estimates for correlated predictors<br>
+<li><p>Ridge tends to retain all features (parameter estimates don’t get set to exactly zero)</p></li>
+<li><p>LASSO selects one feature among correlated group and sets others to zero</p></li>
+<li><p>Ridge shrinks all parameter estimates for correlated features<br>
 <br>
 </p></li>
 </ul>
@@ -980,7 +1017,7 @@ $ y    &lt;dbl&gt; -145.635298, 4.810920, -41.803024, 175.580620, 52.932735, 267
 <li>We are using test to repeatedly to get rigorous held-out performance separate from model selection process.<br>
 </li>
 <li>Just for our understanding</li>
-<li>We would not choose a model configuration based on test set error.</li>
+<li>We would not choose a model configuration based on test set error</li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>error_ex1 <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">model =</span> <span class="fu">character</span>(), </span>
@@ -1065,7 +1102,7 @@ $ rmse_test &lt;dbl&gt; </code></pre>
 <h3 data-number="6.8.2" class="anchored" data-anchor-id="fit-lasso"><span class="header-section-number">6.8.2</span> Fit LASSO</h3>
 <p>LASSO, Ridge, and glmnet all need features on same scale to apply penalty consistently</p>
 <ul>
-<li>Use <code>step_normalize()</code>. This sets mean = 0, sd = 1 (NOTE: Bad name as it does NOT channge shape of distribution!)</li>
+<li>Use <code>step_normalize()</code>. This sets mean = 0, sd = 1 (NOTE: Bad name as it does NOT change shape of distribution!)</li>
 <li>Can use same recipe for LASSO, Ridge, and glmnet</li>
 <li>Can use same train and test feature matrices as well</li>
 </ul>
@@ -1127,7 +1164,11 @@ $ rmse_test &lt;dbl&gt; </code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_hyperparameters</span>(fits_lasso_1, <span class="at">hp1 =</span> <span class="st">"penalty"</span>, <span class="at">metric =</span> <span class="st">"rmse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="006_regularization_files/figure-html/u6-examples-1-8-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="006_regularization_files/figure-html/u6-examples-1-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <hr>
@@ -1146,7 +1187,7 @@ $ rmse_test &lt;dbl&gt; </code></pre>
 <hr>
 <p>We can now use <code>tidy()</code> to look at the LASSO parameter estimates</p>
 <ul>
-<li><code>tidy()</code> using <code>Matrix</code> package, which has conflicts with <code>tidyr</code>. Load the package without those conflicting functions</li>
+<li><code>tidy()</code> uses <code>Matrix</code> package, which has conflicts with <code>tidyr</code>. Load the package without those conflicting functions</li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(Matrix, <span class="at">exclude =</span> <span class="fu">c</span>(<span class="st">"expand"</span>, <span class="st">"pack"</span>, <span class="st">"unpack"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1162,7 +1203,7 @@ $ rmse_test &lt;dbl&gt; </code></pre>
 <span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy</span>() <span class="sc">|&gt;</span> </span>
 <span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">n =</span> <span class="dv">21</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Loaded glmnet 4.1-8</code></pre>
+<pre><code>Loaded glmnet 4.1-7</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 21 × 3
@@ -1252,7 +1293,11 @@ $ rmse_test &lt;dbl&gt; </code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_hyperparameters</span>(fits_ridge_1, <span class="at">hp1 =</span> <span class="st">"penalty"</span>, <span class="at">metric =</span> <span class="st">"rmse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="006_regularization_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="006_regularization_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <hr>
@@ -1357,7 +1402,11 @@ $ rmse_test &lt;dbl&gt; </code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_hyperparameters</span>(fits_glmnet_1, <span class="at">hp1 =</span> <span class="st">"penalty"</span>, <span class="at">hp2 =</span> <span class="st">"mixture"</span>, <span class="at">metric =</span> <span class="st">"rmse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="006_regularization_files/figure-html/u6-examples-1-15a-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="006_regularization_files/figure-html/u6-examples-1-15a-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <hr>
@@ -1457,6 +1506,7 @@ $ rmse_test &lt;dbl&gt; </code></pre>
 <span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>b_x <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">0</span>), <span class="at">each =</span> n_x <span class="sc">/</span> <span class="dv">2</span>)</span>
 <span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>y_error <span class="ot">&lt;-</span> <span class="dv">100</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<hr>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>mu <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="dv">0</span>, n_x)  </span>
 <span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -1670,14 +1720,18 @@ $ rmse_test &lt;dbl&gt; </code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_hyperparameters</span>(fits_lasso_2, <span class="at">hp1 =</span> <span class="st">"penalty"</span>, <span class="at">metric =</span> <span class="st">"rmse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="006_regularization_files/figure-html/unnamed-chunk-34-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="006_regularization_files/figure-html/unnamed-chunk-34-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <hr>
 <p>Fit best LASSO to full training set</p>
 <ul>
 <li>Notice the many <span class="math inline">\(\beta\)</span> = 0</li>
-<li>It did set some of the “good” predictors to 0 as well</li>
+<li>It did set some of the “good” features to 0 as well</li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>fit_lasso_2 <span class="ot">&lt;-</span></span>
@@ -1768,14 +1822,22 @@ $ rmse_test &lt;dbl&gt; </code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_hyperparameters</span>(fits_ridge_2, <span class="at">hp1 =</span> <span class="st">"penalty"</span>, <span class="at">metric =</span> <span class="st">"rmse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="006_regularization_files/figure-html/unnamed-chunk-38-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="006_regularization_files/figure-html/unnamed-chunk-38-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <hr>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_hyperparameters</span>(fits_ridge_2, <span class="at">hp1 =</span> <span class="st">"penalty"</span>, <span class="at">metric =</span> <span class="st">"rmse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="006_regularization_files/figure-html/unnamed-chunk-39-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="006_regularization_files/figure-html/unnamed-chunk-39-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <hr>
@@ -1870,7 +1932,11 @@ $ rmse_test &lt;dbl&gt; </code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot_hyperparameters</span>(fits_glmnet_2, <span class="at">hp1 =</span> <span class="st">"penalty"</span>, <span class="at">hp2 =</span> <span class="st">"mixture"</span>, <span class="at">metric =</span> <span class="st">"rmse"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
-<p><img src="006_regularization_files/figure-html/unnamed-chunk-43-1.png" class="img-fluid" width="672"></p>
+<div>
+<figure class="figure">
+<p><img src="006_regularization_files/figure-html/unnamed-chunk-43-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
 </div>
 </div>
 <hr>
@@ -2125,7 +2191,7 @@ L1 penalized (LASSO) logistic regression (w/ labels coded 0,1):</p>
 </ul>
 
 
-<div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-ISL" class="csl-entry" role="listitem">
 James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2023. <em>An <span>Introduction</span> to <span>Statistical Learning</span>: With <span>Applications</span> in <span>R</span></em>. 2nd ed. Springer <span>Texts</span> in <span>Statistics</span>. <span>New York</span>: <span>Springer-Verlag</span>.
 </div>
@@ -2213,10 +2279,9 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
-  function tippyHover(el, contentFn) {
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
-      content: contentFn,
       maxWidth: 500,
       delay: 100,
       arrow: false,
@@ -2226,8 +2291,17 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       interactive: true,
       interactiveBorder: 10,
       theme: 'quarto',
-      placement: 'bottom-start'
+      placement: 'bottom-start',
     };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
     window.tippy(el, config); 
   }
   const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
@@ -2240,6 +2314,125 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
       return note.innerHTML;
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      // TODO in 1.5, we should make sure this works without a callout special case
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
     });
   }
       let selectedAnnoteEl;
@@ -2283,6 +2476,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
             }
             div.style.top = top - 2 + "px";
             div.style.height = height + 4 + "px";
+            div.style.left = 0;
             let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
             if (gutterDiv === null) {
               gutterDiv = window.document.createElement("div");
@@ -2308,6 +2502,32 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
         });
         selectedAnnoteEl = undefined;
       };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
       // Attach click handler to the DT
       const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
       for (const annoteDlNode of annoteDls) {
@@ -2369,12 +2589,12 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./005_resampling.html" class="pagination-link">
+      <a href="./005_resampling.html" class="pagination-link  aria-label=" &lt;span="" methods="" for="" model="" selection="" and="" evaluation&lt;="" span&gt;"="">
         <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">5</span>&nbsp; <span class="chapter-title">Resampling Methods for Model Selection and Evaluation</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./007_midterm.html" class="pagination-link">
+      <a href="./007_midterm.html" class="pagination-link" aria-label="<span class='chapter-number'>7</span>&nbsp; <span class='chapter-title'>Midterm Exam</span>">
         <span class="nav-page-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Midterm Exam</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
@@ -2383,4 +2603,5 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-</body></html>
+
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/jjcurtin/book_iaml/edit/main/006_regularization.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div></div></footer></body></html>
