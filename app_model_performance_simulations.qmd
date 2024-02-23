@@ -1,1 +1,232 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
 # Appendix 2: Simulations of Model Performance Bias and Variance by Resampling Techniques
+
+
+
+## General Setup
+
+Load libraries
+```{r}
+#| message: false
+#| 
+library(tidyverse)
+library(tidymodels)
+
+theme_set(theme_classic())
+```
+
+## DGP
+Function to generate `n_obs` of simulated observations
+
+* DGP is linear on all `x` + normal error with sd = `irr_err`
+* y is simple sum such that all coefficients = 1
+* features are correlated based on `sigma`
+```{r}
+simulate_DGP <- function (n_obs, n_features, irr_err, mu, sigma){
+
+  MASS::mvrnorm(n_obs, mu = mu, Sigma = sigma) |> 
+    magrittr::set_colnames(str_c("x", 1:n_features)) |> 
+    as_tibble() |> 
+    mutate(error = rnorm(n_obs, 0, irr_err),
+           y = rowSums(across(everything()))) |> 
+    select(-error)
+}
+```
+
+
+## Simulation settings
+```{r}
+n_sims <- 1000  # number of simulations
+n_obs <- 100 # number of observations
+
+n_features <- 20
+mu <- rep(0, n_features)
+sigma <- matrix(.3, nrow = n_features, ncol = n_features)
+diag(sigma) <- 1
+irr_err <- 10
+  
+set.seed(123456)
+# first call so that we can set up recipe
+df <- simulate_DGP(n_obs, n_features, irr_err, mu, sigma) 
+rec <- recipe(y ~ ., data = df)
+
+rmse_combined = NULL  # to store RMSE for all methods
+```
+
+
+## Get simulation dfs
+
+```{r}
+dfs <- rep(n_obs, n_sims) |>
+  map(\(n_obs) simulate_DGP(n_obs, n_features, irr_err, mu, sigma))
+```
+
+
+## What is the TRUE model performance
+
+The irreducible error is set to 10 but our model will have some reducible error too so the true performance of our model will be worse than 10
+
+* The DGP is linear 
+* but we only have 100 observations 
+* and we have 20 features
+
+Lets fit many models of n= 100 (the size of our final model) and assess performance in really big samples of new data (ah the luxury of simulated data!)
+```{r}
+
+# models based on full n for each simulation run
+models <- dfs |> 
+  map(\(df) linear_reg() |> fit(y ~ ., data = df))
+
+# big samples of held out data for high precision assessment of models
+# 1 for each model
+outs <- rep(10000, n_sims) |> 
+  map(\(n_obs) simulate_DGP(n_obs, n_features, irr_err, mu, sigma))
+
+# list of predictions for out from each model
+preds <- map2(models, outs, \(model, out) predict(model, out))
+
+# get mean rmse in big held out data set for 1000 full n models
+# should be very precise
+rmse_true <- map2_dbl(outs, preds, \(out, pred)  rmse_vec(out$y,
+                                                      pred$.pred)) |> 
+  mean()
+
+message("True RMSE = ", rmse_true)
+```
+
+Parallel processing for resampling methods with `fit_resamples()`
+```{r}
+cl <- parallel::makePSOCKcluster(parallel::detectCores(logical = FALSE))
+doParallel::registerDoParallel(cl)
+```
+
+## Validation set
+
+### 80/20 split
+
+
+Here we simulate repeated use of the validation set approach to assess our model performance
+```{r}
+rmse_combined <- dfs |> 
+  map(\(df) validation_split(df, prop = .80)) |>   # validation set split
+  map(\(split) linear_reg() |> fit_resamples(resamples = split, 
+                                              preprocessor = rec,
+                                              metrics = metric_set(rmse))) |> 
+  map(\(fits) collect_metrics(fits, summarise = TRUE)) |> 
+  list_rbind() |> 
+  mutate(method = "val_set_80") |>       # label results in df
+  bind_rows(rmse_combined)
+```
+
+## 50/50 split
+
+Here we simulate repeated use of the validation set approach to assess our model performance
+```{r}
+rmse_combined <- dfs |> 
+  map(\(df) validation_split(df, prop = .50)) |>   # validation set split
+  map(\(split) linear_reg() |> fit_resamples(resamples = split, 
+                                              preprocessor = rec,
+                                              metrics = metric_set(rmse))) |> 
+  map(\(fits) collect_metrics(fits, summarize = TRUE)) |> 
+  list_rbind() |> 
+  mutate(method = "val_set_50") |>       # label results in df
+  bind_rows(rmse_combined)
+```
+
+## K-fold
+
+### Simple 10-fold
+```{r}
+rmse_combined <- dfs |> 
+  map(\(df) vfold_cv(df, v = 10)) |>   # 10-fold
+  map(\(split) linear_reg() |> fit_resamples(resamples = split, 
+                                              preprocessor = rec,
+                                              metrics = metric_set(rmse))) |> 
+  map(\(fits) collect_metrics(fits, summarize = TRUE)) |> 
+  list_rbind() |> 
+  mutate(method = "10-fold") |>       # label results in df
+  bind_rows(rmse_combined)
+```
+
+
+### 3x 10-Fold
+```{r}
+rmse_combined <- dfs |> 
+  map(\(df) vfold_cv(df, v = 10, repeats = 3)) |>   # 3x10-fold
+  map(\(split) linear_reg() |> fit_resamples(resamples = split, 
+                                              preprocessor = rec,
+                                              metrics = metric_set(rmse))) |> 
+  map(\(fits) collect_metrics(fits, summarize = TRUE)) |> 
+  list_rbind() |> 
+  mutate(method = "3x10-fold") |> # label results in df
+  bind_rows(rmse_combined)
+```
+
+
+
+## Bootstrap Resampling
+
+### 10 resamples
+
+```{r}
+rmse_combined <- dfs |> 
+  map(\(df) bootstraps(df, times = 10)) |>   # 10 boots
+  map(\(split) linear_reg() |> fit_resamples(resamples = split, 
+                                              preprocessor = rec,
+                                              metrics = metric_set(rmse))) |> 
+  map(\(fits) collect_metrics(fits, summarize = TRUE)) |> 
+  list_rbind() |> 
+  mutate(method = "boot_10") |>       # label results in df
+  bind_rows(rmse_combined)
+```
+
+### 100 resamples
+```{r}
+rmse_combined <- dfs |> 
+  map(\(df) bootstraps(df, times = 100)) |>   # 100 boots
+  map(\(split) linear_reg() |> fit_resamples(resamples = split, 
+                                              preprocessor = rec,
+                                              metrics = metric_set(rmse))) |> 
+  map(\(fits) collect_metrics(fits, summarize = TRUE)) |> 
+  list_rbind() |> 
+  mutate(method = "boot_100") |>       # label results in df
+  bind_rows(rmse_combined)
+```
+
+### 1000 resamples
+```{r}
+rmse_combined <- dfs |> 
+  map(\(df) bootstraps(df, times = 1000)) |>   # 1000 boots
+  map(\(split) linear_reg() |> fit_resamples(resamples = split, 
+                                              preprocessor = rec,
+                                              metrics = metric_set(rmse))) |> 
+  map(\(fits) collect_metrics(fits, summarize = TRUE)) |> 
+  list_rbind() |> 
+  mutate(method = "boot_1000") |>       # label results in df
+  bind_rows(rmse_combined)
+```
+
+
+## Summarize
+```{r a102-summary}
+rmse_combined |> 
+  group_by(method) |> 
+  summarize(rmse_mean = mean(mean),
+            rmse_sd = sd(mean),
+            n = n())
+```
+
+
+##  Plot sampling distributions
+```{r a102-plot}
+rmse_combined |> 
+  ggplot(aes(x = mean, color = method)) + 
+  geom_density() +
+  geom_vline(aes(xintercept = mean(rmse_true)),
+            color = "blue", linetype = "dashed", linewidth = 1)
+```

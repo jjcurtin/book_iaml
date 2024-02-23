@@ -942,5 +942,82 @@
       "Appendices",
       "<span class='chapter-number'>21</span>  <span class='chapter-title'>Test</span>"
     ]
+  },
+  {
+    "objectID": "app_model_performance_simulations.html#general-setup",
+    "href": "app_model_performance_simulations.html#general-setup",
+    "title": "18  Appendix 2: Simulations of Model Performance Bias and Variance by Resampling Techniques",
+    "section": "18.1 General Setup",
+    "text": "18.1 General Setup\nLoad libraries\n\nlibrary(tidyverse)\n\n── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──\n✔ dplyr     1.1.2     ✔ readr     2.1.4\n✔ forcats   1.0.0     ✔ stringr   1.5.0\n✔ ggplot2   3.4.2     ✔ tibble    3.2.1\n✔ lubridate 1.9.2     ✔ tidyr     1.3.0\n✔ purrr     1.0.1     \n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter() masks stats::filter()\n✖ dplyr::lag()    masks stats::lag()\nℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\nlibrary(tidymodels)\n\n── Attaching packages ────────────────────────────────────── tidymodels 1.1.0 ──\n✔ broom        1.0.5          ✔ rsample      1.1.1     \n✔ dials        1.2.0          ✔ tune         1.1.1     \n✔ infer        1.0.4          ✔ workflows    1.1.3     \n✔ modeldata    1.1.0          ✔ workflowsets 1.0.1     \n✔ parsnip      1.1.0.9004     ✔ yardstick    1.2.0     \n✔ recipes      1.0.6          \n── Conflicts ───────────────────────────────────────── tidymodels_conflicts() ──\n✖ scales::discard() masks purrr::discard()\n✖ dplyr::filter()   masks stats::filter()\n✖ recipes::fixed()  masks stringr::fixed()\n✖ dplyr::lag()      masks stats::lag()\n✖ yardstick::spec() masks readr::spec()\n✖ recipes::step()   masks stats::step()\n• Search for functions across packages at https://www.tidymodels.org/find/\n\ntheme_set(theme_classic())"
+  },
+  {
+    "objectID": "app_model_performance_simulations.html#dgp",
+    "href": "app_model_performance_simulations.html#dgp",
+    "title": "18  Appendix 2: Simulations of Model Performance Bias and Variance by Resampling Techniques",
+    "section": "18.2 DGP",
+    "text": "18.2 DGP\nFunction to generate n_obs of simulated observations\n\nDGP is linear on all x + normal error with sd = irr_err\ny is simple sum such that all coefficients = 1\nfeatures are correlated based on sigma\n\n\nsimulate_DGP &lt;- function (n_obs, n_features, irr_err, mu, sigma){\n\n  MASS::mvrnorm(n_obs, mu = mu, Sigma = sigma) |&gt; \n    magrittr::set_colnames(str_c(\"x\", 1:n_features)) |&gt; \n    as_tibble() |&gt; \n    mutate(error = rnorm(n_obs, 0, irr_err),\n           y = rowSums(across(everything()))) |&gt; \n    select(-error)\n}"
+  },
+  {
+    "objectID": "app_model_performance_simulations.html#simulation-settings",
+    "href": "app_model_performance_simulations.html#simulation-settings",
+    "title": "18  Appendix 2: Simulations of Model Performance Bias and Variance by Resampling Techniques",
+    "section": "18.3 Simulation settings",
+    "text": "18.3 Simulation settings\n\nn_sims &lt;- 1000  # number of simulations\nn_obs &lt;- 100 # number of observations\n\nn_features &lt;- 20\nmu &lt;- rep(0, n_features)\nsigma &lt;- matrix(.3, nrow = n_features, ncol = n_features)\ndiag(sigma) &lt;- 1\nirr_err &lt;- 10\n  \nset.seed(123456)\n# first call so that we can set up recipe\ndf &lt;- simulate_DGP(n_obs, n_features, irr_err, mu, sigma) \nrec &lt;- recipe(y ~ ., data = df)\n\nrmse_combined = NULL  # to store RMSE for all methods"
+  },
+  {
+    "objectID": "app_model_performance_simulations.html#get-simulation-dfs",
+    "href": "app_model_performance_simulations.html#get-simulation-dfs",
+    "title": "18  Appendix 2: Simulations of Model Performance Bias and Variance by Resampling Techniques",
+    "section": "18.4 Get simulation dfs",
+    "text": "18.4 Get simulation dfs\n\ndfs &lt;- rep(n_obs, n_sims) |&gt;\n  map(\\(n_obs) simulate_DGP(n_obs, n_features, irr_err, mu, sigma))"
+  },
+  {
+    "objectID": "app_model_performance_simulations.html#what-is-the-true-model-performance",
+    "href": "app_model_performance_simulations.html#what-is-the-true-model-performance",
+    "title": "18  Appendix 2: Simulations of Model Performance Bias and Variance by Resampling Techniques",
+    "section": "18.5 What is the TRUE model performance",
+    "text": "18.5 What is the TRUE model performance\nThe irreducible error is set to 10 but our model will have some reducible error too so the true performance of our model will be worse than 10\n\nThe DGP is linear\nbut we only have 100 observations\nand we have 20 features\n\nLets fit many models of n= 100 (the size of our final model) and assess performance in really big samples of new data (ah the luxury of simulated data!)\n\n# models based on full n for each simulation run\nmodels &lt;- dfs |&gt; \n  map(\\(df) linear_reg() |&gt; fit(y ~ ., data = df))\n\n# big samples of held out data for high precision assessment of models\n# 1 for each model\nouts &lt;- rep(10000, n_sims) |&gt; \n  map(\\(n_obs) simulate_DGP(n_obs, n_features, irr_err, mu, sigma))\n\n# list of predictions for out from each model\npreds &lt;- map2(models, outs, \\(model, out) predict(model, out))\n\n# get mean rmse in big held out data set for 1000 full n models\n# should be very precise\nrmse_true &lt;- map2_dbl(outs, preds, \\(out, pred)  rmse_vec(out$y,\n                                                      pred$.pred)) |&gt; \n  mean()\n\nmessage(\"True RMSE = \", rmse_true)\n\nTrue RMSE = 11.2850037573609\n\n\nParallel processing for resampling methods with fit_resamples()\n\ncl &lt;- parallel::makePSOCKcluster(parallel::detectCores(logical = FALSE))\ndoParallel::registerDoParallel(cl)"
+  },
+  {
+    "objectID": "app_model_performance_simulations.html#validation-set",
+    "href": "app_model_performance_simulations.html#validation-set",
+    "title": "18  Appendix 2: Simulations of Model Performance Bias and Variance by Resampling Techniques",
+    "section": "18.6 Validation set",
+    "text": "18.6 Validation set\n\n18.6.1 80/20 split\nHere we simulate repeated use of the validation set approach to assess our model performance\n\nrmse_combined &lt;- dfs |&gt; \n  map(\\(df) validation_split(df, prop = .80)) |&gt;   # validation set split\n  map(\\(split) linear_reg() |&gt; fit_resamples(resamples = split, \n                                              preprocessor = rec,\n                                              metrics = metric_set(rmse))) |&gt; \n  map(\\(fits) collect_metrics(fits, summarise = TRUE)) |&gt; \n  list_rbind() |&gt; \n  mutate(method = \"val_set_80\") |&gt;       # label results in df\n  bind_rows(rmse_combined)"
+  },
+  {
+    "objectID": "app_model_performance_simulations.html#split-1",
+    "href": "app_model_performance_simulations.html#split-1",
+    "title": "18  Appendix 2: Simulations of Model Performance Bias and Variance by Resampling Techniques",
+    "section": "18.7 50/50 split",
+    "text": "18.7 50/50 split\nHere we simulate repeated use of the validation set approach to assess our model performance\n\nrmse_combined &lt;- dfs |&gt; \n  map(\\(df) validation_split(df, prop = .50)) |&gt;   # validation set split\n  map(\\(split) linear_reg() |&gt; fit_resamples(resamples = split, \n                                              preprocessor = rec,\n                                              metrics = metric_set(rmse))) |&gt; \n  map(\\(fits) collect_metrics(fits, summarize = TRUE)) |&gt; \n  list_rbind() |&gt; \n  mutate(method = \"val_set_50\") |&gt;       # label results in df\n  bind_rows(rmse_combined)"
+  },
+  {
+    "objectID": "app_model_performance_simulations.html#k-fold",
+    "href": "app_model_performance_simulations.html#k-fold",
+    "title": "18  Appendix 2: Simulations of Model Performance Bias and Variance by Resampling Techniques",
+    "section": "18.8 K-fold",
+    "text": "18.8 K-fold\n\n18.8.1 Simple 10-fold\n\nrmse_combined &lt;- dfs |&gt; \n  map(\\(df) vfold_cv(df, v = 10)) |&gt;   # 10-fold\n  map(\\(split) linear_reg() |&gt; fit_resamples(resamples = split, \n                                              preprocessor = rec,\n                                              metrics = metric_set(rmse))) |&gt; \n  map(\\(fits) collect_metrics(fits, summarize = TRUE)) |&gt; \n  list_rbind() |&gt; \n  mutate(method = \"10-fold\") |&gt;       # label results in df\n  bind_rows(rmse_combined)\n\n\n\n18.8.2 3x 10-Fold\n\nrmse_combined &lt;- dfs |&gt; \n  map(\\(df) vfold_cv(df, v = 10, repeats = 3)) |&gt;   # 3x10-fold\n  map(\\(split) linear_reg() |&gt; fit_resamples(resamples = split, \n                                              preprocessor = rec,\n                                              metrics = metric_set(rmse))) |&gt; \n  map(\\(fits) collect_metrics(fits, summarize = TRUE)) |&gt; \n  list_rbind() |&gt; \n  mutate(method = \"3x10-fold\") |&gt;       # label results in df\n  bind_rows(rmse_combined)"
+  },
+  {
+    "objectID": "app_model_performance_simulations.html#bootstrap-resampling",
+    "href": "app_model_performance_simulations.html#bootstrap-resampling",
+    "title": "18  Appendix 2: Simulations of Model Performance Bias and Variance by Resampling Techniques",
+    "section": "18.9 Bootstrap Resampling",
+    "text": "18.9 Bootstrap Resampling\n\n18.9.1 100 resamples\n\nrmse_combined &lt;- dfs |&gt; \n  map(\\(df) bootstraps(df, times = 100)) |&gt;   # 100 boots\n  map(\\(split) linear_reg() |&gt; fit_resamples(resamples = split, \n                                              preprocessor = rec,\n                                              metrics = metric_set(rmse))) |&gt; \n  map(\\(fits) collect_metrics(fits, summarize = TRUE)) |&gt; \n  list_rbind() |&gt; \n  mutate(method = \"boot_500\") |&gt;       # label results in df\n  bind_rows(rmse_combined)\n\n\n\n18.9.2 1000 resamples\n\nrmse_combined &lt;- dfs |&gt; \n  map(\\(df) bootstraps(df, times = 1000)) |&gt;   # 1000 boots\n  map(\\(split) linear_reg() |&gt; fit_resamples(resamples = split, \n                                              preprocessor = rec,\n                                              metrics = metric_set(rmse))) |&gt; \n  map(\\(fits) collect_metrics(fits, summarize = TRUE)) |&gt; \n  list_rbind() |&gt; \n  mutate(method = \"boot_1000\") |&gt;       # label results in df\n  bind_rows(rmse_combined)"
+  },
+  {
+    "objectID": "app_model_performance_simulations.html#summarize",
+    "href": "app_model_performance_simulations.html#summarize",
+    "title": "18  Appendix 2: Simulations of Model Performance Bias and Variance by Resampling Techniques",
+    "section": "18.10 Summarize",
+    "text": "18.10 Summarize\n\nrmse_combined |&gt; \n  group_by(method) |&gt; \n  summarize(rmse_mean = mean(mean),\n            rmse_sd = sd(mean),\n            n = n())\n\n# A tibble: 6 × 4\n  method     rmse_mean rmse_sd     n\n  &lt;chr&gt;          &lt;dbl&gt;   &lt;dbl&gt; &lt;int&gt;\n1 10-fold         11.2   0.957  1000\n2 3x10-fold       11.2   0.928  1000\n3 boot_1000       12.5   1.02   1000\n4 boot_500        12.5   1.03   1000\n5 val_set_50      13.2   1.77   1000\n6 val_set_80      11.6   1.87   1000"
+  },
+  {
+    "objectID": "app_model_performance_simulations.html#plot-sampling-distributions",
+    "href": "app_model_performance_simulations.html#plot-sampling-distributions",
+    "title": "18  Appendix 2: Simulations of Model Performance Bias and Variance by Resampling Techniques",
+    "section": "18.11 Plot sampling distributions",
+    "text": "18.11 Plot sampling distributions\n\nrmse_combined |&gt; \n  ggplot(aes(x = mean, color = method)) + \n  geom_density() +\n  geom_vline(aes(xintercept = mean(rmse_true)),\n            color = \"blue\", linetype = \"dashed\", linewidth = 1)"
   }
 ]
