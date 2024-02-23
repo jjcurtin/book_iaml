@@ -12,6 +12,8 @@ editor_options:
 
 Load libraries
 ```{r}
+#| message: false
+#| 
 library(tidyverse)
 library(tidymodels)
 
@@ -161,13 +163,27 @@ rmse_combined <- dfs |>
                                               metrics = metric_set(rmse))) |> 
   map(\(fits) collect_metrics(fits, summarize = TRUE)) |> 
   list_rbind() |> 
-  mutate(method = "3x10-fold") |>       # label results in df
+  mutate(method = "3x10-fold") |> # label results in df
   bind_rows(rmse_combined)
 ```
 
 
 
 ## Bootstrap Resampling
+
+### 10 resamples
+
+```{r}
+rmse_combined <- dfs |> 
+  map(\(df) bootstraps(df, times = 10)) |>   # 10 boots
+  map(\(split) linear_reg() |> fit_resamples(resamples = split, 
+                                              preprocessor = rec,
+                                              metrics = metric_set(rmse))) |> 
+  map(\(fits) collect_metrics(fits, summarize = TRUE)) |> 
+  list_rbind() |> 
+  mutate(method = "boot_10") |>       # label results in df
+  bind_rows(rmse_combined)
+```
 
 ### 100 resamples
 ```{r}
@@ -178,7 +194,7 @@ rmse_combined <- dfs |>
                                               metrics = metric_set(rmse))) |> 
   map(\(fits) collect_metrics(fits, summarize = TRUE)) |> 
   list_rbind() |> 
-  mutate(method = "boot_500") |>       # label results in df
+  mutate(method = "boot_100") |>       # label results in df
   bind_rows(rmse_combined)
 ```
 
