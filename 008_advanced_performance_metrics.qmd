@@ -1,45 +1,1741 @@
-# Advanced Performance Metrics
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
 
+# Advanced Performance Metrics
 
 ## Overview of Unit
 
-**Learning Objectives**
+### Learning Objectives
 
-* Understand costs and benefits of accuracy 
-* Use of a confusion matrix
-* Understand costs and benefits of other performanc metrics
-* The ROC curve and area under the curve
-* Model selection using other performance metrics
-* How to address class imbalance
-  * Selection of performance metric
-  * Selection of classification threshold
-  * Sampling and resampling approaches
+- Understand costs and benefits of accuracy 
+- Use of a confusion matrix
+- Understand costs and benefits of other performance metrics
+- The ROC curve and area under the curve
+- Model selection using other performance metrics
+- How to address class imbalance
+  - Selection of performance metric
+  - Selection of classification threshold
+  - Sampling and resampling approaches
 
+-----
 
-**Readings**
+### Readings
 
-* @APM [Chapter 11, pp 247-266](https://vuquangnguyen2016.files.wordpress.com/2018/03/applied-predictive-modeling-max-kuhn-kjell-johnson_1518.pdf)
-* @APM [Chapter 16, pp 419-435](https://vuquangnguyen2016.files.wordpress.com/2018/03/applied-predictive-modeling-max-kuhn-kjell-johnson_1518.pdf)
+- @APM [Chapter 11, pp 247-266](https://vuquangnguyen2016.files.wordpress.com/2018/03/applied-predictive-modeling-max-kuhn-kjell-johnson_1518.pdf)
+- @APM [Chapter 16, pp 419-435](https://vuquangnguyen2016.files.wordpress.com/2018/03/applied-predictive-modeling-max-kuhn-kjell-johnson_1518.pdf)
 
-**Lecture Videos**
+Post questions to the readings channel in Slack
 
-* [Lecture 1: Unit Introduction]()
-* [Lecture 2: The Confusion Matrix]()
-* [Lecture 3: Metrics from the Confusion Matrix, Part 1]()
-* [Lecture 4: Metrics from the Confusion Matrix, Part 2]()
-* [Lecture 5: The Receiver Operating Characteristic (ROC) Curve]()
-* [Lecture 6: Selecting Model Configurations with Other Metrics]()
-* [Lecture 7: Addressing Class Imbalance]()
+### Lecture Videos
 
-* [Discussion]()
+- [Lecture 1: Unit Introduction]()
+- [Lecture 2: The Confusion Matrix]()
+- [Lecture 3: Metrics from the Confusion Matrix, Part 1]()
+- [Lecture 4: Metrics from the Confusion Matrix, Part 2]()
+- [Lecture 5: The Receiver Operating Characteristic (ROC) Curve]()
+- [Lecture 6: Selecting Model Configurations with Other Metrics]()
+- [Lecture 7: Addressing Class Imbalance]()
 
-**Coding Assignment**
+- [Discussion]()
 
-* [data]()
-* [rmd shell]()
-* solution: [rmd](); [html]()
+Post questions to the video-lectures channel in Slack
 
+-----
+
+### Coding Assignment
+
+- [data]()
+- [qmd shell]()
+- [solution]()
+
+Post questions to application-assignments Slack channel
 
 Submit the application assignment [here](https://canvas.wisc.edu/courses/395546/assignments/2187692) and complete the [unit quiz](https://canvas.wisc.edu/courses/395546/quizzes/514050) by 8 pm on Wednesday, March 13th
  
+-----
+
+## Introduction
+
+```{r}
+#| include: false
+
+# set up environment.  Now hidden from view
+
+options(conflicts.policy = "depends.ok")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+tidymodels_conflictRules()
+
+library(tidyverse) # for general data wrangling
+library(tidymodels) # for modeling
+library(xfun, include.only = "cache_rds")
+
+cl <- parallel::makePSOCKcluster(parallel::detectCores(logical = FALSE))
+doParallel::registerDoParallel(cl)
+
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+
+theme_set(theme_classic())
+options(tibble.width = Inf)
+path_data <- "./data"
+
+rerun_setting <- FALSE 
+``` 
+
+In this unit, we will again use the Cleveland heart disease dataset.
+\
+\
+However, I have modified this to make the outcome unbalanced such that Yes represents approximately 10% of the observations
+\
+\
+Now that we will calculate performance metrics beyond accuracy, the order of the levels of our outcome variable(`disease`) matters.  We will make sure that the positive class (event of interest; in this case yes for `disease`) is the **first level**.
+
+-----
+
+First, lets open and skim the raw data
+```{r}
+data_all <- read_csv(here::here(path_data, "cleveland_unbalanced.csv"), 
+                     col_names = FALSE, na = "?",col_types = cols()) |> 
+  rename(age = X1,
+         sex = X2,
+         cp = X3,
+         rest_bp = X4,
+         chol = X5,
+         fbs = X6,
+         rest_ecg = X7,
+         exer_max_hr = X8,
+         exer_ang = X9,
+         exer_st_depress = X10,
+         exer_st_slope = X11,
+         ca = X12,
+         thal = X13,
+         disease = X14) 
+
+data_all |> skim_some()
+```
+
+-----
+
+Code categorical variables as factors with meaningful text labels (and no spaces)
+
+- NOTE the use of `disease = fct_relevel (disease, "yes")` to set yes as positive class (first level) for disease
+```{r}
+data_all <- data_all |> 
+  mutate(disease = factor(disease, levels = 0:4, 
+                          labels = c("no", "yes", "yes", "yes", "yes")),
+         disease = fct_relevel (disease, "yes"),
+         sex = factor(sex,  levels = c(0, 1), labels = c("female", "male")),
+         fbs = factor(fbs, levels = c(0, 1), labels = c("no", "yes")),
+         exer_ang = factor(exer_ang, levels = c(0, 1), labels = c("no", "yes")),
+         exer_st_slope = factor(exer_st_slope, levels = 1:3, 
+                                labels = c("upslope", "flat", "downslope")),
+         cp = factor(cp, levels = 1:4, 
+                     labels = c("typ_ang", "atyp_ang", "non_anginal", "non_anginal")),
+         rest_ecg = factor(rest_ecg, levels = 0:2, 
+                           labels = c("normal", "wave_abn", "ventric_hypertrophy")),
+         thal = factor(thal, levels = c(3, 6, 7), 
+                       labels = c("normal", "fixeddefect", "reversabledefect")))
+
+data_all |> skim_some()
+```
+
+-----
+
+Disease is now unbalanced
+```{r}
+data_all |> tab(disease)
+```
+
+-----
+
+For this example, we will evaluate our final model using a held out test set
+
+```{r}
+set.seed(20140102)
+splits_test <- data_all |> 
+  initial_split(prop = 2/3, strata = "disease")
+
+data_trn <- splits_test |> 
+  analysis()
+
+data_test <- splits_test |> 
+  assessment()
+```
+
+-----
+
+We will be fitting a penalized logistic regression again (using glmnet)
+
+We will do only basic feature engineering for this algorithm and to handle missing data
+
+```{r}
+rec <- recipe(disease ~ ., data = data_trn) |> 
+  step_impute_median(all_numeric_predictors()) |> 
+  step_impute_mode(all_nominal_predictors()) |>   
+  step_dummy(all_nominal_predictors()) |> 
+  step_normalize(all_predictors())
+```
+
+-----
+
+We tune/select best hyperparameter values via bootstrap resampling with the training data
+
+- get bootstrap splits
+- make grid of hyperparameter values
+```{r}
+splits_boot <- data_trn |> 
+  bootstraps(times = 100, strata = "disease")  
+
+grid_glmnet <- expand_grid(penalty = exp(seq(-8, 3, length.out = 200)),
+                           mixture = seq(0, 1, length.out = 6))
+```
+
+-----
+
+```{r}
+#| label: fits_glmnet
+
+fits_glmnet <- cache_rds(
+  expr = {
+    logistic_reg(penalty = tune(), 
+                 mixture = tune()) |> 
+      set_engine("glmnet") |> 
+      set_mode("classification") |> 
+      tune_grid(preprocessor = rec, 
+                resamples = splits_boot, grid = grid_glmnet, 
+                metrics = metric_set(accuracy))
+  },
+  dir = "cache/008/",
+  file = "fits_glmnet",
+  rerun = rerun_setting)
+```
+
+-----
+
+Review hyperparameter plot and best values for hyperparameters
+```{r}
+plot_hyperparameters(fits_glmnet, hp1 = "penalty", hp2 = "mixture", 
+                     metric = "accuracy", log_hp1 = TRUE)
+```
+
+```{r}
+show_best(fits_glmnet, n = 1)
+```
+
+-----
+
+Let's fit this best model configuration to all of our training data and evaluate it in test
+```{r}
+rec_prep <- rec |> 
+  prep(data_trn)
+feat_trn <- rec_prep |> 
+  bake(data_trn)
+
+fit_glmnet <-   
+  logistic_reg(penalty = select_best(fits_glmnet)$penalty, 
+               mixture = select_best(fits_glmnet)$mixture) |> 
+  set_engine("glmnet") |> 
+  set_mode("classification") |> 
+  fit(disease ~ ., data = feat_trn)
+```
+
+-----
+
+And evaluate it by predicting into test
+```{r}
+feat_test <- rec_prep |> 
+  bake(data_test)
+
+(model_accuracy <- accuracy_vec(feat_test$disease, predict(fit_glmnet, feat_test)$.pred_class))
+```
+
+-----
+
+Accuracy is an attractive measure because it is:
+
+- Intuitive and widely understood
+- Naturally extends to multi-class scenarios
+- These are not trivial advantages in research or application
+\
+\
+
+However, accuracy has at least three problems in some situations
+
+- If the outcome is unbalanced, it can be misleading
+  - High performance from simply predicting the majority (vs. minority) class for all observations
+  - Need to anchor evaluation of accuracy to baseline performance based on the majority case percentage
+
+- If the outcome is unbalanced, selecting among model configurations with accuracy can be biased toward configurations that predict the majority class because that will yield high accuracy by itself even without any signal from the predictors
+
+- Regardless of outcome distribution, it considers false positives (FP) and false negatives (FN) equivalent in their costs
+  - This is often not the case
+
+-----
+
+Outcome distributions :
+
+- May start to be considered unbalanced at ratios of 1:5 (20% of cases in the infrequent class)
+- In many real life applications (e.g., fraud detection), imbalance ratios ranging from 1:1000 up to 1:5000 are not atypical
+
+When working with unbalanced datasets:
+
+- The class or classes with many observations are called the major or **majority class(es)**
+- The class with few observations (and there is typically just one) is called the minor or **minority class**.
+\
+\
+
+In our example, the majority class is negative (no) for heart disease and the minority class is positive (yes) for heart disease
+
+-----
+
+::: {.callout-important collapse="false"}
+### Question: In our example, our model's accuracy in test seemed high but was it really performing as well as this seems?
+```{html}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show Answer"
+Although this test accuracy seems high, this is somewhat misleading.  A model that 
+simply labeled everyone as negative for heart disease would achieve almost as high 
+accuracy in our test data
+```
+:::
+
+-----
+
+```{r}
+(model_accuracy <- accuracy_vec(feat_test$disease, 
+                                predict(fit_glmnet, feat_test)$.pred_class))
+
+feat_test |> tab(disease)
+```
+
+-----
+
+::: {.callout-important collapse="false"}
+### Question: Perhaps more importantly, are the costs of false positives (screening someone as positive when they do not have heart disease) and false negatives (screening someone as negative when they do have heart disease) comparable for a preliminary screening method?
+```{html}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show Answer"
+Probably not.  A false positive might mean that we do more testing that is unnecessary 
+and later find out they do not have heart disease.   This comes with some monetary 
+cost and also likely some distress for the patient.   However, a false negative 
+means we send the patient home thinking they are healthy and may suffer a heart 
+attack or other bad outcome.  That seems worse if this is only a preliminary screen.
+```
+:::
+
+-----
+
+## The Confusion Matrix and Related Performance Metrics
+
+At a minimum, it seems important to consider these issues explicitly but accuracy is not sufficiently informative.
+\
+\
+The first step to this more careful assessment is to construct a confusion matrix
+
+-----
+
+|               | **Truth** |           |
+|:--------------|:--------- |:----------|
+| **Prediction**| Negative  | Positive  | 
+| Negative      | TN        | FN        |
+| Positive      | FP        | TP        |
+
+Definitions: 
+
+- TN: True negative
+- TP: True positive
+- FP: False positive (Type 1 error/false alarm)
+- FN: False negative (Type 2 error/miss)
+\
+\
+
+Perfect classifier has all the observations on the diagonal from top left to bottom right
+\
+\
+The two types of errors (on the other diagonal) may have different costs
+\
+\
+We can now begin to consider these costs
+
+-----
+
+Lets look at the confusion matrix associated with our model's performance in test
+
+- We will use `conf_mat()` to calculate the confusion matrix
+- There does NOT (yet?) seem to be a vector version (i.e., `conf_mat_vec()`)
+- Therefore, we have to build a tibble of `truth` and `estimate` to pass into `conf_mat()`
+- It is best to assign the result to an object (e.g., `cm`) because we will use it for a few different tasks
+
+```{r}
+cm <- tibble(truth = feat_test$disease,
+             estimate = predict(fit_glmnet, feat_test)$.pred_class) |> 
+  conf_mat(truth, estimate)
+```
+
+-----
+
+Let's display the matrix
+
+- The columns are sorted based on the true value for the observation (i.e., ground truth)
+  - In this case, that is the patients' true disease status
+  - We can see it is unbalanced with most of the cases in the "no" column
+
+- The rows are sorted by our model's predictions
+
+- As we noted above, correct predictions fall on the top/left- bottom/right diagonal
+
+```{r}
+cm
+```
+
+-----
+
+Tidy model's makes it easy to visualize this matrix in one of two types of plots
+
+- mosaic (the default)
+```{r}
+autoplot(cm)
+```
+
+- heatmap
+```{r}
+autoplot(cm, type = "heatmap")
+```
+
+-----
+
+Regardless of the plot, you can now begin to see the issues with our model
+
+- It seems accurate for patients that do NOT have heart disease
+  - 368/381 correct
+- It is not very accurate for patients that DO have heart disease
+  - 17/47 correct
+
+- This differential performance was masked by our global accuracy measure because overall accuracy was weighted heavily toward accuracy for patients without heart disease given their much higher numbers
+
+-----
+
+We can use this confusion matrix as the starting point for MANY other common metrics and methods for evaluating the performance of a classification model.  In many instances, the metrics come in pairs that are relevant for FP and FN errors
+
+- Sensitivity & Specificity
+- Positive and Negative Predictive Value (PPV, NPV)
+- Precision and Recall
+
+There are also some single metric approaches (like accuracy) that may be preferred when the outcome is unbalanced
+
+- Balanced accuracy
+- F1 (and other F-scores)
+- Kappa
+
+-----
+
+There are also graphical approaches are based on either sensitivity/specificity or precision/recall.  These are:
+
+  - The Receiver Operating Characteristic (ROC) curve
+  - The Precision/Recall Curve (not covered further in this unit)
+  - Each of these curves also yields a single metric that represents the area under the curve
+  
+-----
+
+The best metric/method is a function both of your intended use and the class distributions
+
+- As noted, **accuracy** is widely understood but can be misleading when class distributions are highly unbalanced
+
+- **Sensitivity/Specificity** are common in literatures that consider diagnosis (clinical psychology/psychiatry, medicine)
+
+- **Positive/Negative predictive value** are key to consider with sensitivity/specificity when classes are unbalanced
+
+- **ROC curve and its auROC metric** provide nice summary visualization and metric when considering classification thresholds other than 50% (also common when classes are unbalanced or types of errors matter)
+
+-----
+
+Here are definitions of many of the most common metrics linked to the confusion matrix
+
+
+|               | Reference |           |
+|:--------------|:--------- |:----------|
+| **Prediction**| Negative  | Positive  | 
+| Negative      | TN        | FN        |
+| Positive      | FP        | TP        |
+
+$Accuracy = \frac{TN + TP}{TN + TP + FN + FP}$
+
+$Sensitivity\:(Recall) = \frac{TP}{TP + FN}$
+
+$Specificity = \frac{TN}{TN + FP}$
+
+$Positive\:Predictive\:Value\:(Precision) = \frac{TP}{TP + FP}$
+
+$Negative\:Predictive\:Value = \frac{TN}{TN + FN}$
+
+$Balanced\:accuracy = \frac{Sensitivity + Specificity}{2}$
+
+$F_\beta$ score:
+
+- $F1 = 2 * \frac{Precision * Recall}{Precision + Recall}$ (most common; harmonic mean of precision and recall)
+
+- $F_\beta = (1 + \beta^2) * \frac{Precision * Recall}{(\beta^2*Precision) + Recall}$
+
+- $F_\beta$ was derived so that it measures the effectiveness of a classifier for someone who assigns $\beta$ times as much importance to recall as precision
+
+
+-----
+
+It is easy to get any of these performance metrics using `summary()` on the confusion matrix
+
+Many of the statistics generated are based on an understanding of which level is the positive level.  
+
+- Tidymodels (yardstick to be precise) will default to consider the first level the positive level.  
+- If this is not true, some statistics (e.g., sensitivity, specificity) will be incorrect (i.e., swapped). 
+- You can override this default by setting the following parameter inside any function that is affected by the order of the classes" `event_level = "second"`
+
+```{r}
+cm |> summary()
+```
+
+-----
+
+Let's consider some of what these metrics are telling us about our classifier by looking at the metrics and a confusion matrix plot
+
+Let's start with **sensitivity** and **specificity** and their arithmetic mean (**balanced accuracy**)
+
+- These are column specific accuracies
+- Focus is on truth (columns)
+- Focuses a priori on two types of patients that may walk into the clinic to use our classifier
+```{r}
+cm |> 
+  summary() |> 
+  filter(.metric == "sens" | .metric == "spec" | .metric == "bal_accuracy") |> 
+  select(-.estimator)
+```
+
+```{r}
+autoplot(cm, type = "heatmap")
+```
+
+::: {.callout-important collapse="false"}
+### Question: Can you link the numbers in the confusion matrix to Sensitivity and Specificity metrics
+```{html}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show Answer"
+Sensivity is "accuracy" for the positive cases (in this instance, those with 
+disease = yes).  Sensitivity = 17 / (17 + 30)
+
+Specificity is "accuracy" for the negative cases (disease = no).  
+Specificity = 368 / (368 + 13)
+```
+:::
+
+-----
+
+Now let's consider **positive predictive value** and **negative predictive value**
+
+- These are row specific accuracies
+- Focus is on model predictions (rows)
+- Focuses on the utility of the information/screening result provided from our classifier
+- Not typically reported alone but instead in combo with sensitivity/specificity and prevalence (see next pages)
+- Mosaic plot is better visualization for sensitivity/specificity (though I also like the numbers).  Not that useful for PPV/NPV
+- Use heatmap?
+```{r}
+cm |> 
+  summary() |>
+  filter(.metric == "ppv" | .metric == "npv") |> 
+  select(-.estimator)
+
+autoplot(cm, type = "heatmap")
+```
+
+::: {.callout-important collapse="false"}
+### Question: Can you link the numbers in the confusion matrix to PPV and NPV metrics
+```{html}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show Answer"
+PPV is "accuracy" for the positive predictions (in this instance, when the 
+model predicts yes. 
+PPV = 30 / (30 + 13)
+
+NPV is "accuracy" for the negative predictions (disease = no).  
+NPV = 368 / (368 + 17)
+```
+:::
+
+-----
+
+- PPV and NPV are influenced by both sensitivity and specificity BUT ALSO prevalence.
+
+- This becomes important in unbalanced settings where prevalence of classes is not equal
+  - Your classifier's PPV will be lower, even with good sensitivity and specificity if the prevalence of the positive class is low   
+  - Conversely, your classifier's NPV will be lower, even with good sensitivity and specificity, if the prevalence of the negative class is low.
+
+- Prevalence also can vary by testing setting
+
+-----
+
+Tests for many genetic disorders have very good sensitivity and specificity but their PPV (and NPV) vary widely by setting/patients tested
+
+- Test for multiple endocrine neoplasia type 2 (MEN2) based on mutations in RET
+  - Sensitivity = 98%
+  - Specificity = 99.9%
+
+MENS2 has prevalence of 1/30,000 in general population.  If using the test in the general population with 3 million people:
+
+- 100 will have the disease
+- 2,999,900 will not have the disease
+- Column accuracies (sensitivity and specificity) are high
+- PPV will be very BAD;  98/(3000 + 98) = 3.2%
+- Though NPV will be very near perfect! 2996900 / (2996900 + 2)
+
+|               | Reference |           |
+|:--------------|:--------- |:----------|
+| **Prediction**| Negative  | Positive  | 
+| Negative      | 2996900   | 2         |
+| Positive      | 3000      | 98        |
+
+-----
+
+However, MENS2 prevalence is high (1/5) among patients who present in a clinic with medullary thyroid carcinoma.  If we only used the test among 3 million of these patients 
+
+- 600,000 will have the disease
+- 2,400,000 will NOT have the disease (still unbalanced by but much less)
+- Column accuracies (sensitivity and specificity) remain the same
+  - These are properties of the test/classifier
+- PPV is now much better; 588,000 / (2400 + 588,000) = 99.6%
+  
+|               | Reference |           |
+|:--------------|:--------- |:----------|
+| **Prediction**| Negative  | Positive  | 
+| Negative      | 2397600   | 12000     |
+| Positive      | 2400      | 588000    |
+
+
+-----
+
+Now think about "accuracy" of any specific COVID test
+
+- It dismayed me to see talk of accuracy
+  - The cost of the two types of errors is different!
+- Occasionally, there was talk of sensitivity and specificity
+- There was rarely/never discussion of PPV and NPV, which is what matters most when you are given your test result
+
+::: {.callout-important collapse="false"}
+### Question: How would the PPV and NPV change when we moved from testing only people with symptoms who presented at the hospital to testing everyone (e.g., all college students)?
+```{html}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show Answer"
+Relatively speaking, when testing someone with obvious COVID symptoms PPV would 
+be high but NPV could be low.  Conversely, for our students PPV is likely low but 
+NPV is likely high
+```
+:::
+
+-----
+
+In some instances, it may be more useful to focus on **precision** and **recall** rather than sensitivity and specificity.  The **F1 measure** is the harmonic mean of precision and recall
+
+- This is a row and column accuracy 
+- Recall (sensitivity) focuses on how many true positive cases will we correctly identify
+- Precision (PPV) focuses on how accurate the prediction of "positive" will be (prevalence dependent)
+- This keeps the focus on positive cases
+
+```{r}
+cm |> 
+  summary() |> 
+  filter(.metric == "precision" | .metric == "recall" | .metric == "f_meas") |> 
+  select(-.estimator)
+
+autoplot(cm, type = "heatmap")
+```
+
+::: {.callout-important collapse="false"}
+### Question: Can you link the numbers in the confusion matrix to Recall (Sensitivity) and Precision (PPV) metrics
+```{html}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show Answer"
+Recall/sensitiive is "accuracy" for the positive cases (in this instance, patients 
+with heart disease).
+30 / (30 + 17)
+
+Precision/PPV is "accuracy" for the positive predictions (when model predicts yes).  
+30 / (30 + 13)
+```
+:::
+
+-----
+
+$F1$ is the harmonic mean of Recall and Precision
+
+- Harmonic means are used with rates (see [more detail](https://en.wikipedia.org/wiki/Mean) about the Pythagorean means, if interested)
+- $F1$ is an unweighted harmonic mean
+  - $F1 = 2 * \frac{Precision * Recall}{Precision + Recall}$ 
+  - or using the more general formula for harmonic means: $F1 = \frac{2}{\frac{1}{Precision} + \frac{1}{Recall}}$ 
+- $F_\beta$ is a weighted version where $\beta$ is the relative weighting of recall to precision
+  - Two commonly used values for $\beta$ are 2, which weighs recall twice as much than precision, and 0.5, which weighs precision twice as much as recall 
+  - $F_\beta = (1 + \beta^2) * \frac{Precision * Recall}{(\beta^2*Precision) + Recall}$
+  
+```{r}
+cm |> 
+  summary() |> 
+  filter(.metric == "precision" | .metric == "recall" | .metric == "f_meas") |> 
+  select(-.estimator)
+```
+
+---
+
+**Cohen's Kappa** is a bit more complicated to calculate and understand
+
+- There is a great [explanation of kappa](https://stats.stackexchange.com/questions/82162/cohens-kappa-in-plain-english) on stack overflow
+
+- Wikipedia also has a very detailed [definition and explanation](https://en.wikipedia.org/wiki/Cohen's_kappa) as well (though not in the context of machine learning)
+
+- Compares observed accuracy to expected accuracy (random chance)
+
+$Kappa = \frac{observed\:accuracy - expected\:accuracy}{1 - expected\:accuracy}$
+
+- When outcome is unbalanced, some agreement/accuracy (relationship between model predictions and reference/ground truth) is expected
+
+- Kappa adjusts for this
+\
+\
+
+Kappa is essentially the proportional increase in accuracy above the accuracy expected by the base rates of the reference and classifier
+
+-----
+
+To calculate the expected accuracy, we need to consider the probabilities of reference and classifier prediction both being positive (and both being negative) by chance given the base rates of these classes for the reference and classifier.
+
+
+|               | Reference |           |
+|:--------------|:--------- |:----------|
+| **Prediction**| Negative  | Positive  | 
+| Negative      | TN        | FN        |
+| Positive      | FP        | TP        |
+
+
+$P_{positive} = \frac{FN + TP}{TN + FN + FP + TP} * \frac{FP + TP}{TN + FN + FP + TP}$
+\
+\
+$P_{negative} = \frac{TN + FP}{TN + FN + FP + TP} * \frac{TN + FN}{TN + FN + FP + TP}$
+\
+\
+$P_{expected} = P_{positive} + P_{negative}$
+
+-----
+
+In our example
+
+```{r}
+cm
+```
+
+$P_{positive} = \frac{28 + 18}{426} * \frac{4 + 18}{426} = 0.005576495$
+\
+\
+$P_{negative} = \frac{376 + 4}{426} * \frac{376 + 28}{426} = 0.8459521$
+\
+\
+$P_{expected} = 0.005576495 + 0.8459521 = 0.8515286$
+\
+\
+$Actual Accuracy = 0.9248826$
+\
+\
+$Kappa = \frac{observed\:accuracy - expected\:accuracy}{1 - expected\:accuracy}$
+\
+\
+$Kappa = \frac{0.9248826 - 0.8515286}{1 - 0.8515286} = 0.4940615$
+
+```{r}
+summary(cm) |> 
+  filter(.metric == "kap") |> 
+  pull(.estimate)
+```
+
+-----
+
+Kappa Rules of Thumb w/ a big grain of salt.......
+
+- Kappa < 0: No agreement
+- Kappa between 0.00 and 0.20: Slight agreement
+- Kappa between 0.21 and 0.40: Fair agreement
+- Kappa between 0.41 and 0.60: Moderate agreement
+- Kappa between 0.61 and 0.80: Substantial agreement
+- Kappa between 0.81 and 1.00: Almost perfect agreement.
+
+See @Landis1977 ([PDF](pdfs/landis_1977_kappa.pdf))for more details 
+
+-----
+
+## The Receiver Operating Characteristic Curve
+
+Let's return now to consider sensitivity and specificity again
+
+Remember that our classifier is estimating the probability of an observation being in the positive class.
+
+We dichotomize this probability when we formally make a class prediction
+
+- If the probability > 50%, we classify the observation as positive
+- If the probability < 50%m we classify the observation as negative
+
+-----
+
+::: {.callout-important collapse="false"}
+### Question: How can we improve sensitivity?
+```{html}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show Answer"
+We can use a more liberal/lower classification threshold for saying someone will default.  
+For example, rather than requiring a 50% probability to classify as yes for default, 
+we could lower to 20% fro the classification threshold
+```
+:::
+
+-----
+
+::: {.callout-important collapse="false"}
+### Question: What will the consequences of this change be?
+```{html}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show Answer"
+First, the Bayes classifier threshold of 50% produces the highest overall accuracy 
+so accuracy will generally (though not always) drop when you shift from 50%.  
+
+If we think about this change as it applies to the columns of our confusion matrix, 
+we will now catch more of the yes (fewer false negatives/misses), so sensitivity 
+will go up.  This was the goal of the lower threshold.  However, we will also end up 
+with more false positives so specificity will drop.  If you consider the rows of 
+the confusion matrix, we will have more false positives so the PPV will drop.  
+However, we will have fewer false negatives so the NPV will increase.  Whether 
+these trade-offs are worth it are a function of the cost of different types of errors 
+and how much you gain and lose with regard to each type of performance metric 
+(ROC can inform this; more in a moment)
+```
+:::
+
+```{r}
+autoplot(cm, type = "heatmap")
+```
+
+-----
+
+Previously, we simply used `predict(fit_glmnet, feat_test)$.pred_class`.  `$.pred_class` dichotomized at 50% by default
+
+- This is the classification threshold to use with predicted probabilities that will produce the best overall accuracy (e.g., Bayes classifier)
+- However, we can use a different threshold to increase sensitivity or specificity
+- This comes at a cost to the other characteristic (its a trade-off)
+  - Lower threshold increases sensitivity but decreases specificity
+  - Higher threshold increases specificity but decreases sensitivity
+  
+-----
+
+It is relatively easy to make a new confusion matrix and get new performance metrics with a different classification threshold
+
+- Make a tibble with truth and predicted probabilities
+```{r}
+preds <- tibble(truth = feat_test$disease,
+                prob = predict(fit_glmnet, feat_test, type = "prob")$.pred_yes)
+
+preds
+```
+
+-----
+
+- Use this to get class estimates at any threshold we want
+- Here we threshold at 20%
+```{r}
+preds <- preds |> 
+  mutate(estimate_20 = if_else(prob <= .20, "no", "yes"),
+         estimate_20 = factor(estimate_20, levels = c("yes", "no"))) |> 
+  print()
+```
+
+-----
+
+We can now make a confusion matrix for this new set of truth and estimates using the 20% threshold
+
+```{r}
+cm_20 <- preds |> 
+  conf_mat(truth = truth, estimate = estimate_20)
+
+cm_20
+```
+
+Let's compare to 50% (original)
+
+```{r}
+cm
+```
+
+-----
+
+And let's compare these two thresholds on a subset of our numeric metrics
+
+- 20% threshold
+```{r}
+cm_20 |> 
+  summary() |> 
+  filter(.metric %in% c("accuracy", "sens", "spec", "ppv", "npv")) |> 
+  select(-.estimator)
+```
+
+- 50% threshold
+```{r}
+cm |> 
+  summary() |> 
+  filter(.metric %in% c("accuracy", "sens", "spec", "ppv", "npv")) |> 
+  select(-.estimator)
+```
+
+
+[Do the changes on each of these metrics make sense to you? If not, please review these previous slides again!]{.red}
+
+-----
+
+You can begin to visualize the classifier performance by threshold simply by plotting histograms of the predicted positive class probabilities, separately for the true positive and negative classes
+
+- Let's look at our classifier
+- Ideally, the probabilities are mostly low for the true negative class ("no") and mostly high for the true positive class ("yes")
+- You can imagine how any specific probability cut point would affect specificity (apply cut to the  left panel) or sensitivity (apply cut to the right panel)
+
+```{r}
+ggplot(data = preds, aes(x = prob)) + 
+   geom_histogram(bins = 15) +
+   facet_wrap(vars(truth), nrow = 2) +
+   xlab("Pr(Disease)")
+```
+
+-----
+
+::: {.callout-important collapse="false"}
+### Question: What do you think about its performance? What insights does this plot generate?
+```{html}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show Answer"
+1. You can see that we can likely drop the threshold to somewhere about 25% without 
+decreasing the specificity too much.  This will allow you to detect more positive cases.  
+
+2.  Our model seems to be able to predict negative cases well.  They mostly have low 
+probabilities.   However, you can see its poor performance with positive cases.  
+They are spread pretty evenly across the full range of probabilities.  We likely 
+do not have enough positive cases in our training data
+```
+:::
+
+-----
+
+The **Receiver Operating Characteristics (ROC)** curve for a classifier provides a more formal method to visualize the trade-offs between sensitivity and specificity across all possible thresholds for classification.
+
+Lets look at this in our example
+
+- We need columns for truth and probabilities of the positive class for each observation
+- We need to specify the positive class
+- Returns tibble with data to plot an ROC curve
+
+```{r}
+roc_plot <- 
+  tibble(truth = feat_test$disease,
+         prob = predict(fit_glmnet, feat_test, type = "prob")$.pred_yes) |> 
+  roc_curve(prob, truth = truth)
+
+roc_plot
+```
+
+-----
+
+We can `autoplot()` this
+
+```{r}
+autoplot(roc_plot)
+```
+
+-----
+
+Or we can customize a plot passing the data into` ggplot()`
+
+- Not doing anything fancy here
+- Consider this a shell for you to build on if you want more than `autoplot()` provides
+```{r}
+roc_plot |>
+  ggplot(aes(x = 1 - specificity, y = sensitivity)) +
+  geom_path() +
+  geom_abline(lty = 3) +
+  coord_equal() +
+  labs(x = "1 - Specificity (FPR)",
+       y = "Sensitivity (TPR)")
+```
+
+-----
+
+When evaluating an ROC curve:
+
+- A random classifier would have a diagonal curve from bottom-left to top-right (the dotted line)
+
+- A perfect classifier would reach up to top-left corner
+  - Sensitivity = 1 (true positive rate)
+  - 1 - Specificity = 0 (false positive rate)
+
+-----
+
+The ROC Curve is not only a useful method to visualize classier performance across
+thresholds
+
+The area under the ROC curve (auROC) is an attractive performance metric
+
+- Ranges from 1.0 (perfect) down to approximately 0.5 (random classifier)
+    - If the auROC was consistently less than 0.5, then the predictions could simply be inverted
+    - Values between .70 and .80 are considered fair
+    - Values between .80 and .90 are considered good
+    - Values above .90 are considered excellent
+    - These are very rough, and to my eye, the exact cuts and labels are somewhat arbitrary
+
+-----
+
+- auROC is the probability that the classifier will rank/predict a randomly selected true positive observation higher than a randomly selected true negative observation
+
+- Alternatively, it can be thought of as the average sensitivity across all values of specificity or the average specificity across all values of sensitivity
+
+- auROC summarizes performance (sensitivity vs. specificity trade-off) across all possible thresholds
+
+- auROC is not affected by class imbalances in contrast to many other metrics
+
+-----
+
+It is easy to get the auROC for the ROC in tidymodels using `roc_auc()`
+
+As with calculating the ROC curve, we need 
+
+- truth 
+- predicted probabilities for the positive class
+- to specify the `event_level` (default is first)
+
+```{r}
+tibble(truth = feat_test$disease,
+       prob = predict(fit_glmnet, feat_test, type = "prob")$.pred_yes) |> 
+  roc_auc(prob, truth = truth)
+```
+
+-----
+
+## Using Alternative Performance Metrics for Model Selection
+
+You can select the best model configuration using resampling with performance metrics other than accuracy
+
+- Aggregate measures are typically your best choice (except potentially with high imbalance - more on this later)
+
+  - For classification: 
+    - Accuracy
+    - Balanced accuracy
+    - $F1$
+    - Area under ROC Curve (auROC)
+    - Kappa
+    
+  - For regression
+    - RMSE
+    - $R^2$
+    - MAE (mean absolute error)
+
+-----
+
+- You typically need to use a single metric for selection among model configurations
+  - You should generally use the performance metric that is the best aligned with your problem:
+\
+\
+
+- In classification
+  - Do you care about types of errors or just overall error rate
+  - Is the outcome relatively balanced or unbalanced
+  - What metric will be clearest to your audience
+\
+\
+
+- In regression
+  - Do you want to weight big and small errors the same
+  - What metric will be clearest to your audience (though all of these are pretty clear.  There are more complicated regression metrics)
+\
+\
+
+- Although you will use one metric to select the best configuration, you can evaluate/characterize the performance of your final model with as many metrics as you like
+
+-----
+
+You should recognize the differences between the cost function for the algorithm and the performance metric:
+
+- Cost function is fundamental to the definition of the algorithm
+- Cost function is minimized to determine parameter estimates in parametric models
+- Performance metric is independent of algorithm
+- Performance metric is used to select and evaluate model configurations
+\
+\
+
+- Sometimes they can be the same metric (e.g., RMSE)  
+- BUT, this is not required
+
+-----
+
+With `tidymodels`, it is easy to select hyperparameters or select among model configurations more generally using one of many different performance metrics
+
+- We will still use either `tune_grid()` or `fit_resamples()`
+- We will simply specify a different performance metric inside of `metric_set()`
+- If we only measure one performance metric, we can use defaults with `show_best()`
+
+-----
+
+Here is an example of measuring `roc_auc()` but you can use any performance function from the yardstick package
+```{r}
+fits_glmnet_auc <- cache_rds(
+  expr = {
+    logistic_reg(penalty = tune(), 
+                 mixture = tune()) |> 
+      set_engine("glmnet") |> 
+      set_mode("classification") |> 
+      tune_grid(preprocessor = rec, 
+                resamples = splits_boot, grid = grid_glmnet, 
+                metrics = metric_set(roc_auc))
+
+  },
+  rerun = rerun_setting,
+  dir = "cache/008/",
+  file = "fits_glmnet_auc")
+```
+
+-----
+
+And now use `show_best()`, with best defined by auROC
+```{r u8-roc-12b}
+show_best(fits_glmnet_auc, n = 5)
+```
+
+-----
+
+You can also measure multiple metrics during resampling but you will need to select the best configuration using only one
+
+- see `metric_set()` for the measurement of multiple metrics,
+- see `show_best()` for the use of `metric` to indicate which metric to use for selection
+
+```{r}
+fits_glmnet_many <- cache_rds(
+  expr = {
+    logistic_reg(penalty = tune(), 
+                 mixture = tune()) |> 
+      set_engine("glmnet") |> 
+      set_mode("classification") |> 
+      tune_grid(preprocessor = rec, 
+                resamples = splits_boot, grid = grid_glmnet, 
+                metrics = metric_set(roc_auc, accuracy, sens, spec, bal_accuracy))
+  },
+  rerun = rerun_setting,
+  dir = "cache/008/",
+  file = "fits_glmnet_many")
+```
+
+-----
+
+But now we need to indicate how to define **best**
+\
+\
+We will define it based on balanced accuracy
+```{r}
+show_best(fits_glmnet_many, metric = "bal_accuracy", n = 5)
+```
+\
+\
+And here based on auROC (same as before)
+```{r}
+show_best(fits_glmnet_many, metric = "roc_auc", n = 5)
+```
+-----
+
+Of course, you can easily calculate any performance metric from `yardstick` [package](https://yardstick.tidymodels.org/reference/index.html) in test to evaluate your final model
+
+- Using `conf_mat()` and `summary()` as above (but not for auROC)
+- Using `*_vec()` functions; for example:
+  - `accuracy_vec()`
+  - `roc_auc_vec()`
+  - `sens_vec()`; `spec_vec()`
+- Piping a tibble that contain truth, and estimate or probability into appropriate function
+  - `accuracy()`
+  - `roc_auc()`
+  - `sens()`; `spec()`
+
+-----
+
+Fit best model using auROC
+```{r}
+fit_glmnet_auc <-   
+  logistic_reg(penalty = select_best(fits_glmnet_many, metric = "roc_auc")$penalty, 
+               mixture = select_best(fits_glmnet_many, metric = "roc_auc")$mixture) |> 
+  set_engine("glmnet") |> 
+  set_mode("classification") |> 
+  fit(disease ~ ., data = feat_trn)
+```
+
+and get all metrics
+```{r}
+cm_auc <- 
+  tibble(truth = feat_test$disease,
+         estimate = predict(fit_glmnet_auc, feat_test)$.pred_class) |> 
+  conf_mat(truth, estimate)
+
+cm_auc |> 
+  summary()
+```
+
+-----
+
+Fit best model using balanced accuracy
+```{r}
+fit_glmnet_bal <-   
+  logistic_reg(penalty = select_best(fits_glmnet_many, metric = "bal_accuracy")$penalty, 
+               mixture = select_best(fits_glmnet_many, metric = "bal_accuracy")$mixture) |> 
+  set_engine("glmnet") |> 
+  set_mode("classification") |> 
+  fit(disease ~ ., data = feat_trn)
+```
+
+and still get all metrics (different because best model configuration is different)
+```{r}
+cm_bal <- 
+  tibble(truth = feat_test$disease,
+         estimate = predict(fit_glmnet_bal, feat_test)$.pred_class) |> 
+  conf_mat(truth, estimate)
+
+cm_bal |> 
+  summary()
+```
+
+-----
+
+## Advanced Methods for Class Imbalances
+
+When there is a high degree of class imbalance:
+
+- It is often difficult to build models that predict the minority class well
+- This will yield low sensitivity if the positive class is the minority class (as in our example)
+- This will yield low specificity if the negative class is the minority class
+- Each of these issues may be a problem depending on the costs of FP and FN
+
+-----
+
+Let's see this at play again in our model
+
+- Using the 50% threshold we have low sensitivity but good specificity
+```{r}
+autoplot(cm)
+
+cm |> 
+  summary() |> 
+  filter(.metric == "sens" | .metric == "spec") |> 
+  select(-.estimator)
+```
+
+-----
+
+- We do much better with probabilities for negative (majority) vs. positive (minority) class
+- We can see that we will not affect specificity much by lowering the threshold for positive classification to 20-25%
+- BUT, we really need to do do better with the distribution of probabilities for observations that are positive (yes)
+```{r}
+ggplot(data = preds, aes(x = prob)) + 
+   geom_histogram(bins = 15) +
+   facet_wrap(vars(truth), nrow = 2) +
+   xlab("Pr(Disease)")
+```
+
+-----
+
+What can we do when we have imbalanced outcomes?
+
+We will consider:
+
+- Changes to the classification/decision threshold that trade-off sensitivity vs. specificity for a fitted model (already discussed)
+- Changes to performance metric for selecting the best model configuration  (already demonstrated)
+- Sampling/Resampling methods that will affect the balance of the outcome in the training data to fit models that are better with the minority class (new)
+
+### Classification (Decision) Threshold
+
+We have already seen an example of how the classification threshold (the probability at which we split between predicting a case as positive vs. negative) affects sensitivity vs. specificity
+
+Decreasing the threshold (probability) for classifying a case as positive will:
+
+- Increase sensitivity and decrease specificity
+- This will decrease FN but increase FP
+- This may be useful if the positive class is the minority class
+- The ROC curve is a useful display to provide this information about your classifier
+  - Curve can be colored to show the threshold
+- The separate histograms by positive vs. negative can also be useful as well
+- If you want to use your data to select the best threshold, you will need yet another set of data to make this selection
+  - Can't make the selection in training b/c those probabilities are overfit
+  - Can't make the selection of threshold in test and then also use the same test data to evaluate that model!
+
+-----
+
+### Performance Metric Considerations
+
+When you are choosing a performance metric for selecting your best model configuration, you should choose a performance metric that it best aligned with the nature of the performance you seek
+
+- If you want just good overall accuracy, accuracy may be a good metric
+- If the outcome is unbalanced, and you care about the types of errors, you might want
+  - Balanced accuracy (average of sensitive and specificity)
+  - Only sensitivity or specificity by itself (recommended by Kuhn)
+  - auROC
+  - An F measure (harmonic mean of sensitivity and PPV)
+  - May need to think carefully about what is most important to you
+\
+\
+
+Earlier, we saw that we got better sensitivity when we used balanced accuracy rather than accuracy to tune our hyperparameters
+
+-----
+
+### Sampling and Resampling to Address Class Imbalance
+
+We can address issues of class imbalance either a priori or post-hoc with respect to data collection
+
+-  A priori method would be to over-sample to get more of the minority class into your training set
+  - Use targeted recruiting
+  - Can be very costly or impossible in many instances
+  - If possible,  this can be much better than the resampling approach below
+  
+- Post hoc, we can employ a variety of resampling procedures that are designed to make the training data more balanced
+  - We can up-sample the minority class
+  - We can down-sample the majority class
+  - We can synthesize new minority class observations e.g, SMOTE
+  
+- For both a priori sampling or post-hoc resampling strategies, it is important that your test set is not manipulated.  It should represent the expected distribution for the outcome, unaltered
+
+-----
+
+### Up-sampling
+
+- We resample minority class observations with replacement within our training set to increase the number of total observations of the majority class in the training set.
+- This simply duplicates existing minority class observations
+- Our test (or validation) set(s) should NOT be resampled.  This is handled well by `step_upsample()`
+
+-----
+
+Let's apply this in our example
+
+- Up-sampling is part of feature engineering recipe
+- Need to specify the outcome (`disease`)
+- Can set `over_ratio` to values other than 1 if desired
+- Makes sense to do this after missing data imputation and dummy coding
+- Makes sense to do this before normalizing features 
+- These steps are in the `themis` package rather than `recipes` (can use namespace or load full library)
+```{r}
+rec_up <- recipe(disease ~ ., data = data_trn) |> 
+  step_impute_median(all_numeric_predictors()) |> 
+  step_impute_mode(all_nominal_predictors()) |>   
+  step_dummy(all_nominal_predictors()) |> 
+  themis::step_upsample(disease, over_ratio = 1) |> 
+  step_normalize(all_numeric_predictors())
+```
+
+-----
+
+Need to re-tune model b/c the sample size has changed
+\
+\
+Need to refit the final model to all of train
+```{r}
+fits_glmnet_up <- cache_rds(
+  expr = {
+    logistic_reg(penalty = tune(), 
+                 mixture = tune()) |> 
+      set_engine("glmnet") |> 
+      set_mode("classification") |> 
+      tune_grid(preprocessor = rec_up, 
+                resamples = splits_boot, grid = grid_glmnet, 
+                metrics = metric_set(bal_accuracy))
+  },
+  rerun = rerun_setting,
+  dir = "cache/008/",
+  file = "fit_glmnet_up")
+```
+
+-----
+
+Review hyperparameter plot
+```{r}
+plot_hyperparameters(fits_glmnet_up, hp1 = "penalty", hp2 = "mixture", metric = "bal_accuracy", log_hp1 = TRUE)
+```
+
+-----
+
+Let's fit this best model configuration to all of our training data and evaluate it in test
+
+- Note the use of `NULL` for `new_data` 
+- `step_upsample()` is only applied to training/held-in but not held-out (truly new) data
+- `bake()` knows to use the training data provided during `prep()` if we specify `NULL`
+- Could have done this all along for baking training.  Its sometimes faster but previously same result.  Now its necessary!
+```{r}
+rec_up_prep <- rec_up |> 
+  prep(data_trn)
+
+feat_trn_up <- rec_up_prep |> 
+  bake(new_data = NULL)
+```
+
+-----
+
+Notice that `disease` is now balanced in the training data!
+```{r}
+feat_trn_up |> 
+  skim_all()
+```
+
+-----
+
+```{r}
+fit_glmnet_up <-   
+  logistic_reg(penalty = select_best(fits_glmnet_up)$penalty, 
+               mixture = select_best(fits_glmnet_up)$mixture) |> 
+  set_engine("glmnet") |> 
+  set_mode("classification") |> 
+  fit(disease ~ ., data = feat_trn_up)
+```
+
+-----
+To evaluate this model, we now need test features too
+
+- IMPORTANT: Test is NOT up-sampled
+- bake it as new data!
+```{r}
+feat_test <- rec_up_prep |> 
+  bake(data_test)  
+
+feat_test |> skim_all()
+```
+
+-----
+
+Let's see how this model performs in test
+```{r}
+cm_up <- 
+  tibble(truth = feat_test$disease,
+         estimate = predict(fit_glmnet_up, feat_test)$.pred_class) |> 
+  conf_mat(truth, estimate)
+
+cm_up |> 
+  summary()
+```
+
+-----
+
+```{r}
+preds_up <- tibble(truth = feat_test$disease,
+                prob = predict(fit_glmnet_up, feat_test, type = "prob")$.pred_yes)
+
+ggplot(data = preds_up, aes(x = prob)) + 
+   geom_histogram(bins = 15) +
+   facet_wrap(vars(truth), nrow = 2) +
+   xlab("Pr(Disease)")
+```
+
+-----
+
+### Down-sampling
+
+We resample majority class observations within our training set to decrease/match the number of total observations of the minority class in the training set.
+
+- This selects a subset of the majority class
+- Our test (or validation) set(s) should NOT be resampled.  This is handled well by `step_downsample()`
+
+-----
+
+Down-sampling is part of feature engineering recipe
+
+- Need to specify the outcome (`disease`)
+- Can set `under_ratio` to values other than 1 if desired
+- Makes sense to do this after missing data imputation and dummy coding
+- Makes sense to do this before normalizing features 
+
+```{r}
+rec_down <- recipe(disease ~ ., data = data_trn) |> 
+  step_impute_median(all_numeric_predictors()) |> 
+  step_impute_mode(all_nominal_predictors()) |>   
+  step_dummy(all_nominal_predictors()) |> 
+  themis::step_downsample(disease, under_ratio = 1) |> 
+  step_normalize(all_numeric_predictors())
+```
+
+-----
+
+Need to re-tune model b/c the sample size has changed
+\
+\
+Need to refit the final model to all of train
+```{r}
+fits_glmnet_down <- cache_rds(
+  expr = {
+    logistic_reg(penalty = tune(), 
+                 mixture = tune()) |> 
+      set_engine("glmnet") |> 
+      set_mode("classification") |> 
+      tune_grid(preprocessor = rec_down, 
+                resamples = splits_boot, grid = grid_glmnet, 
+                metrics = metric_set(bal_accuracy))
+  },
+  rerun = rerun_setting,
+  dir = "cache/008/",
+  file = "fits_glmnet_down")
+```
+
+-----
+
+Review hyperparameters
+```{r}
+plot_hyperparameters(fits_glmnet_down, hp1 = "penalty", hp2 = "mixture", 
+                     metric = "bal_accuracy", log_hp1 = TRUE)
+```
+
+-----
+
+Let's fit this best model configuration to all of our training data and evaluate it in test
+
+- Note the use of `NULL` again when getting features for training data. Very important!
+- `step_downsample()` is not applied to baked data (See its default for `skip = TRUE` argument)
+- NOTE: sample size and ratio of yes/now for disease!
+```{r}
+rec_down_prep <- rec_down |> 
+  prep(data_trn)
+
+feat_trn_down <- rec_down_prep |> 
+  bake(new_data = NULL)
+
+feat_trn_down |> skim_some()
+```
+
+-----
+
+Now fit the model to these downsampled training data
+```{r}
+fit_glmnet_down <-   
+  logistic_reg(penalty = select_best(fits_glmnet_down)$penalty, 
+               mixture = select_best(fits_glmnet_down)$mixture) |> 
+  set_engine("glmnet") |> 
+  set_mode("classification") |> 
+  fit(disease ~ ., data = feat_trn_down)
+```
+
+-----
+
+Let's see how this model performs in test
+
+- First we need test features
+- IMPORTANT: Test is NOT down-sampled
+
+```{r}
+feat_test <- rec_down_prep |> 
+  bake(data_test)
+
+feat_test |> skim_some()
+```
+
+-----
+
+Get metrics in test
+```{r}
+cm_down <- 
+  tibble(truth = feat_test$disease,
+         estimate = predict(fit_glmnet_down, feat_test)$.pred_class) |> 
+  conf_mat(truth, estimate)
+
+cm_down |> 
+  summary()
+```
+
+-----
+
+And plot faceted probabilites
+```{r u8-bal-15}
+preds_down <- tibble(truth = feat_test$disease,
+                prob = predict(fit_glmnet_down, feat_test, type = "prob")$.pred_yes)
+
+ggplot(data = preds_down, aes(x = prob)) + 
+   geom_histogram(bins = 15) +
+   facet_wrap(vars(truth), nrow = 2) +
+   xlab("Pr(Disease)")
+```
+
+-----
+
+### SMOTE
+
+A third approach to resampling is called the synthetic minority over-sampling technique (SMOTE)
+\
+\
+To up-sample the minority class, SMOTE synthesizes new observations.  
+
+- To do this, an observation is randomly selected from the minority class.  
+- This observation's K-nearest neighbors (KNNs) are then determined. 
+- The new synthetic observation retains the outcome but a random combination of the predictors values from the randomly selected observation and its neighbors.  
+
+-----
+
+This is easily implemented by recipe in `tidymodels` using `step_smote()`
+
+- Need to specify the outcome (`disease`)
+- Can set `over_ratio` to values other than 1 (default) if desired
+- Can set `neighbors` to values other than 5 (default) if desired
+- Makes sense to do this after missing data imputation and dummy coding
+- Other features will need to be scaled/range-corrected prior to use (for distance)
+- Makes sense to do this before normalizing features for glmnet, etc 
+
+```{r u8-bal-16}
+rec_smote <- recipe(disease ~ ., data = data_trn) |> 
+  step_impute_median(all_numeric_predictors()) |> 
+  step_impute_mode(all_nominal_predictors()) |>   
+  step_dummy(all_nominal_predictors()) |>
+  step_range(all_predictors()) |> 
+  themis::step_smote(disease, over_ratio = 1, neighbors = 5) |> 
+  step_normalize(all_numeric_predictors())
+```
+
+-----
+
+Need to re-tune model b/c the sample size has changed
+\
+\
+Need to refit the final model to all of train
+```{r}
+fits_glmnet_smote <- cache_rds(
+  expr = {
+    logistic_reg(penalty = tune(), 
+                 mixture = tune()) |> 
+      set_engine("glmnet") |> 
+      set_mode("classification") |> 
+      tune_grid(preprocessor = rec_smote, 
+                resamples = splits_boot, grid = grid_glmnet, 
+                metrics = metric_set(bal_accuracy))
+  },
+  rerun = rerun_setting,
+  dir = "cache/008/",
+  file = "fits_glmnet_smote")
+```
+
+-----
+
+Review hyperparameters
+```{r}
+plot_hyperparameters(fits_glmnet_smote, hp1 = "penalty", hp2 = "mixture", 
+                     metric = "bal_accuracy", log_hp1 = TRUE)
+```
+
+-----
+
+Let's fit this best model configuration to all of our training data and evaluate it in test
+
+- Note the use of `NULL` (once again!) for `new_data`
+- `step_smote()` is not applied to new data
+- NOTE: sample size and outcome balance
+```{r}
+rec_smote_prep <- rec_smote |> 
+  prep(data_trn)
+
+feat_trn_smote <- rec_smote_prep |> 
+  bake(NULL)
+
+feat_trn_smote |> skim_some()
+```
+
+-----
+
+Fit model to smote sampled training data
+```{r}
+fit_glmnet_smote <-   
+  logistic_reg(penalty = select_best(fits_glmnet_smote)$penalty, 
+               mixture = select_best(fits_glmnet_smote)$mixture) |> 
+  set_engine("glmnet") |> 
+  set_mode("classification") |> 
+  fit(disease ~ ., data = feat_trn_smote)
+```
+
+-----
+
+Let's see how this model performs in test
+
+- IMPORTANT: Test is NOT SMOTE up-sampled
+```{r}
+feat_test <- rec_smote_prep |> 
+  bake(data_test)
+
+cm_smote <- 
+  tibble(truth = feat_test$disease,
+         estimate = predict(fit_glmnet_smote, feat_test)$.pred_class) |> 
+  conf_mat(truth, estimate)
+
+cm_smote |> 
+  summary()
+```
+
+-----
+
+Plot faceted predicted probabilites
+```{r}
+preds_smote <- tibble(truth = feat_test$disease,
+                prob = predict(fit_glmnet_smote, feat_test, type = "prob")$.pred_yes)
+
+ggplot(data = preds_smote, aes(x = prob)) + 
+   geom_histogram(bins = 15) +
+   facet_wrap(vars(truth), nrow = 2) +
+   xlab("Pr(Disease)")
+```
+
+
+-----
+
+## Discussion
+
+### Announcements
+
+- Timeline on conceptual exams
+- Exam grading - review
+- Unit 9 has a lot of reading and some complicated topics
+
+
+### Questions
+
+Confusion matrix and metrics
+
+- I am still confused about how testing every college student for covid decreases the PPV of a positive test and increases the NPV of a negative test. 
+
+- Can we review the confusion matrix plot
+
+- I would like to go over the differences between sensitivity, specificity, NPV, and PPV and identifying them and how to adjust them 
+
+- Can you review under what circumstances you’re most likely to want to use each performance metric?
+
+- I can understand how Kappa calculated and what it means, but still feel not very sensible to its concept.
+
+  -  I'd like to review more classification threshold examples (changing % and balancing sensitivity/specificity).
+  
+  - I'm still confused about classification threshold. What is the best threshold to choose or it is trial and error to determine the tradeoff between sensitivity and specificity?
+
+- What's the difference between the pair of sensitivity and specificity, and the pair of precision and recall? 
+
+  
+ROC
+  - the ROC curve and threshold
+  
+  - auROC is the probability that the classifier will rank/predict a randomly selected true positive observation higher than a randomly selected true negative observation".
+
+- What more specifically does it mean that auROC “is not affected by” class imbalances? Is this the same as saying its formula doesn’t depend on prevalence (because it’s sensitivity- and specificity-based)?  Why is this a desirable property for datasets with class imbalances - is it just that it makes it a lower variance metric? 
+
+
+Resampling the outcome
+
+- I am confused about over/under-sampling. Wouldn't over/under-sampling lead to more biased models, especially if one's model isn't great? If I am predicting some outcome where a positive result happens only 5% of the time and I oversample that my training set if 50% positive results, wouldn't I trick my model into thinking that positive cases are supper common, thus biasing the model and resulting in poor predictive performance, especially if my model doesn't have strong predictors. 
+
+- It would be useful to go over SMOTE more.
+
 
