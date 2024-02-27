@@ -324,8 +324,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#split-1" id="toc-split-1" class="nav-link" data-scroll-target="#split-1"><span class="header-section-number">18.7</span> 50/50 split</a></li>
   <li><a href="#k-fold" id="toc-k-fold" class="nav-link" data-scroll-target="#k-fold"><span class="header-section-number">18.8</span> K-fold</a>
   <ul class="collapse">
-  <li><a href="#simple-10-fold" id="toc-simple-10-fold" class="nav-link" data-scroll-target="#simple-10-fold"><span class="header-section-number">18.8.1</span> Simple 10-fold</a></li>
-  <li><a href="#x-10-fold" id="toc-x-10-fold" class="nav-link" data-scroll-target="#x-10-fold"><span class="header-section-number">18.8.2</span> 3x 10-Fold</a></li>
+  <li><a href="#simple-5-fold" id="toc-simple-5-fold" class="nav-link" data-scroll-target="#simple-5-fold"><span class="header-section-number">18.8.1</span> Simple 5-fold</a></li>
+  <li><a href="#simple-10-fold" id="toc-simple-10-fold" class="nav-link" data-scroll-target="#simple-10-fold"><span class="header-section-number">18.8.2</span> Simple 10-fold</a></li>
+  <li><a href="#x-10-fold" id="toc-x-10-fold" class="nav-link" data-scroll-target="#x-10-fold"><span class="header-section-number">18.8.3</span> 3x 10-Fold</a></li>
   </ul></li>
   <li><a href="#bootstrap-resampling" id="toc-bootstrap-resampling" class="nav-link" data-scroll-target="#bootstrap-resampling"><span class="header-section-number">18.9</span> Bootstrap Resampling</a>
   <ul class="collapse">
@@ -379,13 +380,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>simulate_DGP <span class="ot">&lt;-</span> <span class="cf">function</span> (n_obs, n_features, irr_err, mu, sigma){</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  MASS<span class="sc">::</span><span class="fu">mvrnorm</span>(n_obs, <span class="at">mu =</span> mu, <span class="at">Sigma =</span> sigma) <span class="sc">|&gt;</span> </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  x <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">mvrnorm</span>(n_obs, <span class="at">mu =</span> mu, <span class="at">Sigma =</span> sigma) <span class="sc">|&gt;</span> </span>
 <span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    magrittr<span class="sc">::</span><span class="fu">set_colnames</span>(<span class="fu">str_c</span>(<span class="st">"x"</span>, <span class="dv">1</span><span class="sc">:</span>n_features)) <span class="sc">|&gt;</span> </span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">error =</span> <span class="fu">rnorm</span>(n_obs, <span class="dv">0</span>, irr_err),</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> <span class="fu">rowSums</span>(<span class="fu">across</span>(<span class="fu">everything</span>()))) <span class="sc">|&gt;</span> </span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(<span class="sc">-</span>error)</span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as_tibble</span>()</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  x <span class="sc">|&gt;</span> </span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>     <span class="fu">mutate</span>(<span class="at">y =</span> <span class="fu">rowSums</span>(<span class="fu">t</span>(<span class="fu">t</span>(x)<span class="sc">*</span>b)) <span class="sc">+</span> <span class="fu">rnorm</span>(n_obs, </span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">mean =</span> <span class="dv">0</span>, </span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>                                        <span class="at">sd =</span> irr_err))</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="simulation-settings" class="level2" data-number="18.3">
@@ -399,13 +402,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>sigma <span class="ot">&lt;-</span> <span class="fu">matrix</span>(.<span class="dv">3</span>, <span class="at">nrow =</span> n_features, <span class="at">ncol =</span> n_features)</span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a><span class="fu">diag</span>(sigma) <span class="ot">&lt;-</span> <span class="dv">1</span></span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>irr_err <span class="ot">&lt;-</span> <span class="dv">10</span></span>
-<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123456</span>)</span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="co"># first call so that we can set up recipe</span></span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">simulate_DGP</span>(n_obs, n_features, irr_err, mu, sigma) </span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>rec <span class="ot">&lt;-</span> <span class="fu">recipe</span>(y <span class="sc">~</span> ., <span class="at">data =</span> df)</span>
-<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="ot">=</span> <span class="cn">NULL</span>  <span class="co"># to store RMSE for all methods</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">rep</span>(<span class="fl">0.5</span>, n_features) <span class="co"># no b0 so set to 0</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123456</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a><span class="co"># first call so that we can set up recipe</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">simulate_DGP</span>(n_obs, n_features, irr_err, mu, sigma) </span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>rec <span class="ot">&lt;-</span> <span class="fu">recipe</span>(y <span class="sc">~</span> ., <span class="at">data =</span> df)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="ot">=</span> <span class="cn">NULL</span>  <span class="co"># to store RMSE for all methods</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 <section id="get-simulation-dfs" class="level2" data-number="18.4">
@@ -489,32 +493,46 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="k-fold" class="level2" data-number="18.8">
 <h2 data-number="18.8" class="anchored" data-anchor-id="k-fold"><span class="header-section-number">18.8</span> K-fold</h2>
-<section id="simple-10-fold" class="level3" data-number="18.8.1">
-<h3 data-number="18.8.1" class="anchored" data-anchor-id="simple-10-fold"><span class="header-section-number">18.8.1</span> Simple 10-fold</h3>
+<section id="simple-5-fold" class="level3" data-number="18.8.1">
+<h3 data-number="18.8.1" class="anchored" data-anchor-id="simple-5-fold"><span class="header-section-number">18.8.1</span> Simple 5-fold</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="ot">&lt;-</span> dfs <span class="sc">|&gt;</span> </span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(df) <span class="fu">vfold_cv</span>(df, <span class="at">v =</span> <span class="dv">10</span>)) <span class="sc">|&gt;</span>   <span class="co"># 10-fold</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(df) <span class="fu">vfold_cv</span>(df, <span class="at">v =</span> <span class="dv">5</span>)) <span class="sc">|&gt;</span>   <span class="co"># 5-fold</span></span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(split) <span class="fu">linear_reg</span>() <span class="sc">|&gt;</span> <span class="fu">fit_resamples</span>(<span class="at">resamples =</span> split, </span>
 <span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>                                              <span class="at">preprocessor =</span> rec,</span>
 <span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>                                              <span class="at">metrics =</span> <span class="fu">metric_set</span>(rmse))) <span class="sc">|&gt;</span> </span>
 <span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(fits) <span class="fu">collect_metrics</span>(fits, <span class="at">summarize =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span> </span>
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list_rbind</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">method =</span> <span class="st">"10-fold"</span>) <span class="sc">|&gt;</span>       <span class="co"># label results in df</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">method =</span> <span class="st">"5-fold"</span>) <span class="sc">|&gt;</span>       <span class="co"># label results in df</span></span>
 <span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(rmse_combined)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="x-10-fold" class="level3" data-number="18.8.2">
-<h3 data-number="18.8.2" class="anchored" data-anchor-id="x-10-fold"><span class="header-section-number">18.8.2</span> 3x 10-Fold</h3>
+<section id="simple-10-fold" class="level3" data-number="18.8.2">
+<h3 data-number="18.8.2" class="anchored" data-anchor-id="simple-10-fold"><span class="header-section-number">18.8.2</span> Simple 10-fold</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="ot">&lt;-</span> dfs <span class="sc">|&gt;</span> </span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(df) <span class="fu">vfold_cv</span>(df, <span class="at">v =</span> <span class="dv">10</span>, <span class="at">repeats =</span> <span class="dv">3</span>)) <span class="sc">|&gt;</span>   <span class="co"># 3x10-fold</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(df) <span class="fu">vfold_cv</span>(df, <span class="at">v =</span> <span class="dv">10</span>)) <span class="sc">|&gt;</span>   <span class="co"># 10-fold</span></span>
 <span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(split) <span class="fu">linear_reg</span>() <span class="sc">|&gt;</span> <span class="fu">fit_resamples</span>(<span class="at">resamples =</span> split, </span>
 <span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>                                              <span class="at">preprocessor =</span> rec,</span>
 <span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>                                              <span class="at">metrics =</span> <span class="fu">metric_set</span>(rmse))) <span class="sc">|&gt;</span> </span>
 <span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(fits) <span class="fu">collect_metrics</span>(fits, <span class="at">summarize =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span> </span>
 <span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list_rbind</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">method =</span> <span class="st">"3x10-fold"</span>) <span class="sc">|&gt;</span> <span class="co"># label results in df</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">method =</span> <span class="st">"10-fold"</span>) <span class="sc">|&gt;</span>       <span class="co"># label results in df</span></span>
 <span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(rmse_combined)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="x-10-fold" class="level3" data-number="18.8.3">
+<h3 data-number="18.8.3" class="anchored" data-anchor-id="x-10-fold"><span class="header-section-number">18.8.3</span> 3x 10-Fold</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="ot">&lt;-</span> dfs <span class="sc">|&gt;</span> </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(df) <span class="fu">vfold_cv</span>(df, <span class="at">v =</span> <span class="dv">10</span>, <span class="at">repeats =</span> <span class="dv">3</span>)) <span class="sc">|&gt;</span>   <span class="co"># 3x10-fold</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(split) <span class="fu">linear_reg</span>() <span class="sc">|&gt;</span> <span class="fu">fit_resamples</span>(<span class="at">resamples =</span> split, </span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                                              <span class="at">preprocessor =</span> rec,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>                                              <span class="at">metrics =</span> <span class="fu">metric_set</span>(rmse))) <span class="sc">|&gt;</span> </span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(fits) <span class="fu">collect_metrics</span>(fits, <span class="at">summarize =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list_rbind</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">method =</span> <span class="st">"3x10-fold"</span>) <span class="sc">|&gt;</span> <span class="co"># label results in df</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(rmse_combined)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
@@ -523,76 +541,77 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="resamples" class="level3" data-number="18.9.1">
 <h3 data-number="18.9.1" class="anchored" data-anchor-id="resamples"><span class="header-section-number">18.9.1</span> 10 resamples</h3>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="ot">&lt;-</span> dfs <span class="sc">|&gt;</span> </span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(df) <span class="fu">bootstraps</span>(df, <span class="at">times =</span> <span class="dv">10</span>)) <span class="sc">|&gt;</span>   <span class="co"># 10 boots</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(split) <span class="fu">linear_reg</span>() <span class="sc">|&gt;</span> <span class="fu">fit_resamples</span>(<span class="at">resamples =</span> split, </span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>                                              <span class="at">preprocessor =</span> rec,</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>                                              <span class="at">metrics =</span> <span class="fu">metric_set</span>(rmse))) <span class="sc">|&gt;</span> </span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(fits) <span class="fu">collect_metrics</span>(fits, <span class="at">summarize =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list_rbind</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">method =</span> <span class="st">"boot_10"</span>) <span class="sc">|&gt;</span>       <span class="co"># label results in df</span></span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(rmse_combined)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-<section id="resamples-1" class="level3" data-number="18.9.2">
-<h3 data-number="18.9.2" class="anchored" data-anchor-id="resamples-1"><span class="header-section-number">18.9.2</span> 100 resamples</h3>
-<div class="cell">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="ot">&lt;-</span> dfs <span class="sc">|&gt;</span> </span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(df) <span class="fu">bootstraps</span>(df, <span class="at">times =</span> <span class="dv">100</span>)) <span class="sc">|&gt;</span>   <span class="co"># 100 boots</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(df) <span class="fu">bootstraps</span>(df, <span class="at">times =</span> <span class="dv">10</span>)) <span class="sc">|&gt;</span>   <span class="co"># 10 boots</span></span>
 <span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(split) <span class="fu">linear_reg</span>() <span class="sc">|&gt;</span> <span class="fu">fit_resamples</span>(<span class="at">resamples =</span> split, </span>
 <span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>                                              <span class="at">preprocessor =</span> rec,</span>
 <span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>                                              <span class="at">metrics =</span> <span class="fu">metric_set</span>(rmse))) <span class="sc">|&gt;</span> </span>
 <span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(fits) <span class="fu">collect_metrics</span>(fits, <span class="at">summarize =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span> </span>
 <span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list_rbind</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">method =</span> <span class="st">"boot_100"</span>) <span class="sc">|&gt;</span>       <span class="co"># label results in df</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">method =</span> <span class="st">"boot_10"</span>) <span class="sc">|&gt;</span>       <span class="co"># label results in df</span></span>
 <span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(rmse_combined)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="resamples-2" class="level3" data-number="18.9.3">
-<h3 data-number="18.9.3" class="anchored" data-anchor-id="resamples-2"><span class="header-section-number">18.9.3</span> 1000 resamples</h3>
+<section id="resamples-1" class="level3" data-number="18.9.2">
+<h3 data-number="18.9.2" class="anchored" data-anchor-id="resamples-1"><span class="header-section-number">18.9.2</span> 100 resamples</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="ot">&lt;-</span> dfs <span class="sc">|&gt;</span> </span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(df) <span class="fu">bootstraps</span>(df, <span class="at">times =</span> <span class="dv">1000</span>)) <span class="sc">|&gt;</span>   <span class="co"># 1000 boots</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(df) <span class="fu">bootstraps</span>(df, <span class="at">times =</span> <span class="dv">100</span>)) <span class="sc">|&gt;</span>   <span class="co"># 100 boots</span></span>
 <span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(split) <span class="fu">linear_reg</span>() <span class="sc">|&gt;</span> <span class="fu">fit_resamples</span>(<span class="at">resamples =</span> split, </span>
 <span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>                                              <span class="at">preprocessor =</span> rec,</span>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>                                              <span class="at">metrics =</span> <span class="fu">metric_set</span>(rmse))) <span class="sc">|&gt;</span> </span>
 <span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(fits) <span class="fu">collect_metrics</span>(fits, <span class="at">summarize =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span> </span>
 <span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list_rbind</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">method =</span> <span class="st">"boot_1000"</span>) <span class="sc">|&gt;</span>       <span class="co"># label results in df</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">method =</span> <span class="st">"boot_100"</span>) <span class="sc">|&gt;</span>       <span class="co"># label results in df</span></span>
 <span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(rmse_combined)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="resamples-2" class="level3" data-number="18.9.3">
+<h3 data-number="18.9.3" class="anchored" data-anchor-id="resamples-2"><span class="header-section-number">18.9.3</span> 1000 resamples</h3>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="ot">&lt;-</span> dfs <span class="sc">|&gt;</span> </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(df) <span class="fu">bootstraps</span>(df, <span class="at">times =</span> <span class="dv">1000</span>)) <span class="sc">|&gt;</span>   <span class="co"># 1000 boots</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(split) <span class="fu">linear_reg</span>() <span class="sc">|&gt;</span> <span class="fu">fit_resamples</span>(<span class="at">resamples =</span> split, </span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>                                              <span class="at">preprocessor =</span> rec,</span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>                                              <span class="at">metrics =</span> <span class="fu">metric_set</span>(rmse))) <span class="sc">|&gt;</span> </span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(fits) <span class="fu">collect_metrics</span>(fits, <span class="at">summarize =</span> <span class="cn">TRUE</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list_rbind</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">method =</span> <span class="st">"boot_1000"</span>) <span class="sc">|&gt;</span>       <span class="co"># label results in df</span></span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(rmse_combined)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
 </section>
 <section id="summarize" class="level2" data-number="18.10">
 <h2 data-number="18.10" class="anchored" data-anchor-id="summarize"><span class="header-section-number">18.10</span> Summarize</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="sc">|&gt;</span> </span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(method) <span class="sc">|&gt;</span> </span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">rmse_mean =</span> <span class="fu">mean</span>(mean),</span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">rmse_sd =</span> <span class="fu">sd</span>(mean),</span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">n =</span> <span class="fu">n</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="sc">|&gt;</span> </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(method) <span class="sc">|&gt;</span> </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">rmse_mean =</span> <span class="fu">mean</span>(mean),</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">rmse_sd =</span> <span class="fu">sd</span>(mean),</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">n =</span> <span class="fu">n</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 7 × 4
+<pre><code># A tibble: 8 × 4
   method     rmse_mean rmse_sd     n
   &lt;chr&gt;          &lt;dbl&gt;   &lt;dbl&gt; &lt;int&gt;
-1 10-fold         10.5   0.574  1000
-2 3x10-fold       10.6   0.555  1000
-3 boot_10         11.1   0.622  1000
-4 boot_100        11.1   0.581  1000
-5 boot_1000       11.1   0.577  1000
-6 val_set_50      11.3   0.915  1000
-7 val_set_80      10.7   1.21   1000</code></pre>
+1 10-fold         10.5   0.567  1000
+2 3x10-fold       10.5   0.548  1000
+3 5-fold          10.7   0.599  1000
+4 boot_10         11.1   0.626  1000
+5 boot_100        11.1   0.581  1000
+6 boot_1000       11.1   0.577  1000
+7 val_set_50      11.3   0.915  1000
+8 val_set_80      10.7   1.21   1000</code></pre>
 </div>
 </div>
 </section>
 <section id="plot-sampling-distributions" class="level2" data-number="18.11">
 <h2 data-number="18.11" class="anchored" data-anchor-id="plot-sampling-distributions"><span class="header-section-number">18.11</span> Plot sampling distributions</h2>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="sc">|&gt;</span> </span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> mean, <span class="at">color =</span> method)) <span class="sc">+</span> </span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>() <span class="sc">+</span></span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> <span class="fu">mean</span>(rmse_true)),</span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">color =</span> <span class="st">"blue"</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="sc">|&gt;</span> </span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> mean, <span class="at">color =</span> method)) <span class="sc">+</span> </span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>() <span class="sc">+</span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> <span class="fu">mean</span>(rmse_true)),</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">color =</span> <span class="st">"blue"</span>, <span class="at">linetype =</span> <span class="st">"dashed"</span>, <span class="at">linewidth =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <p><img src="app_model_performance_simulations_files/figure-html/a102-plot-1.png" class="img-fluid" width="672"></p>
 </div>
