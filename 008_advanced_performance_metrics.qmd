@@ -414,7 +414,7 @@ Regardless of the plot, you can now begin to see the issues with our model
 - It seems accurate for patients that do NOT have heart disease
   - 368/381 correct
 - It is not very accurate for patients that DO have heart disease
-  - 17/47 correct
+  - 30/47 correct
 
 - This differential performance was masked by our global accuracy measure because overall accuracy was weighted heavily toward accuracy for patients without heart disease given their much higher numbers
 
@@ -425,6 +425,8 @@ We can use this confusion matrix as the starting point for MANY other common met
 - Sensitivity & Specificity
 - Positive and Negative Predictive Value (PPV, NPV)
 - Precision and Recall
+
+-----
 
 There are also some single metric approaches (like accuracy) that may be preferred when the outcome is unbalanced
 
@@ -494,6 +496,9 @@ Many of the statistics generated are based on an understanding of which level is
 - If this is not true, some statistics (e.g., sensitivity, specificity) will be incorrect (i.e., swapped). 
 - You can override this default by setting the following parameter inside any function that is affected by the order of the classes" `event_level = "second"`
 
+-----
+
+Here is summary in action!
 ```{r}
 cm |> summary()
 ```
@@ -518,8 +523,10 @@ cm |>
 autoplot(cm, type = "heatmap")
 ```
 
+-----
+
 ::: {.callout-important collapse="false"}
-### Question: Can you link the numbers in the confusion matrix to Sensitivity and Specificity metrics
+### Question: Can you link the numbers in the confusion matrix on the previous slide to Sensitivity and Specificity metrics
 ```{html}
 #| echo: true
 #| code-fold: true
@@ -547,12 +554,16 @@ cm |>
   summary() |>
   filter(.metric == "ppv" | .metric == "npv") |> 
   select(-.estimator)
+```
 
+```{r}
 autoplot(cm, type = "heatmap")
 ```
 
+-----
+
 ::: {.callout-important collapse="false"}
-### Question: Can you link the numbers in the confusion matrix to PPV and NPV metrics
+### Question: Can you link the numbers in the confusion matrix on the previous slide to PPV and NPV metrics
 ```{html}
 #| echo: true
 #| code-fold: true
@@ -624,6 +635,8 @@ Now think about "accuracy" of any specific COVID test
 - Occasionally, there was talk of sensitivity and specificity
 - There was rarely/never discussion of PPV and NPV, which is what matters most when you are given your test result
 
+-----
+
 ::: {.callout-important collapse="false"}
 ### Question: How would the PPV and NPV change when we moved from testing only people with symptoms who presented at the hospital to testing everyone (e.g., all college students)?
 ```{html}
@@ -650,12 +663,16 @@ cm |>
   summary() |> 
   filter(.metric == "precision" | .metric == "recall" | .metric == "f_meas") |> 
   select(-.estimator)
+```
 
+```{r}
 autoplot(cm, type = "heatmap")
 ```
 
+-----
+
 ::: {.callout-important collapse="false"}
-### Question: Can you link the numbers in the confusion matrix to Recall (Sensitivity) and Precision (PPV) metrics
+### Question: Can you link the numbers in the confusion matrix on the previous slide to Recall (Sensitivity) and Precision (PPV) metrics
 ```{html}
 #| echo: true
 #| code-fold: true
