@@ -399,11 +399,15 @@ Tidy model's makes it easy to visualize this matrix in one of two types of plots
 
 - mosaic (the default)
 ```{r}
+#| out-height: 3in
+
 autoplot(cm)
 ```
 
 - heatmap
 ```{r}
+#| out-height: 3in
+
 autoplot(cm, type = "heatmap")
 ```
 
@@ -489,7 +493,8 @@ $F_\beta$ score:
 -----
 
 It is easy to get any of these performance metrics using `summary()` on the confusion matrix
-
+\
+\
 Many of the statistics generated are based on an understanding of which level is the positive level.  
 
 - Tidymodels (yardstick to be precise) will default to consider the first level the positive level.  
@@ -506,7 +511,8 @@ cm |> summary()
 -----
 
 Let's consider some of what these metrics are telling us about our classifier by looking at the metrics and a confusion matrix plot
-
+\
+\
 Let's start with **sensitivity** and **specificity** and their arithmetic mean (**balanced accuracy**)
 
 - These are column specific accuracies
@@ -520,6 +526,8 @@ cm |>
 ```
 
 ```{r}
+#| out-height: 3in
+
 autoplot(cm, type = "heatmap")
 ```
 
@@ -541,7 +549,7 @@ Specificity = 368 / (368 + 13)
 
 -----
 
-Now let's consider **positive predictive value** and **negative predictive value**
+Now let's consider **positive predictive value** and **negative predictive value** 
 
 - These are row specific accuracies
 - Focus is on model predictions (rows)
@@ -549,15 +557,26 @@ Now let's consider **positive predictive value** and **negative predictive value
 - Not typically reported alone but instead in combo with sensitivity/specificity and prevalence (see next pages)
 - Mosaic plot is better visualization for sensitivity/specificity (though I also like the numbers).  Not that useful for PPV/NPV
 - Use heatmap?
+
+```{r}
+#| out-height: 3in
+
+autoplot(cm, type = "heatmap")
+```
+
+-----
+
+```{r}
+#| out-height: 3in
+
+autoplot(cm, type = "heatmap")
+```
+
 ```{r}
 cm |> 
   summary() |>
   filter(.metric == "ppv" | .metric == "npv") |> 
   select(-.estimator)
-```
-
-```{r}
-autoplot(cm, type = "heatmap")
 ```
 
 -----
@@ -580,10 +599,14 @@ NPV = 368 / (368 + 17)
 -----
 
 - PPV and NPV are influenced by both sensitivity and specificity BUT ALSO prevalence.
+\
+\
 
 - This becomes important in unbalanced settings where prevalence of classes is not equal
   - Your classifier's PPV will be lower, even with good sensitivity and specificity if the prevalence of the positive class is low   
   - Conversely, your classifier's NPV will be lower, even with good sensitivity and specificity, if the prevalence of the negative class is low.
+\
+\
 
 - Prevalence also can vary by testing setting
 
@@ -606,8 +629,8 @@ MENS2 has prevalence of 1/30,000 in general population.  If using the test in th
 |               | **Ground Truth**|     |
 |:--------------|:--------- |:----------|
 | **Prediction**| Positive  | Negative  | 
-| Positive      | 98        | 3000      |
-| Negative      | 2         | 2996900   | 
+| Positive      | 98        |    3000   |
+| Negative      |  2        | 2996900   | 
 
 -----
 
@@ -615,15 +638,15 @@ However, MENS2 prevalence is high (1/5) among patients who present in a clinic w
 
 - 600,000 will have the disease
 - 2,400,000 will NOT have the disease (still unbalanced by but much less)
-- Column accuracies (sensitivity and specificity) remain the same
+- Column accuracies (sensitivity and specificity) remain the same (98% and 99.9%)
   - These are properties of the test/classifier
 - PPV is now much better; 588,000 / (2400 + 588,000) = 99.6%
   
 |               | **Ground Truth**|     |
 |:--------------|:--------- |:----------|
 | **Prediction**| Positive  | Negative  | 
-| Positive      | 98        | 3000      |
-| Negative      | 2         | 2996900   | 
+| Positive      | 588000    |    2400   |
+| Negative      |  12000    | 2397600   | 
 
 
 -----
@@ -659,14 +682,24 @@ In some instances, it may be more useful to focus on **precision** and **recall*
 - This keeps the focus on positive cases
 
 ```{r}
+#| out-height: 3in
+
+autoplot(cm, type = "heatmap")
+```
+
+-----
+
+```{r}
+#| out-height: 3in
+
+autoplot(cm, type = "heatmap")
+```
+
+```{r}
 cm |> 
   summary() |> 
   filter(.metric == "precision" | .metric == "recall" | .metric == "f_meas") |> 
   select(-.estimator)
-```
-
-```{r}
-autoplot(cm, type = "heatmap")
 ```
 
 -----
@@ -753,22 +786,22 @@ In our example
 cm
 ```
 
-$P_{positive} = \frac{28 + 18}{426} * \frac{4 + 18}{426} = 0.005576495$
+$P_{positive} = \frac{17 + 30}{428} * \frac{13 + 30}{428} = 0.01103262$
 \
 \
-$P_{negative} = \frac{376 + 4}{426} * \frac{376 + 28}{426} = 0.8459521$
+$P_{negative} = \frac{368 + 13}{428} * \frac{368 + 17}{428} = 0.8007522$
 \
 \
-$P_{expected} = 0.005576495 + 0.8459521 = 0.8515286$
+$P_{expected} = 0.01103262 + 0.8007522 = 0.8117848$
 \
 \
-$Actual Accuracy = 0.9248826$
+$Actual Accuracy = 0.9299065$
 \
 \
 $Kappa = \frac{observed\:accuracy - expected\:accuracy}{1 - expected\:accuracy}$
 \
 \
-$Kappa = \frac{0.9248826 - 0.8515286}{1 - 0.8515286} = 0.4940615$
+$Kappa = \frac{0.9299065 - 0.8117848}{1 - 0.8117848} = 0.627588$
 
 ```{r}
 summary(cm) |> 
@@ -840,6 +873,8 @@ and how much you gain and lose with regard to each type of performance metric
 :::
 
 ```{r}
+#| out-height: 3in
+
 autoplot(cm, type = "heatmap")
 ```
 
@@ -973,6 +1008,8 @@ roc_plot
 We can `autoplot()` this
 
 ```{r}
+#| out-height: 3in
+
 autoplot(roc_plot)
 ```
 
@@ -1248,8 +1285,12 @@ Let's see this at play again in our model
 
 - Using the 50% threshold we have low sensitivity but good specificity
 ```{r}
-autoplot(cm)
+#| out-height: 3in
 
+autoplot(cm)
+```
+
+```{r}
 cm |> 
   summary() |> 
   filter(.metric == "sens" | .metric == "spec") |> 
