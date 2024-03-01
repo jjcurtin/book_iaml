@@ -31,15 +31,13 @@ Post questions to the readings channel in Slack
 
 ### Lecture Videos
 
-- [Lecture 1: Unit Introduction]()
-- [Lecture 2: The Confusion Matrix]()
-- [Lecture 3: Metrics from the Confusion Matrix, Part 1]()
-- [Lecture 4: Metrics from the Confusion Matrix, Part 2]()
-- [Lecture 5: The Receiver Operating Characteristic (ROC) Curve]()
-- [Lecture 6: Selecting Model Configurations with Other Metrics]()
-- [Lecture 7: Addressing Class Imbalance]()
+- [Lecture 1: Unit Introduction](https://mediaspace.wisc.edu/media/iaml+unit+8-1/1_llkkb5j8) ~ 15 mins
+- [Lecture 2: The Confusion Matrix, Part 1](https://mediaspace.wisc.edu/media/iaml+unit+8-2/1_nez4aukh)~ 33 mins
+- [Lecture 3: The Confusion Matrix, Part 2](https://mediaspace.wisc.edu/media/iaml+unit+8-3/1_r5d4f701)~ 11 mins
+- [Lecture 4: The Receiver Operating Characteristic (ROC) Curve]() 
+- [Lecture 5: Selecting Model Configurations with Other Metrics]()
+- [Lecture 6: Addressing Class Imbalance]()
 
-- [Discussion]()
 
 Post questions to the video-lectures channel in Slack
 
@@ -540,7 +538,7 @@ autoplot(cm, type = "heatmap")
 #| code-fold: true
 #| code-summary: "Show Answer"
 Sensivity is "accuracy" for the positive cases (in this instance, those with 
-disease = yes).  Sensitivity = 17 / (17 + 30)
+disease = yes).  Sensitivity = 30 / (17 + 30)
 
 Specificity is "accuracy" for the negative cases (disease = no).  
 Specificity = 368 / (368 + 13)
@@ -710,7 +708,7 @@ cm |>
 #| echo: true
 #| code-fold: true
 #| code-summary: "Show Answer"
-Recall/sensitiive is "accuracy" for the positive cases (in this instance, patients 
+Recall/sensitivity is "accuracy" for the positive cases (in this instance, patients 
 with heart disease).
 30 / (30 + 17)
 
@@ -833,7 +831,7 @@ Remember that our classifier is estimating the probability of an observation bei
 We dichotomize this probability when we formally make a class prediction
 
 - If the probability > 50%, we classify the observation as positive
-- If the probability < 50%m we classify the observation as negative
+- If the probability <= 50%, we classify the observation as negative
 
 -----
 
@@ -845,7 +843,7 @@ We dichotomize this probability when we formally make a class prediction
 #| code-summary: "Show Answer"
 We can use a more liberal/lower classification threshold for saying someone will default.  
 For example, rather than requiring a 50% probability to classify as yes for default, 
-we could lower to 20% fro the classification threshold
+we could lower to 20% for the classification threshold
 ```
 :::
 
@@ -880,7 +878,10 @@ autoplot(cm, type = "heatmap")
 
 -----
 
-Previously, we simply used `predict(fit_glmnet, feat_test)$.pred_class`.  `$.pred_class` dichotomized at 50% by default
+Previously, we simply used `predict(fit_glmnet, feat_test)$.pred_class`.  
+\
+\
+`$.pred_class` dichotomized at 50% by default
 
 - This is the classification threshold to use with predicted probabilities that will produce the best overall accuracy (e.g., Bayes classifier)
 - However, we can use a different threshold to increase sensitivity or specificity
@@ -1043,7 +1044,8 @@ When evaluating an ROC curve:
 
 The ROC Curve is not only a useful method to visualize classier performance across
 thresholds
-
+\
+\
 The area under the ROC curve (auROC) is an attractive performance metric
 
 - Ranges from 1.0 (perfect) down to approximately 0.5 (random classifier)
@@ -1057,7 +1059,7 @@ The area under the ROC curve (auROC) is an attractive performance metric
 
 - auROC is the probability that the classifier will rank/predict a randomly selected true positive observation higher than a randomly selected true negative observation
 
-- Alternatively, it can be thought of as the average sensitivity across all values of specificity or the average specificity across all values of sensitivity
+- Alternatively, it can be thought of as the average sensitivity across all decision thresholds
 
 - auROC summarizes performance (sensitivity vs. specificity trade-off) across all possible thresholds
 
@@ -1066,7 +1068,8 @@ The area under the ROC curve (auROC) is an attractive performance metric
 -----
 
 It is easy to get the auROC for the ROC in tidymodels using `roc_auc()`
-
+\
+\
 As with calculating the ROC curve, we need 
 
 - truth 
