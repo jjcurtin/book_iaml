@@ -51,9 +51,9 @@ Post questions to the video-lectures channel in Slack
 - [data](application_assignments/unit_06/ames_full_cln.csv)
 - [data dictionary](application_assignments/unit_06/ames_data_dictionary.pdf)
 - [qmd shell](application_assignments/unit_06/hw_unit_06_regularization.qmd)
-- [solution](https://dionysus.psych.wisc.edu/iaml/key_unit_05_resampling.html) 
+- [solution](https://dionysus.psych.wisc.edu/iaml/key_unit_06_regularization.html) 
 
-Post questions to application-assignments Slack channel
+
 
 Submit the application assignment [here](https://canvas.wisc.edu/courses/395546/assignments/2187691) and complete the [unit quiz](https://canvas.wisc.edu/courses/395546/quizzes/514047) by 8 pm on Wednesday, February 28th 
 
@@ -1349,79 +1349,95 @@ For L2 penalized (Ridge) logistic regression (w/ labels coded 0,1)
 ### Announcements
 
 - Midterm - application and conceptual parts
-
-- No lab this week
-
 - Can we have a midterm review session?
 
-- Workshops outside of class (simulations; use of CHTC)
+-----
 
-### Questions
+### feature matrix vs. raw predictors
 
-**General**
+When to use which and why could I use raw predictors in simulated data example from lectures
 
-- Resampling simulations (a work in progress; stay tuned for more text)
-- Reading csv files, classing factors, and `step_string2factor()` and `step_num2factor()`  (updated code in previous units and appendix 2)
-- Predictors vs. features and recipes
+-----
 
-**Stepwise questions**
+
+### Cost functions
+
+What is Cost function?
+\
+\
+Linear model 
+
+- $\frac{1}{n}\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}$
+\
+\
+
+Ridge (L2)
+
+- $\frac{1}{n}([\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}] + [\:\lambda\sum_{j = 1}^{p} \beta_j^{2}\:])$
+\
+\
+
+LASSO (L1)
+
+- $\frac{1}{n}([\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}] + [\:\lambda\sum_{j = 1}^{p} |\beta_j|\:])$
+\
+\
+
+Elastic Net
+
+- $\frac{1}{n}([\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}] + [\:\lambda (\alpha\sum_{j = 1}^{p} |\beta_j| + (1-\alpha)\sum_{j = 1}^{p} \beta_j^{2})\:])$
+
+-----
+
+### LASSO, Ridge, and elastic net questions
+
+- The pros and cons of Lasso and Ridge vs. Elastic Net
+
+- I'm still a little confused as to why you would ever use Ridge or LASSO separately when you can just selectively use one or the other through elastic net. Wouldn't it make sense to just always use elastic net and then change the penalty accordingly for when you wanted to use a Ridge or LASSO regression approach?
+  - Pure LASSO
+  - model variance
+  - two self-report measure scales vs. items
+
+- Some explanation why Lasso is more robust to outliers and ridge is more robust to measurement error would be appreciated.
+
+- I'm not very clear why LASSO could limit some parameters to be zero but ridge regression cannot. Can we go through this a bit?
+
+- How do you know what numbers to start at for tuning lamba (like in the code below)? I think John mentioned he has a function to find these, but I'm wondering if there are any rules of thumb.
+
+- How do we know how "strong" of a penalty we need to be applying to our cost function? Does the reduction in variance increase as we increase the strength of the penalty?
+
+- Is a decreased number of features always good or bad, or does it depend on the model/recipe
+
+- Can you talk more about how to interpret the scale of the parameter estimates? In the lecture you said the following and I'm not quite sure what that means:
+
+- I might be totally wrong but I wonder if we have to care about the multi-collinearity or high dimension on classification as well. Or this is only limited to regression and so we are solving with regularising only regression model? 
+
+
+-----
+
+### Stepwise questions
 
 - Could you go over Forward, Backward, and Best Subset subsetting? I think I understand the algorithm they use, but I do not understand the penalty function they use for picking the "best" model. In the book, it looks like it uses R-squared to pick the best model, but wouldn't the full model always have the greatest R-squared?
 
-- I would like to hear your perspectives on forward and backward stepwise selection, and the cases we might use it for (if ever).
+- Is there a reason why we do not discuss variable selection using subset methods? 
 
-- When do we want to apply a forward vs backward selection approach?
+- Is there specific cases when you would pick backwards or forwards selection, or is it up to the researcher?
 
 - Training vs. val/val error in stepwise approaches.   
 
 - Use of AIC, BIC, Cp, and adjusted R2 vs. cross-validation
 
-**Cost functions and optimization algorithms**
+-----
 
-- What is Cost function
+### Explanatory goals
 
-- Cost function in ridge (L2) and LASSO (L1)
-
-- Since Ridge is the square version, is there cubic version of regularization?
-
-- In glmnet, the parameter lambda controls the amount of regularization applied to the coefficients in the model. Regularization shrinks the coefficients towards zero, which can help reduce overfitting by decreasing the variance of the model.  Could you please explain more about regularization shrinks the coefficients toward zero?
-
-- In optimization procedures, what are the maximum likelihood and the gradient descent? Where can we apply them?
-
-**LASSO, Ridge, and glmnet questions**
-
-- It seems like GLMNET is the best method to use, unless we have some computational concerns during implementation with big data, in that case LASSO would be preferred. Is it correct to assume that GLMNET will typically output parameter estimates that are shrunk over parameter estimates set to 0? 
-
-- I think I understand Ridge and LASSO relatively well, but I am unsure about what Elastic Net is really doing and its potential benefits.
-
-- The pros and cons of Lasso and Ridge vs. Elastic Net
-
-- I'm still a little confused as to why you would ever use Ridge or LASSO separately when you can just selectively use one or the other through elastic net. Wouldn't it make sense to just always use elastic net and then change the penalty accordingly for when you wanted to use a Ridge or LASSO regression approach?
-
-- A conceptual issue, but specifically related to the application assignment: When running the LASSO regression model in the application assignment, the best model ended up being the one with the highest lambda in the range of lambda values we tested. This made sense to me, in that it seemed like we needed a model that was much less flexible than OLS regression to address multicollinearity and overfitting. However, when running the elastic net regression model, the best model ended up being a pure ridge model (which made sense), but with the *lowest* lambda value in the range of lambda values we tested. Why would this be, when intuitively it seemed like (and the LASSO model suggested) there would be a lot of regularization needed to address multicollinearity and overfitting?
-
-
-
-**Explanatory goals**
+- Can LASSO be used for variable selection when engaging in cross sectional data analysis to identify which variables in a large set of Xs are important for a particular outcome? 
 
 - In practice, what elements should be considered before selecting IVs and covariates?
 
-- If we only care about understanding the DGP for model configuration, and not making future predictions, how do we measure goodness of fit?
+-----
 
-- Can LASSO be used for variable selection when engaging in cross sectional data analysis to identify which variables in a large set of Xs are important for a particular outcome? 
- 
-**Other questions**
+### PCA
 
-- How is the **curse of dimensionality** related to **multicollinearity** in high dimension feature space? Does it increase collinearity between predictors so that its hard to identify the best coefficient for the regression model?
+- https://setosa.io/ev/principal-component-analysis/
 
-- What are the different underlying assumptions of all the mentioned approaches? 
-
-- Could you talk about when to use R-squared and when to use adjusted R-squared? 
-
-- When do you consider models more sparse? If some models have over 200 predictors, is it worth to drop 40 of them? Does that make the model more interpretable?
-
-- Can we examine our predictors in EDA and decide what penalties to apply to our predictors?
-
-- Is there some situation that OLS are more outstanding than others?
-
-- If possible, could you please share more about the branch-and-bound techniques? 
