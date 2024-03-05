@@ -1,0 +1,376 @@
+---
+title: "Homework Unit 8: Advanced Performance Metrics"
+author: "Your name here"
+date: "`r lubridate::today()`"
+format: 
+  html: 
+    embed-resources: true
+    toc: true 
+    toc_depth: 4
+editor_options: 
+  chunk_output_type: console
+---
+
+## Introduction
+
+To begin, download the following from the course web book (Unit 8):
+
+* `hw_unit_8_performance.qmd` (notebook for this assignment)
+
+* `breast_cancer.csv` (data for this assignment)
+
+The data for this week's assignment has information about breast cancer diagnoses. It contains characteristics of different breast cancer tumors and classifies the tumor as benign or malignant. Your goal is to choose among two candidate statistical algorithms (general GLM vs a tuned KNN model) to identify and evaluate the best performing model for diagnosis. 
+
+You can imagine that the consequences of missing cancerous tumors are not equal to the consequences of misdiagnosing benign tumors. In this assignment, we will explore how the performance metric and balance of diagnoses affect our evaluation of best performing model in this data.
+
+*NOTE:* Fitting models in this assignment will generate some warnings having to do with `glm.fit`. This is to be expected, and we are going to review these warnings and some related issues in our next lab.
+
+Let's get started!
+
+-----
+
+##  Setup
+
+Set up your notebook in this section. You will want to set your path and initiate parallel processing here!
+
+```{r}
+
+```
+
+
+
+## Read in your data
+
+Read in the `breast_cancer.csv` data file and save as an object called `data_all`, perform any checks needed on the data (i.e., light *cleaning* EDA) and set the outcome `diagnosis` as a factor with malignant as the second level.
+
+```{r}
+
+```
+
+
+Print a table to see the balance of positive and negative diagnosis cases.
+
+```{r}
+
+```
+
+
+What do you notice about the distribution of your outcome variable? Do you have any concerns?   
+
+*Type your response here*
+
+
+
+
+## Split data into train and test
+
+Hold out 1/3 of the data as a test set for evaluation using the `initial_split()` function. Use the provided seed. Stratify on diagnosis.
+```{r}
+set.seed(12345)
+
+
+```
+
+
+## Light Modeling EDA
+
+Look at correlations between predictors in `data_train`.
+```{r}
+
+```
+
+
+Visualize the variance of your predictors in `data_train`.
+```{r}
+
+
+```
+
+
+Now, answer the following questions:    
+
+
+Why should you be looking at variance of your predictors?
+
+*Type your response here*
+
+
+If you had concerns about the variance of your predictors, what would you do?
+
+*Type your response here*
+
+
+Do you have concerns about the variance of your predictors in these data?
+
+*Type your response here*
+
+
+
+
+## GLM vs KNN
+
+In this part of this assignment, you will compare the performance of a standard GLM model vs a KNN model (tuned for neighbors) for predicting breast cancer diagnoses from all available predictors. You will choose between these models using bootstrapped resampling, and evaluate the final performance of your model in the held out test set created earlier in this script. You will now select and evaluate models using ROC AUC instead of accuracy.
+
+### Bootstrap splits
+
+Split `data_train` into 100 bootstrap samples stratified on diagnosis. Use the provided seed.
+```{r}
+set.seed(12345)
+
+
+
+```
+
+
+### Build recipes
+
+Write 2 recipes (one for GLM, one for KNN) to predict breast cancer diagnosis from all predictors in `data_train`. Include the minimal necessary steps for each algorithm, including what you learned from your light EDA above.
+```{r}
+
+
+```
+
+
+### Fit GLM
+
+Fit a logistic regression classifier using the recipe you created and your bootstrap splits. Use ROC AUC (`roc_auc`) as your performance metric.
+
+```{r}
+
+
+```
+
+Print the average ROC AUC of your logistic regression model.
+```{r}
+
+
+```
+
+
+### Fit KNN
+
+Set up a hyperparameter grid to consider a range of values for `neighbors` in your KNN models.
+```{r}
+
+
+```
+
+Fit a KNN model using the recipe you created and your bootstrap splits. Use ROC AUC (`roc_auc`) as your performance metric.  
+```{r}
+
+
+```
+
+Generate a plot to help you determine if you considered a wide enough range of values for `neighbors`.
+```{r}
+
+
+```
+
+
+Print the best value for the `neighbors` hyperparameter across resamples based on model ROC AUC.
+```{r}
+
+
+```
+
+Print the average ROC AUC of your best KNN regression model
+```{r}
+
+
+```
+
+
+### Select and fit best model
+
+Now you will select your best model configuration among the various KNN and GLM models based on overall ROC AUC and train it on your full training sample.     
+
+Create training (`feat_train`) and test (`feat_test`) feature matrices using your best recipe (GLM or KNN)
+```{r}
+
+
+```
+
+Fit your best performing model on the full training sample (`feat_train`).
+```{r}
+
+
+```
+
+### Evaluate the best model
+
+Make a figure to plot the ROC of your best model in the test set.
+```{r}
+
+
+```
+
+
+Generate a confusion matrix depicting your model's performance in test.
+```{r}
+
+
+```
+
+
+Make a plot of your confusion matrix.
+```{r}
+
+
+```
+
+
+Report the ROC AUC, accuracy, sensitivity, specificity, PPV, and NPV of your best model in the held out test set.
+```{r}
+
+
+```
+
+## Part 2: Addressing class imbalance
+
+Since only 15% of our cases our malignant, let's see if we can achieve higher sensitivity by up-sampling our data with SMOTE. We will again select between a standard GLM vs tuned KNN using bootstrapped CV and evaluate our best model in test.
+
+### Build recipes
+
+Update your previous recipes to up-sample the minority class (malignant) in diagnosis using `step_smote().` Remember to make 2 recipes (one for GLM, one for KNN).
+```{r}
+
+
+```
+
+
+### Fit GLM
+
+Fit an up-sampled logistic regression classifier using the new GLM recipe you created and your bootstrap splits. Use ROC AUC as your performance metric.
+```{r}
+
+
+```
+
+Print the average ROC AUC of your logistic regression model 
+```{r}
+
+
+```
+
+
+### Fit KNN
+
+Set up a hyperparameter grid to consider a range of values for `neighbors` in your KNN models.
+```{r}
+
+
+```
+
+Fit an up-sampled KNN using the new KNN recipe you created and your bootstrap splits. Use ROC AUC as your performance metric. 
+```{r}
+
+
+```
+
+Generate a plot to help you determine if you considered a wide enough range of values for `neighbors`.
+```{r}
+
+
+```
+
+Print the best value for the `neighbors` hyperparameter across resamples based on model ROC AUC.
+```{r}
+
+
+```
+
+
+Print the average ROC AUC of your best KNN regression model
+```{r}
+
+
+```
+
+### Select and fit the best model
+
+Create the up-sampled training feature matrix using your best recipe (GLM or KNN). *Remember, do not upsample your test data!*
+```{r}
+
+
+```
+
+
+Fit your best performing up-sampled model on the full training sample.
+```{r}
+
+
+```
+
+### Evaluate the best model
+
+Make a figure to plot the ROC of your best ups-ampled model in the test set.
+```{r}
+
+
+```
+
+
+Generate a confusion matrix depicting your up-sampled model's performance in test.
+```{r}
+
+
+```
+
+
+Make a plot of your confusion matrix.
+```{r}
+
+
+```
+
+
+Report the ROC AUC, accuracy, sensitivity, specificity, PPV, and NPV of your best up-sampled model in the held out test set.
+```{r}
+
+
+```
+
+
+
+## Part 3: New Classification Threshold
+
+Now you want to check if there may be an additional benefit for your model's performance if you adjust the classification threshold from its default 50% to a threshold of 40%
+
+### 1) Adjust  classification threshold to 40%
+
+Make a tibble containing the following variables -
+
+* truth: The true values of diagnosis in your test set
+* prob: The predicted probabilities made by your best up-sampled model above in the test set
+* estimate_40: Binary predictions of `diagnosis` (benign vs malignant) created by applying a threshold of 40% to your best model's predicted probabilities.
+```{r}
+
+
+```
+
+### 2) Evaluate model at new threshold
+
+Generate a confusion matrix depicting your up-sampled model's performance in test at your new threshold.
+```{r}
+
+
+```
+
+
+Make a plot of your confusion matrix.
+```{r}
+
+
+```
+
+
+Report the ROC AUC, accuracy, sensitivity, specificity, PPV, and NPV of your best up-sampled model in the held-out test set.
+```{r}
+
+
+
+```
+
+
+**✭✭✭ You are a machine learning superstar ✭✭✭**
