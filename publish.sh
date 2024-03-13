@@ -4,10 +4,10 @@
 # FILE = all or filename
 # FORMAT = book, slides, or slides_wide
 
-FILE=$1
-FORMAT=$2
+FORMAT=$1
+FILE=$2
 
-if [ "$FILE" = "all" ] && [ "$FORMAT" = "book" ]; then
+if [ "$FORMAT" = "book" ]; then
   echo ""
   echo "Publishing all chapters to gh-pages"
   echo ""
@@ -16,18 +16,8 @@ if [ "$FILE" = "all" ] && [ "$FORMAT" = "book" ]; then
   git restore _quarto.yml
 fi
 
-if [ $FILE != "all" ] && [ "$FORMAT" = "book" ];  then
-  echo "ERROR - MUST RENDER FULL BOOK FOR NOW!"
-  #echo ""
-	#echo "Rendering $FILE to web book"
-  #echo "Do not forget to add, commit, and push to Github"
-  #echo ""
-  #cp _quarto_book.yml _quarto.yml
-  #quarto render "$FILE"
-  #git restore _quarto.yml
-fi
  
-if [ $FILE != "all" ] && [ "$FORMAT" = "slides" ];  then
+if [ "$FORMAT" = "slides" ];  then
   echo ""
 	echo "Publishing $FILE to standard slides on quarto-pub"
   echo ""
@@ -36,7 +26,7 @@ if [ $FILE != "all" ] && [ "$FORMAT" = "slides" ];  then
   git restore _quarto.yml
 fi
  
-if [ $FILE != "all" ] && [ "$FORMAT" = "slides_wide" ];  then
+if [ "$FORMAT" = "slides_wide" ];  then
   echo ""
 	echo "Publishing $FILE to wide slides on quarto-pub"
   echo ""
