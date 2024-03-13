@@ -13,18 +13,19 @@ if [ "$FILE" = "all" ] && [ "$FORMAT" = "book" ]; then
   echo "Do not forget to add, commit, and push to Github"
   echo ""
   cp _quarto_book.yml _quarto.yml
-  quarto render
+  quarto publish gh-pages --no-browser 
   git restore _quarto.yml
 fi
 
 if [ $FILE != "all" ] && [ "$FORMAT" = "book" ];  then
-  echo ""
-	echo "Rendering $FILE to web book"
-  echo "Do not forget to add, commit, and push to Github"
-  echo ""
-  cp _quarto_book.yml _quarto.yml
-  quarto render "$FILE"
-  git restore _quarto.yml
+  echo "ERROR - MUST RENDER FULL BOOK FOR NOW!"
+  #echo ""
+	#echo "Rendering $FILE to web book"
+  #echo "Do not forget to add, commit, and push to Github"
+  #echo ""
+  #cp _quarto_book.yml _quarto.yml
+  #quarto render "$FILE"
+  #git restore _quarto.yml
 fi
  
 if [ $FILE != "all" ] && [ "$FORMAT" = "slides" ];  then
