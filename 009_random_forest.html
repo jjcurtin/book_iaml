@@ -20,6 +20,40 @@ ul.task-list li input[type="checkbox"] {
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
 }
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
 /* CSS for citations */
 div.csl-bib-body { }
 div.csl-entry {
@@ -89,6 +123,35 @@ div.csl-indent {
   }
 }</script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="book.css">
 </head>
@@ -305,7 +368,27 @@ div.csl-indent {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#overview-of-unit" id="toc-overview-of-unit" class="nav-link active" data-scroll-target="#overview-of-unit"><span class="header-section-number">9.1</span> Overview of Unit</a></li>
+  <li><a href="#overview-of-unit" id="toc-overview-of-unit" class="nav-link active" data-scroll-target="#overview-of-unit"><span class="header-section-number">9.1</span> Overview of Unit</a>
+  <ul class="collapse">
+  <li><a href="#learning-objectives" id="toc-learning-objectives" class="nav-link" data-scroll-target="#learning-objectives"><span class="header-section-number">9.1.1</span> Learning Objectives</a></li>
+  <li><a href="#readings" id="toc-readings" class="nav-link" data-scroll-target="#readings"><span class="header-section-number">9.1.2</span> Readings</a></li>
+  <li><a href="#lecture-videos" id="toc-lecture-videos" class="nav-link" data-scroll-target="#lecture-videos"><span class="header-section-number">9.1.3</span> Lecture Videos</a></li>
+  <li><a href="#coding-assignment" id="toc-coding-assignment" class="nav-link" data-scroll-target="#coding-assignment"><span class="header-section-number">9.1.4</span> Coding Assignment</a></li>
+  </ul></li>
+  <li><a href="#decision-trees" id="toc-decision-trees" class="nav-link" data-scroll-target="#decision-trees"><span class="header-section-number">9.2</span> Decision Trees</a></li>
+  <li><a href="#decision-trees-in-ames" id="toc-decision-trees-in-ames" class="nav-link" data-scroll-target="#decision-trees-in-ames"><span class="header-section-number">9.3</span> Decision Trees in Ames</a></li>
+  <li><a href="#bagging" id="toc-bagging" class="nav-link" data-scroll-target="#bagging"><span class="header-section-number">9.4</span> Bagging</a></li>
+  <li><a href="#bagging-trees-in-ames" id="toc-bagging-trees-in-ames" class="nav-link" data-scroll-target="#bagging-trees-in-ames"><span class="header-section-number">9.5</span> Bagging Trees in Ames</a></li>
+  <li><a href="#random-forest" id="toc-random-forest" class="nav-link" data-scroll-target="#random-forest"><span class="header-section-number">9.6</span> Random Forest</a>
+  <ul class="collapse">
+  <li><a href="#random-forest-in-ames" id="toc-random-forest-in-ames" class="nav-link" data-scroll-target="#random-forest-in-ames"><span class="header-section-number">9.6.1</span> Random Forest in Ames</a></li>
+  </ul></li>
+  <li><a href="#discussion-notes" id="toc-discussion-notes" class="nav-link" data-scroll-target="#discussion-notes"><span class="header-section-number">9.7</span> Discussion Notes</a>
+  <ul class="collapse">
+  <li><a href="#announcements" id="toc-announcements" class="nav-link" data-scroll-target="#announcements"><span class="header-section-number">9.7.1</span> Announcements</a></li>
+  <li><a href="#past-questions" id="toc-past-questions" class="nav-link" data-scroll-target="#past-questions"><span class="header-section-number">9.7.2</span> Past Questions</a></li>
+  <li><a href="#new-questions" id="toc-new-questions" class="nav-link" data-scroll-target="#new-questions"><span class="header-section-number">9.7.3</span> New Questions</a></li>
+  </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/jjcurtin/book_iaml/edit/main/009_random_forest.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
@@ -333,7 +416,8 @@ div.csl-indent {
 
 <section id="overview-of-unit" class="level2" data-number="9.1">
 <h2 data-number="9.1" class="anchored" data-anchor-id="overview-of-unit"><span class="header-section-number">9.1</span> Overview of Unit</h2>
-<p><strong>Learning Objectives</strong></p>
+<section id="learning-objectives" class="level3" data-number="9.1.1">
+<h3 data-number="9.1.1" class="anchored" data-anchor-id="learning-objectives"><span class="header-section-number">9.1.1</span> Learning Objectives</h3>
 <ul>
 <li>Decision trees</li>
 <li>Bagged trees</li>
@@ -346,28 +430,3136 @@ div.csl-indent {
 <li>Variable importance</li>
 </ul></li>
 </ul>
-<p><strong>Readings</strong></p>
+<hr>
+</section>
+<section id="readings" class="level3" data-number="9.1.2">
+<h3 data-number="9.1.2" class="anchored" data-anchor-id="readings"><span class="header-section-number">9.1.2</span> Readings</h3>
 <ul>
 <li><span class="citation" data-cites="ISL">James et al. (<a href="#ref-ISL" role="doc-biblioref">2023</a>)</span> <a href="pdfs/isl_2.pdf">Chapter 8, Tree Based Methods; pp 327 - 352</a></li>
 </ul>
 <p>In addition, much of the content from this unit has been drawn from four chapters in a book called <a href="https://bradleyboehmke.github.io/HOML/">Hands On Machine Learning In R</a>. It is a great book and I used it heavily (and at times verbatim) b/c it is quite clear in its coverage of these algorithms. If you want more depth, you might read chapters 9-12 from this book as a supplement to this unit in our course.</p>
-<p><strong>Lecture Videos</strong></p>
+<p>Post questions to the readings channel in Slack</p>
+<hr>
+</section>
+<section id="lecture-videos" class="level3" data-number="9.1.3">
+<h3 data-number="9.1.3" class="anchored" data-anchor-id="lecture-videos"><span class="header-section-number">9.1.3</span> Lecture Videos</h3>
 <ul>
-<li><p><a href="">Lecture 1: Decision Trees</a></p></li>
-<li><p><a href="">Lecture 2: Decision Trees in Ames</a></p></li>
-<li><p><a href="">Lecture 3: Bagged Trees</a></p></li>
-<li><p><a href="">Lecture 4: Bagged Trees in Ames</a></p></li>
-<li><p><a href="">Lecture 5: Random Forest</a></p></li>
-<li><p><a href="">Lecture 6: Random Forest in Ames</a></p></li>
-<li><p><a href="">Discussion</a></p></li>
+<li><a href="">Lecture 1: Decision Trees</a></li>
+<li><a href="">Lecture 2: Decision Trees in Ames</a></li>
+<li><a href="">Lecture 3: Bagged Trees</a></li>
+<li><a href="">Lecture 4: Bagged Trees in Ames</a></li>
+<li><a href="">Lecture 5: Random Forest</a></li>
+<li><a href="">Lecture 6: Random Forest in Ames</a></li>
 </ul>
-<p><strong>Coding Assignment</strong></p>
+<hr>
+<p>Post questions to the video-lectures channel in Slack</p>
+</section>
+<section id="coding-assignment" class="level3" data-number="9.1.4">
+<h3 data-number="9.1.4" class="anchored" data-anchor-id="coding-assignment"><span class="header-section-number">9.1.4</span> Coding Assignment</h3>
 <ul>
 <li><a href="homework/unit_10/fifa.csv">data</a></li>
-<li><a href="homework/unit_10/hw_unit_10_random_forest.Rmd">rmd shell</a></li>
-<li>solution: <a href="">rmd</a>; <a href="">html</a></li>
+<li><a href="homework/unit_10/hw_unit_10_random_forest.qmd">qmd shell</a></li>
+<li><a href="">solution</a></li>
 </ul>
+<p>Post questions to application-assignments Slack channel</p>
 <p>Submit the application assignment <a href="https://canvas.wisc.edu/courses/395546/assignments/2187684">here</a> and complete the <a href="https://canvas.wisc.edu/courses/395546/quizzes/514054">unit quiz</a> by 8 pm on Wednesday, April 3rd</p>
+<hr>
+</section>
+</section>
+<section id="decision-trees" class="level2" data-number="9.2">
+<h2 data-number="9.2" class="anchored" data-anchor-id="decision-trees"><span class="header-section-number">9.2</span> Decision Trees</h2>
+<p>Tree-based statistical algorithms:</p>
+<ul>
+<li><p>Are a class of flexible, nonparametric algorithms</p></li>
+<li><p>Work by partitioning the feature space into a number of smaller non-overlapping regions with similar responses by using a set of splitting rules</p></li>
+<li><p>Make predictions by assigning a single prediction to each of these regions</p></li>
+<li><p>Can produce simple rules that are easy to interpret and visualize with tree diagrams</p></li>
+<li><p>Typically lack in predictive performance compared to other common algorithms</p></li>
+<li><p>Serve as <strong>base learners</strong> for more powerful <strong>ensemble approaches</strong></p></li>
+</ul>
+<hr>
+<p>In figure 8.1 from <span class="citation" data-cites="ISL">James et al. (<a href="#ref-ISL" role="doc-biblioref">2023</a>)</span>, they display a simple tree to predict <code>log(salary)</code> using years in the major league and hits from the previous year<br>
+<br>
+This tree only has a depth of two (there are only two levels of splits)</p>
+<ul>
+<li>years &lt; 4.5</li>
+<li>hits &lt; 117.5</li>
+</ul>
+<p><br>
+<br>
+This results in three regions</p>
+<ul>
+<li>years &lt; 4.5</li>
+<li>years &gt;= 4.5 &amp; hits &lt; 117.5</li>
+<li>years &gt;= 4.5 &amp; hits &gt;= 117.5</li>
+</ul>
+<p><br>
+<br>
+A single value for salary is predicted for each of these three regions<br>
+<br>
+Decision trees are very interpretable. How we make decisions?</p>
+<p><img src="figs/ISL_8.1.png" style="height:5in"></p>
+<hr>
+<p>You can see these regions more clearly in the two-dimensional feature space displayed in figure 8.2<br>
+<br>
+Notice how even with a limited tree depth of 2, we can already get a complex partitioning of the feature space.<br>
+<br>
+Decision trees can encode complex decision boundaries (and even more complex than this as tree depth increases)</p>
+<p><img src="figs/ISL_8.2.png" style="height:5in"></p>
+<hr>
+<p>There are many methodologies for constructing decision trees but the most well-known is the classification and regression tree (CART) algorithm proposed in Breiman (1984)</p>
+<ul>
+<li><p>This algorithm is implemented in the <code>rpart</code> <a href="https://cran.r-project.org/web/packages/rpart/index.html">package</a> and this is the engine we will use in tidymodels for decision trees (and bagged trees - a more advance ensemble method)</p></li>
+<li><p>The decision tree partitions the training data into homogeneous subgroups (i.e., groups with similar response values)</p></li>
+<li><p>These subgroups are called <strong>nodes</strong></p></li>
+<li><p>The nodes are formed recursively using binary partitions by asking simple yes-or-no questions about each feature (e.g., are years in major league &lt; 4.5?)</p></li>
+<li><p>This is done a number of times until a suitable stopping criteria is satisfied, e.g.,</p>
+<ul>
+<li>a maximum depth of the tree is reached</li>
+<li>minimum number of remaining observations is available in a node</li>
+</ul></li>
+<li><p>After all the partitioning has been done, the model predicts a single value for each region</p>
+<ul>
+<li>mean response among all observations in the region for regression problems</li>
+<li>majority vote among all observations in the region for classification problems</li>
+<li>probabilities (for classification) can be obtained using the proportion of each class within the region</li>
+</ul></li>
+</ul>
+<hr>
+<p>The bottom left panel in Figure 8.3 shows a slightly more complicated tree with depth = 3 for two arbitrary predictors (<code>x1</code> and <code>x2</code>)<br>
+<br>
+The right column shows a representation of the regions formed by this tree (top) and a 3D representation that includes predictions for y (bottom)<br>
+<br>
+The top left panel displays a set of regions that is NOT possible using binary recursive splitting. This makes the point that there are some patterns in the data that cannot be accommodated well by decision trees</p>
+<p><img src="figs/ISL_8.3.png" style="height:5in"></p>
+<hr>
+<p>Figure 8.4 shows a slightly more complicated decision tree for the hitters dataset with tree depth = 4<br>
+<br>
+With respect to terminology:</p>
+<ul>
+<li>As noted earlier, each of the subgroups are called <strong>nodes</strong></li>
+<li>The first “subgroup”” at the top of the tree is called the <strong>root node</strong>. This node contains all of the training data.</li>
+<li>The final subgroups at the bottom of the tree are called the <strong>terminal nodes</strong> or <strong>leaves</strong> (the “tree” is upside down)</li>
+<li>Every subgroup in between is referred to as an <strong>internal node</strong>.</li>
+<li>The connections between nodes are called <strong>branches</strong></li>
+</ul>
+<p><br>
+<br>
+This tree also highlights another key point. The same features can be used for splitting repeatedly throughout the tree. <img src="figs/ISL_8.4.png" style="height:5in"></p>
+<hr>
+<p>CART uses <strong>binary recursive partitioning</strong><br>
+<br>
+Recursive simply means that each split (or rule) depends on the the splits above it:</p>
+<ul>
+<li>The algorithm first identifies the “best” feature to partition the observations in the root node into one of two new regions (i.e., new nodes that will be on the left and right branches leading from the root node.)
+<ul>
+<li>For regression problems, the “best” feature (and the rule using that feature) is the feature that maximizes the reduction in SSE</li>
+<li>For classification problems, the split is selected to maximize the reduction in cross-entropy or the <a href="https://enhttps://en.wikipedia.org/wiki/Decision_tree_learning#Information_gain.wikipedia.org/wiki/Decision_tree_learning#Gini_impurity">Gini index</a>. These are measures of impurity (and we want to get homogeneous nodes so we minimize them)</li>
+</ul></li>
+<li>The splitting process is then repeated on each of the two new nodes (hence the name binary recursive partitioning).</li>
+<li>This process is continued until a suitable stopping criterion is reached.</li>
+</ul>
+<hr>
+<p>The final depth of the tree is what affects the bias/variance trade-off for this algorithm</p>
+<ul>
+<li>Deep trees (with smaller and smaller sized nodes) will have lower and lower bias but can become overfit to the training data</li>
+<li>Shallow trees may be overly biased (underfit)</li>
+</ul>
+<hr>
+<p>There are two primary approaches to achieve the optimal balance in the bias-variance trade-off</p>
+<ul>
+<li>Early stopping</li>
+<li>Pruning</li>
+</ul>
+<hr>
+<p>With early stopping:</p>
+<ul>
+<li><p>We explicitly stop the growth of the tree early based on a stopping rule. The two most common are:</p>
+<ul>
+<li>A maximum tree depth is reached</li>
+<li>The node has too few cases to be considered for further splits</li>
+</ul></li>
+<li><p>These two stopping criteria can be implemented independently of each other but they do interact</p></li>
+<li><p>They should ideally be tuned via the cross-validation approaches we have learned</p></li>
+</ul>
+<hr>
+<p>With pruning:</p>
+<ul>
+<li><p>We let the tree grow large (max depth = 30 on 32-bit machines) and then prune it back to an optimal size:</p></li>
+<li><p>To do this, we apply a penalty (<span class="math inline">\(\lambda\)</span> * # of terminal nodes) to the cost function/impurity index. (analogous to the L1/LASSO penalty). This penalty is also referred to as the cost complexity parameter</p></li>
+<li><p>Big values for cost complexity will result in less complex trees. Small values will result in deeper, more complex trees</p></li>
+<li><p>Cost complexity can be tuned by our standard cross-validation approaches by itself or in combination with the previous two hyper parameters</p></li>
+</ul>
+<hr>
+<p>Feature engineering for decision trees can be simpler than with other algorithms<br>
+<br>
+There are few pre-processing requirements</p>
+<ul>
+<li><p>Monotonic transformations (e.g., power transformations) are not required to meet algorithm assumptions (in contrast to many parametric models). These transformations only shift the location of the optimal split points.</p></li>
+<li><p>Outliers typically do not bias the results as much since the binary partitioning simply looks for a single location to make a split within the distribution of each feature.</p></li>
+<li><p>The algorithm will handle non-linear effects of features and interactions natively</p></li>
+<li><p>Categorical predictors do not need pre-processing to convert to numeric (e.g., dummy coding).</p></li>
+<li><p>For unordered categorical features with more than two levels, the classes are ordered based on the outcome</p>
+<ul>
+<li>For regression problems, the mean of the response is used</li>
+<li>For classification problems, the proportion of the positive outcome class is used.</li>
+<li>This means that aggregating response levels is not necessary</li>
+</ul></li>
+<li><p>Most decision tree implementations (including the <code>rpart</code> engine) can easily handle missing values in the features and do not require imputation. In <code>rpart</code>, this is handled by using surrogate splits.</p></li>
+</ul>
+<p><br>
+<br>
+It is important to note that feature engineering (e.g., alternative strategies for missing data, categorical level aggregation) may still improve performance, but this algorithm does not have the same pre-processing requirements we have seen previously and will work fairly well “out of the box”.</p>
+<hr>
+</section>
+<section id="decision-trees-in-ames" class="level2" data-number="9.3">
+<h2 data-number="9.3" class="anchored" data-anchor-id="decision-trees-in-ames"><span class="header-section-number">9.3</span> Decision Trees in Ames</h2>
+<p>Let’s see this algorithm in action<br>
+<br>
+- We will explore the decision tree algorithm (and ensemble approaches using it) with the Ames Housing Prices database</p>
+<ul>
+<li>Parallel processing is VERY useful for ensemble approaches because they can be computationally costly</li>
+</ul>
+<hr>
+<p>Read the Ames dataset</p>
+<ul>
+<li>All predictors</li>
+<li>Set factors</li>
+<li>Some tidying of variable names and responses</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="annotated-cell-1"><pre class="sourceCode r code-annotation-code code-with-copy"><code class="sourceCode r"><span id="annotated-cell-1-1"><a href="#annotated-cell-1-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(path_data, <span class="st">"ames_raw_class.csv"</span>),</span>
+<span id="annotated-cell-1-2"><a href="#annotated-cell-1-2" aria-hidden="true" tabindex="-1"></a>              <span class="at">col_types =</span> <span class="fu">cols</span>()) <span class="sc">|&gt;</span>   </span>
+<span id="annotated-cell-1-3"><a href="#annotated-cell-1-3" aria-hidden="true" tabindex="-1"></a>  janitor<span class="sc">::</span><span class="fu">clean_names</span>(<span class="at">case =</span> <span class="st">"snake"</span>) <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-1-4"><a href="#annotated-cell-1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">exter_qual =</span> <span class="fu">replace_na</span>(exter_qual, <span class="st">"none"</span>),</span>
+<span id="annotated-cell-1-5"><a href="#annotated-cell-1-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">bsmt_qual =</span> <span class="fu">replace_na</span>(bsmt_qual, <span class="st">"none"</span>),</span>
+<span id="annotated-cell-1-6"><a href="#annotated-cell-1-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">kitchen_qual =</span> <span class="fu">replace_na</span>(kitchen_qual, <span class="st">"none"</span>),</span>
+<span id="annotated-cell-1-7"><a href="#annotated-cell-1-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">garage_qual =</span> <span class="fu">replace_na</span>(garage_qual, <span class="st">"none"</span>),</span>
+<span id="annotated-cell-1-8"><a href="#annotated-cell-1-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">fireplace_qu =</span> <span class="fu">replace_na</span>(fireplace_qu, <span class="st">"none"</span>),</span>
+<span id="annotated-cell-1-9"><a href="#annotated-cell-1-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">alley =</span> <span class="fu">replace_na</span>(alley, <span class="st">"none"</span>),</span>
+<span id="annotated-cell-1-10"><a href="#annotated-cell-1-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">bsmt_cond =</span> <span class="fu">replace_na</span>(bsmt_cond, <span class="st">"none"</span>),</span>
+<span id="annotated-cell-1-11"><a href="#annotated-cell-1-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">bsmt_exposure =</span> <span class="fu">replace_na</span>(bsmt_exposure, <span class="st">"none"</span>),</span>
+<span id="annotated-cell-1-12"><a href="#annotated-cell-1-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">bsmt_fin_type_1 =</span> <span class="fu">replace_na</span>(bsmt_fin_type_1, <span class="st">"none"</span>),</span>
+<span id="annotated-cell-1-13"><a href="#annotated-cell-1-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">bsmt_fin_type_2 =</span> <span class="fu">replace_na</span>(bsmt_fin_type_2, <span class="st">"none"</span>),</span>
+<span id="annotated-cell-1-14"><a href="#annotated-cell-1-14" aria-hidden="true" tabindex="-1"></a>         <span class="at">garage_type =</span> <span class="fu">replace_na</span>(garage_type, <span class="st">"none"</span>),</span>
+<span id="annotated-cell-1-15"><a href="#annotated-cell-1-15" aria-hidden="true" tabindex="-1"></a>         <span class="at">garage_finish =</span> <span class="fu">replace_na</span>(garage_finish, <span class="st">"none"</span>),</span>
+<span id="annotated-cell-1-16"><a href="#annotated-cell-1-16" aria-hidden="true" tabindex="-1"></a>         <span class="at">garage_cond =</span> <span class="fu">replace_na</span>(garage_cond, <span class="st">"none"</span>),</span>
+<span id="annotated-cell-1-17"><a href="#annotated-cell-1-17" aria-hidden="true" tabindex="-1"></a>         <span class="at">pool_qc =</span> <span class="fu">replace_na</span>(pool_qc, <span class="st">"none"</span>),</span>
+<span id="annotated-cell-1-18"><a href="#annotated-cell-1-18" aria-hidden="true" tabindex="-1"></a>         <span class="at">fence =</span> <span class="fu">replace_na</span>(fence, <span class="st">"none"</span>),</span>
+<span id="annotated-cell-1-19"><a href="#annotated-cell-1-19" aria-hidden="true" tabindex="-1"></a>         <span class="at">misc_feature =</span> <span class="fu">replace_na</span>(misc_feature, <span class="st">"none"</span>))  <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-1-20"><a href="#annotated-cell-1-20" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.character), factor)) <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-1-21"><a href="#annotated-cell-1-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.factor), tidy_responses)) <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-1-22"><a href="#annotated-cell-1-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">mo_sold =</span> <span class="fu">factor</span>(mo_sold, </span>
+<span id="annotated-cell-1-23"><a href="#annotated-cell-1-23" aria-hidden="true" tabindex="-1"></a>                          <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>,</span>
+<span id="annotated-cell-1-24"><a href="#annotated-cell-1-24" aria-hidden="true" tabindex="-1"></a>                          <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"jan"</span>, <span class="st">"feb"</span>, <span class="st">"mar"</span>, <span class="st">"apr"</span>, <span class="st">"may"</span>, <span class="st">"jun"</span>,</span>
+<span id="annotated-cell-1-25"><a href="#annotated-cell-1-25" aria-hidden="true" tabindex="-1"></a>                                     <span class="st">"jul"</span>, <span class="st">"aug"</span>, <span class="st">"sep"</span>, <span class="st">"oct"</span>, <span class="st">"nov"</span>, <span class="st">"dec"</span>))) <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-1-26"><a href="#annotated-cell-1-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ms_zoning =</span> <span class="fu">fct_recode</span>(ms_zoning,</span>
+<span id="annotated-cell-1-27"><a href="#annotated-cell-1-27" aria-hidden="true" tabindex="-1"></a>                                <span class="at">res_low =</span> <span class="st">"rl"</span>,</span>
+<span id="annotated-cell-1-28"><a href="#annotated-cell-1-28" aria-hidden="true" tabindex="-1"></a>                                <span class="at">res_med =</span> <span class="st">"rm"</span>,</span>
+<span id="annotated-cell-1-29"><a href="#annotated-cell-1-29" aria-hidden="true" tabindex="-1"></a>                                <span class="at">res_high =</span> <span class="st">"rh"</span>,</span>
+<span id="annotated-cell-1-30"><a href="#annotated-cell-1-30" aria-hidden="true" tabindex="-1"></a>                                <span class="at">float =</span> <span class="st">"fv"</span>,</span>
+<span id="annotated-cell-1-31"><a href="#annotated-cell-1-31" aria-hidden="true" tabindex="-1"></a>                                <span class="at">agri =</span> <span class="st">"a_agr"</span>,</span>
+<span id="annotated-cell-1-32"><a href="#annotated-cell-1-32" aria-hidden="true" tabindex="-1"></a>                                <span class="at">indus =</span> <span class="st">"i_all"</span>,</span>
+<span id="annotated-cell-1-33"><a href="#annotated-cell-1-33" aria-hidden="true" tabindex="-1"></a>                                <span class="at">commer =</span> <span class="st">"c_all"</span>),</span>
+<span id="annotated-cell-1-34"><a href="#annotated-cell-1-34" aria-hidden="true" tabindex="-1"></a>         <span class="at">bldg_type =</span> <span class="fu">fct_recode</span>(bldg_type,</span>
+<span id="annotated-cell-1-35"><a href="#annotated-cell-1-35" aria-hidden="true" tabindex="-1"></a>                                <span class="at">one_fam =</span> <span class="st">"1fam"</span>,</span>
+<span id="annotated-cell-1-36"><a href="#annotated-cell-1-36" aria-hidden="true" tabindex="-1"></a>                                <span class="at">two_fam =</span> <span class="st">"2fmcon"</span>,</span>
+<span id="annotated-cell-1-37"><a href="#annotated-cell-1-37" aria-hidden="true" tabindex="-1"></a>                                <span class="at">town_end =</span> <span class="st">"twnhse"</span>,</span>
+<span id="annotated-cell-1-38"><a href="#annotated-cell-1-38" aria-hidden="true" tabindex="-1"></a>                                <span class="at">town_inside =</span> <span class="st">"twnhs"</span>)) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-1-39"><a href="#annotated-cell-1-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>pid)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>And take a quick look</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">skim_some</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<caption>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Name</td>
+<td style="text-align: left;">data_trn</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Number of rows</td>
+<td style="text-align: left;">1955</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Number of columns</td>
+<td style="text-align: left;">80</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">_______________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Column type frequency:</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">factor</td>
+<td style="text-align: left;">45</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">numeric</td>
+<td style="text-align: left;">35</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">________________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Group variables</td>
+<td style="text-align: left;">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: factor</strong></p>
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 10%">
+<col style="width: 14%">
+<col style="width: 8%">
+<col style="width: 9%">
+<col style="width: 41%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: left;">ordered</th>
+<th style="text-align: right;">n_unique</th>
+<th style="text-align: left;">top_counts</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">ms_sub_class</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: left;">020: 730, 060: 388, 050: 208, 120: 122</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ms_zoning</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: left;">res: 1530, res: 297, flo: 91, com: 19</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">street</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">pav: 1946, grv: 9</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">alley</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">non: 1821, grv: 86, pav: 48</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">lot_shape</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">reg: 1258, ir1: 636, ir2: 49, ir3: 12</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">land_contour</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">lvl: 1769, hls: 75, bnk: 72, low: 39</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">utilities</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">all: 1953, nos: 2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">lot_config</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">ins: 1454, cor: 328, cul: 114, fr2: 55</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">land_slope</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">gtl: 1864, mod: 78, sev: 13</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">neighborhood</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">28</td>
+<td style="text-align: left;">nam: 299, col: 174, old: 161, edw: 135</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">condition_1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: left;">nor: 1693, fee: 114, art: 54, rra: 31</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">condition_2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">nor: 1938, fee: 6, art: 4, pos: 3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">bldg_type</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">one: 1631, tow: 145, dup: 77, tow: 64</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">house_style</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: left;">1st: 989, 2st: 580, 1_5: 224, slv: 79</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">roof_style</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">gab: 1557, hip: 362, gam: 16, fla: 9</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">roof_matl</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: left;">com: 1929, tar: 11, wds: 8, wds: 4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">exterior_1st</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: left;">vin: 671, hdb: 301, met: 298, wd_: 283</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">exterior_2nd</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: left;">vin: 662, met: 295, hdb: 279, wd_: 267</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">mas_vnr_type</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">0.99</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">non: 1167, brk: 581, sto: 171, brk: 18</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">exter_qual</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">ta: 1215, gd: 651, ex: 63, fa: 26</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">exter_cond</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">ta: 1707, gd: 195, fa: 42, ex: 8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">foundation</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">pco: 865, cbl: 849, brk: 198, sla: 33</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">bsmt_qual</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">ta: 861, gd: 808, ex: 167, fa: 62</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">bsmt_cond</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">ta: 1739, gd: 85, fa: 69, non: 57</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">bsmt_exposure</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">no: 1271, av: 274, gd: 183, mn: 168</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">bsmt_fin_type_1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: left;">unf: 576, glq: 535, alq: 294, rec: 202</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">bsmt_fin_type_2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: left;">unf: 1655, rec: 75, lwq: 69, non: 57</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">heating</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">gas: 1920, gas: 20, gra: 8, wal: 5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">heating_qc</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">ex: 979, ta: 590, gd: 324, fa: 60</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">central_air</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">y: 1821, n: 134</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">electrical</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">sbr: 1792, fus: 125, fus: 29, fus: 7</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">kitchen_qual</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">ta: 1011, gd: 765, ex: 126, fa: 52</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">functional</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: left;">typ: 1822, min: 48, min: 41, mod: 23</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">fireplace_qu</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">non: 960, gd: 481, ta: 407, fa: 44</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">garage_type</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: left;">att: 1161, det: 521, bui: 123, non: 107</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">garage_finish</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">unf: 826, rfn: 547, fin: 473, non: 109</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">garage_qual</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">ta: 1745, non: 109, fa: 79, gd: 16</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">garage_cond</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">ta: 1778, non: 109, fa: 46, gd: 12</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">paved_drive</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">y: 1775, n: 139, p: 41</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">pool_qc</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">non: 1945, ex: 3, gd: 3, fa: 2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">fence</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">non: 1599, mnp: 215, gdw: 70, gdp: 61</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">misc_feature</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">non: 1887, she: 62, oth: 3, gar: 2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">mo_sold</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: left;">jun: 333, jul: 298, may: 273, apr: 177</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sale_type</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: left;">wd: 1695, new: 158, cod: 57, con: 16</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sale_condition</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">nor: 1616, par: 161, abn: 120, fam: 30</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: right;">p0</th>
+<th style="text-align: right;">p100</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">lot_frontage</td>
+<td style="text-align: right;">319</td>
+<td style="text-align: right;">0.84</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">313</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">lot_area</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1476</td>
+<td style="text-align: right;">215245</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">overall_qual</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">overall_cond</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">year_built</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1875</td>
+<td style="text-align: right;">2010</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">year_remod_add</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1950</td>
+<td style="text-align: right;">2010</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">mas_vnr_area</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">0.99</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1600</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">bsmt_fin_sf_1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">5644</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">bsmt_fin_sf_2</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1526</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">bsmt_unf_sf</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2153</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">total_bsmt_sf</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">6110</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">x1st_flr_sf</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">372</td>
+<td style="text-align: right;">4692</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">x2nd_flr_sf</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2065</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">low_qual_fin_sf</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1064</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">gr_liv_area</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">438</td>
+<td style="text-align: right;">5642</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">bsmt_full_bath</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">bsmt_half_bath</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">full_bath</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">half_bath</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">bedroom_abv_gr</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">kitchen_abv_gr</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tot_rms_abv_grd</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">14</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">fireplaces</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">garage_yr_blt</td>
+<td style="text-align: right;">109</td>
+<td style="text-align: right;">0.94</td>
+<td style="text-align: right;">1896</td>
+<td style="text-align: right;">2010</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">garage_cars</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">garage_area</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1488</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">wood_deck_sf</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">870</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">open_porch_sf</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">742</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">enclosed_porch</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">552</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">x3ssn_porch</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">508</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">screen_porch</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">576</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">pool_area</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">738</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">misc_val</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">12500</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">yr_sold</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">2006</td>
+<td style="text-align: right;">2010</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sale_price</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">12789</td>
+<td style="text-align: right;">745000</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<hr>
+<p>A basic recipe for Decision Tree approaches</p>
+<ul>
+<li><p>Easy to do because the algorithm is very flexible</p></li>
+<li><p>Will handle non-linear relationships and interactions natively</p></li>
+<li><p>Dummy coding not needed (and generally not recommended) for factors</p></li>
+<li><p>Not even very important to consider frequency of response categories</p></li>
+<li><p>Not even necessary to convert character to factor (but I do to make it easy to do further feature engineering if desired)</p></li>
+<li><p>Be careful with categorical variables which are coded with numbers</p>
+<ul>
+<li>They will be coded as numeric by R and treated as numeric by R</li>
+<li>If they are ordered (<code>overall_qual</code>), this a priori order would be respected by <code>rpart</code> so no worries</li>
+<li>If they are unordered, this will force an order on the levels rather than allowing <code>rpart</code> to determine an order based on the outcome in your training data.</li>
+</ul></li>
+<li><p>Notice the missing data for features (<code>rpart</code> will handle it with <em>surrogates</em>)</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>rec <span class="ot">&lt;-</span> <span class="fu">recipe</span>(sale_price <span class="sc">~</span> ., <span class="at">data =</span> data_trn)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>rec_prep <span class="ot">&lt;-</span> rec <span class="sc">|&gt;</span> </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(data_trn)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>feat_trn <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(<span class="cn">NULL</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>feat_trn <span class="sc">|&gt;</span> <span class="fu">skim_some</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<caption>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Name</td>
+<td style="text-align: left;">feat_trn</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Number of rows</td>
+<td style="text-align: left;">1955</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Number of columns</td>
+<td style="text-align: left;">80</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">_______________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Column type frequency:</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">factor</td>
+<td style="text-align: left;">45</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">numeric</td>
+<td style="text-align: left;">35</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">________________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Group variables</td>
+<td style="text-align: left;">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: factor</strong></p>
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 10%">
+<col style="width: 14%">
+<col style="width: 8%">
+<col style="width: 9%">
+<col style="width: 41%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: left;">ordered</th>
+<th style="text-align: right;">n_unique</th>
+<th style="text-align: left;">top_counts</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">ms_sub_class</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: left;">020: 730, 060: 388, 050: 208, 120: 122</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ms_zoning</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: left;">res: 1530, res: 297, flo: 91, com: 19</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">street</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">pav: 1946, grv: 9</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">alley</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">non: 1821, grv: 86, pav: 48</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">lot_shape</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">reg: 1258, ir1: 636, ir2: 49, ir3: 12</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">land_contour</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">lvl: 1769, hls: 75, bnk: 72, low: 39</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">utilities</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">all: 1953, nos: 2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">lot_config</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">ins: 1454, cor: 328, cul: 114, fr2: 55</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">land_slope</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">gtl: 1864, mod: 78, sev: 13</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">neighborhood</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">28</td>
+<td style="text-align: left;">nam: 299, col: 174, old: 161, edw: 135</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">condition_1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: left;">nor: 1693, fee: 114, art: 54, rra: 31</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">condition_2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">nor: 1938, fee: 6, art: 4, pos: 3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">bldg_type</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">one: 1631, tow: 145, dup: 77, tow: 64</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">house_style</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: left;">1st: 989, 2st: 580, 1_5: 224, slv: 79</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">roof_style</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">gab: 1557, hip: 362, gam: 16, fla: 9</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">roof_matl</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: left;">com: 1929, tar: 11, wds: 8, wds: 4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">exterior_1st</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: left;">vin: 671, hdb: 301, met: 298, wd_: 283</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">exterior_2nd</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: left;">vin: 662, met: 295, hdb: 279, wd_: 267</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">mas_vnr_type</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">0.99</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">non: 1167, brk: 581, sto: 171, brk: 18</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">exter_qual</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">ta: 1215, gd: 651, ex: 63, fa: 26</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">exter_cond</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">ta: 1707, gd: 195, fa: 42, ex: 8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">foundation</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">pco: 865, cbl: 849, brk: 198, sla: 33</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">bsmt_qual</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">ta: 861, gd: 808, ex: 167, fa: 62</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">bsmt_cond</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">ta: 1739, gd: 85, fa: 69, non: 57</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">bsmt_exposure</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">no: 1271, av: 274, gd: 183, mn: 168</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">bsmt_fin_type_1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: left;">unf: 576, glq: 535, alq: 294, rec: 202</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">bsmt_fin_type_2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: left;">unf: 1655, rec: 75, lwq: 69, non: 57</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">heating</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">gas: 1920, gas: 20, gra: 8, wal: 5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">heating_qc</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">ex: 979, ta: 590, gd: 324, fa: 60</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">central_air</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">y: 1821, n: 134</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">electrical</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">sbr: 1792, fus: 125, fus: 29, fus: 7</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">kitchen_qual</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">ta: 1011, gd: 765, ex: 126, fa: 52</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">functional</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: left;">typ: 1822, min: 48, min: 41, mod: 23</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">fireplace_qu</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">non: 960, gd: 481, ta: 407, fa: 44</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">garage_type</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: left;">att: 1161, det: 521, bui: 123, non: 107</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">garage_finish</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">unf: 826, rfn: 547, fin: 473, non: 109</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">garage_qual</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">ta: 1745, non: 109, fa: 79, gd: 16</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">garage_cond</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">ta: 1778, non: 109, fa: 46, gd: 12</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">paved_drive</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">y: 1775, n: 139, p: 41</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">pool_qc</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">non: 1945, ex: 3, gd: 3, fa: 2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">fence</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">non: 1599, mnp: 215, gdw: 70, gdp: 61</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">misc_feature</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">non: 1887, she: 62, oth: 3, gar: 2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">mo_sold</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: left;">jun: 333, jul: 298, may: 273, apr: 177</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sale_type</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: left;">wd: 1695, new: 158, cod: 57, con: 16</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sale_condition</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">nor: 1616, par: 161, abn: 120, fam: 30</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: right;">p0</th>
+<th style="text-align: right;">p100</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">lot_frontage</td>
+<td style="text-align: right;">319</td>
+<td style="text-align: right;">0.84</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">313</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">lot_area</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1476</td>
+<td style="text-align: right;">215245</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">overall_qual</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">overall_cond</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">year_built</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1875</td>
+<td style="text-align: right;">2010</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">year_remod_add</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">1950</td>
+<td style="text-align: right;">2010</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">mas_vnr_area</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: right;">0.99</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1600</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">bsmt_fin_sf_1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">5644</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">bsmt_fin_sf_2</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1526</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">bsmt_unf_sf</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2153</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">total_bsmt_sf</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">6110</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">x1st_flr_sf</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">372</td>
+<td style="text-align: right;">4692</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">x2nd_flr_sf</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2065</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">low_qual_fin_sf</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1064</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">gr_liv_area</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">438</td>
+<td style="text-align: right;">5642</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">bsmt_full_bath</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">bsmt_half_bath</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">full_bath</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">half_bath</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">bedroom_abv_gr</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">kitchen_abv_gr</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tot_rms_abv_grd</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">14</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">fireplaces</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">garage_yr_blt</td>
+<td style="text-align: right;">109</td>
+<td style="text-align: right;">0.94</td>
+<td style="text-align: right;">1896</td>
+<td style="text-align: right;">2010</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">garage_cars</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">garage_area</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1488</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">wood_deck_sf</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">870</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">open_porch_sf</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">742</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">enclosed_porch</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">552</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">x3ssn_porch</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">508</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">screen_porch</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">576</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">pool_area</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">738</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">misc_val</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">12500</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">yr_sold</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">2006</td>
+<td style="text-align: right;">2010</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sale_price</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">12789</td>
+<td style="text-align: right;">745000</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<hr>
+<p>Fit a simple decision tree</p>
+<ul>
+<li>Use <code>rpart</code> engine</li>
+<li><code>tree_depth = 3</code></li>
+<li><code>min_n = 2</code> and <code>cost_complexity = 0</code> removes impact of those hyperparameters</li>
+<li><code>model = TRUE</code> if you want to plot the decision tree with <code>rplot.plot()</code> from the <code>rpart.plot</code> package</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>fit_tree_ex1 <span class="ot">&lt;-</span>   </span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">decision_tree</span>(<span class="at">tree_depth =</span> <span class="dv">3</span>, <span class="at">min_n =</span> <span class="dv">2</span>, <span class="at">cost_complexity =</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"rpart"</span>, <span class="at">model =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span>  </span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(sale_price <span class="sc">~</span> garage_cars <span class="sc">+</span> garage_area <span class="sc">+</span> overall_qual <span class="sc">+</span> kitchen_qual <span class="sc">+</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                  bsmt_qual, <span class="at">data =</span> feat_trn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>Let’s plot the decision tree using <code>rpart.plot</code> for a package with the same name. No need to load the full package</p>
+<ul>
+<li>Easy to understand how the model makes predictions</li>
+<li>But how well does this model predict <code>sale_price</code>?</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fit_tree_ex1<span class="sc">$</span>fit <span class="sc">|&gt;</span> rpart.plot<span class="sc">::</span><span class="fu">rpart.plot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="009_random_forest_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<div class="callout callout-style-default callout-important no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Question: How can we determine this?
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<details class="code-fold">
+<summary>Show Answer</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>We need held out data. We could do a validation split, k-fold, or bootstraps.  </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>K-fold may be preferred b/c it provides a less biased estimate of model performance.  </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>I will use bootstrap cross-validation instead because I will later use these same </span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>splits to also choose among hyperparameter values.]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+<hr>
+<p>Using only 10 bootstraps to save time. Use more in your work!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">20140102</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>splits_boot <span class="ot">&lt;-</span> data_trn <span class="sc">|&gt;</span> </span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bootstraps</span>(<span class="at">times =</span> <span class="dv">10</span>, <span class="at">strata =</span> <span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fits_tree_ex1 <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">decision_tree</span>(<span class="at">tree_depth =</span> <span class="dv">3</span>, <span class="at">min_n =</span> <span class="dv">2</span>, <span class="at">cost_complexity =</span> <span class="dv">0</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_engine</span>(<span class="st">"rpart"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fit_resamples</span>(<span class="at">preprocessor =</span> rec, </span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">resamples =</span> splits_boot,  </span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">metrics =</span> <span class="fu">metric_set</span>(rmse))</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting,</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/009/"</span>,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_tree_ex1"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>Not that great (remember unit 3 with only a subset of predictors did better than this)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>fits_tree_ex1 <span class="sc">|&gt;</span> <span class="fu">collect_metrics</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 6
+  .metric .estimator   mean     n std_err .config             
+  &lt;chr&gt;   &lt;chr&gt;       &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
+1 rmse    standard   42771.   100    271. Preprocessor1_Model1</code></pre>
+</div>
+</div>
+<hr>
+<p>We want to allow a deeper tree to reduce bias<br>
+<br>
+But will also need to consider pruning tree to prevent overfitting</p>
+<p>This is the bias-variance trade-off again. To find the sweet stop we can tune</p>
+<ul>
+<li>tree_depth</li>
+<li>min_n</li>
+<li>cost_complexity</li>
+</ul>
+<hr>
+<p>Set up a tuning grid</p>
+<ul>
+<li>Can use <code>tidymodels</code> to determine possibly good values to start</li>
+<li>Still need to evaluate</li>
+<li>May still need to adjust</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">cost_complexity</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Cost-Complexity Parameter (quantitative)
+Transformer: log-10 [1e-100, Inf]
+Range (transformed scale): [-10, -1]</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">tree_depth</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Tree Depth (quantitative)
+Range: [1, 15]</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">min_n</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Minimal Node Size (quantitative)
+Range: [2, 40]</code></pre>
+</div>
+</div>
+<hr>
+<p>We can use these function with <code>dials::grid_regular()</code> to get a tuning grid<br>
+<br>
+With <code>levels = 4</code> we get 64 combinations of values (4 x 4 x 4)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>grid_tree <span class="ot">&lt;-</span> <span class="fu">grid_regular</span>(<span class="fu">cost_complexity</span>(), <span class="fu">tree_depth</span>(), <span class="fu">min_n</span>(), <span class="at">levels =</span> <span class="dv">4</span>)</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>grid_tree</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 64 × 3
+   cost_complexity tree_depth min_n
+             &lt;dbl&gt;      &lt;int&gt; &lt;int&gt;
+ 1    0.0000000001          1     2
+ 2    0.0000001             1     2
+ 3    0.0001                1     2
+ 4    0.1                   1     2
+ 5    0.0000000001          5     2
+ 6    0.0000001             5     2
+ 7    0.0001                5     2
+ 8    0.1                   5     2
+ 9    0.0000000001         10     2
+10    0.0000001            10     2
+# ℹ 54 more rows</code></pre>
+</div>
+</div>
+<hr>
+<p>Now we can use the bootstrap as intended to select best values of hyperparameters (i.e., tune them)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>fits_tree <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">decision_tree</span>(<span class="at">cost_complexity =</span> <span class="fu">tune</span>(),</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">tree_depth =</span> <span class="fu">tune</span>(),</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">min_n =</span> <span class="fu">tune</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_engine</span>(<span class="st">"rpart"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tune_grid</span>(<span class="at">preprocessor =</span> rec, </span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>              <span class="at">resamples =</span> splits_boot, </span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>              <span class="at">grid =</span> grid_tree, </span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>              <span class="at">metrics =</span> <span class="fu">metric_set</span>(rmse))</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting,</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/009"</span>,</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_tree"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>Can use <code>autoplot()</code> to view performance by hyperparameter values</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(fits_tree)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="009_random_forest_files/figure-html/unnamed-chunk-14-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<p>The best values for all hyperparameters are not near their edges and we see floor in RMSE so this looks good</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_best</span>(fits_tree)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 9
+  cost_complexity tree_depth min_n .metric .estimator   mean     n std_err
+            &lt;dbl&gt;      &lt;int&gt; &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;       &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;
+1    0.0001               15    40 rmse    standard   37151.   100    219.
+2    0.0000000001         10    40 rmse    standard   37154.   100    220.
+3    0.0000001            10    40 rmse    standard   37154.   100    220.
+4    0.0000000001         15    40 rmse    standard   37154.   100    219.
+5    0.0000001            15    40 rmse    standard   37154.   100    219.
+  .config              
+  &lt;chr&gt;                
+1 Preprocessor1_Model63
+2 Preprocessor1_Model57
+3 Preprocessor1_Model58
+4 Preprocessor1_Model61
+5 Preprocessor1_Model62</code></pre>
+</div>
+</div>
+<p>This is as good as our other models in unit 3 (see OOB cross-validated error above). It was easy to fit with all the predictors. However, we can still do better.</p>
+<hr>
+<p>Let’s still fit this tree to all the training data and understand it a bit better</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>fit_tree <span class="ot">&lt;-</span>   </span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">decision_tree</span>(<span class="at">cost_complexity =</span> <span class="fu">select_best</span>(fits_tree)<span class="sc">$</span>cost_complexity,</span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">tree_depth =</span> <span class="fu">select_best</span>(fits_tree)<span class="sc">$</span>tree_depth,</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">min_n =</span> <span class="fu">select_best</span>(fits_tree)<span class="sc">$</span>min_n) <span class="sc">|&gt;</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"rpart"</span>, <span class="at">model =</span> <span class="cn">TRUE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span>  </span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(sale_price <span class="sc">~</span> ., <span class="at">data =</span> feat_trn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>Still interpretable but need bigger, higher res plot</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>fit_tree<span class="sc">$</span>fit <span class="sc">|&gt;</span> rpart.plot<span class="sc">::</span><span class="fu">rpart.plot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: labs do not fit even at cex 0.15, there may be some overplotting</code></pre>
+</div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="009_random_forest_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<p>Even though decision trees themselves are relatively poor at prediction, these ideas will be key when we consider ensemble approaches.<br>
+<br>
+<br>
+Ensemble approaches aggregate multiple models to improve prediction. Our first ensemble approach is bagging</p>
+<hr>
+</section>
+<section id="bagging" class="level2" data-number="9.4">
+<h2 data-number="9.4" class="anchored" data-anchor-id="bagging"><span class="header-section-number">9.4</span> Bagging</h2>
+<p><strong>Bootstrap aggregating (bagging)</strong> prediction models involve:</p>
+<ul>
+<li>Fitting multiple versions of a prediction model</li>
+<li>Combining (or ensembling) them into an aggregated prediction</li>
+<li>You can begin to learn more about bagging in the <a href="pdfs/breiman1996a.pdf">original paper</a> that proposed the technique</li>
+</ul>
+<hr>
+<p>The specific steps are:</p>
+<ul>
+<li>B bootstraps of the original training data are created [NOTE: This is a new use for bootstrapping! More on that in a moment]</li>
+<li>The model configuration (either regression or classification algorithm with a specific set of features and hyperparameters) is fit to each bootstrap sample</li>
+<li>These individual fitted models are called the <strong>base learners</strong></li>
+<li>Final predictions are made by aggregating the predictions across all of the individual base learners
+<ul>
+<li>For regression, this can be the average of base learner predictions</li>
+<li>For classification, it can be either the average of estimated class probabilities or majority class vote across individual base learners</li>
+</ul></li>
+</ul>
+<hr>
+<p>Bagging effectively <strong>reduces the variance of an individual base learner</strong><br>
+<br>
+However, bagging does not always improve on an individual base learner</p>
+<ul>
+<li>Bagging works especially well for flexible, high variance base learners (based on statistical algorithms or other characteristics of the problem)</li>
+<li>These base learners can become overfit to their training data</li>
+<li>Therefore base learners will produce different predictions across each bootstrap sample of the training data</li>
+<li>The aggregate predictions across base learners will be lower variance</li>
+<li>With respect to statistical algorithms that you know, decision trees are high variance (KNN also)</li>
+<li>In contrast, bagging a linear model (with low P to N ratio) would likely not improve much upon the base learners’ performance</li>
+</ul>
+<hr>
+<p>Bagging takes advantage of the “wisdom of the crowd” effect (Surowiecki, 2005)</p>
+<ul>
+<li>Aggregation of information across large diverse groups often produces decisions that are better than any single member of the group</li>
+<li>Regis Philbin once stated that the Ask the Audience lifeline on <em>Who Wants to be a Millionaire</em> is right 95% of the time</li>
+<li>With more diverse group members and perspectives (i.e., high variance learners), we get better aggregated predictions</li>
+</ul>
+<hr>
+<p>With decision trees, optimal performance is often found by bagging 50-500 base learner trees</p>
+<ul>
+<li>Data sets that have a few strong features typically require fewer trees</li>
+<li>Data sets with lots of noise or multiple strong features may need more</li>
+<li>Using too many trees will NOT lead to overfitting, just no further benefit in variance reduction</li>
+<li>However, too many trees will increase computational costs (particularly if you are also using “an outer loop” of resampling to select among configurations or to evaluate the model)</li>
+</ul>
+<hr>
+<p>Bagging uses bootstrap resampling for yet another goal. We can use bootstrapping</p>
+<ul>
+<li>For cross-validation to assess performance model configuration(s)
+<ul>
+<li>Select among model model configurations</li>
+<li>Evaluate a final model configuration (if we don’t have independent test set)</li>
+</ul></li>
+<li>For estimating standard errors and confidence intervals of statistics (no longer part of this course - see Appendix)</li>
+<li>And now for building multiple base learners whose aggregate predictions are lower variance than any of the individual base learners</li>
+</ul>
+<hr>
+<p>When bagging, we can (and typically will):</p>
+<ul>
+<li>Use an “outer loop” of bootstrap resampling to select among model configurations</li>
+<li>While using an “inner loop” of bootstrapping to fit multiple base learners for any specific configuration</li>
+<li>This inner loop is <em>often</em> opaque to users (more on this in a moment), happening under the hood in the algorithm (e.g., Random Forest) or the implementation of the code (<code>bagged_tree()</code>)</li>
+</ul>
+<hr>
+</section>
+<section id="bagging-trees-in-ames" class="level2" data-number="9.5">
+<h2 data-number="9.5" class="anchored" data-anchor-id="bagging-trees-in-ames"><span class="header-section-number">9.5</span> Bagging Trees in Ames</h2>
+<p>We will now use <code>bag_tree()</code> rather than <code>decision_tree()</code> from the <code>baguette</code> package. Not part of minimal tidymodels libraries so we will need to load this package</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(baguette)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>We can still tune the same hyperparameters. We are now just creating many <code>rpart</code> decision trees and aggregating their predictions. We will START with the recommended values by tidymodels<br>
+<br>
+We can use the same recipe<br>
+<br>
+We will use the same splits to tune hyperparameters<br>
+<br>
+Now we need <code>times = 20</code> to fit 20 models to 10 bootstraps (set earlier) of the training data.</p>
+<ul>
+<li>Keeping this low to reduce computational costs.<br>
+</li>
+<li>You will likely want more bootstrapped models to reduce final model variance and more boostraps resamples to get a lower variance performance estimate to select best hyperparameters</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>fits_bagged <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">bag_tree</span>(<span class="at">cost_complexity =</span> <span class="fu">tune</span>(),</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">tree_depth =</span> <span class="fu">tune</span>(),</span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">min_n =</span> <span class="fu">tune</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_engine</span>(<span class="st">"rpart"</span>, <span class="at">times =</span> <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tune_grid</span>(<span class="at">preprocessor =</span> rec, </span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>              <span class="at">resamples =</span> splits_boot, </span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a>              <span class="at">grid =</span> grid_tree, </span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a>              <span class="at">metrics =</span> <span class="fu">metric_set</span>(rmse))</span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-13"><a href="#cb26-13" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb26-14"><a href="#cb26-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting,</span>
+<span id="cb26-15"><a href="#cb26-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/009/"</span>,</span>
+<span id="cb26-16"><a href="#cb26-16" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_bagged"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>Can still use <code>autoplot()</code> to view performance by hyperparameter values</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(fits_bagged)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="009_random_forest_files/figure-html/unnamed-chunk-20-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<p>The best values for all hyperparameters are at their edges.</p>
+<ul>
+<li>Looks like we could have fit a more complex model.<br>
+</li>
+<li>Makes sense because we are relying on bagging to reduce model variance so we can accommodate base learners that are more overfit.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_best</span>(fits_bagged)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 9
+  cost_complexity tree_depth min_n .metric .estimator   mean     n std_err
+            &lt;dbl&gt;      &lt;int&gt; &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;       &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;
+1    0.0000000001         10     2 rmse    standard   28311.    10    652.
+2    0.0000000001         15     2 rmse    standard   28346.    10    581.
+3    0.0000001            10    14 rmse    standard   28489.    10    717.
+4    0.0000001            15     2 rmse    standard   28553.    10    714.
+5    0.0001               10    14 rmse    standard   28585.    10    760.
+  .config              
+  &lt;chr&gt;                
+1 Preprocessor1_Model09
+2 Preprocessor1_Model13
+3 Preprocessor1_Model26
+4 Preprocessor1_Model14
+5 Preprocessor1_Model27</code></pre>
+</div>
+</div>
+<hr>
+<p>Switching to <code>expand_grid()</code> to manually select</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>grid_tree_bagged <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(<span class="at">cost_complexity =</span> <span class="fu">c</span>(<span class="dv">10</span><span class="sc">^-</span><span class="dv">10</span>, <span class="dv">10</span><span class="sc">^-</span><span class="dv">7</span>, <span class="dv">10</span><span class="sc">^-</span><span class="dv">04</span>, <span class="dv">10</span><span class="sc">^-</span><span class="dv">01</span>), </span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>                                <span class="at">tree_depth =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">15</span>, <span class="dv">20</span>, <span class="dv">30</span>), </span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>                                <span class="at">min_n =</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">14</span>, <span class="dv">27</span>, <span class="dv">40</span>))</span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>grid_tree_bagged</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 64 × 3
+   cost_complexity tree_depth min_n
+             &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt;
+ 1    0.0000000001         10     2
+ 2    0.0000000001         10    14
+ 3    0.0000000001         10    27
+ 4    0.0000000001         10    40
+ 5    0.0000000001         15     2
+ 6    0.0000000001         15    14
+ 7    0.0000000001         15    27
+ 8    0.0000000001         15    40
+ 9    0.0000000001         20     2
+10    0.0000000001         20    14
+# ℹ 54 more rows</code></pre>
+</div>
+</div>
+<hr>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>fits_bagged_2 <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">bag_tree</span>(<span class="at">cost_complexity =</span> <span class="fu">tune</span>(),</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">tree_depth =</span> <span class="fu">tune</span>(),</span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">min_n =</span> <span class="fu">tune</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_engine</span>(<span class="st">"rpart"</span>, <span class="at">times =</span> <span class="dv">20</span>) <span class="sc">|&gt;</span></span>
+<span id="cb32-7"><a href="#cb32-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb32-8"><a href="#cb32-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tune_grid</span>(<span class="at">preprocessor =</span> rec, </span>
+<span id="cb32-9"><a href="#cb32-9" aria-hidden="true" tabindex="-1"></a>              <span class="at">resamples =</span> splits_boot, </span>
+<span id="cb32-10"><a href="#cb32-10" aria-hidden="true" tabindex="-1"></a>              <span class="at">grid =</span> grid_tree_bagged, </span>
+<span id="cb32-11"><a href="#cb32-11" aria-hidden="true" tabindex="-1"></a>              <span class="at">metrics =</span> <span class="fu">metric_set</span>(rmse))</span>
+<span id="cb32-12"><a href="#cb32-12" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb32-13"><a href="#cb32-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting, </span>
+<span id="cb32-14"><a href="#cb32-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/009/"</span>,</span>
+<span id="cb32-15"><a href="#cb32-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_bagged_2"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>Review hyperparameter plot</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(fits_bagged_2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="009_random_forest_files/figure-html/unnamed-chunk-24-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<p>This looks better. And look at that BIG improvement in OOB cross-validated RMSE</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_best</span>(fits_bagged_2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 9
+  cost_complexity tree_depth min_n .metric .estimator   mean     n std_err
+            &lt;dbl&gt;      &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;       &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;
+1    0.0001               15     2 rmse    standard   27575.    10    640.
+2    0.0000000001         15     2 rmse    standard   27673.    10    635.
+3    0.0000001            30     2 rmse    standard   27724.    10    662.
+4    0.0000001            20     2 rmse    standard   27726.    10    713.
+5    0.0000000001         20     2 rmse    standard   27758.    10    625.
+  .config              
+  &lt;chr&gt;                
+1 Preprocessor1_Model37
+2 Preprocessor1_Model05
+3 Preprocessor1_Model29
+4 Preprocessor1_Model25
+5 Preprocessor1_Model09</code></pre>
+</div>
+</div>
+<p>BUT, we can do better still…..</p>
+<hr>
+</section>
+<section id="random-forest" class="level2" data-number="9.6">
+<h2 data-number="9.6" class="anchored" data-anchor-id="random-forest"><span class="header-section-number">9.6</span> Random Forest</h2>
+<p>Random forests are a modification of bagged decision trees that build a large collection of de-correlated trees to further improve predictive performance.</p>
+<ul>
+<li>They are a very popular “out-of-the-box” or “off-the-shelf” statistical algorithm that predicts well</li>
+<li>Many modern implementations of random forests exist; however, Breiman’s algorithm (Breiman 2001) has largely become the standard procedure.</li>
+<li>We will use the <code>ranger</code> engine implementation of this algorithm</li>
+</ul>
+<hr>
+<p>Random forests builds on decision trees (its base learners) and bagging to reduce final model variance.<br>
+<br>
+Simply bagging trees is not optimal to reduce final model variance</p>
+<ul>
+<li><p>The trees in bagging are not completely independent of each other since all the original features are considered at every split of every tree.</p></li>
+<li><p>Trees from different bootstrap samples typically have similar structure to each other (especially at the top of the tree) due to any underlying strong relationships</p></li>
+<li><p>The trees are correlated (not as diverse a set of base learners)</p></li>
+</ul>
+<hr>
+<p>Random forests help to reduce tree correlation by injecting more randomness into the tree-growing process<br>
+<br>
+More specifically, while growing a decision tree during the bagging process, random forests perform split-variable randomization where each time a split is to be performed, the search for the best split variable is limited to a random subset of <code>mtry</code> of the original <code>p</code> features.<br>
+<br>
+Because the algorithm randomly selects a bootstrap sample to train on and a random sample of features to use at each split, a more diverse set of trees is produced which tends to lessen tree correlation beyond bagged trees and often dramatically increases predictive power.</p>
+<hr>
+<p>There are three primary hyper-parameters to consider tuning in random forests within <code>tidymodels</code></p>
+<ul>
+<li><code>mtry</code></li>
+<li><code>trees</code></li>
+<li><code>min_n</code></li>
+</ul>
+<hr>
+<p><code>mtry</code></p>
+<ul>
+<li>The number of features to randomly select for splitting on each split</li>
+<li>Selection of value for <code>mtry</code> balances low tree correlation with reasonable predictive strength</li>
+<li>Good starting values for <code>mtry</code> are <span class="math inline">\(\frac{p}{3}\)</span> for regression and <span class="math inline">\(\sqrt{p}\)</span> for classification</li>
+<li>When there are fewer relevant features (e.g., noisy data) a higher value may be needed to make it more likely to select those features with the strongest signal.</li>
+<li>When there are many relevant features, a lower value might perform better</li>
+<li>Default in <code>ranger</code> is <span class="math inline">\(\sqrt{p}\)</span></li>
+</ul>
+<hr>
+<p><code>trees</code></p>
+<ul>
+<li>The number of bootstrap resamples of the training data to fit decision tree base learners</li>
+<li>The number of trees needs to be sufficiently large to stabilize the error rate.</li>
+<li>A good rule of thumb is to start with 10 times the number of features</li>
+<li>You may need to adjust based on values for <code>mtry</code> and <code>min_n</code></li>
+<li>More trees provide more robust and stable error estimates and variable importance measures</li>
+<li>More trees == more computational cost</li>
+<li>Default in <code>ranger</code> is 500</li>
+</ul>
+<hr>
+<p><code>min_n</code></p>
+<ul>
+<li>Minimum number of observations in a new node rather than min to split</li>
+<li>Note that this is different than its definition for decision trees and bagged trees</li>
+<li>You can consider the defaults (above) as a starting point</li>
+<li>If your data has many noisy predictors and higher <code>mtry</code> values are performing best, then performance may improve by increasing node size (i.e., decreasing tree depth and complexity).</li>
+<li>If computation time is a concern then you can often decrease run time substantially by increasing the node size and have only marginal impacts to your error estimate</li>
+<li>Default in ranger is 1 for classification and 5 for regression</li>
+</ul>
+<hr>
+<section id="random-forest-in-ames" class="level3" data-number="9.6.1">
+<h3 data-number="9.6.1" class="anchored" data-anchor-id="random-forest-in-ames"><span class="header-section-number">9.6.1</span> Random Forest in Ames</h3>
+<p>Let’s see how de-correlated the base learner trees improves their aggregate performance<br>
+<br>
+We will need a new recipe for Random Forest</p>
+<ul>
+<li>Random Forest works well out of the box with little feature engineering</li>
+<li>It is still aggregating decision trees in bootstrap resamples of the training data</li>
+<li>However, the Random Forest algorithm does not natively handling missing data. We need to handle missing data manually during feature engineering. We will impute</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>rec_rf <span class="ot">&lt;-</span> <span class="fu">recipe</span>(sale_price <span class="sc">~</span> ., <span class="at">data =</span> data_trn) <span class="sc">|&gt;</span> </span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_impute_median</span>(<span class="fu">all_numeric</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_impute_mode</span>(<span class="fu">all_nominal</span>()) </span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>rec_rf_prep <span class="ot">&lt;-</span> rec_rf <span class="sc">|&gt;</span></span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(data_trn)</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>feat_trn_rf <span class="ot">&lt;-</span> rec_rf_prep <span class="sc">|&gt;</span> </span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">make_features</span>(<span class="cn">NULL</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 1,955
+Columns: 80
+$ ms_sub_class    &lt;fct&gt; 020, 020, 020, 060, 120, 120, 120, 060, 060, 060, 020,…
+$ ms_zoning       &lt;fct&gt; res_low, res_high, res_low, res_low, res_low, res_low,…
+$ lot_frontage    &lt;dbl&gt; 141, 80, 81, 74, 41, 43, 39, 60, 75, 63, 85, 69, 47, 1…
+$ lot_area        &lt;dbl&gt; 31770, 11622, 14267, 13830, 4920, 5005, 5389, 7500, 10…
+$ street          &lt;fct&gt; pave, pave, pave, pave, pave, pave, pave, pave, pave, …
+$ alley           &lt;fct&gt; none, none, none, none, none, none, none, none, none, …
+$ lot_shape       &lt;fct&gt; ir1, reg, ir1, ir1, reg, ir1, ir1, reg, ir1, ir1, reg,…
+$ land_contour    &lt;fct&gt; lvl, lvl, lvl, lvl, lvl, hls, lvl, lvl, lvl, lvl, lvl,…
+$ utilities       &lt;fct&gt; allpub, allpub, allpub, allpub, allpub, allpub, allpub…
+$ lot_config      &lt;fct&gt; corner, inside, corner, inside, inside, inside, inside…
+$ land_slope      &lt;fct&gt; gtl, gtl, gtl, gtl, gtl, gtl, gtl, gtl, gtl, gtl, gtl,…
+$ neighborhood    &lt;fct&gt; names, names, names, gilbert, stonebr, stonebr, stoneb…
+$ condition_1     &lt;fct&gt; norm, feedr, norm, norm, norm, norm, norm, norm, norm,…
+$ condition_2     &lt;fct&gt; norm, norm, norm, norm, norm, norm, norm, norm, norm, …
+$ bldg_type       &lt;fct&gt; one_fam, one_fam, one_fam, one_fam, town_end, town_end…
+$ house_style     &lt;fct&gt; 1story, 1story, 1story, 2story, 1story, 1story, 1story…
+$ overall_qual    &lt;dbl&gt; 6, 5, 6, 5, 8, 8, 8, 7, 6, 6, 7, 8, 8, 8, 9, 4, 6, 6, …
+$ overall_cond    &lt;dbl&gt; 5, 6, 6, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 7, 2, 5, 6, 6, …
+$ year_built      &lt;dbl&gt; 1960, 1961, 1958, 1997, 2001, 1992, 1995, 1999, 1993, …
+$ year_remod_add  &lt;dbl&gt; 1960, 1961, 1958, 1998, 2001, 1992, 1996, 1999, 1994, …
+$ roof_style      &lt;fct&gt; hip, gable, hip, gable, gable, gable, gable, gable, ga…
+$ roof_matl       &lt;fct&gt; compshg, compshg, compshg, compshg, compshg, compshg, …
+$ exterior_1st    &lt;fct&gt; brkface, vinylsd, wd_sdng, vinylsd, cemntbd, hdboard, …
+$ exterior_2nd    &lt;fct&gt; plywood, vinylsd, wd_sdng, vinylsd, cmentbd, hdboard, …
+$ mas_vnr_type    &lt;fct&gt; stone, none, brkface, none, none, none, none, none, no…
+$ mas_vnr_area    &lt;dbl&gt; 112, 0, 108, 0, 0, 0, 0, 0, 0, 0, 0, 0, 603, 0, 350, 0…
+$ exter_qual      &lt;fct&gt; ta, ta, ta, ta, gd, gd, gd, ta, ta, ta, ta, gd, ex, gd…
+$ exter_cond      &lt;fct&gt; ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta…
+$ foundation      &lt;fct&gt; cblock, cblock, cblock, pconc, pconc, pconc, pconc, pc…
+$ bsmt_qual       &lt;fct&gt; ta, ta, ta, gd, gd, gd, gd, ta, gd, gd, gd, gd, gd, gd…
+$ bsmt_cond       &lt;fct&gt; gd, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta…
+$ bsmt_exposure   &lt;fct&gt; gd, no, no, no, mn, no, no, no, no, no, gd, av, gd, av…
+$ bsmt_fin_type_1 &lt;fct&gt; blq, rec, alq, glq, glq, alq, glq, unf, unf, unf, glq,…
+$ bsmt_fin_sf_1   &lt;dbl&gt; 639, 468, 923, 791, 616, 263, 1180, 0, 0, 0, 637, 368,…
+$ bsmt_fin_type_2 &lt;fct&gt; unf, lwq, unf, unf, unf, unf, unf, unf, unf, unf, unf,…
+$ bsmt_fin_sf_2   &lt;dbl&gt; 0, 144, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1120, 0, 0, 0, 0, 1…
+$ bsmt_unf_sf     &lt;dbl&gt; 441, 270, 406, 137, 722, 1017, 415, 994, 763, 789, 663…
+$ total_bsmt_sf   &lt;dbl&gt; 1080, 882, 1329, 928, 1338, 1280, 1595, 994, 763, 789,…
+$ heating         &lt;fct&gt; gasa, gasa, gasa, gasa, gasa, gasa, gasa, gasa, gasa, …
+$ heating_qc      &lt;fct&gt; fa, ta, ta, gd, ex, ex, ex, gd, gd, gd, gd, ta, ex, gd…
+$ central_air     &lt;fct&gt; y, y, y, y, y, y, y, y, y, y, y, y, y, y, y, y, y, y, …
+$ electrical      &lt;fct&gt; sbrkr, sbrkr, sbrkr, sbrkr, sbrkr, sbrkr, sbrkr, sbrkr…
+$ x1st_flr_sf     &lt;dbl&gt; 1656, 896, 1329, 928, 1338, 1280, 1616, 1028, 763, 789…
+$ x2nd_flr_sf     &lt;dbl&gt; 0, 0, 0, 701, 0, 0, 0, 776, 892, 676, 0, 0, 1589, 672,…
+$ low_qual_fin_sf &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+$ gr_liv_area     &lt;dbl&gt; 1656, 896, 1329, 1629, 1338, 1280, 1616, 1804, 1655, 1…
+$ bsmt_full_bath  &lt;dbl&gt; 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 0, …
+$ bsmt_half_bath  &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+$ full_bath       &lt;dbl&gt; 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 1, 1, 3, 2, 1, 1, 2, 2, …
+$ half_bath       &lt;dbl&gt; 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, …
+$ bedroom_abv_gr  &lt;dbl&gt; 3, 2, 3, 3, 2, 2, 2, 3, 3, 3, 2, 1, 4, 4, 1, 2, 3, 3, …
+$ kitchen_abv_gr  &lt;dbl&gt; 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, …
+$ kitchen_qual    &lt;fct&gt; ta, ta, gd, ta, gd, gd, gd, gd, ta, ta, gd, gd, ex, ta…
+$ tot_rms_abv_grd &lt;dbl&gt; 7, 5, 6, 6, 6, 5, 5, 7, 7, 7, 5, 4, 12, 8, 8, 4, 7, 7,…
+$ functional      &lt;fct&gt; typ, typ, typ, typ, typ, typ, typ, typ, typ, typ, typ,…
+$ fireplaces      &lt;dbl&gt; 2, 0, 0, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 0, 2, 1, …
+$ fireplace_qu    &lt;fct&gt; gd, none, none, ta, none, none, ta, ta, ta, gd, po, no…
+$ garage_type     &lt;fct&gt; attchd, attchd, attchd, attchd, attchd, attchd, attchd…
+$ garage_yr_blt   &lt;dbl&gt; 1960, 1961, 1958, 1997, 2001, 1992, 1995, 1999, 1993, …
+$ garage_finish   &lt;fct&gt; fin, unf, unf, fin, fin, rfn, rfn, fin, fin, fin, unf,…
+$ garage_cars     &lt;dbl&gt; 2, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 2, 3, 2, 2, 2, …
+$ garage_area     &lt;dbl&gt; 528, 730, 312, 482, 582, 506, 608, 442, 440, 393, 506,…
+$ garage_qual     &lt;fct&gt; ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta…
+$ garage_cond     &lt;fct&gt; ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta, ta…
+$ paved_drive     &lt;fct&gt; p, y, y, y, y, y, y, y, y, y, y, y, y, y, y, y, y, y, …
+$ wood_deck_sf    &lt;dbl&gt; 210, 140, 393, 212, 0, 0, 237, 140, 157, 0, 192, 0, 50…
+$ open_porch_sf   &lt;dbl&gt; 62, 0, 36, 34, 0, 82, 152, 60, 84, 75, 0, 54, 36, 12, …
+$ enclosed_porch  &lt;dbl&gt; 0, 0, 0, 0, 170, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0…
+$ x3ssn_porch     &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+$ screen_porch    &lt;dbl&gt; 0, 120, 0, 0, 0, 144, 0, 0, 0, 0, 0, 140, 210, 0, 0, 0…
+$ pool_area       &lt;dbl&gt; 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, …
+$ pool_qc         &lt;fct&gt; none, none, none, none, none, none, none, none, none, …
+$ fence           &lt;fct&gt; none, mnprv, none, mnprv, none, none, none, none, none…
+$ misc_feature    &lt;fct&gt; none, none, gar2, none, none, none, none, none, none, …
+$ misc_val        &lt;dbl&gt; 0, 0, 12500, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,…
+$ mo_sold         &lt;fct&gt; may, jun, jun, mar, apr, jan, mar, jun, apr, may, feb,…
+$ yr_sold         &lt;dbl&gt; 2010, 2010, 2010, 2010, 2010, 2010, 2010, 2010, 2010, …
+$ sale_type       &lt;fct&gt; wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd, wd…
+$ sale_condition  &lt;fct&gt; normal, normal, normal, normal, normal, normal, normal…
+$ sale_price      &lt;dbl&gt; 215000, 105000, 172000, 189900, 213500, 191500, 236500…</code></pre>
+</div>
+</div>
+<hr>
+<p>A quick look at features</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>feat_trn_rf <span class="sc">|&gt;</span> <span class="fu">skim_some</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<caption>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Name</td>
+<td style="text-align: left;">feat_trn_rf</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Number of rows</td>
+<td style="text-align: left;">1955</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Number of columns</td>
+<td style="text-align: left;">80</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">_______________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Column type frequency:</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">factor</td>
+<td style="text-align: left;">45</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">numeric</td>
+<td style="text-align: left;">35</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">________________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Group variables</td>
+<td style="text-align: left;">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: factor</strong></p>
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 10%">
+<col style="width: 14%">
+<col style="width: 8%">
+<col style="width: 9%">
+<col style="width: 41%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: left;">ordered</th>
+<th style="text-align: right;">n_unique</th>
+<th style="text-align: left;">top_counts</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">ms_sub_class</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">16</td>
+<td style="text-align: left;">020: 730, 060: 388, 050: 208, 120: 122</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ms_zoning</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: left;">res: 1530, res: 297, flo: 91, com: 19</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">street</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">pav: 1946, grv: 9</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">alley</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">non: 1821, grv: 86, pav: 48</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">lot_shape</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">reg: 1258, ir1: 636, ir2: 49, ir3: 12</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">land_contour</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">lvl: 1769, hls: 75, bnk: 72, low: 39</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">utilities</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">all: 1953, nos: 2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">lot_config</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">ins: 1454, cor: 328, cul: 114, fr2: 55</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">land_slope</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">gtl: 1864, mod: 78, sev: 13</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">neighborhood</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">28</td>
+<td style="text-align: left;">nam: 299, col: 174, old: 161, edw: 135</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">condition_1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">9</td>
+<td style="text-align: left;">nor: 1693, fee: 114, art: 54, rra: 31</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">condition_2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">nor: 1938, fee: 6, art: 4, pos: 3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">bldg_type</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">one: 1631, tow: 145, dup: 77, tow: 64</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">house_style</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: left;">1st: 989, 2st: 580, 1_5: 224, slv: 79</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">roof_style</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">gab: 1557, hip: 362, gam: 16, fla: 9</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">roof_matl</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: left;">com: 1929, tar: 11, wds: 8, wds: 4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">exterior_1st</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">15</td>
+<td style="text-align: left;">vin: 671, hdb: 301, met: 298, wd_: 283</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">exterior_2nd</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">17</td>
+<td style="text-align: left;">vin: 662, met: 295, hdb: 279, wd_: 267</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">mas_vnr_type</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">non: 1184, brk: 581, sto: 171, brk: 18</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">exter_qual</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">ta: 1215, gd: 651, ex: 63, fa: 26</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">exter_cond</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">ta: 1707, gd: 195, fa: 42, ex: 8</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">foundation</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">pco: 865, cbl: 849, brk: 198, sla: 33</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">bsmt_qual</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">ta: 861, gd: 808, ex: 167, fa: 62</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">bsmt_cond</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">ta: 1739, gd: 85, fa: 69, non: 57</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">bsmt_exposure</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">no: 1271, av: 274, gd: 183, mn: 168</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">bsmt_fin_type_1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: left;">unf: 576, glq: 535, alq: 294, rec: 202</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">bsmt_fin_type_2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: left;">unf: 1655, rec: 75, lwq: 69, non: 57</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">heating</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">gas: 1920, gas: 20, gra: 8, wal: 5</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">heating_qc</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">ex: 979, ta: 590, gd: 324, fa: 60</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">central_air</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">y: 1821, n: 134</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">electrical</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">sbr: 1793, fus: 125, fus: 29, fus: 7</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">kitchen_qual</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">ta: 1011, gd: 765, ex: 126, fa: 52</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">functional</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: left;">typ: 1822, min: 48, min: 41, mod: 23</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">fireplace_qu</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">non: 960, gd: 481, ta: 407, fa: 44</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">garage_type</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: left;">att: 1161, det: 521, bui: 123, non: 107</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">garage_finish</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: left;">unf: 826, rfn: 547, fin: 473, non: 109</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">garage_qual</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">ta: 1745, non: 109, fa: 79, gd: 16</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">garage_cond</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">ta: 1778, non: 109, fa: 46, gd: 12</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">paved_drive</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">y: 1775, n: 139, p: 41</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">pool_qc</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">non: 1945, ex: 3, gd: 3, fa: 2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">fence</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">non: 1599, mnp: 215, gdw: 70, gdp: 61</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">misc_feature</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">5</td>
+<td style="text-align: left;">non: 1887, she: 62, oth: 3, gar: 2</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">mo_sold</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">12</td>
+<td style="text-align: left;">jun: 333, jul: 298, may: 273, apr: 177</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">sale_type</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">10</td>
+<td style="text-align: left;">wd: 1695, new: 158, cod: 57, con: 16</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sale_condition</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">6</td>
+<td style="text-align: left;">nor: 1616, par: 161, abn: 120, fam: 30</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: right;">p0</th>
+<th style="text-align: right;">p100</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">lot_frontage</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">21</td>
+<td style="text-align: right;">313</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">lot_area</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1476</td>
+<td style="text-align: right;">215245</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">overall_qual</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">10</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">overall_cond</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">9</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">year_built</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1875</td>
+<td style="text-align: right;">2010</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">year_remod_add</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1950</td>
+<td style="text-align: right;">2010</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">mas_vnr_area</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1600</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">bsmt_fin_sf_1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">5644</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">bsmt_fin_sf_2</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1526</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">bsmt_unf_sf</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2153</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">total_bsmt_sf</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">6110</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">x1st_flr_sf</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">372</td>
+<td style="text-align: right;">4692</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">x2nd_flr_sf</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2065</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">low_qual_fin_sf</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1064</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">gr_liv_area</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">438</td>
+<td style="text-align: right;">5642</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">bsmt_full_bath</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">bsmt_half_bath</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">full_bath</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">half_bath</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">bedroom_abv_gr</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">kitchen_abv_gr</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">tot_rms_abv_grd</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">14</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">fireplaces</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">garage_yr_blt</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1896</td>
+<td style="text-align: right;">2010</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">garage_cars</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">4</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">garage_area</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1488</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">wood_deck_sf</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">870</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">open_porch_sf</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">742</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">enclosed_porch</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">552</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">x3ssn_porch</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">508</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">screen_porch</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">576</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">pool_area</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">738</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">misc_val</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">12500</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">yr_sold</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">2006</td>
+<td style="text-align: right;">2010</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">sale_price</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">12789</td>
+<td style="text-align: right;">745000</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<hr>
+<p>We will need a tuning grid for the hyperparameters<br>
+<br>
+I played around a bit with values for <code>trees</code>, <code>mtry</code>, and <code>min_n</code> until I arrived at values that produced a floor for RMSE</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>grid_rf <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(<span class="at">trees =</span> <span class="fu">c</span>(<span class="dv">250</span>, <span class="dv">500</span>, <span class="dv">750</span>, <span class="dv">1000</span>), </span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>                       <span class="at">mtry =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">25</span>), </span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">min_n =</span> <span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">2</span>, <span class="dv">5</span>, <span class="dv">10</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>Let’s now fit the model configurations defined by the <code>grid_rf</code> using <code>tune_grid()</code></p>
+<p><code>ranger</code> gives you a lot of additional control by changing defaults in <code>set_engine()</code>.</p>
+<ul>
+<li><p>We will mostly use defaults</p></li>
+<li><p>You should explore if you want to get the best performance from your models</p></li>
+<li><p>see <code>?ranger</code></p></li>
+<li><p>Defaults for splitting rules are <code>gini</code> for classification and <code>variance</code> for regression. These are appropriate</p></li>
+<li><p>We will explicitly specify <code>respect.unordered.factors = "order"</code> as recommended. Could consider <code>respect.unordered.factors = "partition"</code></p></li>
+<li><p>We will set <code>oob.error = FALSE</code>. TRUE would allow for OOB performance estimate using OOB for each bootstrap for each base learner. We calculate this ourselves using <code>tune_grid()</code></p></li>
+<li><p>We will set <code>seed =</code> to generate reproducible bootstraps</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>fits_rf <span class="ot">&lt;-</span><span class="fu">cache_rds</span>(</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">rand_forest</span>(<span class="at">trees =</span> <span class="fu">tune</span>(),</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>              <span class="at">mtry =</span> <span class="fu">tune</span>(),</span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">min_n =</span> <span class="fu">tune</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_engine</span>(<span class="st">"ranger"</span>,</span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>               <span class="at">respect.unordered.factors =</span> <span class="st">"order"</span>,</span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a>               <span class="at">oob.error =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb40-9"><a href="#cb40-9" aria-hidden="true" tabindex="-1"></a>               <span class="at">seed =</span> <span class="dv">102030</span>) <span class="sc">|&gt;</span></span>
+<span id="cb40-10"><a href="#cb40-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb40-11"><a href="#cb40-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tune_grid</span>(<span class="at">preprocessor =</span> rec_rf, </span>
+<span id="cb40-12"><a href="#cb40-12" aria-hidden="true" tabindex="-1"></a>              <span class="at">resamples =</span> splits_boot, </span>
+<span id="cb40-13"><a href="#cb40-13" aria-hidden="true" tabindex="-1"></a>              <span class="at">grid =</span> grid_rf, </span>
+<span id="cb40-14"><a href="#cb40-14" aria-hidden="true" tabindex="-1"></a>              <span class="at">metrics =</span> <span class="fu">metric_set</span>(rmse))</span>
+<span id="cb40-15"><a href="#cb40-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb40-16"><a href="#cb40-16" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb40-17"><a href="#cb40-17" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting,</span>
+<span id="cb40-18"><a href="#cb40-18" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/009/"</span>,</span>
+<span id="cb40-19"><a href="#cb40-19" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_rf"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>We used these plots to confirm that we had selected good combinations of hyperparameters to tune and that the best hyperparameters are inside the range of values considered (or at their objective edge)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(fits_rf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="009_random_forest_files/figure-html/unnamed-chunk-30-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<p>But more importantly, look at the additional reduction in OOB RMSE for Random Forest relative to bagged trees!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_best</span>(fits_rf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 5 × 9
+   mtry trees min_n .metric .estimator   mean     n std_err
+  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;       &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;
+1    20   750     1 rmse    standard   24979.    10    710.
+2    20   750     2 rmse    standard   24980.    10    711.
+3    20  1000     1 rmse    standard   24981.    10    713.
+4    20  1000     2 rmse    standard   24991.    10    716.
+5    20   500     1 rmse    standard   24997.    10    717.
+  .config              
+  &lt;chr&gt;                
+1 Preprocessor1_Model41
+2 Preprocessor1_Model42
+3 Preprocessor1_Model57
+4 Preprocessor1_Model58
+5 Preprocessor1_Model25</code></pre>
+</div>
+</div>
+<hr>
+<p>Let’s fit the best model configuration to all the training data</p>
+<ul>
+<li>We will use the same seed and other arguments as before</li>
+<li>We could now use this final model to predict into our Ames test set (but we will skip that step) to get a better estimate of true performance with new data.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>fit_rf <span class="ot">&lt;-</span>   </span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rand_forest</span>(<span class="at">trees =</span> <span class="fu">select_best</span>(fits_rf)<span class="sc">$</span>trees,</span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">mtry =</span> <span class="fu">select_best</span>(fits_rf)<span class="sc">$</span>mtry,</span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">min_n =</span> <span class="fu">select_best</span>(fits_rf)<span class="sc">$</span>min_n) <span class="sc">|&gt;</span></span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"ranger"</span>, </span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>             <span class="at">respect.unordered.factors =</span> <span class="st">"order"</span>, </span>
+<span id="cb44-7"><a href="#cb44-7" aria-hidden="true" tabindex="-1"></a>             <span class="at">oob.error =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb44-8"><a href="#cb44-8" aria-hidden="true" tabindex="-1"></a>             <span class="at">seed =</span> <span class="dv">102030</span>) <span class="sc">|&gt;</span></span>
+<span id="cb44-9"><a href="#cb44-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span>  </span>
+<span id="cb44-10"><a href="#cb44-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(sale_price <span class="sc">~</span> ., <span class="at">data =</span> feat_trn_rf)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>In conclusion:</p>
+<ul>
+<li><p>Random Forest is a great out of the box statistical algorithm for both classification and regression</p></li>
+<li><p>We see no compelling reason to use bagged trees because Random Forest has all (except missing data handling) the benefits of bagged trees plus better prediction b/c of the de-correlated base learners</p></li>
+<li><p>In some instances, we might use a decision tree if we wanted an interpretable tree as a method to understand rule based relationships between our features and our outcome.</p></li>
+</ul>
+<hr>
+</section>
+</section>
+<section id="discussion-notes" class="level2" data-number="9.7">
+<h2 data-number="9.7" class="anchored" data-anchor-id="discussion-notes"><span class="header-section-number">9.7</span> Discussion Notes</h2>
+<section id="announcements" class="level3" data-number="9.7.1">
+<h3 data-number="9.7.1" class="anchored" data-anchor-id="announcements"><span class="header-section-number">9.7.1</span> Announcements</h3>
+<ul>
+<li>Exam review x2</li>
+<li>Installing keras package</li>
+</ul>
+</section>
+<section id="past-questions" class="level3" data-number="9.7.2">
+<h3 data-number="9.7.2" class="anchored" data-anchor-id="past-questions"><span class="header-section-number">9.7.2</span> Past Questions</h3>
+<ol type="1">
+<li><p>Explain how decision tree algorithm works generally</p></li>
+<li><p>How does CART and RF handle categorical variables? What about other transformations of predictors (normalize, scale, combine)? <a href="https://bradleyboehmke.github.io/HOML/DT.html#partitioning">non-linear?</a></p></li>
+<li><p>How do you do bagging for decision trees? How do you select best bagged tree?</p></li>
+<li><p>When and Why does bagging improve model performance</p></li>
+<li><p>Why does bagging not work optimally and how does random forest improve on it?</p></li>
+</ol>
+</section>
+<section id="new-questions" class="level3" data-number="9.7.3">
+<h3 data-number="9.7.3" class="anchored" data-anchor-id="new-questions"><span class="header-section-number">9.7.3</span> New Questions</h3>
+<section id="interpretability" class="level4" data-number="9.7.3.1">
+<h4 data-number="9.7.3.1" class="anchored" data-anchor-id="interpretability"><span class="header-section-number">9.7.3.1</span> Interpretability</h4>
+<ul>
+<li><p>Can you explain how boosting decision trees are more interpretable than random forest? I understand that it builds on top each model so that it slowly grows over time reducing the residuals from the models, but I’m still confused on it’s interpretability.</p></li>
+<li><p>Could we please discuss the interpretability of parametric vs machine learning models vs decision tree models. It seems that machine learning and smaller decision tree models are relatively easy to interpret, yet in a lot of papers the interpretability of such models is viewed as a negative in comparison to parametric models.</p></li>
+<li><p>Are able to determine the directionality of how the features are impacting the outcome)</p></li>
+</ul>
+</section>
+<section id="feature-engineering" class="level4" data-number="9.7.3.2">
+<h4 data-number="9.7.3.2" class="anchored" data-anchor-id="feature-engineering"><span class="header-section-number">9.7.3.2</span> Feature engineering</h4>
+<ul>
+<li><p>Why do decision tree models not require feature engineering of nominal variables, whereas random forest models do?</p></li>
+<li><p>how will decision tree handle missing values in features?</p></li>
+<li><p>I am very interested in and still a little bit confused about how random forest and decision trees can run with such minimal feature engineering. I would like to hear a little bit more about how these methods differ in comparison to previous methods we’ve used, which have required much more feature engineering</p></li>
+</ul>
+</section>
+<section id="bagging-1" class="level4" data-number="9.7.3.3">
+<h4 data-number="9.7.3.3" class="anchored" data-anchor-id="bagging-1"><span class="header-section-number">9.7.3.3</span> Bagging</h4>
+<ul>
+<li><p>How does bagging affect the bias specifically?</p></li>
+<li><p>I am interested in understanding better how techniques like bagging can reduce variance so drastically without seeming to affect bias much.</p></li>
+<li><p>Bagging and random forests have no impact on model bias, correct?</p></li>
+<li><p>Is it correct that we will not use bagged trees in any situations?</p></li>
+<li><p>I am still confuse of difference between using bootstrap on decision tree and bagging</p></li>
+</ul>
+</section>
+<section id="bootstrap" class="level4" data-number="9.7.3.4">
+<h4 data-number="9.7.3.4" class="anchored" data-anchor-id="bootstrap"><span class="header-section-number">9.7.3.4</span> Bootstrap</h4>
+<ul>
+<li>What is the difference of bagging and normal bootstraps?</li>
+<li>What are the “outer loop” and “inner loop” of bagging?</li>
+</ul>
+</section>
+<section id="random-forest-1" class="level4" data-number="9.7.3.5">
+<h4 data-number="9.7.3.5" class="anchored" data-anchor-id="random-forest-1"><span class="header-section-number">9.7.3.5</span> Random Forest</h4>
+<ul>
+<li><p>What are the differences between decision trees and random forests? When do you want to use a decision tree versus a random forest?</p></li>
+<li><p>Could you explain a method of Variable Selection for Random Forest?</p></li>
+<li><p>Is the logic for preferring random forests over bagging essentially the same as the logic for preferring k-fold cross-validation with k &lt; n over LOOCV?</p></li>
+<li><p>Can you talk more about real world use in random forest?</p></li>
+</ul>
+</section>
+<section id="boosting" class="level4" data-number="9.7.3.6">
+<h4 data-number="9.7.3.6" class="anchored" data-anchor-id="boosting"><span class="header-section-number">9.7.3.6</span> Boosting</h4>
+<ul>
+<li>Boosting a decision tree</li>
+<li>boosting versus other ensemble techniques like random forest</li>
+</ul>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
@@ -375,6 +3567,8 @@ div.csl-indent {
 James, Gareth, Daniela Witten, Trevor Hastie, and Robert Tibshirani. 2023. <em>An <span>Introduction</span> to <span>Statistical Learning</span>: With <span>Applications</span> in <span>R</span></em>. 2nd ed. Springer <span>Texts</span> in <span>Statistics</span>. <span>New York</span>: <span>Springer-Verlag</span>.
 </div>
 </div>
+</section>
+</section>
 </section>
 
 </main> <!-- /main -->
