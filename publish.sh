@@ -14,6 +14,7 @@ if [ "$FORMAT" = "book" ]; then
   cp _quarto_book.yml _quarto.yml
   quarto publish gh-pages --no-browser 
   git restore _quarto.yml
+  rm -r _book
 fi
 
  
