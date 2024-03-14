@@ -1793,7 +1793,6 @@ Confusion matrix
 - Is there a limit on how much you should up/down-sample or SMOTE? In other words, is there a threshold of imbalance at which it's not helpful to use one of those techniques, since you are just putting in "fake" data? (Or is "fake data" a bad/incorrect way to think about it?)
 
 
-
 ### ROC
 
 - Axes and various names/representations
@@ -1801,6 +1800,41 @@ Confusion matrix
 - threshold
 - intepretation of auROC
 
+```{r}
+library(tidyverse)
+theme_set(theme_classic()) 
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/format_path.R?raw=true")
+path_models <- format_path("studydata/risk/models/ema")
+preds_hour<- read_rds(file.path(path_models, 
+                               "outer_preds_1hour_0_v5_nested_main.rds"))
+roc_hour <- preds_hour|> 
+  yardstick::roc_curve(prob_beta, truth = label)
+
+roc_hour |> 
+  ggplot(aes(x = 1 - specificity, y = sensitivity)) +
+    geom_path(linewidth = 1.25) +
+    geom_abline(lty = 3) +
+    coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+    labs(x = "FPR (1 - Specificity)",
+        y = "TPR (Sensitivity)") +
+  scale_x_continuous(breaks = seq(0,1,.25))
+```
+
+
+My preferred way
+
+
+```{r}
+roc_hour |> 
+  ggplot(aes(x = 1 - specificity, y = sensitivity)) +
+    geom_path(linewidth = 1.25) +
+    geom_abline(lty = 3) +
+    coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+    labs(x = "Specificity",
+        y = "Sensitivity") +
+  scale_x_continuous(breaks = seq(0,1,.25),
+    labels = sprintf("%.2f", seq(1,0,-.25)))
+```
 
 ### Kappa
 
