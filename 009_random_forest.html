@@ -424,11 +424,7 @@ window.Quarto = {
 <li>How to bag models and the benefits</li>
 <li>Random Forest</li>
 <li>How Random Forest extends bagged trees</li>
-<li>Feature interpretation with:
-<ul>
-<li>Decision tree plots</li>
-<li>Variable importance</li>
-</ul></li>
+<li>Feature interpretation with decision tree plots</li>
 </ul>
 <hr>
 </section>
@@ -444,8 +440,8 @@ window.Quarto = {
 <section id="lecture-videos" class="level3" data-number="9.1.3">
 <h3 data-number="9.1.3" class="anchored" data-anchor-id="lecture-videos"><span class="header-section-number">9.1.3</span> Lecture Videos</h3>
 <ul>
-<li><a href="">Lecture 1: Decision Trees</a></li>
-<li><a href="">Lecture 2: Decision Trees in Ames</a></li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+9-1/1_xk3gxr2y">Lecture 1: Decision Trees</a></li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+9-2/1_nrwshb2s">Lecture 2: Decision Trees in Ames</a></li>
 <li><a href="">Lecture 3: Bagged Trees</a></li>
 <li><a href="">Lecture 4: Bagged Trees in Ames</a></li>
 <li><a href="">Lecture 5: Random Forest</a></li>
@@ -457,8 +453,8 @@ window.Quarto = {
 <section id="coding-assignment" class="level3" data-number="9.1.4">
 <h3 data-number="9.1.4" class="anchored" data-anchor-id="coding-assignment"><span class="header-section-number">9.1.4</span> Coding Assignment</h3>
 <ul>
-<li><a href="homework/unit_10/fifa.csv">data</a></li>
-<li><a href="homework/unit_10/hw_unit_10_random_forest.qmd">qmd shell</a></li>
+<li><a href="application_assignments/unit_09/fifa.csv">data</a></li>
+<li><a href="application_assignments/unit_09/hw_unit_10_random_forest.qmd">qmd shell</a></li>
 <li><a href="">solution</a></li>
 </ul>
 <p>Post questions to application-assignments Slack channel</p>
@@ -485,9 +481,8 @@ This tree only has a depth of two (there are only two levels of splits)</p>
 <li>years &lt; 4.5</li>
 <li>hits &lt; 117.5</li>
 </ul>
-<p><br>
-<br>
-This results in three regions</p>
+<hr>
+<p>This results in three regions</p>
 <ul>
 <li>years &lt; 4.5</li>
 <li>years &gt;= 4.5 &amp; hits &lt; 117.5</li>
@@ -533,9 +528,7 @@ The right column shows a representation of the regions formed by this tree (top)
 The top left panel displays a set of regions that is NOT possible using binary recursive splitting. This makes the point that there are some patterns in the data that cannot be accommodated well by decision trees</p>
 <p><img src="figs/ISL_8.3.png" style="height:5in"></p>
 <hr>
-<p>Figure 8.4 shows a slightly more complicated decision tree for the hitters dataset with tree depth = 4<br>
-<br>
-With respect to terminology:</p>
+<p>Figure 8.4 shows a slightly more complicated decision tree for the hitters dataset with tree depth = 4. With respect to terminology:</p>
 <ul>
 <li>As noted earlier, each of the subgroups are called <strong>nodes</strong></li>
 <li>The first “subgroup”” at the top of the tree is called the <strong>root node</strong>. This node contains all of the training data.</li>
@@ -554,7 +547,7 @@ Recursive simply means that each split (or rule) depends on the the splits above
 <li>The algorithm first identifies the “best” feature to partition the observations in the root node into one of two new regions (i.e., new nodes that will be on the left and right branches leading from the root node.)
 <ul>
 <li>For regression problems, the “best” feature (and the rule using that feature) is the feature that maximizes the reduction in SSE</li>
-<li>For classification problems, the split is selected to maximize the reduction in cross-entropy or the <a href="https://enhttps://en.wikipedia.org/wiki/Decision_tree_learning#Information_gain.wikipedia.org/wiki/Decision_tree_learning#Gini_impurity">Gini index</a>. These are measures of impurity (and we want to get homogeneous nodes so we minimize them)</li>
+<li>For classification problems, the split is selected to maximize the reduction in <a href="https://en.wikipedia.org/wiki/Decision_tree_learning#Information_gain">cross-entropy</a> or the <a href="https://en.wikipedia.org/wiki/Decision_tree_learning#Gini_impurity">Gini index</a>. These are measures of impurity (and we want to get homogeneous nodes so we minimize them)</li>
 </ul></li>
 <li>The splitting process is then repeated on each of the two new nodes (hence the name binary recursive partitioning).</li>
 <li>This process is continued until a suitable stopping criterion is reached.</li>
@@ -583,17 +576,14 @@ Recursive simply means that each split (or rule) depends on the the splits above
 <li><p>They should ideally be tuned via the cross-validation approaches we have learned</p></li>
 </ul>
 <hr>
-<p>With pruning:</p>
+<p>With pruning, we let the tree grow large (max depth = 30 on 32-bit machines) and then prune it back to an optimal size:</p>
 <ul>
-<li><p>We let the tree grow large (max depth = 30 on 32-bit machines) and then prune it back to an optimal size:</p></li>
-<li><p>To do this, we apply a penalty (<span class="math inline">\(\lambda\)</span> * # of terminal nodes) to the cost function/impurity index. (analogous to the L1/LASSO penalty). This penalty is also referred to as the cost complexity parameter</p></li>
+<li><p>To do this, we apply a penalty (<span class="math inline">\(\lambda\)</span> * # of terminal nodes) to the cost function/impurity index (analogous to the L1/LASSO penalty). This penalty is also referred to as the cost complexity parameter</p></li>
 <li><p>Big values for cost complexity will result in less complex trees. Small values will result in deeper, more complex trees</p></li>
 <li><p>Cost complexity can be tuned by our standard cross-validation approaches by itself or in combination with the previous two hyper parameters</p></li>
 </ul>
 <hr>
-<p>Feature engineering for decision trees can be simpler than with other algorithms<br>
-<br>
-There are few pre-processing requirements</p>
+<p>Feature engineering for decision trees can be simpler than with other algorithms because there are very few pre-processing requirements:</p>
 <ul>
 <li><p>Monotonic transformations (e.g., power transformations) are not required to meet algorithm assumptions (in contrast to many parametric models). These transformations only shift the location of the optimal split points.</p></li>
 <li><p>Outliers typically do not bias the results as much since the binary partitioning simply looks for a single location to make a split within the distribution of each feature.</p></li>
@@ -614,10 +604,9 @@ It is important to note that feature engineering (e.g., alternative strategies f
 </section>
 <section id="decision-trees-in-ames" class="level2" data-number="9.3">
 <h2 data-number="9.3" class="anchored" data-anchor-id="decision-trees-in-ames"><span class="header-section-number">9.3</span> Decision Trees in Ames</h2>
-<p>Let’s see this algorithm in action<br>
-<br>
-- We will explore the decision tree algorithm (and ensemble approaches using it) with the Ames Housing Prices database</p>
+<p>Let’s see this algorithm in action</p>
 <ul>
+<li>We will explore the decision tree algorithm (and ensemble approaches using it) with the Ames Housing Prices database</li>
 <li>Parallel processing is VERY useful for ensemble approaches because they can be computationally costly</li>
 </ul>
 <hr>
@@ -2090,7 +2079,6 @@ It is important to note that feature engineering (e.g., alternative strategies f
 <p>Let’s plot the decision tree using <code>rpart.plot</code> for a package with the same name. No need to load the full package</p>
 <ul>
 <li>Easy to understand how the model makes predictions</li>
-<li>But how well does this model predict <code>sale_price</code>?</li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fit_tree_ex1<span class="sc">$</span>fit <span class="sc">|&gt;</span> rpart.plot<span class="sc">::</span><span class="fu">rpart.plot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -2109,7 +2097,7 @@ It is important to note that feature engineering (e.g., alternative strategies f
 <i class="callout-icon no-icon"></i>
 </div>
 <div class="callout-title-container flex-fill">
-Question: How can we determine this?
+Question: How can we determine how well this model predicts sale_price?
 </div>
 <div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
 </div>
@@ -2134,6 +2122,8 @@ Question: How can we determine this?
 <span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>splits_boot <span class="ot">&lt;-</span> data_trn <span class="sc">|&gt;</span> </span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bootstraps</span>(<span class="at">times =</span> <span class="dv">10</span>, <span class="at">strata =</span> <span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<hr>
+<p>Now let’s evaluate its performance in our OOB held-out sets</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fits_tree_ex1 <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
@@ -2162,8 +2152,9 @@ Question: How can we determine this?
 <hr>
 <p>We want to allow a deeper tree to reduce bias<br>
 <br>
-But will also need to consider pruning tree to prevent overfitting</p>
-<p>This is the bias-variance trade-off again. To find the sweet stop we can tune</p>
+But will also need to consider pruning tree to prevent overfitting<br>
+<br>
+This is the bias-variance trade-off again. To find the sweet stop we can tune</p>
 <ul>
 <li>tree_depth</li>
 <li>min_n</li>
@@ -2252,7 +2243,9 @@ With <code>levels = 4</code> we get 64 combinations of values (4 x 4 x 4)</p>
 </div>
 </div>
 <hr>
-<p>The best values for all hyperparameters are not near their edges and we see floor in RMSE so this looks good</p>
+<p>The best values for some of the hyperparameters (tree depth and min n) are at their edges so we might consider extending their range and training again. I will skip this here to save time.<br>
+<br>
+This model as good as our other models in unit 3 (see OOB cross-validated error above). It was easy to fit with all the predictors. It might get even a little better for we further tuned the hyperparameters. However, we can still do better with a more advanced algorithm based on decision trees.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_best</span>(fits_tree)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
@@ -2273,7 +2266,6 @@ With <code>levels = 4</code> we get 64 combinations of values (4 x 4 x 4)</p>
 5 Preprocessor1_Model62</code></pre>
 </div>
 </div>
-<p>This is as good as our other models in unit 3 (see OOB cross-validated error above). It was easy to fit with all the predictors. However, we can still do better.</p>
 <hr>
 <p>Let’s still fit this tree to all the training data and understand it a bit better</p>
 <div class="cell">
@@ -2301,10 +2293,9 @@ With <code>levels = 4</code> we get 64 combinations of values (4 x 4 x 4)</p>
 </div>
 </div>
 <hr>
-<p>Even though decision trees themselves are relatively poor at prediction, these ideas will be key when we consider ensemble approaches.<br>
+<p>Even though decision trees themselves are relatively poor at prediction, these ideas will be key when we consider more advanced ensemble approaches<br>
 <br>
-<br>
-Ensemble approaches aggregate multiple models to improve prediction. Our first ensemble approach is bagging</p>
+Ensemble approaches aggregate multiple models to improve prediction. Our first ensemble approach is bagging.</p>
 <hr>
 </section>
 <section id="bagging" class="level2" data-number="9.4">

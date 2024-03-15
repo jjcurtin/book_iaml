@@ -391,7 +391,10 @@ window.Quarto = {
   <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion"><span class="header-section-number">8.7</span> Discussion</a>
   <ul class="collapse">
   <li><a href="#announcements" id="toc-announcements" class="nav-link" data-scroll-target="#announcements"><span class="header-section-number">8.7.1</span> Announcements</a></li>
-  <li><a href="#questions" id="toc-questions" class="nav-link" data-scroll-target="#questions"><span class="header-section-number">8.7.2</span> Questions</a></li>
+  <li><a href="#general" id="toc-general" class="nav-link" data-scroll-target="#general"><span class="header-section-number">8.7.2</span> General</a></li>
+  <li><a href="#resampling" id="toc-resampling" class="nav-link" data-scroll-target="#resampling"><span class="header-section-number">8.7.3</span> Resampling</a></li>
+  <li><a href="#roc" id="toc-roc" class="nav-link" data-scroll-target="#roc"><span class="header-section-number">8.7.4</span> ROC</a></li>
+  <li><a href="#kappa" id="toc-kappa" class="nav-link" data-scroll-target="#kappa"><span class="header-section-number">8.7.5</span> Kappa</a></li>
   </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/jjcurtin/book_iaml/edit/main/008_advanced_performance_metrics.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
@@ -3937,35 +3940,105 @@ Need to refit the final model to all of train</p>
 <section id="announcements" class="level3" data-number="8.7.1">
 <h3 data-number="8.7.1" class="anchored" data-anchor-id="announcements"><span class="header-section-number">8.7.1</span> Announcements</h3>
 <ul>
-<li>Timeline on conceptual exams</li>
-<li>Exam grading - review</li>
-<li>Unit 9 has a lot of reading and some complicated topics</li>
+<li>Exams by the end of the weekend</li>
+<li>Lectures released tonight and by end of tomorrow</li>
+<li>Installing keras package</li>
 </ul>
 </section>
-<section id="questions" class="level3" data-number="8.7.2">
-<h3 data-number="8.7.2" class="anchored" data-anchor-id="questions"><span class="header-section-number">8.7.2</span> Questions</h3>
-<p>Confusion matrix and metrics</p>
+<section id="general" class="level3" data-number="8.7.2">
+<h3 data-number="8.7.2" class="anchored" data-anchor-id="general"><span class="header-section-number">8.7.2</span> General</h3>
 <ul>
-<li><p>I am still confused about how testing every college student for covid decreases the PPV of a positive test and increases the NPV of a negative test.</p></li>
-<li><p>Can we review the confusion matrix plot</p></li>
-<li><p>I would like to go over the differences between sensitivity, specificity, NPV, and PPV and identifying them and how to adjust them</p></li>
-<li><p>Can you review under what circumstances you’re most likely to want to use each performance metric?</p></li>
-<li><p>I can understand how Kappa calculated and what it means, but still feel not very sensible to its concept.</p>
+<li><p>I’m not understanding the difference between tuning the model to create a fit object, and then creating a separate fit object to evaluate it using the test data. I know this is fundamental but it somehow has slipped through my understanding.</p>
 <ul>
-<li><p>I’d like to review more classification threshold examples (changing % and balancing sensitivity/specificity).</p></li>
-<li><p>I’m still confused about classification threshold. What is the best threshold to choose or it is trial and error to determine the tradeoff between sensitivity and specificity?</p></li>
+<li>What is “tuning”</li>
+<li>How do we tune hyperparameters and then evaluate best model config? Using valiation + test. Using 10-fold + test</li>
 </ul></li>
-<li><p>What’s the difference between the pair of sensitivity and specificity, and the pair of precision and recall?</p></li>
 </ul>
-<p>ROC - the ROC curve and threshold</p>
+<p>Confusion matrix</p>
 <ul>
-<li><p>auROC is the probability that the classifier will rank/predict a randomly selected true positive observation higher than a randomly selected true negative observation”.</p></li>
-<li><p>What more specifically does it mean that auROC “is not affected by” class imbalances? Is this the same as saying its formula doesn’t depend on prevalence (because it’s sensitivity- and specificity-based)? Why is this a desirable property for datasets with class imbalances - is it just that it makes it a lower variance metric?</p></li>
+<li>NYTimes article
+<ul>
+<li>define accuracy, sens, spec, ppv, npv, bal_accuracy</li>
+<li>Cost of FP and FN?</li>
+<li>Can we go over some more concrete (real-world) examples of when it would be a good idea to use a different threshold for classification?</li>
+<li>I would like to understand more about adjusting decision thresholds across a few more application contexts. Also, are there any techniques to optimize decision thresholds? Or is it trial and error.</li>
+</ul></li>
 </ul>
-<p>Resampling the outcome</p>
+</section>
+<section id="resampling" class="level3" data-number="8.7.3">
+<h3 data-number="8.7.3" class="anchored" data-anchor-id="resampling"><span class="header-section-number">8.7.3</span> Resampling</h3>
 <ul>
-<li><p>I am confused about over/under-sampling. Wouldn’t over/under-sampling lead to more biased models, especially if one’s model isn’t great? If I am predicting some outcome where a positive result happens only 5% of the time and I oversample that my training set if 50% positive results, wouldn’t I trick my model into thinking that positive cases are supper common, thus biasing the model and resulting in poor predictive performance, especially if my model doesn’t have strong predictors.</p></li>
-<li><p>It would be useful to go over SMOTE more.</p></li>
+<li>similarities and differences</li>
+<li>resampling held-in but not held-out</li>
+<li>Is there a limit on how much you should up/down-sample or SMOTE? In other words, is there a threshold of imbalance at which it’s not helpful to use one of those techniques, since you are just putting in “fake” data? (Or is “fake data” a bad/incorrect way to think about it?)</li>
+</ul>
+</section>
+<section id="roc" class="level3" data-number="8.7.4">
+<h3 data-number="8.7.4" class="anchored" data-anchor-id="roc"><span class="header-section-number">8.7.4</span> ROC</h3>
+<ul>
+<li>Axes and various names/representations</li>
+<li>Why is top right perfect performance</li>
+<li>threshold</li>
+<li>intepretation of auROC</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb116"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb116-1"><a href="#cb116-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb116-2"><a href="#cb116-2" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(<span class="fu">theme_classic</span>()) </span>
+<span id="cb116-3"><a href="#cb116-3" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">source_url</span>(<span class="st">"https://github.com/jjcurtin/lab_support/blob/main/format_path.R?raw=true"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>ℹ SHA-1 hash of file is "a58e57da996d1b70bb9a5b58241325d6fd78890f"</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb118"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb118-1"><a href="#cb118-1" aria-hidden="true" tabindex="-1"></a>path_models <span class="ot">&lt;-</span> <span class="fu">format_path</span>(<span class="st">"studydata/risk/models/ema"</span>)</span>
+<span id="cb118-2"><a href="#cb118-2" aria-hidden="true" tabindex="-1"></a>preds_hour<span class="ot">&lt;-</span> <span class="fu">read_rds</span>(<span class="fu">file.path</span>(path_models, </span>
+<span id="cb118-3"><a href="#cb118-3" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"outer_preds_1hour_0_v5_nested_main.rds"</span>))</span>
+<span id="cb118-4"><a href="#cb118-4" aria-hidden="true" tabindex="-1"></a>roc_hour <span class="ot">&lt;-</span> preds_hour<span class="sc">|&gt;</span> </span>
+<span id="cb118-5"><a href="#cb118-5" aria-hidden="true" tabindex="-1"></a>  yardstick<span class="sc">::</span><span class="fu">roc_curve</span>(prob_beta, <span class="at">truth =</span> label)</span>
+<span id="cb118-6"><a href="#cb118-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb118-7"><a href="#cb118-7" aria-hidden="true" tabindex="-1"></a>roc_hour <span class="sc">|&gt;</span> </span>
+<span id="cb118-8"><a href="#cb118-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="dv">1</span> <span class="sc">-</span> specificity, <span class="at">y =</span> sensitivity)) <span class="sc">+</span></span>
+<span id="cb118-9"><a href="#cb118-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_path</span>(<span class="at">linewidth =</span> <span class="fl">1.25</span>) <span class="sc">+</span></span>
+<span id="cb118-10"><a href="#cb118-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_abline</span>(<span class="at">lty =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb118-11"><a href="#cb118-11" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_fixed</span>(<span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb118-12"><a href="#cb118-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"FPR (1 - Specificity)"</span>,</span>
+<span id="cb118-13"><a href="#cb118-13" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="st">"TPR (Sensitivity)"</span>) <span class="sc">+</span></span>
+<span id="cb118-14"><a href="#cb118-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,.<span class="dv">25</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="008_advanced_performance_metrics_files/figure-html/unnamed-chunk-84-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>My preferred way</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb119"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb119-1"><a href="#cb119-1" aria-hidden="true" tabindex="-1"></a>roc_hour <span class="sc">|&gt;</span> </span>
+<span id="cb119-2"><a href="#cb119-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> <span class="dv">1</span> <span class="sc">-</span> specificity, <span class="at">y =</span> sensitivity)) <span class="sc">+</span></span>
+<span id="cb119-3"><a href="#cb119-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_path</span>(<span class="at">linewidth =</span> <span class="fl">1.25</span>) <span class="sc">+</span></span>
+<span id="cb119-4"><a href="#cb119-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_abline</span>(<span class="at">lty =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb119-5"><a href="#cb119-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">coord_fixed</span>(<span class="at">xlim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>), <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">1</span>)) <span class="sc">+</span></span>
+<span id="cb119-6"><a href="#cb119-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"Specificity"</span>,</span>
+<span id="cb119-7"><a href="#cb119-7" aria-hidden="true" tabindex="-1"></a>        <span class="at">y =</span> <span class="st">"Sensitivity"</span>) <span class="sc">+</span></span>
+<span id="cb119-8"><a href="#cb119-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">1</span>,.<span class="dv">25</span>),</span>
+<span id="cb119-9"><a href="#cb119-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">labels =</span> <span class="fu">sprintf</span>(<span class="st">"%.2f"</span>, <span class="fu">seq</span>(<span class="dv">1</span>,<span class="dv">0</span>,<span class="sc">-</span>.<span class="dv">25</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="008_advanced_performance_metrics_files/figure-html/unnamed-chunk-85-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="kappa" class="level3" data-number="8.7.5">
+<h3 data-number="8.7.5" class="anchored" data-anchor-id="kappa"><span class="header-section-number">8.7.5</span> Kappa</h3>
+<ul>
+<li>expected accuracy
+<ul>
+<li>given majority class proportion</li>
+<li>by chance given base rates</li>
+</ul></li>
+<li>ratio of improvement above expected accuracy</li>
 </ul>
 
 
