@@ -440,12 +440,11 @@ window.Quarto = {
 <section id="lecture-videos" class="level3" data-number="9.1.3">
 <h3 data-number="9.1.3" class="anchored" data-anchor-id="lecture-videos"><span class="header-section-number">9.1.3</span> Lecture Videos</h3>
 <ul>
-<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+9-1/1_xk3gxr2y">Lecture 1: Decision Trees</a></li>
-<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+9-2/1_nrwshb2s">Lecture 2: Decision Trees in Ames</a></li>
-<li><a href="">Lecture 3: Bagged Trees</a></li>
-<li><a href="">Lecture 4: Bagged Trees in Ames</a></li>
-<li><a href="">Lecture 5: Random Forest</a></li>
-<li><a href="">Lecture 6: Random Forest in Ames</a></li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+9-1/1_xk3gxr2y">Lecture 1: Decision Trees</a> ~ 30 mins</li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+9-2/1_nrwshb2s">Lecture 2: Decision Trees in Ames</a> ~ 20 mins</li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+9-3/1_bykr6l2l">Lecture 3: Bagged Trees</a>i ~ 10 mins</li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+9-4/1_qkn0qrgy">Lecture 4: Bagged Trees in Ames</a> ~ 6 mins</li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+9-5/1_wtuy10yx">Lecture 5: Random Forest</a> ~ 16 mins</li>
 </ul>
 <hr>
 <p>Post questions to the video-lectures channel in Slack</p>
@@ -454,7 +453,7 @@ window.Quarto = {
 <h3 data-number="9.1.4" class="anchored" data-anchor-id="coding-assignment"><span class="header-section-number">9.1.4</span> Coding Assignment</h3>
 <ul>
 <li><a href="application_assignments/unit_09/fifa.csv">data</a></li>
-<li><a href="application_assignments/unit_09/hw_unit_10_random_forest.qmd">qmd shell</a></li>
+<li><a href="https://raw.githubusercontent.com/jjcurtin/book_iaml/main/application_assignments/unit_09/hw_unit_10_random_forest.qmd">qmd shell</a></li>
 <li><a href="">solution</a></li>
 </ul>
 <p>Post questions to application-assignments Slack channel</p>
@@ -2378,7 +2377,7 @@ We can use the same recipe<br>
 <br>
 We will use the same splits to tune hyperparameters<br>
 <br>
-Now we need <code>times = 20</code> to fit 20 models to 10 bootstraps (set earlier) of the training data.</p>
+Now we need <code>times = 20</code> to fit 20 models (inner loop of bootstrapping) to each of the 10 bootstraps (outer loop; set earlier) of the training data.</p>
 <ul>
 <li>Keeping this low to reduce computational costs.<br>
 </li>
@@ -2390,7 +2389,7 @@ Now we need <code>times = 20</code> to fit 20 models to 10 bootstraps (set earli
 <span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">bag_tree</span>(<span class="at">cost_complexity =</span> <span class="fu">tune</span>(),</span>
 <span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">tree_depth =</span> <span class="fu">tune</span>(),</span>
 <span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">min_n =</span> <span class="fu">tune</span>()) <span class="sc">|&gt;</span></span>
-<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_engine</span>(<span class="st">"rpart"</span>, <span class="at">times =</span> <span class="dv">10</span>) <span class="sc">|&gt;</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_engine</span>(<span class="st">"rpart"</span>, <span class="at">times =</span> <span class="dv">20</span>) <span class="sc">|&gt;</span></span>
 <span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span> </span>
 <span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tune_grid</span>(<span class="at">preprocessor =</span> rec, </span>
 <span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a>              <span class="at">resamples =</span> splits_boot, </span>
@@ -2427,18 +2426,18 @@ Now we need <code>times = 20</code> to fit 20 models to 10 bootstraps (set earli
 <pre><code># A tibble: 5 × 9
   cost_complexity tree_depth min_n .metric .estimator   mean     n std_err
             &lt;dbl&gt;      &lt;int&gt; &lt;int&gt; &lt;chr&gt;   &lt;chr&gt;       &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;
-1    0.0000000001         10     2 rmse    standard   28311.    10    652.
-2    0.0000000001         15     2 rmse    standard   28346.    10    581.
-3    0.0000001            10    14 rmse    standard   28489.    10    717.
-4    0.0000001            15     2 rmse    standard   28553.    10    714.
-5    0.0001               10    14 rmse    standard   28585.    10    760.
+1    0.0000001            15     2 rmse    standard   27777.    10    537.
+2    0.0001               15     2 rmse    standard   27801.    10    644.
+3    0.0001               15    14 rmse    standard   27870.    10    748.
+4    0.0000000001         10    14 rmse    standard   27908.    10    777.
+5    0.0000000001         10     2 rmse    standard   27910.    10    609.
   .config              
   &lt;chr&gt;                
-1 Preprocessor1_Model09
-2 Preprocessor1_Model13
-3 Preprocessor1_Model26
-4 Preprocessor1_Model14
-5 Preprocessor1_Model27</code></pre>
+1 Preprocessor1_Model14
+2 Preprocessor1_Model15
+3 Preprocessor1_Model31
+4 Preprocessor1_Model25
+5 Preprocessor1_Model09</code></pre>
 </div>
 </div>
 <hr>
@@ -2530,7 +2529,7 @@ Now we need <code>times = 20</code> to fit 20 models to 10 bootstraps (set earli
 <li>We will use the <code>ranger</code> engine implementation of this algorithm</li>
 </ul>
 <hr>
-<p>Random forests builds on decision trees (its base learners) and bagging to reduce final model variance.<br>
+<p>Random forests build on decision trees (its base learners) and bagging to reduce final model variance.<br>
 <br>
 Simply bagging trees is not optimal to reduce final model variance</p>
 <ul>
