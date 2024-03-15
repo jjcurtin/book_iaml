@@ -32,12 +32,11 @@ Post questions to the readings channel in Slack
 
 ### Lecture Videos
 
-- [Lecture 1: Decision Trees](https://mediaspace.wisc.edu/media/iaml+unit+9-1/1_xk3gxr2y)
-- [Lecture 2: Decision Trees in Ames](https://mediaspace.wisc.edu/media/iaml+unit+9-2/1_nrwshb2s)
-- [Lecture 3: Bagged Trees]()
-- [Lecture 4: Bagged Trees in Ames]()
-- [Lecture 5: Random Forest]()
-- [Lecture 6: Random Forest in Ames]()
+- [Lecture 1: Decision Trees](https://mediaspace.wisc.edu/media/iaml+unit+9-1/1_xk3gxr2y) ~ 30 mins
+- [Lecture 2: Decision Trees in Ames](https://mediaspace.wisc.edu/media/iaml+unit+9-2/1_nrwshb2s) ~ 20 mins
+- [Lecture 3: Bagged Trees](https://mediaspace.wisc.edu/media/iaml+unit+9-3/1_bykr6l2l)i ~ 10 mins
+- [Lecture 4: Bagged Trees in Ames](https://mediaspace.wisc.edu/media/iaml+unit+9-4/1_qkn0qrgy) ~ 6 mins
+- [Lecture 5: Random Forest](https://mediaspace.wisc.edu/media/iaml+unit+9-5/1_wtuy10yx) ~ 16 mins
 
 -----
 
@@ -633,7 +632,7 @@ We can use the same recipe
 We will use the same splits to tune hyperparameters
 \
 \
-Now we need `times = 20` to fit 20 models to 10 bootstraps (set earlier) of the training data.  
+Now we need `times = 20` to fit 20 models (inner loop of bootstrapping) to each of the 10 bootstraps (outer loop; set earlier) of the training data.  
 
 - Keeping this low to reduce computational costs.  
 - You will likely want more bootstrapped models to reduce final model variance and more boostraps resamples to get a lower variance performance estimate to select best hyperparameters
@@ -644,7 +643,7 @@ fits_bagged <- cache_rds(
     bag_tree(cost_complexity = tune(),
            tree_depth = tune(),
            min_n = tune()) |>
-    set_engine("rpart", times = 10) |>
+    set_engine("rpart", times = 20) |>
     set_mode("regression") |> 
     tune_grid(preprocessor = rec, 
               resamples = splits_boot, 
@@ -739,7 +738,7 @@ Random forests are a modification of bagged decision trees that build a large co
 
 -----
 
-Random forests builds on decision trees (its base learners) and bagging to reduce final model variance.
+Random forests build on decision trees (its base learners) and bagging to reduce final model variance.
 \
 \
 Simply bagging trees is not optimal to reduce final model variance
