@@ -16,9 +16,7 @@ editor_options:
 - How to bag models and the benefits
 - Random Forest
 - How Random Forest extends bagged trees
-- Feature interpretation with:
-  - Decision tree plots
-  - Variable importance
+- Feature interpretation with decision tree plots
 
 -----
 
@@ -83,8 +81,8 @@ This tree only has a depth of two (there are only two levels of splits)
 - years < 4.5
 - hits < 117.5
 
-\
-\
+-----
+
 This results in three regions
 
   - years < 4.5
@@ -144,10 +142,7 @@ The top left panel displays a set of regions that is NOT possible using binary r
 
 -----
 
-Figure 8.4 shows a slightly more complicated decision tree for the hitters dataset with tree depth = 4
-\
-\
-With respect to terminology:
+Figure 8.4 shows a slightly more complicated decision tree for the hitters dataset with tree depth = 4.  With respect to terminology:
 
 - As noted earlier, each of the subgroups are called **nodes**
 - The first "subgroup"" at the top of the tree is called the **root node**.  This node contains all of the training data. 
@@ -169,7 +164,7 @@ Recursive simply means that each split (or rule) depends on the the splits above
 
 - The algorithm first identifies the "best" feature to partition the observations in the root node into one of two new regions (i.e., new nodes that will be on the left and right branches leading from the root node.)
   -  For regression problems, the "best" feature (and the rule using that feature) is the feature that maximizes the reduction in SSE
-  - For classification problems, the split is selected to maximize the reduction in cross-entropy or the [Gini index](https://enhttps://en.wikipedia.org/wiki/Decision_tree_learning#Information_gain.wikipedia.org/wiki/Decision_tree_learning#Gini_impurity).  These are measures of impurity (and we want to get homogeneous nodes so we minimize them)
+  - For classification problems, the split is selected to maximize the reduction in [cross-entropy](https://en.wikipedia.org/wiki/Decision_tree_learning#Information_gain) or the [Gini index](https://en.wikipedia.org/wiki/Decision_tree_learning#Gini_impurity).  These are measures of impurity (and we want to get homogeneous nodes so we minimize them)
   
 - The splitting process is then repeated on each of the two new nodes (hence the name binary recursive partitioning). 
 - This process is continued until a suitable stopping criterion is reached.
@@ -203,11 +198,9 @@ With early stopping:
 
 -----
 
-With pruning:
+With pruning, we let the tree grow large (max depth = 30 on 32-bit machines) and then prune it back to an optimal size:
 
-- We let the tree grow large (max depth = 30 on 32-bit machines) and then prune it back to an optimal size:
-
-- To do this, we apply a penalty ($\lambda$ * # of terminal nodes) to the cost function/impurity index. (analogous to the L1/LASSO penalty). This penalty is also referred to as the cost complexity parameter
+- To do this, we apply a penalty ($\lambda$ * # of terminal nodes) to the cost function/impurity index (analogous to the L1/LASSO penalty). This penalty is also referred to as the cost complexity parameter
 
 - Big values for cost complexity will result in less complex trees.  Small values will result in deeper, more complex trees
 
@@ -215,10 +208,7 @@ With pruning:
 
 -----
 
-Feature engineering for decision trees can be simpler than with other algorithms
-\
-\
-There are few pre-processing requirements
+Feature engineering for decision trees can be simpler than with other algorithms because there are very few pre-processing requirements:
 
 - Monotonic transformations (e.g., power transformations) are not required to meet algorithm assumptions (in contrast to many parametric models).  These transformations only shift the location of the optimal split points.
 
@@ -244,10 +234,8 @@ It is important to note that feature engineering (e.g., alternative strategies f
 ## Decision Trees in Ames
 
 Let's see this algorithm in action
-\
-\
-- We will explore the decision tree algorithm (and ensemble approaches using it) with the Ames Housing Prices database
 
+- We will explore the decision tree algorithm (and ensemble approaches using it) with the Ames Housing Prices database
 - Parallel processing is VERY useful for ensemble approaches because they can be computationally costly
 
 ```{r}
@@ -386,7 +374,7 @@ fit_tree_ex1 <-
 Let's plot the decision tree using `rpart.plot` for a package with the same name.  No need to load the full package
 
 - Easy to understand how the model makes predictions
-- But how well does this model predict `sale_price`?
+
 ```{r}
 fit_tree_ex1$fit |> rpart.plot::rpart.plot()
 ```
@@ -394,7 +382,7 @@ fit_tree_ex1$fit |> rpart.plot::rpart.plot()
 -----
 
 ::: {.callout-important collapse="false"}
-### Question: How can we determine this?
+### Question: How can we determine how well this model predicts sale_price?
 ```{html}
 #| echo: true
 #| code-fold: true
@@ -414,6 +402,10 @@ set.seed(20140102)
 splits_boot <- data_trn |> 
   bootstraps(times = 10, strata = "sale_price")
 ```
+
+-----
+
+Now let's evaluate its performance in our OOB held-out sets
 
 ```{r}
 fits_tree_ex1 <- cache_rds(
@@ -444,7 +436,8 @@ We want to allow a deeper tree to reduce bias
 \
 \
 But will also need to consider pruning tree to prevent overfitting
-
+\
+\
 This is the bias-variance trade-off again.  To find the sweet stop we can tune
 
 - tree_depth
@@ -511,12 +504,14 @@ autoplot(fits_tree)
 
 -----
 
-The best values for all hyperparameters are not near their edges and we see floor in RMSE so this looks good
+The best values for some of the hyperparameters (tree depth and min n) are at their edges so we might consider extending their range and training again.  I will skip this here to save time. 
+\
+\
+This model as good as our other models in unit 3 (see OOB cross-validated error above).  It was easy to fit with all the predictors. It might get even a little better for we further tuned the hyperparameters.   However, we can still do better with a more advanced algorithm based on decision trees.
+
 ```{r}
 show_best(fits_tree)
 ```
-
-This is as good as our other models in unit 3 (see OOB cross-validated error above).  It was easy to fit with all the predictors.  However, we can still do better.
 
 -----
 
@@ -541,10 +536,10 @@ fit_tree$fit |> rpart.plot::rpart.plot()
 
 -----
 
-Even though decision trees themselves are relatively poor at prediction, these ideas will be key when we consider ensemble approaches.   
+Even though decision trees themselves are relatively poor at prediction, these ideas will be key when we consider more advanced ensemble approaches
 \
 \
-Ensemble approaches aggregate multiple models to improve prediction.   Our first ensemble approach is bagging
+Ensemble approaches aggregate multiple models to improve prediction.   Our first ensemble approach is bagging.
 
 -----
 

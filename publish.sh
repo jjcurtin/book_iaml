@@ -23,7 +23,7 @@ if [ "$FORMAT" = "slides" ];  then
 	echo "Publishing $FILE to standard slides on quarto-pub"
   echo ""
   cp _quarto_slides.yml _quarto.yml
-  quarto publish quarto-pub "$FILE" 
+  quarto publish quarto-pub "$FILE" --no-browser
   git restore _quarto.yml
 fi
  
@@ -32,6 +32,6 @@ if [ "$FORMAT" = "slides_wide" ];  then
 	echo "Publishing $FILE to wide slides on quarto-pub"
   echo ""
   cp _quarto_slides_wide.yml _quarto.yml
-  quarto publish quarto-pub "$FILE" 
+  quarto publish quarto-pub "$FILE" --no-browser
   git restore _quarto.yml
 fi
