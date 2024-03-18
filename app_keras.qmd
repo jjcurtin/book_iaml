@@ -1,0 +1,81 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# Installing Keras for Neural Networks
+
+## Windows
+
+
+Follow the steps below to install keras in R as well as the backend software that lets you use keras in R. Take a little extra time to get things working in R before the start of the unit so you can start on the homework once it is released.
+
+### Install keras package in R
+
+1. Open RStudio.
+
+2. Type `install.packages("keras")` in the console
+
+3. Once installed, type `library(keras)` in the console
+
+4. In order to run keras you then need to install the backend. To do this, type `install_keras()` in the console. You will be prompted to install a software called Miniconda, Select `Yes/Y`.  [Details: This will install a distribution of the python language and a number of libraries, including tensorflow and keras. These are all needed to use keras for fitting neural networks in tidymodels. This installation process may take a few minutes, and will result in about 6GB of disk space used.]
+
+5. Restart your R session (Session > Restart R from the menu)
+
+### Test for install
+
+6. Type `library(keras)` in the console again to load the package.
+
+7. Type `backend()` in the console. It should return something like `Module(tensorflow_core.keras.backend)` or `Module(keras.api._v2.keras.backend)`. If it doesn't, or if it provides a warning or error that suggests that tensorflow was not installed, reach out to the TAs and John.
+
+### Common problems
+
+The most common problem with getting keras/tensorflow to run in R (assuming you've followed the steps above) has to do with keras using the correct distribution of python on your computer (which typically results from having more than one distribution of python on your machine). You'll be alerted to this by an error message that tells you that keras/tensorflow isn't installed on your computer (even though you installed it above). This can be solved with the function `keras::use_condaenv()`, where the obligatory argument of this function is a path to the miniconda environment you created in step 4. Alternatively, you can use `keras::use_python()` where instead you provide the path to the specific version of python _within_ the miniconda installed in step 4. The challenge is finding the path to put as the first argument to either of these functions. If this comes up and you need help, reach out to the TAs and John.
+
+
+
+## Mac OS
+
+The steps below will allow Mac users to install keras in R and the backend software to support fitting neural networks in R. Ideally, get your installation going well in advance of the homework being released so that you can hit the ground running on this unit. Also note that Linux users can follow this tutorial and everything should work out fine because of the similarity between Linux and MacOS (UNIX and UNIX-like systems).
+
+### First thing: Check your processor
+
+The first thing to do is determine the type of processor you have on your computer. Go to the Apple icon in the upper left of your screen and select "About this Mac". In the window that pops up one of the lines will show your "Processor". It will either tell you that you have some type of Intel processor, or (importantly) it will tell you that you have an "M1" or "M2" processor. If you have an M1 or M2 (or other M) processor, check that you have the proper version of R installed on your machine for the M-class processors by typing `R.version` in the console in RStudio. For Macs with the M-class processor (M1 or M2) you need to have a distribution of R identified with the `arm64` (64-bit Advanced RISC Machines) in the version name. If your version of R isn't identified in this way, you need to re-install R with the appropriate `arm64` distribution from CRAN before proceeding to install the necessary modeling libraries for using neural networks in R with the python backend. If you don't, it will not work to install these libraries and you won't be able to do the work in this unit. We've found that it is better to check for this before you try to install keras and related libraries in R because the wrong distribution of R will cause you problems once you move on to install keras. If you have an M1 or M2 processor and you have the proper version of R installed for that machinery, you can move on to the steps below outlining how to install keras in R. For related issues that arise after installing the proper version of R for M-class processors, see the "Common problems" section below. Sometimes additional issues arise beyond the R version problem.
+
+Alternatively, if you have an Intel processor, you shouldn't encounter problems and you can move on to step 1 below for `Install keras in R`
+
+
+### Install keras in R
+1. Open RStudio
+
+2. To install keras in R, type `install.packages("keras")` in the console
+
+3. Then load the library by typing `library(keras)` in the console
+
+### Install backend python and libraries
+4. In order to run keras you then need to install the backend. Run `install_keras()`. This should prompt you to install Miniconda. This is a distribution of the python language and a number of libraries, including tensorflow and keras, all of which we need to run ANNs. If you are comfortable installing this software, select Yes/Y. This installation process may take a few minutes, and will result in about 6GB of disk space used.
+
+5. Restart R session (Session > Restart R from the menu)
+
+### Test the backend
+6. Load the keras library by typing (`library(keras)`) in the console
+
+7. To see if the backend installed, type `backend()` in the console.   [Details: This function should provide some information about `tensorflow` as your backend library to `keras`. If it provides you something like `Module(tensorflow_core.keras.backend)` or `Module(keras.api._v2.keras.backend)`, then you should be good. If it doesn't, or if it provides a warning or error that suggests that tensorflow was not installed, reach out to the TAs and John for help.]
+
+### Common problems
+If keras in R won't install, then you either need to try again with a fresh install (starting from the top of this tutorial), or you need to point R to a proper installation of keras/tensorflow on your machine. Most commonly, this would be done with another conda distribution of python (other than the one that keras installs for you) that you install yourself outside of R. It could be that you already have another conda distribution of python installed if you've used python in other work/ courses. If you get to this point, you will likely need the support of an instructor, so reach out and they can help. Nonetheless, the important details to consider are discussed below.
+
+If the R installation of keras doesn't work and you need to install keras in a different conda environment than the one R installs for you, then (once you install keras in that other environment) you need to specify the correct distribution of python (i.e., the one associated with the correct conda environment) on your machine for use in keras in R. The "correct" one is the one that has a successfully installed version of tensorflow and keras. Most likely, if this is a problem, it is due to the fact that your Mac has an M1 or M2 processor. This is an idiosyncratic case because these processors sometimes require a version of tensorflow/keras that isn't the version automatically installed when you use `keras::install_keras()` in R. You'll know if this is the case if you try to complete the installation steps above using `keras::install_keras()` in R and problems arise (i.e., R tells you that keras and/or tensorflow weren't properly installed).
+
+In order to point R to another version of conda/python on your machine (assuming you've installed one), use the function `keras::use_python()`. Here, the obligatory argument of this function is a path to the miniconda python distribution that contains the successful installation of tensorflow and keras. Calling this function will need to be done at the top of any scripts where you intend to use keras in R. This would look something like `use_python("/Users/johncurtin/miniconda3/bin/python")`. The challenge in using this function is finding this path to put as the first argument. If this comes up and you need help, reach out to the instructors.
+
+For more on this and related methods of sourcing specific versions of python from within R see this page [from the reticulate package](https://rstudio.github.io/reticulate/articles/versions.html). Note that reticulate is the package in R that supports the keras implementation, and is automatically installed when you install keras in R. Many reticulate functions are inherited by keras such that you can call the same function (with the same name) in keras or in reticulate from within R and have the same outcome (e.g., `keras::use_python()` is equivalent to `reticulate::use_python()`).
+
+The other common issue concerns the M-class processor and your version of R, described above - so follow that suggestion if it applies to you. If you've gotten this far, hopefully you've read through that issue already.
+
+## Trying it out
+Feel free to test out your new library with the tutorial for MNIST [here](https://cran.r-project.org/web/packages/keras/vignettes/index.html), or follow along with Lecture 6 in the Unit 11 lectures. Note that if you use the vignette linked above, it is not in `tidymodels`, so the code looks different than what you'll see in the homework, but would still be worthwhile (especially because it shows you output that looks like what you would see in `python`).
+
+## Remember
+If you run into trouble above, reach out on Slack. We will hold a special session with the group to focus on installation if need be. Likewise, you can reach out to the tutorial author mcooperborkenhagen@fsu.edu for support.
