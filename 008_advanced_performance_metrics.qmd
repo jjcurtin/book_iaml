@@ -1766,8 +1766,11 @@ ggplot(data = preds_smote, aes(x = prob)) +
 ### Announcements
 
 - Exams by the end of the weekend
+- Conceptual exam often curved a bit
 - Lectures released tonight and by end of tomorrow
-- Installing keras package
+- Installing keras package - stay tuned
+
+-----
 
 ### General
 
@@ -1776,29 +1779,32 @@ ggplot(data = preds_smote, aes(x = prob)) +
   - What is "tuning"
   - How do we tune hyperparameters and then evaluate best model config?  Using valiation + test.  Using 10-fold + test
 
+-----
 
-Confusion matrix
+### Confusion matrix
 
-- NYTimes article
+- [NYTimes article](https://urldefense.com/v3/__https://www.nytimes.com/2024/03/13/health/colon-cancer-blood-test.html?referringSource=articleShare__;!!Mak6IKo!OaziyxcpufWYWd7pH4afLy0_vJYtgepf11PXl8Dt4mt8RwfIwDvRQNOc7jkGMOvzPGUxplw0urJZ4_22kA$)
+  - new blood test for colon cancer
+  - 53,000 die per year ([more details](https://urldefense.com/v3/__https://www.health.ny.gov/statistics/cancer/registry/table6/tb6colonnys.htm__;!!Mak6IKo!KOBPv41cGQHyN3SiPTniqsQKpR0dzE-T9Tyq5rvbdnySerqgsZcYL-_AqAd9tTNMAzoR9CVgzbEwHe0HYg$))
+  - test results: detected 87%, FPR was 10%
+  - How well work for 55- 59 yo
+  - What if applied to 30 year old
+
+- More generally
   - define accuracy, sens, spec, ppv, npv, bal_accuracy
   - Cost of FP and FN?
-  - Can we go over some more concrete (real-world) examples of when it would be a good idea to use a different threshold for classification? 
-  - I would like to understand more about adjusting decision thresholds across a few more application contexts. Also, are there any techniques to optimize decision thresholds? Or is it trial and error.
+  - impact of decision threshold?
 
-
-### Resampling
-
-- similarities and differences
-- resampling held-in but not held-out
-- Is there a limit on how much you should up/down-sample or SMOTE? In other words, is there a threshold of imbalance at which it's not helpful to use one of those techniques, since you are just putting in "fake" data? (Or is "fake data" a bad/incorrect way to think about it?)
-
+-----
 
 ### ROC
 
 - Axes and various names/representations
 - Why is top right perfect performance
-- threshold
-- intepretation of auROC
+- thresholds
+- interpretation of auROC and the diagonal line
+- Can we go over some more concrete (real-world) examples of when it would be a good idea to use a different threshold for classification? 
+  - I would like to understand more about adjusting decision thresholds across a few more application contexts. Also, are there any techniques to optimize decision thresholds? Or is it trial and error.
 
 ```{r}
 library(tidyverse)
@@ -1809,21 +1815,44 @@ preds_hour<- read_rds(file.path(path_models,
                                "outer_preds_1hour_0_v5_nested_main.rds"))
 roc_hour <- preds_hour|> 
   yardstick::roc_curve(prob_beta, truth = label)
+```
 
+Option 1 - TPR vs. FPR
+
+- sensible axes
+- Less common terms
+```{r}
 roc_hour |> 
   ggplot(aes(x = 1 - specificity, y = sensitivity)) +
     geom_path(linewidth = 1.25) +
     geom_abline(lty = 3) +
     coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
-    labs(x = "FPR (1 - Specificity)",
-        y = "TPR (Sensitivity)") +
+    labs(x = "False Positive Rate (FPR)",
+        y = "True Positive Rate (TPR)") +
+  scale_x_continuous(breaks = seq(0,1,.25))
+```
+
+Option 2 - Sensitivity vs. 1 - Specificity 
+
+- More common terms
+- 1 - Specificity is confusing!
+```{r}
+roc_hour |> 
+  ggplot(aes(x = 1 - specificity, y = sensitivity)) +
+    geom_path(linewidth = 1.25) +
+    geom_abline(lty = 3) +
+    coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+    labs(x = "(1 - Specificity)",
+        y = "Sensitivity") +
   scale_x_continuous(breaks = seq(0,1,.25))
 ```
 
 
-My preferred way
-
-
+Option 3
+ 
+- More common terms
+- Sensible (though reversed) axis
+- My preferred format
 ```{r}
 roc_hour |> 
   ggplot(aes(x = 1 - specificity, y = sensitivity)) +
@@ -1835,6 +1864,16 @@ roc_hour |>
   scale_x_continuous(breaks = seq(0,1,.25),
     labels = sprintf("%.2f", seq(1,0,-.25)))
 ```
+
+-----
+
+### Resampling
+
+- similarities and differences
+- resampling held-in but not held-out
+- Is there a limit on how much you should up/down-sample or SMOTE? In other words, is there a threshold of imbalance at which it's not helpful to use one of those techniques, since you are just putting in "fake" data? (Or is "fake data" a bad/incorrect way to think about it?)
+
+-----
 
 ### Kappa
 
