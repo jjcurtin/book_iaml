@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Introduction to Applied Machine Learning - 17&nbsp; Appendix 2: Simulations of Model Performance Bias and Variance by Resampling Techniques</title>
+<title>Introduction to Applied Machine Learning - 18&nbsp; Appendix 2: Simulations of Model Performance Bias and Variance by Resampling Techniques</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -65,7 +65,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
 <link href="./app_shap.html" rel="next">
-<link href="./app_dummy_coding.html" rel="prev">
+<link href="./app_keras.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -116,7 +116,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./app_terminology.html">Appendices</a></li><li class="breadcrumb-item"><a href="./app_model_performance_simulations.html"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Appendix 2: Simulations of Model Performance Bias and Variance by Resampling Techniques</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./app_terminology.html">Appendices</a></li><li class="breadcrumb-item"><a href="./app_model_performance_simulations.html"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Appendix 2: Simulations of Model Performance Bias and Variance by Resampling Techniques</span></a></li></ol></nav>
         <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -279,26 +279,32 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./app_keras.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Installing Keras for Neural Networks</span></span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./app_model_performance_simulations.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Appendix 2: Simulations of Model Performance Bias and Variance by Resampling Techniques</span></span></a>
+ <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Appendix 2: Simulations of Model Performance Bias and Variance by Resampling Techniques</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./app_shap.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Appendix 3: Understanding Shapley Values from SHAP</span></span></a>
+ <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Appendix 3: Understanding Shapley Values from SHAP</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./app_bootstrapping.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Appendix 4: Bootstrapping Standard Errors &amp; Confidence Intervals</span></span></a>
+ <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Appendix 4: Bootstrapping Standard Errors &amp; Confidence Intervals</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./app_test.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">20</span>&nbsp; <span class="chapter-title">Test</span></span></a>
+ <span class="menu-text"><span class="chapter-number">21</span>&nbsp; <span class="chapter-title">Test</span></span></a>
   </div>
 </li>
       </ul>
@@ -313,39 +319,39 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#general-setup" id="toc-general-setup" class="nav-link active" data-scroll-target="#general-setup"><span class="header-section-number">17.1</span> General Setup</a></li>
-  <li><a href="#dgp" id="toc-dgp" class="nav-link" data-scroll-target="#dgp"><span class="header-section-number">17.2</span> DGP</a></li>
-  <li><a href="#simulation-settings" id="toc-simulation-settings" class="nav-link" data-scroll-target="#simulation-settings"><span class="header-section-number">17.3</span> Simulation settings</a></li>
-  <li><a href="#get-simulation-dfs" id="toc-get-simulation-dfs" class="nav-link" data-scroll-target="#get-simulation-dfs"><span class="header-section-number">17.4</span> Get simulation dfs</a></li>
-  <li><a href="#what-is-the-true-model-performance" id="toc-what-is-the-true-model-performance" class="nav-link" data-scroll-target="#what-is-the-true-model-performance"><span class="header-section-number">17.5</span> What is the TRUE model performance</a></li>
-  <li><a href="#validation-set" id="toc-validation-set" class="nav-link" data-scroll-target="#validation-set"><span class="header-section-number">17.6</span> Validation set</a>
+  <li><a href="#general-setup" id="toc-general-setup" class="nav-link active" data-scroll-target="#general-setup"><span class="header-section-number">18.1</span> General Setup</a></li>
+  <li><a href="#dgp" id="toc-dgp" class="nav-link" data-scroll-target="#dgp"><span class="header-section-number">18.2</span> DGP</a></li>
+  <li><a href="#simulation-settings" id="toc-simulation-settings" class="nav-link" data-scroll-target="#simulation-settings"><span class="header-section-number">18.3</span> Simulation settings</a></li>
+  <li><a href="#get-simulation-dfs" id="toc-get-simulation-dfs" class="nav-link" data-scroll-target="#get-simulation-dfs"><span class="header-section-number">18.4</span> Get simulation dfs</a></li>
+  <li><a href="#what-is-the-true-model-performance" id="toc-what-is-the-true-model-performance" class="nav-link" data-scroll-target="#what-is-the-true-model-performance"><span class="header-section-number">18.5</span> What is the TRUE model performance</a></li>
+  <li><a href="#validation-set" id="toc-validation-set" class="nav-link" data-scroll-target="#validation-set"><span class="header-section-number">18.6</span> Validation set</a>
   <ul class="collapse">
-  <li><a href="#split" id="toc-split" class="nav-link" data-scroll-target="#split"><span class="header-section-number">17.6.1</span> 80/20 split</a></li>
+  <li><a href="#split" id="toc-split" class="nav-link" data-scroll-target="#split"><span class="header-section-number">18.6.1</span> 80/20 split</a></li>
   </ul></li>
-  <li><a href="#split-1" id="toc-split-1" class="nav-link" data-scroll-target="#split-1"><span class="header-section-number">17.7</span> 50/50 split</a></li>
-  <li><a href="#k-fold" id="toc-k-fold" class="nav-link" data-scroll-target="#k-fold"><span class="header-section-number">17.8</span> K-fold</a>
+  <li><a href="#split-1" id="toc-split-1" class="nav-link" data-scroll-target="#split-1"><span class="header-section-number">18.7</span> 50/50 split</a></li>
+  <li><a href="#k-fold" id="toc-k-fold" class="nav-link" data-scroll-target="#k-fold"><span class="header-section-number">18.8</span> K-fold</a>
   <ul class="collapse">
-  <li><a href="#simple-5-fold" id="toc-simple-5-fold" class="nav-link" data-scroll-target="#simple-5-fold"><span class="header-section-number">17.8.1</span> Simple 5-fold</a></li>
-  <li><a href="#simple-10-fold" id="toc-simple-10-fold" class="nav-link" data-scroll-target="#simple-10-fold"><span class="header-section-number">17.8.2</span> Simple 10-fold</a></li>
-  <li><a href="#x-10-fold" id="toc-x-10-fold" class="nav-link" data-scroll-target="#x-10-fold"><span class="header-section-number">17.8.3</span> 3x 10-Fold</a></li>
+  <li><a href="#simple-5-fold" id="toc-simple-5-fold" class="nav-link" data-scroll-target="#simple-5-fold"><span class="header-section-number">18.8.1</span> Simple 5-fold</a></li>
+  <li><a href="#simple-10-fold" id="toc-simple-10-fold" class="nav-link" data-scroll-target="#simple-10-fold"><span class="header-section-number">18.8.2</span> Simple 10-fold</a></li>
+  <li><a href="#x-10-fold" id="toc-x-10-fold" class="nav-link" data-scroll-target="#x-10-fold"><span class="header-section-number">18.8.3</span> 3x 10-Fold</a></li>
   </ul></li>
-  <li><a href="#bootstrap-resampling" id="toc-bootstrap-resampling" class="nav-link" data-scroll-target="#bootstrap-resampling"><span class="header-section-number">17.9</span> Bootstrap Resampling</a>
+  <li><a href="#bootstrap-resampling" id="toc-bootstrap-resampling" class="nav-link" data-scroll-target="#bootstrap-resampling"><span class="header-section-number">18.9</span> Bootstrap Resampling</a>
   <ul class="collapse">
-  <li><a href="#resamples" id="toc-resamples" class="nav-link" data-scroll-target="#resamples"><span class="header-section-number">17.9.1</span> 10 resamples</a></li>
-  <li><a href="#resamples-1" id="toc-resamples-1" class="nav-link" data-scroll-target="#resamples-1"><span class="header-section-number">17.9.2</span> 100 resamples</a></li>
-  <li><a href="#resamples-2" id="toc-resamples-2" class="nav-link" data-scroll-target="#resamples-2"><span class="header-section-number">17.9.3</span> 1000 resamples</a></li>
+  <li><a href="#resamples" id="toc-resamples" class="nav-link" data-scroll-target="#resamples"><span class="header-section-number">18.9.1</span> 10 resamples</a></li>
+  <li><a href="#resamples-1" id="toc-resamples-1" class="nav-link" data-scroll-target="#resamples-1"><span class="header-section-number">18.9.2</span> 100 resamples</a></li>
+  <li><a href="#resamples-2" id="toc-resamples-2" class="nav-link" data-scroll-target="#resamples-2"><span class="header-section-number">18.9.3</span> 1000 resamples</a></li>
   </ul></li>
-  <li><a href="#summarize" id="toc-summarize" class="nav-link" data-scroll-target="#summarize"><span class="header-section-number">17.10</span> Summarize</a></li>
-  <li><a href="#plot-sampling-distributions" id="toc-plot-sampling-distributions" class="nav-link" data-scroll-target="#plot-sampling-distributions"><span class="header-section-number">17.11</span> Plot sampling distributions</a></li>
+  <li><a href="#summarize" id="toc-summarize" class="nav-link" data-scroll-target="#summarize"><span class="header-section-number">18.10</span> Summarize</a></li>
+  <li><a href="#plot-sampling-distributions" id="toc-plot-sampling-distributions" class="nav-link" data-scroll-target="#plot-sampling-distributions"><span class="header-section-number">18.11</span> Plot sampling distributions</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/jjcurtin/book_iaml/edit/main/app_model_performance_simulations.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./app_terminology.html">Appendices</a></li><li class="breadcrumb-item"><a href="./app_model_performance_simulations.html"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Appendix 2: Simulations of Model Performance Bias and Variance by Resampling Techniques</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./app_terminology.html">Appendices</a></li><li class="breadcrumb-item"><a href="./app_model_performance_simulations.html"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Appendix 2: Simulations of Model Performance Bias and Variance by Resampling Techniques</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Appendix 2: Simulations of Model Performance Bias and Variance by Resampling Techniques</span></h1>
+<h1 class="title"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Appendix 2: Simulations of Model Performance Bias and Variance by Resampling Techniques</span></h1>
 </div>
 
 
@@ -362,8 +368,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<section id="general-setup" class="level2" data-number="17.1">
-<h2 data-number="17.1" class="anchored" data-anchor-id="general-setup"><span class="header-section-number">17.1</span> General Setup</h2>
+<section id="general-setup" class="level2" data-number="18.1">
+<h2 data-number="18.1" class="anchored" data-anchor-id="general-setup"><span class="header-section-number">18.1</span> General Setup</h2>
 <p>Load libraries</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
@@ -372,8 +378,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(<span class="fu">theme_classic</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="dgp" class="level2" data-number="17.2">
-<h2 data-number="17.2" class="anchored" data-anchor-id="dgp"><span class="header-section-number">17.2</span> DGP</h2>
+<section id="dgp" class="level2" data-number="18.2">
+<h2 data-number="18.2" class="anchored" data-anchor-id="dgp"><span class="header-section-number">18.2</span> DGP</h2>
 <p>Function to generate <code>n_obs</code> of simulated observations</p>
 <ul>
 <li>DGP is linear on all <code>x</code> + normal error with sd = <code>irr_err</code></li>
@@ -394,8 +400,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="simulation-settings" class="level2" data-number="17.3">
-<h2 data-number="17.3" class="anchored" data-anchor-id="simulation-settings"><span class="header-section-number">17.3</span> Simulation settings</h2>
+<section id="simulation-settings" class="level2" data-number="18.3">
+<h2 data-number="18.3" class="anchored" data-anchor-id="simulation-settings"><span class="header-section-number">18.3</span> Simulation settings</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>n_sims <span class="ot">&lt;-</span> <span class="dv">1000</span>  <span class="co"># number of simulations</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>n_obs <span class="ot">&lt;-</span> <span class="dv">300</span> <span class="co"># number of observations</span></span>
@@ -415,15 +421,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="ot">=</span> <span class="cn">NULL</span>  <span class="co"># to store RMSE for all methods</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="get-simulation-dfs" class="level2" data-number="17.4">
-<h2 data-number="17.4" class="anchored" data-anchor-id="get-simulation-dfs"><span class="header-section-number">17.4</span> Get simulation dfs</h2>
+<section id="get-simulation-dfs" class="level2" data-number="18.4">
+<h2 data-number="18.4" class="anchored" data-anchor-id="get-simulation-dfs"><span class="header-section-number">18.4</span> Get simulation dfs</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>dfs <span class="ot">&lt;-</span> <span class="fu">rep</span>(n_obs, n_sims) <span class="sc">|&gt;</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(n_obs) <span class="fu">simulate_DGP</span>(n_obs, n_features, irr_err, mu, sigma))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="what-is-the-true-model-performance" class="level2" data-number="17.5">
-<h2 data-number="17.5" class="anchored" data-anchor-id="what-is-the-true-model-performance"><span class="header-section-number">17.5</span> What is the TRUE model performance</h2>
+<section id="what-is-the-true-model-performance" class="level2" data-number="18.5">
+<h2 data-number="18.5" class="anchored" data-anchor-id="what-is-the-true-model-performance"><span class="header-section-number">18.5</span> What is the TRUE model performance</h2>
 <p>The irreducible error is set to 10 but our model will have some reducible error too so the true performance of our model will be worse than 10</p>
 <ul>
 <li>The DGP is linear</li>
@@ -461,10 +467,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>doParallel<span class="sc">::</span><span class="fu">registerDoParallel</span>(cl)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="validation-set" class="level2" data-number="17.6">
-<h2 data-number="17.6" class="anchored" data-anchor-id="validation-set"><span class="header-section-number">17.6</span> Validation set</h2>
-<section id="split" class="level3" data-number="17.6.1">
-<h3 data-number="17.6.1" class="anchored" data-anchor-id="split"><span class="header-section-number">17.6.1</span> 80/20 split</h3>
+<section id="validation-set" class="level2" data-number="18.6">
+<h2 data-number="18.6" class="anchored" data-anchor-id="validation-set"><span class="header-section-number">18.6</span> Validation set</h2>
+<section id="split" class="level3" data-number="18.6.1">
+<h3 data-number="18.6.1" class="anchored" data-anchor-id="split"><span class="header-section-number">18.6.1</span> 80/20 split</h3>
 <p>Here we simulate repeated use of the validation set approach to assess our model performance</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="ot">&lt;-</span> dfs <span class="sc">|&gt;</span> </span>
@@ -483,8 +489,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </section>
 </section>
-<section id="split-1" class="level2" data-number="17.7">
-<h2 data-number="17.7" class="anchored" data-anchor-id="split-1"><span class="header-section-number">17.7</span> 50/50 split</h2>
+<section id="split-1" class="level2" data-number="18.7">
+<h2 data-number="18.7" class="anchored" data-anchor-id="split-1"><span class="header-section-number">18.7</span> 50/50 split</h2>
 <p>Here we simulate repeated use of the validation set approach to assess our model performance</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="ot">&lt;-</span> dfs <span class="sc">|&gt;</span> </span>
@@ -498,10 +504,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(rmse_combined)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="k-fold" class="level2" data-number="17.8">
-<h2 data-number="17.8" class="anchored" data-anchor-id="k-fold"><span class="header-section-number">17.8</span> K-fold</h2>
-<section id="simple-5-fold" class="level3" data-number="17.8.1">
-<h3 data-number="17.8.1" class="anchored" data-anchor-id="simple-5-fold"><span class="header-section-number">17.8.1</span> Simple 5-fold</h3>
+<section id="k-fold" class="level2" data-number="18.8">
+<h2 data-number="18.8" class="anchored" data-anchor-id="k-fold"><span class="header-section-number">18.8</span> K-fold</h2>
+<section id="simple-5-fold" class="level3" data-number="18.8.1">
+<h3 data-number="18.8.1" class="anchored" data-anchor-id="simple-5-fold"><span class="header-section-number">18.8.1</span> Simple 5-fold</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="ot">&lt;-</span> dfs <span class="sc">|&gt;</span> </span>
 <span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(df) <span class="fu">vfold_cv</span>(df, <span class="at">v =</span> <span class="dv">5</span>)) <span class="sc">|&gt;</span>   <span class="co"># 5-fold</span></span>
@@ -514,8 +520,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(rmse_combined)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="simple-10-fold" class="level3" data-number="17.8.2">
-<h3 data-number="17.8.2" class="anchored" data-anchor-id="simple-10-fold"><span class="header-section-number">17.8.2</span> Simple 10-fold</h3>
+<section id="simple-10-fold" class="level3" data-number="18.8.2">
+<h3 data-number="18.8.2" class="anchored" data-anchor-id="simple-10-fold"><span class="header-section-number">18.8.2</span> Simple 10-fold</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="ot">&lt;-</span> dfs <span class="sc">|&gt;</span> </span>
 <span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(df) <span class="fu">vfold_cv</span>(df, <span class="at">v =</span> <span class="dv">10</span>)) <span class="sc">|&gt;</span>   <span class="co"># 10-fold</span></span>
@@ -528,8 +534,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(rmse_combined)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="x-10-fold" class="level3" data-number="17.8.3">
-<h3 data-number="17.8.3" class="anchored" data-anchor-id="x-10-fold"><span class="header-section-number">17.8.3</span> 3x 10-Fold</h3>
+<section id="x-10-fold" class="level3" data-number="18.8.3">
+<h3 data-number="18.8.3" class="anchored" data-anchor-id="x-10-fold"><span class="header-section-number">18.8.3</span> 3x 10-Fold</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="ot">&lt;-</span> dfs <span class="sc">|&gt;</span> </span>
 <span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(df) <span class="fu">vfold_cv</span>(df, <span class="at">v =</span> <span class="dv">10</span>, <span class="at">repeats =</span> <span class="dv">3</span>)) <span class="sc">|&gt;</span>   <span class="co"># 3x10-fold</span></span>
@@ -543,10 +549,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </section>
 </section>
-<section id="bootstrap-resampling" class="level2" data-number="17.9">
-<h2 data-number="17.9" class="anchored" data-anchor-id="bootstrap-resampling"><span class="header-section-number">17.9</span> Bootstrap Resampling</h2>
-<section id="resamples" class="level3" data-number="17.9.1">
-<h3 data-number="17.9.1" class="anchored" data-anchor-id="resamples"><span class="header-section-number">17.9.1</span> 10 resamples</h3>
+<section id="bootstrap-resampling" class="level2" data-number="18.9">
+<h2 data-number="18.9" class="anchored" data-anchor-id="bootstrap-resampling"><span class="header-section-number">18.9</span> Bootstrap Resampling</h2>
+<section id="resamples" class="level3" data-number="18.9.1">
+<h3 data-number="18.9.1" class="anchored" data-anchor-id="resamples"><span class="header-section-number">18.9.1</span> 10 resamples</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="ot">&lt;-</span> dfs <span class="sc">|&gt;</span> </span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(df) <span class="fu">bootstraps</span>(df, <span class="at">times =</span> <span class="dv">10</span>)) <span class="sc">|&gt;</span>   <span class="co"># 10 boots</span></span>
@@ -559,8 +565,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(rmse_combined)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="resamples-1" class="level3" data-number="17.9.2">
-<h3 data-number="17.9.2" class="anchored" data-anchor-id="resamples-1"><span class="header-section-number">17.9.2</span> 100 resamples</h3>
+<section id="resamples-1" class="level3" data-number="18.9.2">
+<h3 data-number="18.9.2" class="anchored" data-anchor-id="resamples-1"><span class="header-section-number">18.9.2</span> 100 resamples</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="ot">&lt;-</span> dfs <span class="sc">|&gt;</span> </span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(df) <span class="fu">bootstraps</span>(df, <span class="at">times =</span> <span class="dv">100</span>)) <span class="sc">|&gt;</span>   <span class="co"># 100 boots</span></span>
@@ -573,8 +579,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bind_rows</span>(rmse_combined)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 </section>
-<section id="resamples-2" class="level3" data-number="17.9.3">
-<h3 data-number="17.9.3" class="anchored" data-anchor-id="resamples-2"><span class="header-section-number">17.9.3</span> 1000 resamples</h3>
+<section id="resamples-2" class="level3" data-number="18.9.3">
+<h3 data-number="18.9.3" class="anchored" data-anchor-id="resamples-2"><span class="header-section-number">18.9.3</span> 1000 resamples</h3>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="ot">&lt;-</span> dfs <span class="sc">|&gt;</span> </span>
 <span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(df) <span class="fu">bootstraps</span>(df, <span class="at">times =</span> <span class="dv">1000</span>)) <span class="sc">|&gt;</span>   <span class="co"># 1000 boots</span></span>
@@ -588,8 +594,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </section>
 </section>
-<section id="summarize" class="level2" data-number="17.10">
-<h2 data-number="17.10" class="anchored" data-anchor-id="summarize"><span class="header-section-number">17.10</span> Summarize</h2>
+<section id="summarize" class="level2" data-number="18.10">
+<h2 data-number="18.10" class="anchored" data-anchor-id="summarize"><span class="header-section-number">18.10</span> Summarize</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="sc">|&gt;</span> </span>
 <span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(method) <span class="sc">|&gt;</span> </span>
@@ -611,8 +617,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </section>
-<section id="plot-sampling-distributions" class="level2" data-number="17.11">
-<h2 data-number="17.11" class="anchored" data-anchor-id="plot-sampling-distributions"><span class="header-section-number">17.11</span> Plot sampling distributions</h2>
+<section id="plot-sampling-distributions" class="level2" data-number="18.11">
+<h2 data-number="18.11" class="anchored" data-anchor-id="plot-sampling-distributions"><span class="header-section-number">18.11</span> Plot sampling distributions</h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>rmse_combined <span class="sc">|&gt;</span> </span>
 <span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> mean, <span class="at">color =</span> method)) <span class="sc">+</span> </span>
@@ -1021,13 +1027,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./app_dummy_coding.html" class="pagination-link" aria-label="Novel Levels in Held-Out Set(s)">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Novel Levels in Held-Out Set(s)</span></span>
+      <a href="./app_keras.html" class="pagination-link" aria-label="Installing Keras for Neural Networks">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Installing Keras for Neural Networks</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
       <a href="./app_shap.html" class="pagination-link" aria-label="Appendix 3: Understanding Shapley Values from SHAP">
-        <span class="nav-page-text"><span class="chapter-number">18</span>&nbsp; <span class="chapter-title">Appendix 3: Understanding Shapley Values from SHAP</span></span> <i class="bi bi-arrow-right-short"></i>
+        <span class="nav-page-text"><span class="chapter-number">19</span>&nbsp; <span class="chapter-title">Appendix 3: Understanding Shapley Values from SHAP</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
