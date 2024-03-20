@@ -486,61 +486,81 @@ rec_scaled_wrong <-
   step_normalize(all_predictors())
 ```
 
-
-`r colorize("What went wrong and what should we do?", "red")`^[Many of the features have zero variance b/c they are black for ALL of the images (e.g., top rows of pixels.  We can scale a predictor with zero variance b/c when we divide by the SD = 0, we get NaN).  At a minimum, we should remove zero variance predictors in training from training and test]
+::: {.callout-important collapse="false"}
+### Question: What went wrong and what should we do?
+```{html}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show Answer"
+Many of the features have zero variance b/c they are black for ALL of the 
+images (e.g., top rows of pixels.  We can not scale a predictor with zero variance 
+b/c when we divide by the SD = 0, we get NaN).  At a minimum, we should remove 
+zero variance predictors in training from training and test
+```
+:::
 
 -----
 
 For example
-```{r u11-fit-8}
+```{r}
 data_trn$x1 |> sd()
 ```
+
+-----
 
 Let's remove zero variance predictors before we scale
 
 - To be clear, zero variance features are NOT a problem for neural networks (though clearly they won't help either).
 - But they WILL definitely cause problems for some scaling transformations.
-```{r u11-fit-9}
+```{r}
 rec_scaled <- 
   recipe(y ~ ., data = data_trn) |>
   step_zv(all_predictors()) |> 
   step_normalize(all_predictors())
 ```
 
+-----
+
 We now have 717 (+ y) features rather than 28 * 28 = 784 features
 
-```{r u11-fit-10}
-feat_trn <- rec_scaled |> 
-  make_features(data_trn)
+```{r}
+
+rec_scaled_prep <- rec_scaled |> 
+  prep(data_trn)
+
+feat_trn <- rec_scaled_prep |> 
+  bake(NULL)
 
 dim(feat_trn)
 ```
 
 -----
 
-Let's also make the feature matrix for test.  This will exclude features that were zero variance in **train** 
-and scale them by their mean and sd in **train**
+Let's also make the feature matrix for test.  This will exclude features that were zero variance in **train** and scale them by their mean and sd in **train**
 
-```{r u11-fit-11}
-feat_test <- rec_scaled |> 
-  make_features(data_trn, data_test)
+```{r}
+feat_test <- rec_scaled_prep |> 
+  bake(data_test)
 
 dim(feat_test)
 ```
 
 -----
 
-Let's fit and evaluate this new feature set with previous model parameters
+Let's fit and evaluate this new feature set with no other changes to the model configuration
 
-- That helped a LOT
-- Still could be better though (but it always impresses me! ;-)
-```{r u11-fit-12}
+```{r}
 fit <-
   mlp() |>
   set_mode("classification") |> 
   set_engine("keras", verbose = 0, seeds = fit_seeds) |>
   fit(y ~ ., data = feat_trn)
+```
 
+
+- That helped a LOT
+- Still could be better though (but it always impresses me! ;-)
+```{rj}
 accuracy_vec(feat_test$y, predict(fit, feat_test)$.pred_class)
 ```
 
@@ -555,6 +575,8 @@ These include:
 
 You can see some discussion of these issues [here](https://machinelearningmastery.com/how-to-improve-neural-network-stability-and-modeling-performance-with-data-scaling/#:~:text=Scaling%20input%20and%20output%20variables,is%20presented%20to%20a%20network) and [here](https://stats.stackexchange.com/questions/7757/data-normalization-and-standardization-in-neural-networks) to get you started.  The [paper](http://yann.lecun.com/exdb/publis/pdf/lecun-98b.pdf) linked in the stack overflow response is also a useful starting point.
 
+-----
+
 Some **preliminary** modeling EDA on my part suggested these additional considerations didn't have major impact on the performance of our models with this dataset so we will stick with just scaling the features.
 
 -----
@@ -563,15 +585,17 @@ It is not surprising that a model configuration with only one hidden layer and 5
 
 Let's try 30 units (cheating based on the book chapter!! ;-)
 
-- Bingo!  Much, much better!
-- We could see if even more units works better still but I won't follow that through here for sake of simplicity
-
-```{r u11-fit-13}
+```{r}
 fit_nn <- mlp(hidden_units = 30) |>
     set_mode("classification") |> 
     set_engine("keras", verbose = 0, seeds = fit_seeds) |>
     fit(y ~ ., data = feat_trn)
 ```
+
+-----
+
+- Bingo!  Much, much better!
+- We could see if even more units works better still but I won't follow that through here for sake of simplicity
 
 ```{r}
 accuracy_vec(feat_test$y, predict(fit_nn, feat_test)$.pred_class)
@@ -582,7 +606,7 @@ accuracy_vec(feat_test$y, predict(fit_nn, feat_test)$.pred_class)
 The Three Brown 1 Blue videos had a brief discussion of the [relu activation function](https://machinelearningmastery.com/rectified-linear-activation-function-for-deep-learning-neural-networks/).
 
 Let's see how to use other activation functions and if this one helps.
-```{r u11-fit-14}
+```{r}
 fit_nn <- mlp(hidden_units = 30, activation = "relu") |>
   set_mode("classification") |> 
   set_engine("keras", verbose = 0, seeds = fit_seeds) |>
@@ -593,6 +617,7 @@ fit_nn <- mlp(hidden_units = 30, activation = "relu") |>
 accuracy_vec(feat_test$y, predict(fit_nn, feat_test)$.pred_class)
 ```
 
+-----
 
 ## Dealing with Overfitting
 
@@ -601,7 +626,7 @@ As you might imagine, given the number of weights to be fit in even a modest neu
 
 - 21,540 for hidden layer (717 * 30 weight + 30 biases)
 - 310 for output layer (30 * 10 weights, + 10 biases)
-```{r u11-fit-15}
+```{r}
 fit_nn
 ```
 
@@ -616,6 +641,7 @@ There are a number of different methods available to reduce potential overfittin
 - Dropout
 - Early stopping or monitoring validation error to prevent too many epochs
 
+-----
 
 ### Regularization or Weight Decay
 
@@ -638,17 +664,21 @@ In the tidymodels implementation of Keras:
 
 - [Here](https://machinelearningmastery.com/how-to-reduce-overfitting-in-deep-learning-with-weight-regularization/) is a starting point for more reading on regularization in neural networks
 
+-----
+
 Let's set `penalty = .0001`.   
 
-- Looks like there is not much benefit to regularization for this network.  
-- Would likely provide much greater benefit in smaller N contexts or with more complicated model architectures (more hidden units, more hidden unit layers).
-
-```{r u11-fit-16}
+```{r}
 fit_nn <- mlp(hidden_units = 30, activation = "relu", penalty = .0001) |>
   set_mode("classification") |> 
   set_engine("keras", verbose = 0, seeds = fit_seeds) |>
   fit(y ~ ., data = feat_trn)
 ```
+
+-----
+
+- Looks like there is not much benefit to regularization for this network.  
+- Would likely provide much greater benefit in smaller N contexts or with more complicated model architectures (more hidden units, more hidden unit layers).
 
 ```{r}
 accuracy_vec(feat_test$y, predict(fit_nn, feat_test)$.pred_class)
@@ -657,7 +687,8 @@ accuracy_vec(feat_test$y, predict(fit_nn, feat_test)$.pred_class)
 ### Dropout
 
 Dropout is a second technique to minimize overfitting.
-
+\
+\
 Here is a clear description of dropout from a blog post on the Machine Learning Mastery: 
 
 - Dropout is a technique where randomly selected neurons are ignored during training. They are “dropped-out” randomly. This means that their contribution to the activation of downstream neurons is temporally removed on the forward pass and any weight updates are not applied to the neuron on the backward pass.
@@ -668,9 +699,11 @@ Here is a clear description of dropout from a blog post on the Machine Learning 
 
 - The effect is that the network becomes less sensitive to the specific weights of neurons. This in turn results in a network that is capable of better generalization and is less likely to overfit the training data.
 
+-----
 
 For further reading, you might start with the 2014 paper by [Srivastava, et al](https://jmlr.org/papers/volume15/srivastava14a/srivastava14a.pdf) that proposed the technique.
-
+\
+\
 In tidymodels, you can set or tune the amount of dropout via the `dropout` argument in `mlp()`
 
 - Srivastava, et al suggest starting with values around .5.  
@@ -678,23 +711,26 @@ In tidymodels, you can set or tune the amount of dropout via the `dropout` argum
 - `droppout = 0` (the default) means no dropout
 - In tidymodels implementation of Keras, you can use a non-zero `penalty` or `dropout` but not both
 
+-----
+
 Let's try `dropout = .1`.  
 
-- Looks like there may be a little benefit but not substantial.  
-- Would likely provide much greater benefit in smaller N contexts or with more complicated model architectures (more hidden units, more hidden unit layers).
-
-```{r u11-fit-17}
+```{r}
 fit_nn <- mlp(hidden_units = 30, activation = "relu", dropout = .1) |>
   set_mode("classification") |>  
   set_engine("keras", verbose = 0, seeds = fit_seeds) |>
   fit(y ~ ., data = feat_trn)
 ```
 
-```{r}
+-----
 
+- Looks like there may be a little benefit but not substantial.  
+- Would likely provide much greater benefit in smaller N contexts or with more complicated model architectures (more hidden units, more hidden unit layers).
+```{r}
 accuracy_vec(feat_test$y, predict(fit_nn, feat_test)$.pred_class)
 ```
 
+-----
 
 ### Number of Epochs and Early Stopping
 
@@ -705,11 +741,14 @@ Now that we have a model that is working well, lets return to the issue of numbe
 - Too few epochs can lead to under-fitting (which also produces poor performance)
 - The default of `epochs = 20` is a reasonable starting point for a network with one hidden layer but may not work for all situations
 
+-----
 
 Monitoring training error (loss, accuracy) is not ideal b/c it will tend to always decrease
 
-  - This is what you would get if you set `verbose = 1`
+- This is what you would get if you set `verbose = 1`
 
+\
+\
 Validation error is what you need to monitor
 
 - Validation error will increase when the model becomes overfit to training
@@ -734,7 +773,8 @@ NOTE:
 - This (currently) is not knitted into my web book but the plot and messages are pretty clear
 - You can use this information to choose appropriate values for `epoch`
 - `val_accuracy` had plateau and `val_loss` had started to creep up by 10 epochs.
-```{r u11-fit-18}
+
+```{r}
 fit_nn <- mlp(hidden_units = 30, activation = "relu", epochs = 50) |>
   set_mode("classification") |>  
   set_engine("keras", verbose = 1, seeds = fit_seeds, 
@@ -746,9 +786,12 @@ fit_nn <- mlp(hidden_units = 30, activation = "relu", epochs = 50) |>
 -----
 
 In some instances, it may be that we want to do more than simply look at epoch performance plots during modeling EDA
-
+\
+\
 We can instead set the number of epochs to be high but use an early stopping callback to end 
 the training early at an optimal time
+
+-----
 
 Callbacks allow us to interrupt training.   
 
@@ -761,9 +804,12 @@ Callbacks allow us to interrupt training.
 - This is a method to **tune or select** best number of epochs.  
   - I haven't yet figured out where the epochs at termination are saved so need to 
   watch the feedback.  It was 35 epochs here
-  - As always, we **could** next refit to the full training set after we have determined the optimal 
-number of epochs.  We won't do that here.
-- This fit stopped at 15 epochs
+  - As always, we **could** next refit to the full training set after we have determined the optimal number of epochs.  We won't do that here.
+
+-----
+
+This fit stopped at 15 epochs
+
 ```{r}
 callback_list <- list(keras::callback_early_stopping(monitor = "val_loss", 
                                                      min_delta = 0, 
@@ -781,47 +827,68 @@ fit_nn <- mlp(hidden_units = 30, activation = "relu", epochs = 200) |>
   fit(y ~ ., data = feat_trn)
 ```
 
+-----
+
 ```{r}
 accuracy_vec(feat_test$y, predict(fit_nn, feat_test)$.pred_class)
 ```
 
-**Coding sidebar:** You can see many of the optional arguments you can set for Keras in the help [here](https://keras.rstudio.com/reference/fit.html).   And you can see more info about `callback_early_stopping()` [here](https://keras.rstudio.com/reference/callback_early_stopping.html)
+-----
 
+**Coding sidebar:** You can see many of the optional arguments you can set for Keras in the help [here](https://keras.rstudio.com/reference/fit.html).   
+\
+\
+And you can see more info about `callback_early_stopping()` [here](https://keras.rstudio.com/reference/callback_early_stopping.html)
+
+-----
 
 ## Using Resampling to Select Best Model Configuration
 
 Developing a good network artchitecture and considering feature enginnering options involves experimentation
   
-  - This is what Keras is designed to do
-  - tidymodels allows this too
-  - We need to evaluate configurations with a valid method to evaluate performance
-    - validation split metric
-    - k-fold metric
-    - bootstrap method
-    - Each can be paired with `fit_resamples()` or `tune_grid()`
-  - We need to be systematic
-    - `tune_grid()` helps with this too
-    - recipes can be tuned as well (outside the scope of this course)
-    
+- This is what Keras is designed to do
+- tidymodels allows this too
+- We need to evaluate configurations with a valid method to evaluate performance
+  - validation split metric
+  - k-fold metric
+  - bootstrap method
+  - Each can be paired with `fit_resamples()` or `tune_grid()`
+- We need to be systematic
+  - `tune_grid()` helps with this too
+  - recipes can be tuned as well (outside the scope of this course)
+
+-----
+
 Here is an example where we can select among many model configurations that differ across multiple network characteristics
 
 - Evaluate with validation split accuracy 
 - Sample size is relatively big so we have 1000 validation set observations.  Should offer a low variance performance estimate
-- K-fold and bootstrap would still be better but big computation costs (too big for this web book but would be done in real life!)
+- K-fold and bootstrap would still be better but big computation costs (too big for this web book but could be done in real life!)
 
-```{r u11-fit-20}
+-----
+
+Its really just our normal workflow at this point
+
+- Get splits (validation splits in this example)
+```{r}
 set.seed(102030)
 splits_validation <-
   data_trn |> 
   validation_split(prop = 5/6)
 ```
 
+-----
+
+- Set up gride of hyperparameter values
 ```{r}
 grid_keras <- expand_grid(hidden_units = c(5, 10, 20, 30, 50, 100), 
                           penalty = c(.00001, .0001, .01, .1))
 ```
 
-```{r u11-fit-21, eval = FALSE}
+-----
+
+- Use `tune_grid()` to fit models in training and predict into validation set for each combination of hyperparameter values
+```{r}
 fits_nn <- mlp(hidden_units = tune(), penalty = tune(), activation = "relu") |>
     set_mode("classification") |> 
     # setting to verbose = 1 to track progress.  Training error not that useful
@@ -830,16 +897,22 @@ fits_nn <- mlp(hidden_units = tune(), penalty = tune(), activation = "relu") |>
                   grid = grid_keras,
                   resamples = splits_validation,
                   metrics = metric_set(accuracy))
+```
 
+-----
+
+- Find model configuration with best performance in the held-out validation set
+```{r}
 show_best(fits_nn)
 ```
 
+-----
 
 ## Other Details
 
 We can get a better sense of how tidymodels is interacting with Keras by looking at the function that is called
 
-```{r u11-fit-22}
+```{r}
 mlp(hidden_units = 30, activation = "relu", dropout = .1) |>
   set_mode("classification") |>  
   set_engine("keras", verbose = 0, seeds = fit_seeds) |> 
@@ -849,7 +922,7 @@ mlp(hidden_units = 30, activation = "relu", dropout = .1) |>
 -----
 
 `keras_mlp()` is a wrapper around the calls to Keras.  Lets see what it does
-```{r u11-fit-23}
+```{r}
 keras_mlp
 ```
 
@@ -859,7 +932,6 @@ We can see:
 - The choice of cost function: mse or binary_crossentropy
 - The optimizer: Adam
 - How the three seeds are being used
-
 
 -----
 
@@ -876,10 +948,13 @@ The [Adam optimizer](pdfs/kingma_adam_optimizer.pdf) is used instead of classic 
 - Appropriate for problems with very noisy/or sparse gradients.
 - Hyper-parameters have intuitive interpretation and typically require little tuning.
 
+-----
+
 You can start additional reading about Adam [here](https://machinelearningmastery.com/adam-optimization-algorithm-for-deep-learning/#:~:text=Adam%20is%20a%20replacement%20optimization,sparse%20gradients%20on%20noisy%20problems)
 
 For now, if you want another optimizer or much more control over your network architecture, you may need to work directly in Keras.
 
+-----
 
 ## Discussion Notes
 
