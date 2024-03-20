@@ -1658,13 +1658,17 @@ rec_prep <- rec |> # <1>
 ```
 1. We start by prepping our raw/original recipe (`rec`)
 2. We use the `prep()` function on on the training data.  Recipes are ALWAYS prepped using training data.  This makes sure that are recipes will always only use information from the training set when making features for any subsequent dataset.
+3. As part of the prepping process, `prep()` calculates and saves the features for the training data for later use
 
 -----
 
 Second, we bake the training data using this prepped recipe to get a feature matrix from it.  
+\
+\
+We set `new_data = NULL` because don't need features for new data.  Instead, we want features from the training data that were used to prep the recipe
 ```{r}
 feat_trn <- rec_prep |> 
-  bake(new_data = data_trn)
+  bake(new_data = NULL)
 ```
 
 -----

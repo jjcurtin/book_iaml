@@ -319,10 +319,11 @@ rec_prep <- rec |>
 -----
 
 - And now  we can bake the training data to make a feature matrix
+- Training features were already saved in the prepped recipe so we set `new_data = NULL`
 
 ```{r}
 feat_trn <- rec_prep |> 
-  bake(new_data = data_trn)
+  bake(new_data = NULL)
 ```
 
 -----
@@ -487,7 +488,7 @@ We can get the predicted values for `sale_price` (i.e., $\hat{sale\_price}$) in 
 However, we first need to make a feature matrix for our validation set
 
 - We use the same recipe that we previously prepped with training data (`data_trn`)
-- But now we **bake** the validation data, `data_val`
+- But now we **bake** new data that were not used to train the recipe - the validation data, `data_val`
 
 ```{r  u3-simple-12}
 feat_val <- rec_prep |> 
@@ -666,7 +667,7 @@ rec_prep <- rec |>
 feat_trn <- rec_prep |> 
   bake(data_trn) # <1>
 ```
-1. I am going to stop using `new_data = ` but remember, we can bake any dataset to make features for that dataset.
+1. I am going to stop using `new_data = ` but remember, we use NULL if we want the previously saved training features.  If instead, we want features for new data, we provide that dataset.
 
 -----
 
@@ -860,7 +861,7 @@ rec_prep <- rec |>
 - Notice the features are now less skewed (but `sale_price` is still skewed)
 ```{r}
 feat_trn <- rec_prep |> 
-  bake(data_trn)
+  bake(NULL)
 
 feat_trn |> skim_all()
 ```
@@ -1302,7 +1303,7 @@ rec_prep <- rec |>
   prep(data_trn)
 
 feat_trn <- rec_prep |> 
-  bake(data_trn)
+  bake(NULL)
 
 feat_val <- rec_prep |> 
   bake(data_val)
@@ -1447,7 +1448,7 @@ rec_prep <- rec |>
   prep(data_trn)
 
 feat_trn <- rec_prep |> 
-  bake(data_trn)
+  bake(NULL)
 
 feat_val <- rec_prep |> 
   bake(data_val)
@@ -1544,7 +1545,7 @@ rec_prep <- rec |>
   prep(data_trn)
 
 feat_trn <- rec_prep |> 
-  bake(data_trn)
+  bake(NULL)
 
 feat_val <- rec_prep |> 
   bake(data_val)
@@ -1641,7 +1642,7 @@ rec_prep <- rec |>
   prep(data_trn)
 
 feat_trn <- rec_prep |> 
-  bake(data_trn)
+  bake(NULL)
 
 feat_val <- rec_prep |> 
   bake(data_val)
@@ -1882,7 +1883,7 @@ rec_prep <- rec |>
   prep(data_trn_demo)
 
 feat_trn_demo <- rec_prep |> 
-  bake(data_trn_demo)
+  bake(NULL)
 ```
 
 -----
@@ -2303,7 +2304,7 @@ rec_prep <- rec |>
   prep(data_trn)
 
 feat_trn <- rec_prep |>
-  bake(data_trn)
+  bake(NULL)
 
 feat_val <- rec_prep |> 
   bake(data_val)
@@ -2487,7 +2488,7 @@ rec_prep <- rec |>
   prep(data_trn)
 
 feat_trn <- rec_prep |> 
-  bake(data_trn)
+  bake(NULL)
 
 feat_val <- rec_prep |> 
   bake(data_val)
