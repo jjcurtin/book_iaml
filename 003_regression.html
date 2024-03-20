@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.550">
+<meta name="generator" content="quarto-1.4.551">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -285,26 +285,32 @@ window.Quarto = {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./011_neural_networks.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Advanced Models: Neural Networks</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./012_nlp.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Natural Language Processing: Text Processing and Feature Engineering</span></span></a>
+ <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Natural Language Processing: Text Processing and Feature Engineering</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./013_applications.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Applications for Machine Learning: Synthesis and Concept Generalization</span></span></a>
+ <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Applications for Machine Learning: Synthesis and Concept Generalization</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./014_ethics.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">13</span>&nbsp; <span class="chapter-title">Ethical Issues in Machine Learning Research and Applications</span></span></a>
+ <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Ethical Issues in Machine Learning Research and Applications</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./015_final.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">14</span>&nbsp; <span class="chapter-title">Final Exam and Project</span></span></a>
+ <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Final Exam and Project</span></span></a>
   </div>
 </li>
         <li class="sidebar-item sidebar-item-section">
@@ -319,19 +325,13 @@ window.Quarto = {
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./app_terminology.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">15</span>&nbsp; <span class="chapter-title">Key Terminology and Concepts</span></span></a>
+ <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Key Terminology and Concepts</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./app_dummy_coding.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Novel Levels in Held-Out Set(s)</span></span></a>
-  </div>
-</li>
-          <li class="sidebar-item">
-  <div class="sidebar-item-container"> 
-  <a href="./app_keras.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Installing Keras for Neural Networks</span></span></a>
+ <span class="menu-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Novel Levels in Held-Out Set(s)</span></span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -997,10 +997,11 @@ Question: Why do we need independent validation data to select the best model co
 <hr>
 <ul>
 <li>And now we can bake the training data to make a feature matrix</li>
+<li>Training features were already saved in the prepped recipe so we set <code>new_data = NULL</code></li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>feat_trn <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(<span class="at">new_data =</span> data_trn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(<span class="at">new_data =</span> <span class="cn">NULL</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <p>You should always review the feature matrix to make sure it looks as you expect</p>
@@ -1360,7 +1361,7 @@ stats::lm(formula = missing_arg(), data = missing_arg(), weights = missing_arg()
 <p>However, we first need to make a feature matrix for our validation set</p>
 <ul>
 <li>We use the same recipe that we previously prepped with training data (<code>data_trn</code>)</li>
-<li>But now we <strong>bake</strong> the validation data, <code>data_val</code></li>
+<li>But now we <strong>bake</strong> new data that were not used to train the recipe - the validation data, <code>data_val</code></li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>feat_val <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
@@ -1672,7 +1673,7 @@ stats::lm(formula = missing_arg(), data = missing_arg(), weights = missing_arg()
 <dl class="code-annotation-container-grid">
 <dt data-target-cell="annotated-cell-46" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-46" data-code-lines="2" data-code-annotation="1">I am going to stop using <code>new_data =</code> but remember, we can bake any dataset to make features for that dataset.</span>
+<span data-code-cell="annotated-cell-46" data-code-lines="2" data-code-annotation="1">I am going to stop using <code>new_data =</code> but remember, we use NULL if we want the previously saved training features. If instead, we want features for new data, we provide that dataset.</span>
 </dd>
 </dl>
 </div>
@@ -2183,7 +2184,7 @@ Question: What are the implications of the correlations among many of these pred
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a>feat_trn <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
-<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_trn)</span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(<span class="cn">NULL</span>)</span>
 <span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb83-4"><a href="#cb83-4" aria-hidden="true" tabindex="-1"></a>feat_trn <span class="sc">|&gt;</span> <span class="fu">skim_all</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
@@ -2979,7 +2980,7 @@ F-statistic: 23.78 on 2 and 1462 DF,  p-value: 6.858e-11</code></pre>
 <span id="cb110-2"><a href="#cb110-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(data_trn)</span>
 <span id="cb110-3"><a href="#cb110-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb110-4"><a href="#cb110-4" aria-hidden="true" tabindex="-1"></a>feat_trn <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
-<span id="cb110-5"><a href="#cb110-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_trn)</span>
+<span id="cb110-5"><a href="#cb110-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(<span class="cn">NULL</span>)</span>
 <span id="cb110-6"><a href="#cb110-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb110-7"><a href="#cb110-7" aria-hidden="true" tabindex="-1"></a>feat_val <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
 <span id="cb110-8"><a href="#cb110-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -3475,7 +3476,7 @@ Question: Will the addition of new predictors/features to a model always reduce 
 <span id="cb121-2"><a href="#cb121-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(data_trn)</span>
 <span id="cb121-3"><a href="#cb121-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb121-4"><a href="#cb121-4" aria-hidden="true" tabindex="-1"></a>feat_trn <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
-<span id="cb121-5"><a href="#cb121-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_trn)</span>
+<span id="cb121-5"><a href="#cb121-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(<span class="cn">NULL</span>)</span>
 <span id="cb121-6"><a href="#cb121-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb121-7"><a href="#cb121-7" aria-hidden="true" tabindex="-1"></a>feat_val <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
 <span id="cb121-8"><a href="#cb121-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -3572,7 +3573,7 @@ Question: Will the addition of new predictors/features to a model always reduce 
 <span id="cb126-2"><a href="#cb126-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(data_trn)</span>
 <span id="cb126-3"><a href="#cb126-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb126-4"><a href="#cb126-4" aria-hidden="true" tabindex="-1"></a>feat_trn <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
-<span id="cb126-5"><a href="#cb126-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_trn)</span>
+<span id="cb126-5"><a href="#cb126-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(<span class="cn">NULL</span>)</span>
 <span id="cb126-6"><a href="#cb126-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb126-7"><a href="#cb126-7" aria-hidden="true" tabindex="-1"></a>feat_val <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
 <span id="cb126-8"><a href="#cb126-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -3869,7 +3870,7 @@ Question: Will the addition of new predictors/features to a model always reduce 
 <span id="cb132-2"><a href="#cb132-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(data_trn)</span>
 <span id="cb132-3"><a href="#cb132-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb132-4"><a href="#cb132-4" aria-hidden="true" tabindex="-1"></a>feat_trn <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
-<span id="cb132-5"><a href="#cb132-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_trn)</span>
+<span id="cb132-5"><a href="#cb132-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(<span class="cn">NULL</span>)</span>
 <span id="cb132-6"><a href="#cb132-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb132-7"><a href="#cb132-7" aria-hidden="true" tabindex="-1"></a>feat_val <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
 <span id="cb132-8"><a href="#cb132-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -4337,7 +4338,7 @@ kknn::train.kknn(formula = missing_arg(), data = missing_arg(),
 <span id="cb142-5"><a href="#cb142-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(data_trn_demo)</span>
 <span id="cb142-6"><a href="#cb142-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb142-7"><a href="#cb142-7" aria-hidden="true" tabindex="-1"></a>feat_trn_demo <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
-<span id="cb142-8"><a href="#cb142-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_trn_demo)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb142-8"><a href="#cb142-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(<span class="cn">NULL</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <ul>
@@ -4671,7 +4672,7 @@ Question: How will k = 1 perform in training and validation sets?
 <span id="cb158-2"><a href="#cb158-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(data_trn)</span>
 <span id="cb158-3"><a href="#cb158-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb158-4"><a href="#cb158-4" aria-hidden="true" tabindex="-1"></a>feat_trn <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span></span>
-<span id="cb158-5"><a href="#cb158-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_trn)</span>
+<span id="cb158-5"><a href="#cb158-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(<span class="cn">NULL</span>)</span>
 <span id="cb158-6"><a href="#cb158-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb158-7"><a href="#cb158-7" aria-hidden="true" tabindex="-1"></a>feat_val <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
 <span id="cb158-8"><a href="#cb158-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -5197,7 +5198,7 @@ Question: How will k = 1 perform in training and validation sets?
 <span id="cb182-2"><a href="#cb182-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(data_trn)</span>
 <span id="cb182-3"><a href="#cb182-3" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb182-4"><a href="#cb182-4" aria-hidden="true" tabindex="-1"></a>feat_trn <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
-<span id="cb182-5"><a href="#cb182-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_trn)</span>
+<span id="cb182-5"><a href="#cb182-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(<span class="cn">NULL</span>)</span>
 <span id="cb182-6"><a href="#cb182-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb182-7"><a href="#cb182-7" aria-hidden="true" tabindex="-1"></a>feat_val <span class="ot">&lt;-</span> rec_prep <span class="sc">|&gt;</span> </span>
 <span id="cb182-8"><a href="#cb182-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_val)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -5747,6 +5748,24 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/github\.io\/jjcurtin\/book_iaml");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
@@ -5781,7 +5800,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
     });
   }
   const xrefs = window.document.querySelectorAll('a.quarto-xref');
