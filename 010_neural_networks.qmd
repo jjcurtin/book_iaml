@@ -151,6 +151,10 @@ path_data <- "./data"
 rerun_setting <- FALSE 
 ``` 
 
+```{r}
+library(keras, exclude = "get_weights")
+```
+
 -----
 
 ## The MINST dataset
@@ -430,7 +434,7 @@ Let's fit this first model configuration in training set
 - `verbose = 0`
 - `seeds = fit_seeds`
 ```{r}
-fit <-
+fit_1 <-
   mlp() |>
   set_mode("classification") |> 
   set_engine("keras", 
@@ -448,7 +452,7 @@ Here is this model's performance in test
 \
 It's not that great (though clearly better than 10%)
 ```{r}
-accuracy_vec(feat_test$y, predict(fit, feat_test)$.pred_class)
+accuracy_vec(feat_test$y, predict(fit_1, feat_test)$.pred_class)
 ```
 
 -----
@@ -550,7 +554,7 @@ dim(feat_test)
 Let's fit and evaluate this new feature set with no other changes to the model configuration
 
 ```{r}
-fit <-
+fit_2 <-
   mlp() |>
   set_mode("classification") |> 
   set_engine("keras", verbose = 0, seeds = fit_seeds) |>
@@ -560,8 +564,8 @@ fit <-
 
 - That helped a LOT
 - Still could be better though (but it always impresses me! ;-)
-```{rj}
-accuracy_vec(feat_test$y, predict(fit, feat_test)$.pred_class)
+```{r}
+accuracy_vec(feat_test$y, predict(fit_2, feat_test)$.pred_class)
 ```
 
 -----
@@ -586,7 +590,7 @@ It is not surprising that a model configuration with only one hidden layer and 5
 Let's try 30 units (cheating based on the book chapter!! ;-)
 
 ```{r}
-fit_nn <- mlp(hidden_units = 30) |>
+fit_5units <- mlp(hidden_units = 30) |>
     set_mode("classification") |> 
     set_engine("keras", verbose = 0, seeds = fit_seeds) |>
     fit(y ~ ., data = feat_trn)
@@ -598,7 +602,7 @@ fit_nn <- mlp(hidden_units = 30) |>
 - We could see if even more units works better still but I won't follow that through here for sake of simplicity
 
 ```{r}
-accuracy_vec(feat_test$y, predict(fit_nn, feat_test)$.pred_class)
+accuracy_vec(feat_test$y, predict(fit_5units, feat_test)$.pred_class)
 ```
 
 -----
@@ -607,14 +611,14 @@ The Three Brown 1 Blue videos had a brief discussion of the [relu activation fun
 
 Let's see how to use other activation functions and if this one helps.
 ```{r}
-fit_nn <- mlp(hidden_units = 30, activation = "relu") |>
+fit_relu <- mlp(hidden_units = 30, activation = "relu") |>
   set_mode("classification") |> 
   set_engine("keras", verbose = 0, seeds = fit_seeds) |>
   fit(y ~ ., data = feat_trn)
 ```
 
 ```{r}
-accuracy_vec(feat_test$y, predict(fit_nn, feat_test)$.pred_class)
+accuracy_vec(feat_test$y, predict(fit_relu, feat_test)$.pred_class)
 ```
 
 -----
@@ -627,7 +631,7 @@ As you might imagine, given the number of weights to be fit in even a modest neu
 - 21,540 for hidden layer (717 * 30 weight + 30 biases)
 - 310 for output layer (30 * 10 weights, + 10 biases)
 ```{r}
-fit_nn
+fit_relu
 ```
 
 This will be an even bigger problem if you aren't using "big" data
@@ -669,7 +673,7 @@ In the tidymodels implementation of Keras:
 Let's set `penalty = .0001`.   
 
 ```{r}
-fit_nn <- mlp(hidden_units = 30, activation = "relu", penalty = .0001) |>
+fit_penalty <- mlp(hidden_units = 30, activation = "relu", penalty = .0001) |>
   set_mode("classification") |> 
   set_engine("keras", verbose = 0, seeds = fit_seeds) |>
   fit(y ~ ., data = feat_trn)
@@ -681,7 +685,7 @@ fit_nn <- mlp(hidden_units = 30, activation = "relu", penalty = .0001) |>
 - Would likely provide much greater benefit in smaller N contexts or with more complicated model architectures (more hidden units, more hidden unit layers).
 
 ```{r}
-accuracy_vec(feat_test$y, predict(fit_nn, feat_test)$.pred_class)
+accuracy_vec(feat_test$y, predict(fit_penalty, feat_test)$.pred_class)
 ```
 
 ### Dropout
@@ -716,7 +720,7 @@ In tidymodels, you can set or tune the amount of dropout via the `dropout` argum
 Let's try `dropout = .1`.  
 
 ```{r}
-fit_nn <- mlp(hidden_units = 30, activation = "relu", dropout = .1) |>
+fit_dropout <- mlp(hidden_units = 30, activation = "relu", dropout = .1) |>
   set_mode("classification") |>  
   set_engine("keras", verbose = 0, seeds = fit_seeds) |>
   fit(y ~ ., data = feat_trn)
@@ -727,7 +731,7 @@ fit_nn <- mlp(hidden_units = 30, activation = "relu", dropout = .1) |>
 - Looks like there may be a little benefit but not substantial.  
 - Would likely provide much greater benefit in smaller N contexts or with more complicated model architectures (more hidden units, more hidden unit layers).
 ```{r}
-accuracy_vec(feat_test$y, predict(fit_nn, feat_test)$.pred_class)
+accuracy_vec(feat_test$y, predict(fit_dropout, feat_test)$.pred_class)
 ```
 
 -----
@@ -775,7 +779,7 @@ NOTE:
 - `val_accuracy` had plateau and `val_loss` had started to creep up by 10 epochs.
 
 ```{r}
-fit_nn <- mlp(hidden_units = 30, activation = "relu", epochs = 50) |>
+fit_epochs50 <- mlp(hidden_units = 30, activation = "relu", epochs = 50) |>
   set_mode("classification") |>  
   set_engine("keras", verbose = 1, seeds = fit_seeds, 
              metrics = c("accuracy"), 
@@ -816,8 +820,8 @@ callback_list <- list(keras::callback_early_stopping(monitor = "val_loss",
                                                      patience = 10))
 ```
 
-```{r u11-fit-19}
-fit_nn <- mlp(hidden_units = 30, activation = "relu", epochs = 200) |>
+```{r}
+fit_early <- mlp(hidden_units = 30, activation = "relu", epochs = 200) |>
   set_mode("classification") |> 
   set_engine("keras", verbose = 1,
              seeds = fit_seeds, 
@@ -830,7 +834,7 @@ fit_nn <- mlp(hidden_units = 30, activation = "relu", epochs = 200) |>
 -----
 
 ```{r}
-accuracy_vec(feat_test$y, predict(fit_nn, feat_test)$.pred_class)
+accuracy_vec(feat_test$y, predict(fit_early, feat_test)$.pred_class)
 ```
 
 -----
