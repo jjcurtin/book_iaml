@@ -72,7 +72,7 @@ From the website:
 
 - Keras has the following key features:
   - Allows the same code to run on CPU or on GPU, seamlessly.
-  - **User-friendly API*- which makes it easy to quickly prototype deep learning models.
+  - **User-friendly API** - which makes it easy to quickly prototype deep learning models.
   - Built-in support for basic multi-layer perceptrons, convolutional networks (for computer vision), recurrent networks (for sequence processing), and any combination of both.
   - Supports arbitrary network architectures: multi-input or multi-output models, layer sharing, model sharing, etc. This means that Keras is appropriate for building essentially any deep learning model, from a memory network to a neural Turing machine.
 
@@ -84,8 +84,8 @@ Keras is actually a wrapper around an even more extensive open source platform, 
 
 - TensorFlow was originally developed by researchers and engineers working on the Google Brain Team within Google's Machine Intelligence research organization for the purposes of conducting machine learning and deep neural networks research
 
-\
-\
+-----
+
 If you are serious about focusing primarily or exclusively on neural networks, you will probably work directly within Keras in R or Python. However, tidymodels gives us access to 3 layer (single hidden layer) MLP neural networks through the `keras` engine.  This allows us to fit simple (but still powerful) neural networks using all the tools (and code/syntax) that you already know.  Yay! 
 \
 \
@@ -151,6 +151,7 @@ rerun_setting <- FALSE
 
 ```{r}
 library(keras, exclude = "get_weights")
+library(magrittr, exclude = c("set_names", "extract"))
 ```
 
 -----
@@ -165,8 +166,8 @@ It consists of two sets:
   - There are 60,000 images from 250 people in train
   - There are 10,000 images from a different 250 people in test (from different people than in train)
 
-\
-\
+-----
+
 Each observation in the datasets represent a single image and its label
 
 - Each image is a 28 X 28 grid of pixels = 784 predictors (x1 - x784)
@@ -273,6 +274,7 @@ to 255 (white)
 - First 28 variables are the top row of 28 pixels
 - Next 28 variables are the second row of 28 pixels
 - There are 28 rows of 28 predictors total (784 predictors)
+
 -----
 
 - Lets understand this by changing values for  individual predictors
@@ -450,7 +452,7 @@ NOTE: The first model fit with Keras in each new session will generate those war
 Here is this model's performance in test
 \
 \
-It's not that great (though clearly better than 10%)
+It's not that great ([What would you expect by chance?]{.red})
 ```{r}
 accuracy_vec(feat_test$y, predict(fit_1, feat_test)$.pred_class)
 ```
@@ -473,7 +475,7 @@ We will also want inputs with the same variance if we later apply L2 regularizat
 
 We could:
 
-- Use `step_normalize()`  [Bad choice of function names by tidymodel folks; scale vs. normalize]
+- Use `step_normalize()`  [Bad choice of function names by tidymodel folks; standardize vs. normalize]
 - Use `step_range()`
 - Book range corrected based on known true range (`/ 255`)
 \
@@ -695,6 +697,8 @@ fit_penalty <- mlp(hidden_units = 30, activation = "relu", penalty = .0001) |>
 accuracy_vec(feat_test$y, predict(fit_penalty, feat_test)$.pred_class)
 ```
 
+-----
+
 ### Dropout
 
 Dropout is a second technique to minimize overfitting.
@@ -783,12 +787,13 @@ NOTE:
 - `metrics = c("accuracy")`
 - `validation_split = 1/6`
 - You will see message updates and a plot that tracks training and validation loss and accuracy across epochs
-- This (currently) is not knitted into my web book but the plot and messages are pretty clear
+- This is not rendered into my slides but the plot and messages are pretty clear
 - You can use this information to choose appropriate values for `epoch`
 - `val_accuracy` had plateau and `val_loss` had started to creep up by 10 epochs.
 
 ```{r}
 #| label: fit_epochs50
+#| message: false
 
 fit_epochs50 <- mlp(hidden_units = 30, activation = "relu", epochs = 50) |>
   set_mode("classification") |>  
@@ -833,6 +838,7 @@ callback_list <- list(keras::callback_early_stopping(monitor = "val_loss",
 
 ```{r}
 #| label: fit_early
+#| message: false
 
 fit_early <- mlp(hidden_units = 30, activation = "relu", epochs = 200) |>
   set_mode("classification") |> 
