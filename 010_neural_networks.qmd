@@ -36,11 +36,12 @@ Post questions to the readings channel in Slack
 - [Lecture 2: Gradient descent, how neural networks learn](https://www.youtube.com/watch?v=IHZwWFHWa-w&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&index=2&t) ~ 21 mins
 - [Lecture 3: What is backpropagation really doing?](https://www.youtube.com/watch?v=Ilg3gGewQ5U&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&index=3&t) ~ 13 mins
 - [Optional Lecture 4: Backpropagation calculus](https://www.youtube.com/watch?v=tIeHLnjs5U8&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&index=4&t) ~ 10 mins
-- [Lecture 5: Introduction and the MNIST dataset]()
-- [Lecture 6: Fitting neural networks in tidymodels with Keras - Part 1]()
-- [Lecture 7: Fitting neural networks in tidymodels with Keras - Part 2]()
-- [Lecture 8: Addressing overfitting]()
-- [Lecture 9: Selecting model configurations and final remarks]()
+- [Lecture 5: Introduction and the MNIST dataset](https://mediaspace.wisc.edu/media/iaml+10-5/1_uqw3f0o9) ~ 14 mins
+- [Lecture 6: Fitting neural networks in tidymodels with Keras](https://mediaspace.wisc.edu/media/iaml+unit+10-6/1_sv7eicou) ~ 18 mins
+- [Lecture 7: Addressing overfitting - Intro and L2](https://mediaspace.wisc.edu/media/iaml+unit+10-7/1_ulfnye8s) ~ 5 mins
+- [Lecture 8: Addressing overfitting - Dropout](https://mediaspace.wisc.edu/media/iaml+unit+10-8/1_4k4cf1aj) ~ 4 mins
+- [Lecture 9: Addressing overfitting - Early stopping](https://mediaspace.wisc.edu/media/iaml+unit+10-9/1_5dlsj34t) ~ 8 mins
+- [Lecture 10: Selecting model configurations and final remarks](https://mediaspace.wisc.edu/media/iaml+unit+10-10/1_i448a6ta) ~ 8 mins
 
 Post questions to the video-lectures channel in Slack
 
@@ -156,7 +157,7 @@ library(magrittr, exclude = c("set_names", "extract"))
 
 -----
 
-## The MINST dataset
+## The MNIST dataset
 
 The [MNIST database](https://en.wikipedia.org/wiki/MNIST_database) (Modified National Institute of Standards and Technology database) is a large database of handwritten digits that is commonly used for training and testing in the field of machine learning.
 \
@@ -351,8 +352,7 @@ algorithm
 
 - We will build up to more complex (and better) configurations
 
-- We will end with a demonstration of the use of the single validation set approach to
-select among model configurations
+- We will end with a demonstration of the use of the single validation set approach to select among model configurations
 
 -----
 
@@ -494,13 +494,13 @@ We will use `step_normalize()`
 
 -----
 
-This is wrong! Luckily we glimpsed our feature matrix (not displayed here)
-
 ```{r}
 rec_scaled_wrong <- 
   recipe(y ~ ., data = data_trn) |>
   step_normalize(all_predictors())
 ```
+
+This is wrong! Luckily we glimpsed our feature matrix (not displayed here)
 
 ::: {.callout-important collapse="false"}
 ### Question: What went wrong and what should we do?
@@ -622,7 +622,7 @@ accuracy_vec(feat_test$y, predict(fit_5units, feat_test)$.pred_class)
 
 -----
 
-The Three Brown 1 Blue videos had a brief discussion of the [relu activation function](https://machinelearningmastery.com/rectified-linear-activation-function-for-deep-learning-neural-networks/).
+The Three Blue 1 Brown videos had a brief discussion of the [relu activation function](https://machinelearningmastery.com/rectified-linear-activation-function-for-deep-learning-neural-networks/).
 
 Let's see how to use other activation functions and if this one helps.
 ```{r}
@@ -669,8 +669,7 @@ There are a number of different methods available to reduce potential overfittin
 L2 regularization is implemented in essentially the same fashion as you have seen 
 it previously (e.g., glmnet)
 
-The loss function is expanded to include a penalty based on the sum of 
-the squared weights multiplied by $\lambda$.  
+The cost function is expanded to include a penalty based on the sum of the squared weights multiplied by $\lambda$.  
 
 In the tidymodels implementation of Keras:
 
@@ -780,7 +779,7 @@ Validation error is what you need to monitor
 
 - Validation error will increase when the model becomes overfit to training
 - We can have Keras hold back some portion of the training data for validation
-  - `validation_split = .1`
+  - `validation_split = 1/6`
   - We pass it in as an optional argument in `set_engine()`
   - We can use this to monitor validation error rather than training error by epoch. 
   - You can fit an exploratory model with `epochs = 50` to review the plot
@@ -831,10 +830,9 @@ Callbacks allow us to interrupt training.
 - We set up callbacks in a list
 - We pass them in as an optional argument in `set_engine()` using `callbacks = `
 - Notice the arguments for `callback_early_stopping()`
-- We also must provide validation error.  Here we set `validation_split = .1`
+- We also must provide validation error.  Here we set `validation_split = 1/6`
 - This is a method to **tune or select** best number of epochs.  
-  - I haven't yet figured out where the epochs at termination are saved so need to 
-  watch the feedback.  It was 35 epochs here
+  - I haven't yet figured out where the epochs at termination are saved so need to watch the feedback.  It was 35 epochs here
   - As always, we **could** next refit to the full training set after we have determined the optimal number of epochs.  We won't do that here.
 
 -----
@@ -897,7 +895,7 @@ Developing a good network artchitecture and considering feature enginnering opti
 Here is an example where we can select among many model configurations that differ across multiple network characteristics
 
 - Evaluate with validation split accuracy 
-- Sample size is relatively big so we have 1000 validation set observations.  Should offer a low variance performance estimate
+- Sample size is relatively big so we have 10,000 validation set observations.  Should offer a low variance performance estimate
 - K-fold and bootstrap would still be better but big computation costs (too big for this web book but could be done in real life!)
 
 -----
