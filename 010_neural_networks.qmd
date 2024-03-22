@@ -119,20 +119,18 @@ You should also know that Keras is configured to use GPUs rather than CPU (GPUs 
 Now lets start fresh
 
 - We load our normal environment including source files, parallel  processing and cache support if we plan to use it (code not displayed)
-- We will use some functions in other packages
-  - We will use `imager` package functions for viewing images saved as matrices
-  - We will `data.table` package function for reading and writing large files
-- These latter packages are specific to the data we will use in this unit and not always needed when using neural networks
-- We will use namespace rather than load full packages for these functions
-
+- keras will work with R without loading it or other packages (beyond what we always load).  However, there will be some function conflicts.
+  - So we will load keras and exclude the conflict
+  - We also need to load magittr and exclude one of its conflicting functions
+  
 ```{r}
 #| include: false
 
 # set up environment.  Now hidden from view
 
-# options(conflicts.policy = "depends.ok")
+options(conflicts.policy = "depends.ok")
 devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
-# tidymodels_conflictRules()
+tidymodels_conflictRules()
 
 library(tidyverse) # for general data wrangling
 library(tidymodels) # for modeling
@@ -434,13 +432,15 @@ Let's fit this first model configuration in training set
 - `verbose = 0`
 - `seeds = fit_seeds`
 ```{r}
+#| label: fit_1
+
 fit_1 <-
-  mlp() |>
-  set_mode("classification") |> 
-  set_engine("keras", 
-             verbose = 0, 
-             seeds = fit_seeds) |>
-  fit(y ~ ., data = feat_trn)
+    mlp() |>
+    set_mode("classification") |> 
+    set_engine("keras", 
+               verbose = 0, 
+               seeds = fit_seeds) |>
+    fit(y ~ ., data = feat_trn)
 ```
 
 NOTE: The first model fit with Keras in each new session will generate those warnings/errors about GPU. You can ignore them.
@@ -528,7 +528,6 @@ rec_scaled <-
 We now have 717 (+ y) features rather than 28 * 28 = 784 features
 
 ```{r}
-
 rec_scaled_prep <- rec_scaled |> 
   prep(data_trn)
 
@@ -554,6 +553,8 @@ dim(feat_test)
 Let's fit and evaluate this new feature set with no other changes to the model configuration
 
 ```{r}
+#| label: fit_2
+
 fit_2 <-
   mlp() |>
   set_mode("classification") |> 
@@ -590,6 +591,8 @@ It is not surprising that a model configuration with only one hidden layer and 5
 Let's try 30 units (cheating based on the book chapter!! ;-)
 
 ```{r}
+#| label: fit_5units
+
 fit_5units <- mlp(hidden_units = 30) |>
     set_mode("classification") |> 
     set_engine("keras", verbose = 0, seeds = fit_seeds) |>
@@ -611,6 +614,8 @@ The Three Brown 1 Blue videos had a brief discussion of the [relu activation fun
 
 Let's see how to use other activation functions and if this one helps.
 ```{r}
+#| label: fit_relu
+
 fit_relu <- mlp(hidden_units = 30, activation = "relu") |>
   set_mode("classification") |> 
   set_engine("keras", verbose = 0, seeds = fit_seeds) |>
@@ -673,6 +678,8 @@ In the tidymodels implementation of Keras:
 Let's set `penalty = .0001`.   
 
 ```{r}
+#| label: fit_penalty
+
 fit_penalty <- mlp(hidden_units = 30, activation = "relu", penalty = .0001) |>
   set_mode("classification") |> 
   set_engine("keras", verbose = 0, seeds = fit_seeds) |>
@@ -720,6 +727,8 @@ In tidymodels, you can set or tune the amount of dropout via the `dropout` argum
 Let's try `dropout = .1`.  
 
 ```{r}
+#| label: fit_dropout
+
 fit_dropout <- mlp(hidden_units = 30, activation = "relu", dropout = .1) |>
   set_mode("classification") |>  
   set_engine("keras", verbose = 0, seeds = fit_seeds) |>
@@ -779,6 +788,8 @@ NOTE:
 - `val_accuracy` had plateau and `val_loss` had started to creep up by 10 epochs.
 
 ```{r}
+#| label: fit_epochs50
+
 fit_epochs50 <- mlp(hidden_units = 30, activation = "relu", epochs = 50) |>
   set_mode("classification") |>  
   set_engine("keras", verbose = 1, seeds = fit_seeds, 
@@ -821,6 +832,8 @@ callback_list <- list(keras::callback_early_stopping(monitor = "val_loss",
 ```
 
 ```{r}
+#| label: fit_early
+
 fit_early <- mlp(hidden_units = 30, activation = "relu", epochs = 200) |>
   set_mode("classification") |> 
   set_engine("keras", verbose = 1,
@@ -893,7 +906,11 @@ grid_keras <- expand_grid(hidden_units = c(5, 10, 20, 30, 50, 100),
 
 - Use `tune_grid()` to fit models in training and predict into validation set for each combination of hyperparameter values
 ```{r}
-fits_nn <- mlp(hidden_units = tune(), penalty = tune(), activation = "relu") |>
+#| label: fits_nn
+
+fits_nn <- cache_rds(
+  expr = {
+    mlp(hidden_units = tune(), penalty = tune(), activation = "relu") |>
     set_mode("classification") |> 
     # setting to verbose = 1 to track progress.  Training error not that useful
     set_engine("keras", verbose = 1, seeds = fit_seeds) |>  
@@ -901,6 +918,10 @@ fits_nn <- mlp(hidden_units = tune(), penalty = tune(), activation = "relu") |>
                   grid = grid_keras,
                   resamples = splits_validation,
                   metrics = metric_set(accuracy))
+  },
+  rerun = rerun_setting,
+  dir = "cache/010/",
+  file = "fits_nn")
 ```
 
 -----
