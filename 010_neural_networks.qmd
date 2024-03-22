@@ -121,7 +121,7 @@ Now lets start fresh
 - We load our normal environment including source files, parallel  processing and cache support if we plan to use it (code not displayed)
 - keras will work with R without loading it or other packages (beyond what we always load).  However, there will be some function conflicts.
   - So we will load keras and exclude the conflict
-  - We also need to load magittr and exclude one of its conflicting functions
+  - We also need to load magrittr and exclude one of its conflicting functions
   
 ```{r}
 #| include: false
@@ -195,6 +195,11 @@ Here is some very basic info on the outcome distribution
 - in train
 ```{r}
 data_trn |> tab(y)
+```
+
+```{r}
+#| out-height: 3in
+
 data_trn |> plot_bar("y")
 ```
 
@@ -202,7 +207,12 @@ data_trn |> plot_bar("y")
 
 - in test
 ```{r}
-data_test|> tab(y)
+data_test|> tab(y)i
+```
+
+```{r}
+#| out-height: 3in
+
 data_test |> plot_bar("y")
 
 ```
@@ -794,6 +804,7 @@ NOTE:
 ```{r}
 #| label: fit_epochs50
 #| message: false
+#| output: false
 
 fit_epochs50 <- mlp(hidden_units = 30, activation = "relu", epochs = 50) |>
   set_mode("classification") |>  
@@ -839,6 +850,7 @@ callback_list <- list(keras::callback_early_stopping(monitor = "val_loss",
 ```{r}
 #| label: fit_early
 #| message: false
+#| output: false
 
 fit_early <- mlp(hidden_units = 30, activation = "relu", epochs = 200) |>
   set_mode("classification") |> 
