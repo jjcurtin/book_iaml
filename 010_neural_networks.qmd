@@ -36,11 +36,12 @@ Post questions to the readings channel in Slack
 - [Lecture 2: Gradient descent, how neural networks learn](https://www.youtube.com/watch?v=IHZwWFHWa-w&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&index=2&t) ~ 21 mins
 - [Lecture 3: What is backpropagation really doing?](https://www.youtube.com/watch?v=Ilg3gGewQ5U&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&index=3&t) ~ 13 mins
 - [Optional Lecture 4: Backpropagation calculus](https://www.youtube.com/watch?v=tIeHLnjs5U8&list=PLZHQObOWTQDNU6R1_67000Dx_ZCJB-3pi&index=4&t) ~ 10 mins
-- [Lecture 5: Introduction and the MNIST dataset]()
-- [Lecture 6: Fitting neural networks in tidymodels with Keras - Part 1]()
-- [Lecture 7: Fitting neural networks in tidymodels with Keras - Part 2]()
-- [Lecture 8: Addressing overfitting]()
-- [Lecture 9: Selecting model configurations and final remarks]()
+- [Lecture 5: Introduction and the MNIST dataset](https://mediaspace.wisc.edu/media/iaml+10-5/1_uqw3f0o9) ~ 14 mins
+- [Lecture 6: Fitting neural networks in tidymodels with Keras](https://mediaspace.wisc.edu/media/iaml+unit+10-6/1_sv7eicou) ~ 18 mins
+- [Lecture 7: Addressing overfitting - Intro and L2](https://mediaspace.wisc.edu/media/iaml+unit+10-7/1_ulfnye8s) ~ 5 mins
+- [Lecture 8: Addressing overfitting - Dropout](https://mediaspace.wisc.edu/media/iaml+unit+10-8/1_4k4cf1aj) ~ 4 mins
+- [Lecture 9: Addressing overfitting - Early stopping](https://mediaspace.wisc.edu/media/iaml+unit+10-9/1_5dlsj34t) ~ 8 mins
+- [Lecture 10: Selecting model configurations and final remarks](https://mediaspace.wisc.edu/media/iaml+unit+10-10/1_i448a6ta) ~ 8 mins
 
 Post questions to the video-lectures channel in Slack
 
@@ -72,7 +73,7 @@ From the website:
 
 - Keras has the following key features:
   - Allows the same code to run on CPU or on GPU, seamlessly.
-  - **User-friendly API*- which makes it easy to quickly prototype deep learning models.
+  - **User-friendly API** - which makes it easy to quickly prototype deep learning models.
   - Built-in support for basic multi-layer perceptrons, convolutional networks (for computer vision), recurrent networks (for sequence processing), and any combination of both.
   - Supports arbitrary network architectures: multi-input or multi-output models, layer sharing, model sharing, etc. This means that Keras is appropriate for building essentially any deep learning model, from a memory network to a neural Turing machine.
 
@@ -84,8 +85,8 @@ Keras is actually a wrapper around an even more extensive open source platform, 
 
 - TensorFlow was originally developed by researchers and engineers working on the Google Brain Team within Google's Machine Intelligence research organization for the purposes of conducting machine learning and deep neural networks research
 
-\
-\
+-----
+
 If you are serious about focusing primarily or exclusively on neural networks, you will probably work directly within Keras in R or Python. However, tidymodels gives us access to 3 layer (single hidden layer) MLP neural networks through the `keras` engine.  This allows us to fit simple (but still powerful) neural networks using all the tools (and code/syntax) that you already know.  Yay! 
 \
 \
@@ -96,13 +97,13 @@ If you plan to use Keras directly in R, you might start with this [book](https:/
 Getting tidymodels configured to use the `keras` engine can take a  little bit of upfront effort.
 \
 \
-We provide [an appendix] to guide you through this process
+We provide [an appendix](https://jjcurtin.github.io/book_iaml/app_keras.html) to guide you through this process
 \
 \
 If you havent already set this up, please do so immediately so that you can reach out to us for support if you need it
 \
 \
-Once you have completed this one-time installation, you can now use the `keras` engine through tidymodels like any other engine.  No need to load Keras each time or do anything different from your normal tidymodeling workflow.
+Once you have completed this one-time installation, you can now use the `keras` engine through tidymodels like any other engine.  No need to do anything different from your normal tidymodeling workflow.
 
 -----
 
@@ -119,12 +120,10 @@ You should also know that Keras is configured to use GPUs rather than CPU (GPUs 
 Now lets start fresh
 
 - We load our normal environment including source files, parallel  processing and cache support if we plan to use it (code not displayed)
-- We will use some functions in other packages
-  - We will use `imager` package functions for viewing images saved as matrices
-  - We will `data.table` package function for reading and writing large files
-- These latter packages are specific to the data we will use in this unit and not always needed when using neural networks
-- We will use namespace rather than load full packages for these functions
-
+- keras will work with R without loading it or other packages (beyond what we always load).  However, there will be some function conflicts.
+  - So we will load keras and exclude the conflict
+  - We also need to load magrittr and exclude two of its conflicting functions
+  
 ```{r}
 #| include: false
 
@@ -153,11 +152,12 @@ rerun_setting <- FALSE
 
 ```{r}
 library(keras, exclude = "get_weights")
+library(magrittr, exclude = c("set_names", "extract"))
 ```
 
 -----
 
-## The MINST dataset
+## The MNIST dataset
 
 The [MNIST database](https://en.wikipedia.org/wiki/MNIST_database) (Modified National Institute of Standards and Technology database) is a large database of handwritten digits that is commonly used for training and testing in the field of machine learning.
 \
@@ -167,8 +167,8 @@ It consists of two sets:
   - There are 60,000 images from 250 people in train
   - There are 10,000 images from a different 250 people in test (from different people than in train)
 
-\
-\
+-----
+
 Each observation in the datasets represent a single image and its label
 
 - Each image is a 28 X 28 grid of pixels = 784 predictors (x1 - x784)
@@ -196,6 +196,11 @@ Here is some very basic info on the outcome distribution
 - in train
 ```{r}
 data_trn |> tab(y)
+```
+
+```{r}
+#| out-height: 3in
+
 data_trn |> plot_bar("y")
 ```
 
@@ -204,6 +209,11 @@ data_trn |> plot_bar("y")
 - in test
 ```{r}
 data_test|> tab(y)
+```
+
+```{r}
+#| out-height: 3in
+
 data_test |> plot_bar("y")
 
 ```
@@ -275,6 +285,7 @@ to 255 (white)
 - First 28 variables are the top row of 28 pixels
 - Next 28 variables are the second row of 28 pixels
 - There are 28 rows of 28 predictors total (784 predictors)
+
 -----
 
 - Lets understand this by changing values for  individual predictors
@@ -341,8 +352,7 @@ algorithm
 
 - We will build up to more complex (and better) configurations
 
-- We will end with a demonstration of the use of the single validation set approach to
-select among model configurations
+- We will end with a demonstration of the use of the single validation set approach to select among model configurations
 
 -----
 
@@ -434,13 +444,15 @@ Let's fit this first model configuration in training set
 - `verbose = 0`
 - `seeds = fit_seeds`
 ```{r}
+#| label: fit_1
+
 fit_1 <-
-  mlp() |>
-  set_mode("classification") |> 
-  set_engine("keras", 
-             verbose = 0, 
-             seeds = fit_seeds) |>
-  fit(y ~ ., data = feat_trn)
+    mlp() |>
+    set_mode("classification") |> 
+    set_engine("keras", 
+               verbose = 0, 
+               seeds = fit_seeds) |>
+    fit(y ~ ., data = feat_trn)
 ```
 
 NOTE: The first model fit with Keras in each new session will generate those warnings/errors about GPU. You can ignore them.
@@ -450,7 +462,7 @@ NOTE: The first model fit with Keras in each new session will generate those war
 Here is this model's performance in test
 \
 \
-It's not that great (though clearly better than 10%)
+It's not that great ([What would you expect by chance?]{.red})
 ```{r}
 accuracy_vec(feat_test$y, predict(fit_1, feat_test)$.pred_class)
 ```
@@ -473,7 +485,7 @@ We will also want inputs with the same variance if we later apply L2 regularizat
 
 We could:
 
-- Use `step_normalize()`  [Bad choice of function names by tidymodel folks; scale vs. normalize]
+- Use `step_normalize()`  [Bad choice of function names by tidymodel folks; standardize vs. normalize]
 - Use `step_range()`
 - Book range corrected based on known true range (`/ 255`)
 \
@@ -482,13 +494,13 @@ We will use `step_normalize()`
 
 -----
 
-This is wrong! Luckily we glimpsed our feature matrix (not displayed here)
-
 ```{r}
 rec_scaled_wrong <- 
   recipe(y ~ ., data = data_trn) |>
   step_normalize(all_predictors())
 ```
+
+This is wrong! Luckily we glimpsed our feature matrix (not displayed here)
 
 ::: {.callout-important collapse="false"}
 ### Question: What went wrong and what should we do?
@@ -528,7 +540,6 @@ rec_scaled <-
 We now have 717 (+ y) features rather than 28 * 28 = 784 features
 
 ```{r}
-
 rec_scaled_prep <- rec_scaled |> 
   prep(data_trn)
 
@@ -554,6 +565,8 @@ dim(feat_test)
 Let's fit and evaluate this new feature set with no other changes to the model configuration
 
 ```{r}
+#| label: fit_2
+
 fit_2 <-
   mlp() |>
   set_mode("classification") |> 
@@ -590,6 +603,8 @@ It is not surprising that a model configuration with only one hidden layer and 5
 Let's try 30 units (cheating based on the book chapter!! ;-)
 
 ```{r}
+#| label: fit_5units
+
 fit_5units <- mlp(hidden_units = 30) |>
     set_mode("classification") |> 
     set_engine("keras", verbose = 0, seeds = fit_seeds) |>
@@ -607,10 +622,12 @@ accuracy_vec(feat_test$y, predict(fit_5units, feat_test)$.pred_class)
 
 -----
 
-The Three Brown 1 Blue videos had a brief discussion of the [relu activation function](https://machinelearningmastery.com/rectified-linear-activation-function-for-deep-learning-neural-networks/).
+The Three Blue 1 Brown videos had a brief discussion of the [relu activation function](https://machinelearningmastery.com/rectified-linear-activation-function-for-deep-learning-neural-networks/).
 
 Let's see how to use other activation functions and if this one helps.
 ```{r}
+#| label: fit_relu
+
 fit_relu <- mlp(hidden_units = 30, activation = "relu") |>
   set_mode("classification") |> 
   set_engine("keras", verbose = 0, seeds = fit_seeds) |>
@@ -652,8 +669,7 @@ There are a number of different methods available to reduce potential overfittin
 L2 regularization is implemented in essentially the same fashion as you have seen 
 it previously (e.g., glmnet)
 
-The loss function is expanded to include a penalty based on the sum of 
-the squared weights multiplied by $\lambda$.  
+The cost function is expanded to include a penalty based on the sum of the squared weights multiplied by $\lambda$.  
 
 In the tidymodels implementation of Keras:
 
@@ -673,6 +689,8 @@ In the tidymodels implementation of Keras:
 Let's set `penalty = .0001`.   
 
 ```{r}
+#| label: fit_penalty
+
 fit_penalty <- mlp(hidden_units = 30, activation = "relu", penalty = .0001) |>
   set_mode("classification") |> 
   set_engine("keras", verbose = 0, seeds = fit_seeds) |>
@@ -687,6 +705,8 @@ fit_penalty <- mlp(hidden_units = 30, activation = "relu", penalty = .0001) |>
 ```{r}
 accuracy_vec(feat_test$y, predict(fit_penalty, feat_test)$.pred_class)
 ```
+
+-----
 
 ### Dropout
 
@@ -720,6 +740,8 @@ In tidymodels, you can set or tune the amount of dropout via the `dropout` argum
 Let's try `dropout = .1`.  
 
 ```{r}
+#| label: fit_dropout
+
 fit_dropout <- mlp(hidden_units = 30, activation = "relu", dropout = .1) |>
   set_mode("classification") |>  
   set_engine("keras", verbose = 0, seeds = fit_seeds) |>
@@ -757,7 +779,7 @@ Validation error is what you need to monitor
 
 - Validation error will increase when the model becomes overfit to training
 - We can have Keras hold back some portion of the training data for validation
-  - `validation_split = .1`
+  - `validation_split = 1/6`
   - We pass it in as an optional argument in `set_engine()`
   - We can use this to monitor validation error rather than training error by epoch. 
   - You can fit an exploratory model with `epochs = 50` to review the plot
@@ -774,11 +796,15 @@ NOTE:
 - `metrics = c("accuracy")`
 - `validation_split = 1/6`
 - You will see message updates and a plot that tracks training and validation loss and accuracy across epochs
-- This (currently) is not knitted into my web book but the plot and messages are pretty clear
+- This is not rendered into my slides but the plot and messages are pretty clear
 - You can use this information to choose appropriate values for `epoch`
 - `val_accuracy` had plateau and `val_loss` had started to creep up by 10 epochs.
 
 ```{r}
+#| label: fit_epochs50
+#| message: false
+#| output: false
+
 fit_epochs50 <- mlp(hidden_units = 30, activation = "relu", epochs = 50) |>
   set_mode("classification") |>  
   set_engine("keras", verbose = 1, seeds = fit_seeds, 
@@ -804,10 +830,9 @@ Callbacks allow us to interrupt training.
 - We set up callbacks in a list
 - We pass them in as an optional argument in `set_engine()` using `callbacks = `
 - Notice the arguments for `callback_early_stopping()`
-- We also must provide validation error.  Here we set `validation_split = .1`
+- We also must provide validation error.  Here we set `validation_split = 1/6`
 - This is a method to **tune or select** best number of epochs.  
-  - I haven't yet figured out where the epochs at termination are saved so need to 
-  watch the feedback.  It was 35 epochs here
+  - I haven't yet figured out where the epochs at termination are saved so need to watch the feedback.  It was 35 epochs here
   - As always, we **could** next refit to the full training set after we have determined the optimal number of epochs.  We won't do that here.
 
 -----
@@ -821,6 +846,10 @@ callback_list <- list(keras::callback_early_stopping(monitor = "val_loss",
 ```
 
 ```{r}
+#| label: fit_early
+#| message: false
+#| output: false
+
 fit_early <- mlp(hidden_units = 30, activation = "relu", epochs = 200) |>
   set_mode("classification") |> 
   set_engine("keras", verbose = 1,
@@ -866,7 +895,7 @@ Developing a good network artchitecture and considering feature enginnering opti
 Here is an example where we can select among many model configurations that differ across multiple network characteristics
 
 - Evaluate with validation split accuracy 
-- Sample size is relatively big so we have 1000 validation set observations.  Should offer a low variance performance estimate
+- Sample size is relatively big so we have 10,000 validation set observations.  Should offer a low variance performance estimate
 - K-fold and bootstrap would still be better but big computation costs (too big for this web book but could be done in real life!)
 
 -----
@@ -883,7 +912,7 @@ splits_validation <-
 
 -----
 
-- Set up gride of hyperparameter values
+- Set up grid of hyperparameter values
 ```{r}
 grid_keras <- expand_grid(hidden_units = c(5, 10, 20, 30, 50, 100), 
                           penalty = c(.00001, .0001, .01, .1))
@@ -893,7 +922,11 @@ grid_keras <- expand_grid(hidden_units = c(5, 10, 20, 30, 50, 100),
 
 - Use `tune_grid()` to fit models in training and predict into validation set for each combination of hyperparameter values
 ```{r}
-fits_nn <- mlp(hidden_units = tune(), penalty = tune(), activation = "relu") |>
+#| label: fits_nn
+
+fits_nn <- cache_rds(
+  expr = {
+    mlp(hidden_units = tune(), penalty = tune(), activation = "relu") |>
     set_mode("classification") |> 
     # setting to verbose = 1 to track progress.  Training error not that useful
     set_engine("keras", verbose = 1, seeds = fit_seeds) |>  
@@ -901,6 +934,10 @@ fits_nn <- mlp(hidden_units = tune(), penalty = tune(), activation = "relu") |>
                   grid = grid_keras,
                   resamples = splits_validation,
                   metrics = metric_set(accuracy))
+  },
+  rerun = rerun_setting,
+  dir = "cache/010/",
+  file = "fits_nn")
 ```
 
 -----
@@ -963,6 +1000,7 @@ For now, if you want another optimizer or much more control over your network ar
 ## Discussion Notes
 
 0. Keras and tidymodels
+
   - power/flexibility vs. simplicity
   - `nnet` package
 

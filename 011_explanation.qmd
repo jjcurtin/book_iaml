@@ -1,5 +1,4 @@
-# Model Comparisons and Other Explanatory Goals
-
+# Explanatory Approaches 
 
 ## Overview of Unit
 
@@ -59,3 +58,1199 @@ Post questions to the application_assignments Slack channel
 
 Submit the application assignment [here](https://canvas.wisc.edu/courses/395546/assignments/2187693) and complete the[unit quiz](https://canvas.wisc.edu/courses/395546/quizzes/514055) by 8 pm on Wednesday, April 10th 
 
+***
+
+Basic setup
+```{r u9-overview-1, warning=FALSE, message=FALSE}
+library(iml) # NEW: for feature importance, plots, etc
+library(tidyposterior) # NEW: for perf_mod()
+
+library(skimr)
+library(tidyverse)
+library(tidymodels)
+
+theme_set(theme_classic())
+
+# source class functions
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+
+# handle paths
+library(here)
+path_data <- "./data"
+
+# parallel processing
+library(doParallel)
+cl <- makePSOCKcluster(parallel::detectCores(logical = FALSE))
+registerDoParallel(cl)
+```
+
+Handle additional function conflicts
+```{r conflicts}
+library(conflicted)
+tidymodels_prefer() # resolve common function conflicts
+
+conflicts_prefer(dplyr::mutate)
+conflicts_prefer(dplyr::arrange)
+conflicts_prefer(dplyr::summarize)
+conflicts_prefer(yardstick::accuracy)
+conflicts_prefer(rstanarm::logit)
+conflicts_prefer(readr::cols)
+conflicts_prefer(base::`:`)
+conflicts_prefer(broom::bootstrap)
+conflicts_prefer(svglite::font_face)
+```
+
+
+## Model Comparisons & Feature Ablation
+
+Permutation tests can be used to determine if a specific model is performing better than would be expected by chance.
+
+However, we often want to compare two models against each other.
+
+Model comparisons can also be used for explanatory goals
+
+In 610/710, you learned to think about the tests of specific parameter estimates as model comparisons of models that did vs. did not include the specific feature(s) in the model.
+
+* This can be done for a single feature (e.g., $x_3$)
+    * compact model:  $y = b_0 + b_1*x_1 + b_2*x_2$
+    * full (augmented) model: $y = b_0 + b_1*x_1 + b_2*x_2 + b_3 * x_3$
+    * The comparison of these two models is equivalent to the test of $H_0: b_3 = 0$
+* This can also involve sets of features if you hypothesis involves the effect of a set of features
+    * All features that represent a categorical predictor
+    * Set of features that represent some broad construct (e.g., psychiatric illness represented by symptoms counts for all of the major psychiatric diagnoses)
+
+* This technique of comparing two nested models (i.e. feature set for the compact model is a subset of the feature set for the full/augmented model) is often called feature ablation in the machine learning world
+
+***
+
+Model comparisons can also be done between model configurations that differ by characteristics other than their features (e.g., statistical algorithm)
+
+Model comparisons can be useful to determine the best available model configuration to use for a prediction goal
+
+* In some instances, it is OK to simply choose the descriptively better performing model configuration (e.g., better validation set or resampled performance estimate)
+* However, if the descriptively better performing model has other disadvantages (e.g., more costly to implement) you might want to only use it if you had rigorously demonstrated that it likely better for all new data.
+
+***
+
+We will learn approaches to statistically compare models
+
+* Traditional frequentist (NHST) approach using a variant of the t-test to accommodate correlated observations
+* A Bayesian alternative to the t-test
+
+We will compare model configurations formed by feature ablation but nothing would be different if these model configurations different by other characteristics such as statistical algorithm
+
+
+### An Empirical Example
+
+The context for our example will be the Cleveland heart disease dataset
+
+We will imagine we have developed a new diagnostic screener for heart disease based on an exercise test protocol
+
+We want to demonstrate the incremental improvement in our screening for heart disease using features from this test vs. other readily available characteristics about the patients.
+
+***
+
+Let's open the data set
+
+Our exercise test protocol yields four scores ($exer\_*$) that we use in combination to predict the probability of heart disease in the patient
+
+* Max heart hr during the exercise test
+* experience of angina during the test
+* The slope of the peak exercise ST segment (don't ask me what that is!  ;-)
+* ST depression induced by exercise test relative to rest
+
+We also have many other demographic and physical characteristics that we want to "control" for when evaluating the performance of our test
+
+* I use control in both its senses.  It likely helps to have these covariates b/c they reduce error in the outcome
+* I also want to demonstrate that our test has incremental predictive validity above these other characteristics which are already available for screening without my complicated test
+
+```{r u9-compare-1}
+data_all <- read_csv(file.path(path_data, "cleveland.csv"), col_names = FALSE, na = "?",col_types = cols()) %>% 
+  rename(age = X1,
+         sex = X2,
+         cp = X3,
+         rest_bp = X4,
+         chol = X5,
+         fbs = X6,
+         rest_ecg = X7,
+         exer_max_hr = X8,
+         exer_ang = X9,
+         exer_st_depress = X10,
+         exer_st_slope = X11,
+         ca = X12,
+         thal = X13,
+         disease = X14) %>% 
+  mutate(disease = if_else(disease == 0, "no", "yes"),
+         disease = factor(disease, levels = c("yes", "no")),  # pos event first
+         sex = factor(if_else(sex == 0, "female", "male")),
+         fbs = factor(if_else(fbs == 0, "normal", "elevated")),
+         exer_ang = factor(if_else(exer_ang == 0, "no", "yes")),
+         exer_st_slope = dplyr::recode(exer_st_slope, 
+                                       `1` = "upslope", 
+                                       `2` = "flat", 
+                                       `3` = "downslope"),
+         exer_st_slope = factor(exer_st_slope),
+         cp = dplyr::recode(cp, 
+                            `1` = "typ_ang", 
+                            `2` = "atyp_ang", 
+                            `3` = "non_anginal", 
+                            `4` = "non_anginal"),
+         cp = factor(cp),
+         rest_ecg = dplyr::recode(rest_ecg, 
+                                  `0` = "normal", 
+                                  `1` = "wave_abn", 
+                                  `2` = "ventric_hypertrophy"),
+         rest_ecg = factor(rest_ecg),
+         thal = dplyr::recode(thal, 
+                              `3` = "normal", 
+                              `6` = "fixeddefect", 
+                              `7` = "reversabledefect"),
+         thal = factor(thal)) %>% 
+  glimpse()
+```
+
+***
+
+The dataset is not that large and we have a decent number of features so we will build models using regularized logistic regression (glmnet)
+
+It would be better to actually do some exploration to build the best compact model first but we will skip that part of the analysis here
+
+Here is a feature engineering recipe for the full model with all features that is appropriate for glmnet
+
+```{r u9-compare-2}
+rec_full <- recipe(disease ~ ., data = data_all) %>% 
+  step_impute_median(all_numeric_predictors()) %>% 
+  step_impute_mode(all_nominal_predictors()) %>%   
+  step_dummy(all_nominal_predictors()) %>% 
+  step_normalize(all_predictors())
+```
+
+***
+
+Lets take a quick look at a feature matrix using all the data to make sure things are as we expect
+
+```{r u9-compare-3}
+rec_full
+
+feat_all_full <- rec_full %>% 
+  make_features(data_all, data_all, FALSE) %>% 
+  skim_tee()
+```
+
+*** 
+
+We are using glmnet so we need to find the optimal set of hyperparameter values for this model configuration
+
+Let's select/tune hyperparameters using bootstrap resampling
+
+```{r u9-compare-4}
+set.seed(123456)
+splits_boot <- data_all %>% 
+  bootstraps(times = 100, strata = "disease")
+```
+
+```{r u9-compare-5}
+grid_glmnet <- expand_grid(penalty = exp(seq(-8, 2, length.out = 300)),
+                           mixture = c(0, .025, .05, .1, .2, .4, .6, .8, 1))
+fits_full <- 
+  logistic_reg(penalty = tune(),
+               mixture = tune()) %>% 
+  set_engine("glmnet") %>% 
+  tune_grid(preprocessor = rec_full,
+            resamples = splits_boot,
+            grid = grid_glmnet,
+            metrics = metric_set(accuracy))
+```
+
+***
+
+Let's check how the models perform (bootstrap resampled accuracy) with various values for the hyperparameters
+
+Here is accuracy by log penalty (lambda) and mixture (alpha)
+
+
+```{r u9-compare-6}
+fits_full %>% 
+  plot_hyperparameters(hp1 = "penalty", hp2 = "mixture", metric = "accuracy", log_hp1 = TRUE)
+
+exp(-8)
+```
+
+`r colorize("Does the glmnet (regularized logistic regresssion) outperform a simple logistic regression?  How would these two algorithms compare?", "red")` ^[Remember that the linear model is a special case of glmnet where the penalty = 0.  Here we are looking log penalty down to -8, or `r exp(-8)`.  That is pretty close to 0 so an approximation of how the standard logistic regression would perform.  glmnet is about 2% more accurate with its optimal hyperparameter values]
+
+***
+
+Here are the optimal hyperparameter values
+```{r u9-compare-7}
+collect_metrics(fits_full) %>% 
+  arrange(desc(mean)) %>% 
+  print(n = 10)
+
+(hp_best_full <- select_best(fits_full, n = 1))
+```
+
+***
+
+Let's fit this model to the full sample 
+```{r u9-compare-8}
+fit_full <- 
+  logistic_reg(penalty = hp_best_full$penalty,
+               mixture = hp_best_full$mixture) %>% 
+  set_engine("glmnet") %>% 
+  fit(disease ~ ., data = feat_all_full)
+```
+
+We don't care too much about objective performance in our situation.  That is not our question.
+
+* Same sample accuracy is comparable to what you would normally have if you weren't in a machine learning context
+* Bootstrapped accuracy is better because it is prediction in new data vs. same sample
+* K-fold would be less biased than bootstrap if we cared about performance of the overall model
+* Some optimization bias using either k-fold or bootstrapped accuracy to both select hyperparameters AND assess performance of best model
+* If we really cared about overall performance, we should have held back a test set (or done nested CV)
+
+```{r u9-compare-9}
+accuracy_vec(feat_all_full$disease, predict(fit_full, feat_all_full)$.pred_class)
+
+collect_metrics(fits_full) %>% 
+  arrange(desc(mean)) %>% 
+  print(n = 1)
+```
+
+
+
+Our focal question is NOT how well our full model does.  It is how much do scores from our exercise test improve prediction above baseline (with baseline being all other available characteristics).  
+
+We need to use **feature ablation** to form a compact/reduced model that does not include the features associated with our exercise test
+
+Here is a recipe to feature engineer features associated with this compact model
+
+Note: `step_rm(contains("exer_")`
+
+All else is the same
+
+
+```{r u9-compare-10}
+rec_compact <- recipe(disease ~ ., data = data_all) %>% 
+  step_rm(contains("exer_")) %>%                    # remove key feature(s)
+  step_impute_median(all_numeric_predictors()) %>% 
+  step_impute_mode(all_nominal_predictors()) %>%   
+  step_dummy(all_nominal_predictors()) %>% 
+  step_normalize(all_predictors())
+```
+
+***
+
+We need to select/tune hyperparameters for this new model.  It has different complexity that the full model so might need different regularization for optimal performance.
+
+```{r u9-compare-11}
+fits_compact <- 
+  logistic_reg(penalty = tune(),
+               mixture = tune()) %>% 
+  set_engine("glmnet") %>% 
+  tune_grid(preprocessor = rec_compact,   # use recipe for compact model
+            resamples = splits_boot,  
+            grid = grid_glmnet,
+            metrics = metric_set(accuracy))
+```
+
+Confirm that we found a good set of hyperparameters
+```{r u9-compare-12}
+fits_compact %>% 
+  plot_hyperparameters(hp1 = "penalty", hp2 = "mixture", metric = "accuracy", log_hp1 = TRUE)
+
+collect_metrics(fits_compact) %>% 
+  arrange(desc(mean)) %>% 
+  print(n = 10)
+
+(hp_best_compact <- select_best(fits_compact, n = 1))
+```
+
+Fit this compact model configuration to the full dataset
+```{r u9-compare-13}
+feat_all_compact <- rec_compact %>% 
+  make_features(data_all, data_all, FALSE) 
+
+fit_compact <- 
+  logistic_reg(penalty = hp_best_compact$penalty,
+               mixture = hp_best_compact$mixture) %>% 
+  set_engine("glmnet") %>% 
+  fit(disease ~ ., data = feat_all_compact)
+```
+
+***
+
+Here are accuracies for full and compact models in full sample where models were fit
+```{r u9-compare-14}
+accuracy_vec(feat_all_full$disease, predict(fit_full, feat_all_full)$.pred_class)
+accuracy_vec(feat_all_compact$disease, predict(fit_compact, feat_all_compact)$.pred_class)
+```
+
+Here are accuracies for these two models assessed by bootstrap resampling
+```{r u9-compare-15}
+collect_metrics(fits_full) %>% 
+  arrange(desc(mean)) %>% 
+  slice(1)
+
+collect_metrics(fits_compact) %>% 
+  arrange(desc(mean)) %>% 
+  slice(1)
+```
+
+It is less accurate but.....
+
+* A simple descriptive comparison is not sufficient to justify the use of a costly test
+
+* We need to be more confident that the test really improves screening in all possible held out samples.
+
+* And by how much?
+
+* How can we compare these two models?
+
+
+### Nadeau and Bengio (2003) Correlated t-test
+
+We have 100 bootstrapped accuracies for each model.
+
+Could we compare these?
+
+* We used the bootstrap but if we wanted a less biased estimate we could (should?) have used k-fold
+  * We could do 10 repeats of 10-fold to still obtain 100 performance estimates for each model configuration
+
+* We have used the same 100 held-out samples (we used the same splits) so these two sets of accuracies (for each of the two models) should be considered paired/repeated.   
+  * Not a problem, we could use paired samples t-test
+  * Easiest to thing about this paired test as testing if the differences in accuracy for each of the 100 held out sets == 0.  That removes the lack of independence from using the sample 100 held-out sets twice
+  * BUT these 100 differences are still not independent
+  * Each have been estimated using models that were fit with overlapping observations (the held in sets were fit with many of the same observations for each of the k-1 held in folds)
+  * If we ignore this violation and simply do a paired-samples t-test, we will have inflation of alpha
+
+***
+
+@Nadeau2003 ([see pdf](pdfs/nadeauC2003.pdf)) and @Bouckaert2003 ([see pdf](pdfs/bouckaertR2003.pdf)) have explored the degree of dependence among performance estimates using resampling.   
+
+This was originally done for repeated random train/test splits (e.g., 90/10 splits) but is now also used when doing repeated k-fold.
+
+The classic paired t-test has the following formula
+
+$t = \frac{\overline{x} - 0}{\sqrt{\hat{\sigma^2}*\frac{1}{n}}}$
+
+The standard error for the difference (denominator of the t-statistic formula) is too small
+
+It is adjusted by $\frac{\rho}{1-\rho}$ where $\rho = \frac{n_{test}}{n_{total}}$ or equivalent $\frac{1}{k}$
+
+
+This adjustment yields:
+
+
+$t = \frac{\overline{x} - 0}{\sqrt{\hat{\sigma^2}*(\frac{1}{n} + \frac{\rho}{1-\rho})}}$
+
+
+***
+
+Let's perform this correlated t-test to compare our compact and full models
+
+We first need to evaluate both models using 10x 10-fold CV splits.  Important that these are the SAME splits for both model configurations
+```{r u9-compare-16}
+set.seed(2468)
+splits_cv <-
+  data_all %>% 
+  vfold_cv(v = 10, repeats = 10, strata = "disease")
+```
+
+***
+
+Here is k-fold accuracy for the full model
+
+```{r u9-compare_full-17}
+# NOTE:  I cant get this to accept anything but the actual numeric values for 
+# penalty and mixture. Not sure why.   If no one else solves this problem, 
+# I will simplify to a reprex and submit a bug report
+cv_full <- 
+  logistic_reg(penalty = 0.2132798, 
+               mixture = 0.2) %>% 
+  set_engine("glmnet") %>% 
+  fit_resamples(preprocessor = rec_full,  
+            resamples = splits_cv,
+            metrics = metric_set(accuracy))
+
+collect_metrics(cv_full, summarize = TRUE)
+
+collect_metrics(cv_full, summarize = FALSE)
+
+collect_metrics(cv_full, summarize = FALSE)$.estimate
+```
+
+Here is k-fold accuracy for the compact model
+```{r u9-compare-18}
+cv_compact <- 
+  logistic_reg(penalty = 0.2606748,
+               mixture = 0.2) %>% 
+  set_engine("glmnet") %>% 
+  fit_resamples(preprocessor = rec_compact,  
+            resamples = splits_cv,
+            metrics = metric_set(accuracy))
+
+collect_metrics(cv_compact, summarize = TRUE)
+
+collect_metrics(cv_compact, summarize = FALSE)$.estimate
+```
+
+***
+
+Define a function for Nadeau and Bengio (2003) correlated t-test
+```{r u9-compare-19}
+# included in fun_ml.R
+nb_correlated_t_test <- function(cv_fits_full, cv_fits_compact, k = 10){
+
+    cv_metrics_full <- collect_metrics(cv_fits_full, summarize = FALSE)$.estimate
+    cv_metrics_compact <- collect_metrics(cv_fits_compact, summarize = FALSE)$.estimate
+    diffs <- cv_metrics_full - cv_metrics_compact
+    n <- length(diffs)
+    mean_diff <- mean(diffs)
+    var_diffs <- var(diffs)
+    proportion_test <- 1 / k
+    proportion_train <- 1 - proportion_test
+    correction <- (1 / n) + (proportion_test / proportion_train)
+    se = sqrt(correction * var_diffs)
+
+    t = abs(mean_diff/se)
+    p_value <- 2 * pt(t, n - 1, lower.tail = FALSE)
+    tibble(mean_diff = mean_diff, se = se, t = t, df = n - 1, p_value = p_value)
+}
+```
+
+*** 
+
+Calculate the t-test.  In this instance we likely want a one-tailed test (though of course, that should have been planned in advanced and ideally pre-registered!).   My function returns a two-tailed p-value so we should cut it in half.
+```{r u9-compare-20}
+nb_correlated_t_test(cv_fits_full = cv_full, 
+                     cv_fits_compact = cv_compact, 
+                     k = 10)
+
+```
+
+The improvement in prediction accuracy associated with the use of our exercise test protocol is significant (one-tailted).
+
+These data are unlikely if the full and compact models had the same accuracy.  
+
+### Bayesian estimation for model comparisons
+
+@Benavoli2017 critique the many shortcomings wrt the frequentist approach, and I must admit, I am mostly convinced
+
+* NHST does not provide the probabilities of the null and alternative hypotheses.   
+  * That is what we want
+  * NHST gives us the probability of our data given the null
+* NHST focuses on a point-wise comparison (no difference) that is almost never true.
+* NHST yields no information about the null hypothesis (i.e., when we fail to reject)
+* The inference depends on the sampling and testing intention (think about Bonferonni correction)
+
+***
+
+They suggest to use Bayesian parameter estimation as alternative to the t-test.  Bayesian estimation has now been included in tidymodels in the `tidyposterior` package using the `perf_mod()` function.  
+
+
+You can (and should!) read more about this implementation of Bayesian Estimation in the associated [vignette](https://tidyposterior.tidymodels.org/articles/Getting_Started.html) AND by reading the help materials on `perf_mod()`
+
+***  
+
+Using this approach, we will estimate the posterior probability for values associated with specific parameters of interest.  For our goals, we will care about estimates of three parameters
+
+* The accuracy of the full model
+* The accuracy of the compact model
+* The difference in accuracies between these two models.
+
+We want to determine the posterior probabilities associated with ranges of values for each of these three model performance parameters estimates.   We can then use these posterior probability distributions to determine that probability that the accuracy of the full model is greater than the accuracy of the compact model.  
+
+In addition, we can also determine if the increased accuracy of the full model is meaningful (i.e., practically important).
+
+To accomplish this latter goal, we will: 
+
+* Specify a Region of Practical Equivalence (a better alternative to the point-wise null in NHST)
+  * I will define classifiers whose performance are within +-1% as equivalent (not meaningfully different from each other) for our example   
+  * Not worth the effort if my test doesn't improve screening accuracy by at least this
+
+*** 
+
+To estimate posterior probabilities for these three parameter estimates, we need to 
+
+* set prior probabilities for these parameter estimates.  These should be broad/uninformative in most instances unless you have substantial prior information about credible values.  
+* Collect data on these estimates.  This will be the same as before - the 100 estimates of accuracy using 10x10 fold CV for both the full and compact models.
+
+Using these priors and these data, we can derive the posterior probabilities for our three performance estimates
+
+*** 
+
+Lets do this step by step.  We will use the `tidyposterior` package that we previously loaded.  
+
+
+We need to make a dataframe of our 100 performance estimates for the full and compact models.  Here is the code to do this using our previous resamples of our models
+
+* Make dataframes of the accuracies from the full model and the compact model
+```{r}
+accuracy_full <-
+  collect_metrics(cv_full, summarize = FALSE) %>%
+  filter(.metric == "accuracy") %>%
+  select(id, id2, full = .estimate) %>% 
+  print()
+
+
+accuracy_compact <-
+     collect_metrics(cv_compact, summarize = FALSE) %>%
+     filter(.metric == "accuracy") %>%
+     select(id, id2, compact = .estimate)
+```
+
+* join these dataframes, matching on repeat and fold ids
+
+```{r}
+resamples <- accuracy_full %>% 
+  full_join(accuracy_compact, by = c("id", "id2")) %>% 
+  print
+```
+
+***
+Now we can use `perf_mod()` to derive the posterior probabilites for the accuracy of each of these two models
+
+* We need to specify a model with parameters in formula.  Here we indicate that we have a multi-level model with repeated observation of accuracy across folds (id2) nested within repeats (id).  This handles dependence associated with repeated observations of accuracy using similar models in k-fold cv.
+
+* We are interested in the intercept from this model listed in formula.  The intercept value will represent the accuracy estimate for each model.
+
+* The default for `perf_mod()` will be to constrain the variances of the intercept parameter estimate to be the same across models.  This may be fine for some performance metrics (e.g., rmse) but for binary accuracy the variance is dependent on the mean.  Therefore we allow these variances to be different using `hetero_var = TRUE`
+
+* In some instances (e..g., rmse), we may want to allow the errors in our model to be something other than Gaussian (though this is often a reasonable assumption by the central limit theorem).  You can change the `family` for the errors if needed.  See vignette and help on `perf_mod()`.  Here, we use the default Gaussian distribution.
+
+* This is an iterative process using a Markov chain Monte Carlo method (Hamilton Monte Carlo) so we need to set a seed (for reproducibility), and the number of iterations and chains (beyond the scope of this course to dive into this method).  I provide default values for `iter` and `chains` because you may need to increase these in some instances for the method to converge on valid values.  You can often address converge and other warnings by increasing `iter`, `chains` or `adapt_delta`.  You can read more about these warnings and issues [here](https://mc-stan.org/misc/warnings.html), [here](https://mc-stan.org/rstanarm/reference/adapt_delta.html#:~:text=For%20the%20No%2DU%2DTurn,not%20set%20to%20%22sampling%22%20.), [here](https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup), and [here](http://singmann.org/hierarchical-mpt-in-stan-i-dealing-with-convergent-transitions-via-control-arguments/) to start.
+
+```{r u9-bayes-1}
+set.seed(101)
+pp <- xfun::cache_rds({
+
+  perf_mod(resamples, 
+          formula = statistic ~ model + (1 | id2/id),
+          # defaults but may require increases
+          iter = 2000, chains = 4,  
+          # for more Gaussian distribution of accuracy
+          transform = tidyposterior::logit_trans,
+          hetero_var = TRUE, # for accuracy
+          family = gaussian, # default but could change depending on DV
+          # increase adapt_delta (e.g., .99, .999) to 
+          # fix divergent transitions
+          adapt_delta = .99)  
+
+},
+rerun = FALSE,
+dir = "cache/",
+file = "u9-bayes-1.rds")
+```
+
+
+***
+
+In contrast to the NHST approach, we now have what we really want - posterior probabilities. Lets look at them
+
+We can view the posterior probability distributions using an autoplot method for perf_mod objects. 
+
+* These density plots tell how probable various values are for the accuracy of each model
+
+* The probabilities associated with any region of the curve is equal to the area under that curve for that region.  This will tell you the probability associated with that range of values for accuracy.
+
+* You can easily see in this instance that the probable values for accuracy are higher generally for full model than the compact model
+
+```{r default_pp_plot}
+pp %>% autoplot
+```
+
+***
+
+You will likely want to publish a figure showing these posterior probability distributions so you may want to fine tune the plots.  Here are some code options using ggplot
+
+Here is the same density plots using ggplot so  you can now edit to adjust as you like
+```{r better_pp_plot_1}
+
+pp %>% 
+  tidy(seed = 123) %>% 
+  mutate(model = forcats::fct_inorder(model)) %>%
+  ggplot() + 
+  geom_density(aes(x = posterior, color = model) )
+```
+
+We are actually sampling from the posterior distribution so it might make more sense to display these as histograms rather than density plots
+
+```{r better_pp_plot_2}
+pp %>% 
+  tidy(seed = 123) %>% 
+  mutate(model = forcats::fct_inorder(model)) %>%
+  ggplot() + 
+  geom_histogram(aes(x = posterior, fill = model), color = "white", alpha = 0.4,
+                 bins = 50, position = "identity") 
+```
+
+Or maybe you want to facet the histograms if the overlap is difficulty to view
+```{r better_pp_plot_3}
+pp %>% 
+  tidy(seed = 123) %>% 
+  mutate(model = forcats::fct_inorder(model)) %>%
+  ggplot(aes(x = posterior)) + 
+  geom_histogram(color = "white", fill = "blue") + 
+  facet_wrap(~ model, ncol = 1)
+```
+
+***
+
+We can also calculate the 95% Higher Density Intervals (aka, 95% Credible Intervals; the Bayesian alternative to the 95% Confidence Intervals) for the accuracy of each model.  This is the range of parameter estimate values that include 95% of the credible values.  Kruschke described this in the [assigned reading](pdfs/pkruschke2018a.pdf.pdf).
+```{r pp_summary}
+pp %>% tidy(seed = 123) %>% summary
+```
+
+
+***
+
+But what we really want is derive the posterior probability for the difference in accuracy between the two models.  This will let us determine credible values for the magnitude of the difference and determine if this difference is meaningful.
+
+We said early that we would define a ROPE of +-.01 around zero.  The models are only meaningful different if their accuracies differ by at least 1%
+
+Lets visualize the posterior probability distribution for the difference along with this ROPE using the built in autoplot function
+
+
+```{r pp_contrast_plot}
+pp %>% contrast_models(seed = 4) %>% autoplot(size = .01)
+```
+
+***
+
+We could make more pretty plots directly in ggplot
+
+```{r pp_contrast_plot_2}
+pp %>% 
+  contrast_models(seed = 4) %>% 
+  ggplot() +
+  geom_density(aes(x = difference), color = "blue")+
+  geom_vline(aes(xintercept = -.01), linetype = "dashed") + 
+  geom_vline(aes(xintercept = .01), linetype = "dashed")
+
+pp %>% 
+  contrast_models(seed = 4) %>% 
+  ggplot(aes(x = difference)) + 
+  geom_histogram(bins = 50, color = "white", fill = "blue")+
+  geom_vline(aes(xintercept = -.01), linetype = "dashed") + 
+  geom_vline(aes(xintercept = .01), linetype = "dashed")
+```
+
+***
+
+But perhaps most important, lets calculate the probability that the full model is more accurate than the compact model
+
+* The mean increase in accuracy is 4.14%
+* The 95% HDI is 3.01% - 5.53%
+* The probability that the full model is meaningfully higher than the compact model (i.e., what proportion of the credible values are above the ROPE) is 1.
+
+```{r pp_contrast_summary}
+pp %>% contrast_models(seed = 4) %>% summary(size = .01)
+```
+
+Alternatively, using the approach proposed by Kruschke (2018), you can conclude that the full model is meaningfully better than the compact model if the 95% HDI is fully above the ROPE.  In this instance it is (.031 - .0553 is all above .01)
+
+
+## Feature Importance
+
+There as been increasing focus on improving the interpretability of machine learning models that we are using.  There are numerous reasons to want to better understand why our models make the predictions that they do.  
+
+For our purposes, the growing set of tools to interpret our models can help address our **explanatory questions**.   But they can also help us **find errors** in our models and **detect possible bias** (we will focus explicitly on algorithmic bias in later units)
+
+***
+
+Feature importance metrics are an important tool to better understand how our models work.
+
+These metrics help us understand which features in our models contribute most to the predictions that the model makes.  
+
+For some models, interpretation and identification of important features is easy.  For example, if we standardize the variables in a glm or glmnet model, we can interpret the absolute magnitude of the parameter estimates (i.e., the coefficients) as an index of the global (i.e., across all observations) importance of each feature.  
+
+But for other models, we need different approaches.  There are many approaches to quantify the importance of a feature, but we will focus on two that are model agnostic (i.e., can be used across all statistical algorithms)
+
+* Permutation Feature Importance
+* Shapley Values
+
+***
+
+We will use the `iml` package that was released along with @IML to calculate these variable importance metrics.
+
+You can get more help on the use the functions in `iml` in this [vignette](https://cran.r-project.org/web/packages/iml/vignettes/intro.html)
+
+***
+
+Lets first get some coding issues accomplished before we dig into the details of the two feature importance metrics
+
+To calculate these metrics, the `iml` functions will need access to the raw features and outcome. Lets get those again.
+
+```{r get_data}
+feat <- rec_full %>% 
+  make_features(data_all, data_all, FALSE)
+
+x <- feat %>% select(-disease)  # x features
+y <- feat %>% select(disease) # outcome
+```
+
+***
+
+We will also need a predictor function to allow the `iml` functions to make predictions using the model.  
+
+This is a bit more complicated for classification models because we have to first make a wrapper around `predict()` so that it returns class probabilities rather than class label predictions, which is otherwise the default.  Then we have to use that wrapper inside of the `iml` `Predictor$new()` function.   
+
+If you were calculating feature importance for a regression model, you would not need the wrapper function.
+
+```{r predictor_function}
+# only needed for classification models
+predict_wrapper <- function(model, newdata) {
+  predict(model, newdata, type = "prob") %>%  # set type = "prob" for probabilities
+    dplyr::select(yes = .pred_yes, no = .pred_no)
+  
+}
+
+# make iml predictor function
+predictor <- iml::Predictor$new(model = fit_full, 
+                           data = x, 
+                           y = y,
+                           predict.fun = predict_wrapper)  
+                           # No need to set predict.fun for regression models
+```
+
+We can now use this predictor function : `predictor` with various `iml` functions
+
+***
+
+### Permutation Feature Importance
+
+The first model agnostic approach to calculating feature important is called Permutation Feature Importance
+
+This approach is very straight forward.  This approach says - if we want to calculate the importance of any specific feature, we can compare our performance metric using the original features to the performance metric we get if we permute (i.e., shuffle) the values for the feature we are evaluating.  
+
+By randomly shuffling the values for the feature, we break the relationship between that feature and the outcome so it no longer contributes to the predictions.   If performance doesn't change much, then that feature is not important.  If performance goes down a lot, the feature is important.  We can see this relative change in performance by calculating the ratio of the permuted performance to the original performance ($\frac{permuted}{original}$) Simple!   
+
+***
+
+`FeatureImp$new()` supports many performance metrics that can be passed into `loss =` as a string (e.g., `loss = "rmse"`).  See help for a full list.
+
+`iml` doesn't directly support accuracy because it prefers "error" metrics.  As such, is supports "ce" which stands for classification error (1 - accuracy).   
+
+However, you can also pass in a function object instead if you need an unsupported performance metrix.   For example, you could use `loss = Metrics::accuracy` to use the accuracy function from the `Metrics` package.  See help for more details on the use of custom functions.
+
+I am OK with the shift to classification error as it is intuitive to talk about how much error increases when features are permuted
+
+Lets calculated these permuted feature importance values for each feature now.
+```{r u9-permute_rmse}
+imp_permute <- xfun::cache_rds({
+  
+  iml::FeatureImp$new(predictor, loss = "ce")
+
+},
+rerun = FALSE,
+dir = "cache/",
+file = "u9-permute_rmse.rds")
+```
+
+***
+
+We can use the built in plot function to display the prediction accuracy (with a 95% confidence interval) when each feature is permuted.  We see that when `ca` is permuted, classification error increases by a factor of approximately 1.3.
+
+The next most important feature is from our exercise test: `exer_ang_yes`
+
+```{r}
+imp_permute %>% plot
+```
+
+**PROGRAMMING NOTE**:  If you wanted to have more control over the plot, you can pipe the results directly into ggplot using `imp_permuate$results %>% `
+
+
+### Shapley Values
+
+Shapley values provide insight on the importance of any feature to the prediction for a single observation - often called **local importance** (vs. global importance as per the permutation feature importance measure above).
+
+Shapley values can also be used to index global importance by averaging the local shapley values for a feature across all (or a random sample) of the observations.
+
+Shapley values are derived from Coalition Game Theory.  
+
+They provide the average marginal contribution to prediction (for a single observation) of a feature value across all possible coalitions of features (combinations of sets of features from the null set to all other features).
+
+@IML provides a [detailed account](https://christophm.github.io/interpretable-ml-book/shapley.html#shapley) of the theory behind these values and how they are calculated which I will not reproduce here.
+
+***
+
+Lets calculate Shapley Values for the first observation in our dataset
+
+Their features values were
+```{r }
+obs_num <- 1
+x1 <- x %>% 
+  slice(obs_num) %>% 
+  glimpse
+```
+
+And we can get Shapley values using `Shapley$new()`
+```{r local_shapley}
+sv <- iml::Shapley$new(predictor, x.interest = x1)
+```
+
+There is a standard plot method but its not pretty and for binary classification, the plot of both levels is redundant
+```{r}
+
+sv %>% plot
+```
+
+I prefer to take control directly with the raw output and ggplot.  The raw output is in `$results`
+
+```{r}
+sv$results %>% 
+  head
+```
+
+And here is a start to a nicer plot
+
+* This participant's value for `thal_normal` increases the probability of disease by ~ .05 from the mean predicted disease probability.
+* This participant's value for `thal_reverseabledefect` decreases their probability of disease by ~ .05 from the mean predicted disease probability.
+
+
+```{r}
+sv$results %>% 
+  filter(class == "yes") %>% 
+  arrange(abs(phi)) %>% 
+  mutate(feature = factor(feature),
+         feature = forcats::fct_inorder(feature)) %>% 
+  ggplot(aes(x = feature, y = phi)) +
+  geom_col() +
+  coord_flip()
+```
+
+
+***
+
+We can use these Shapley values for the local importance of the features for each observation to calculate the global importance of these features.  
+
+Features that have big absolute Shapley values on average across observation are more important.   Let's calculate this.
+
+First we need a function to get shapley values for each observation (along with the feature values for a nicer plot)
+
+```{r global_shapley_function}
+
+get_shapley_values <- function(df1, predictor){
+  iml::Shapley$new(predictor, x.interest = df1)$results %>%
+    separate_wider_delim(feature.value, delim = "=",
+                         names = c("tmp", "feature_value")) %>%
+    dplyr::mutate(feature_value = as.numeric(feature_value)) %>%
+    dplyr::select(feature, feature_value, phi)
+}
+```
+
+And then we can map this function over observations to get the Shapley values for each observation.   
+```{r u9-global_shapley}
+local_shaps <- xfun::cache_rds({
+  
+  x %>%
+    dplyr::mutate(id = row_number()) %>%
+    nest(.by = id, .key = "dfs") %>%   # nest a dataframe for each observation
+    dplyr::mutate(shapleys = purrr::map(dfs, \(df1) get_shapley_values(df1,
+                                                                       predictor))) %>%
+    dplyr::select(-dfs) %>%
+    unnest(shapleys) 
+
+},
+rerun = FALSE,
+dir = "cache/",
+file = "u9-global_shapley.rds")
+
+local_shaps %>% head
+```
+
+**Programming note**:  This code demonstrates another nice R programming technique using `nest()` and `unnest()` in combination with `map()` and list-columns. For more info, see [this chapter](https://r4ds.had.co.nz/many-models.html) in @RDS2023 and the vignette on nesting (`vignette("nest")`).
+
+***
+
+Now that we have Shapley values for all observations, we can calculate the mean absolute Shapley value across observations and plot it.
+
+* Across all observations, `ca` contributes to an average change of .06 from the mean predicted probability of disease.
+* One of the features from our exercise test, `exer_ang_yes`, contributes about .05 change from mean predicted probability of disease.
+* The other `exer_` features are not far behind.
+
+```{r}
+local_shaps %>%
+  dplyr::mutate(phi = abs(phi)) %>%
+  group_by(feature) %>%
+  dplyr::summarize(mean_shapley = mean(phi)) %>%
+  dplyr::arrange(desc(mean_shapley)) %>%
+  dplyr::mutate(feature = factor(feature),
+         feature = forcats::fct_reorder(feature, mean_shapley)) %>%
+  ggplot(aes(x = feature, y = mean_shapley)) +
+  geom_point() +
+  coord_flip()
+```
+
+For a more advanced plot (not displayed here) we could superimpose the individual local Shapley values and color them based on the feature score.   This would allow us to show the direction of the relationship between the Shapley values and feature values.  See FIGURE 9.26 in @IML for an example of this type of plot.
+
+***
+
+Shapley values are attractive relative to other approaches because
+
+* They have a solid theoretical basis
+* Sound statistical properties (Efficiency, Symmetry, Dummy and Additivity - see @IML)
+* Can provided a unified perspective across both local and global importance.
+
+***
+
+However, they can be VERY time consuming to calculate (particularly if you want to use them for global importance such that you need them for all/many observations).  
+
+There are computational shortcuts available but even those approximately can be very time consuming.
+
+(Note that for decision tree based algorithms SHAP provides a more computationally efficient way to estimate Shapley values - see [section 9.6](https://christophm.github.io/interpretable-ml-book/shap.html) in @IML for more detail.)
+
+## Visual Approaches to Understand our Models
+
+We can also learn about how our features are used to make predictions in our models using visual approaches.   There are two key plots that we can use:
+
+* Partial Dependence (PD) Plots
+* Accumulated Local Effects (ALE) Plots
+
+
+***
+
+### Partial Dependence (PD) Plots
+
+The Partial dependence (PD) plot displays the marginal effect of a target feature or combination of features on the predictions from a model.  
+
+In essence, the prediction for any value of a target feature is the average prediction across cases if we set all cases to have that value for the target feature but their observed values for all other features.
+
+We can use PD plots to understand whether the relationship between a target feature and the outcome is linear, monotonic, or more complex.  It may also help us visualize and understand if interactions between features exist (if we make a PD plot for two target features).  
+
+
+***
+
+The PD Plot is attractive because 
+
+* it is easy to understand (prediction for each feature value averaged across observed values for all other features)
+* if the target feature is uncorrelated with all other features, its interpretation is clear, it is how the average prediction changes as the target features changes values.
+* it is computationally easy to implement
+* it has a causal (for the model, not the real world!) interpretation. This is what happens to the predciction if we manipulate the values of the target feature but hold all other features constant at their observed values.
+
+***
+
+However:
+
+* The assumption that the target feature is not correlated with the other features is likely unrealistic in many/most instances
+* This plot (but also other plot methods) are limited to 1 - 2 features in combination.
+* It may hide effects when interactions exist
+
+
+### Accumulated Local Effects (ALE) Plots
+
+If the features are correlated, the partial dependence plot should not be used because the plots will otherwise be based on combinations of the target feature and other features that may never occur (given the feature correlations).
+
+Molnar describes how this problem of correlated features and unrealistic combinations of features can be solved by M-Plots that plot the average effect of a target feature using the conditional values on other features (i.e., only using realistic values for the other features based on their correlations with the target feature).  Unfortunately, this too is sub-optimal because it will confound the effect of the target feature with the effects of the other features that are correlated with it.
+
+Accumulated Local Effects (ALE) plots also use conditional values of other features to solve the correlated features problem.  However, ALE plots solve the confounding problem by calculating **differences** in predictions associated with changes in the target feature rather than average predictions for each value of that target feature. These differences hold the other features values (mostly) constant to remove their effects.  
+
+ALE plots are the preferred plot in situations where  you expect your target feature to be correlated with other features (which is likely most situations.)
+
+***
+
+We will use the `iml`  package that accompanies @IML to make PD and ALE plots.
+
+The code is very straight-forward.  Here we get the predicted values for an ALE plot to examine the effect of one of the features from our exercise test (`exer_max_hr`) on disease probabilities. 
+
+If we wanted a PD plot, we could simply substitute `pdp` for `ale`
+
+```{r pdp_plots}
+ale <- iml::FeatureEffect$new(predictor,
+                  feature = "exer_max_hr",
+                  method = "ale",  # or pdp
+                  grid.size = 30)
+```
+
+***
+
+There is a default plot function that can be used.  It combines the ale/pd plot with a rug plot to show the distribution of values for the target feature.  However, by default, it displays separate plots for all levels of a categorical outcome.   This makes sense if your categorical outcome has three or more levels but not for a binary outcome
+
+```{r}
+ale %>% plot
+```
+
+***
+
+With two levels for the outcome, it is redundant.  In this instance, you can make your own plot.  You might also do this to gain more control over the plot.
+
+We need a dataframe for the raw values of the target feature for the rug plot.  We also need values for y for the rug plot but I dont plan to show them so I set those to constant (0).
+
+```{r}
+# for the rug
+feature_values <- x %>% dplyr::select(exer_max_hr) %>% 
+  dplyr::mutate(.value = 0) %>% 
+  glimpse()
+
+ale$results %>% 
+  filter(.class == "yes") %>% 
+  ggplot() +
+  geom_line(mapping = aes(x = exer_max_hr, y = .value)) + 
+  geom_rug(mapping = aes(x = exer_max_hr, y = .value),
+           data = feature_values,
+           sides = "b", position = "jitter", alpha = 0.5) +
+  scale_y_continuous(limits = c(-.10, .15))
+```
+
+
+## Detecting Interactions
+
+We can explore the magnitude of interactions among our features as well to better understand our model.  
+
+We can estimate the magnitude of the interaction using the H-statistic, developed by [Friedman and Popescu (2008)](https://arxiv.org/abs/0811.1679).
+
+The H-statistic quantifies proportion of total variance in the predictions that is explained by the interactions.
+
+We can calculate that for total variance across all the (two-way) interactions a feature can have with other features or we can look all the specific two-way interactions individually for a target feature.  Lets look at both.
+
+```{r u9-all_interactions}
+int_all <-xfun::cache_rds({
+  
+  iml::Interaction$new(predictor) 
+  
+},
+rerun = FALSE,
+dir = "cache/",
+file = "u9-all_interactions")
+```
+
+Here is the default plot for each features total interactions across all other features
+```{r}
+int_all %>%  plot
+```
+
+And a clearer plot
+```{r}
+int_all$results %>% 
+  dplyr::filter(.class == "yes") %>% 
+  dplyr::arrange(abs(.interaction)) %>% 
+  dplyr::mutate(.feature = factor(.feature),
+         .feature = forcats::fct_inorder(.feature)) %>% 
+  ggplot() +
+  geom_col(mapping = aes(x = .feature, y = .interaction))  +
+  ylab("H-stasitic") +
+  coord_flip()
+```
+
+And here are all the interactions with the `exer_max_hr` feature. 
+```{r specific_interactions}
+int_one <- iml::Interaction$new(predictor, feature = "exer_max_hr") 
+```
+
+```{r}
+int_one$results %>%   
+  dplyr::filter(.class == "yes") %>%
+  dplyr::arrange(abs(.interaction)) %>% 
+  dplyr::mutate(.feature = factor(.feature),
+         .feature = forcats::fct_inorder(.feature)) %>% 
+  ggplot() +
+  geom_col(mapping = aes(x = .feature, y = .interaction))  +
+  ylab("H-stasitic") +
+  coord_flip()
+```
+
+
+Cleveland plots are sometimes considered easier to view than bar plots and could have been used for many of the above graphs.  Here is an example of a Cleveland plot for the H-statistic
+
+```{r}
+int_one$results %>%   
+  filter(.class == "yes") %>%
+  dplyr::arrange(abs(.interaction)) %>% 
+  dplyr::mutate(.feature = factor(.feature),
+         .feature = forcats::fct_inorder(.feature)) %>% 
+  ggplot(mapping = aes(x = .feature, y = .interaction)) +
+  geom_point(size = 2, color = "red") +
+  geom_segment(aes(x = .feature, y = .interaction, xend = .feature), yend = 0, colour = "grey50")  +
+  ylab("H-stasitic") +
+  coord_flip()
+```
+
+
+## Summary and Closing Thoughts
+
+When pursuing purely explanatory goals with machine learning methods, we can: 
+
+* Use resampling with the full dataset to determine appropriate model configuration
+  * Best statistical algorithm
+  * Which covariates
+  * Other "researcher degrees of freedom" such as handling of outliers, transformations of predictors
+
+* Use permutation test for a test that is analogous to the linear model test of R^2^
+  * Useful if we have a question about our full set of features
+
+* Use model comparisons (Frequentist or Bayesian) in combination with feature ablation to test effect of feature or set of features
+
+* We can use feature importance measures (permutation or Shapley) to understand the contributions that various features make to prediction for an observation (local) or across observations (global)
+
+* We can explore the shape (and magnitude?) of relationships using PD and ALE plots
+
+* We can explore the strength of interactions among our features
+
+
+## Discussion
+
+### Annoucements
+
+* Review conceptual exam
+* RMD files
+
+
+### Questions
+
+#### ALE and PD plots
+- What is the difference between PD plot and ALE plot? And when should we use they for specific?
+
+- I am still confused about partial dependence plots and ale plots and when we want to use them. 
+
+- I am confused about the question in the unit 9 quiz. when you have moderate or stronger correlations among your features, ALE and M-plots both could be used to visualize the effects of your features on the outcome. Based on the web book, we learned that M-plot is sub-optimal, which means we better use ALE right? and M-plots are not recommended. 
+
+#### Prediction vs. explanation
+- I think it would be useful to talk about how to use these same models that we have been building for explanatory purposes rather than predictive ones. Is that when interpretability matters most? I feel like some of the reading on interpretability contradicted what we talked about earlier on in the semester about how in a predictive model, interpretability doesn't necessarily matter.
+
+- It seems that there is a trade-off regarding interpretability. How to make a good decision about the degree of the interpretability so that the system will be not manipulated when there is a misalignment/mismatch between the goals of the creator and the user? 
+
+- If I understood correctly, interpretability/explainability is about the model predictions, while comprehensibility is about users' understanding of the explanations. Transparency is about the algorithms. These concepts are kind of confusing. It would be nice if you could help us distinguish them more conceptually. 
+
+#### Permutation test
+
+- Mathematically, is there not a way to estimate what the accuracy would be even if there were not a relationship between predictors and outcome? Wouldn't the estimated accuracy simply be the proportion of observations in the dominant class? I guess I do not see why the permutation test is necessary, then.
+
+- shuffling a feature's values removes the relationship between that feature and the outcome, and I think the prediction error of the model increases. 
+
+#### Bayesian estimation
+
+- In case of unit 9, K-fold is preferred, the question goes how to balance the choice between K-fold and bootstrap?
+
+- What's are prior posterior probabilities?
+
+- HDI and ROPE.
+
+- I'm still a little confused about HDI values. I understand that when HDI values are above the ROPE it tells us that our full model is meaningfully better than our compact model, but I don't understand what the HDI values themselves represent or how they are calculated.
+
+- If there’s no difference between our model’s performance and the performance of a similar model in a permuted dataset, (how) can we distinguish whether that’s because there’s no signal in our predictors or because our model failed to exploit that signal?
+
+- I am especially confused about Bayesian estimation for model comparisons. Does convergence mean that the best parameters for the model have been found, and why do we do this specifically with Bayesian estimation
+
+#### Shapley values
+
+- I think I just need a deep dive into shapely values
+
+- What are shapley values and how do we interpret them?
+
+- Revisiting Shapley values
+
+- Since Shapley values average across all possible coalitions, do they implicitly take into account interactions?
+
+#### Interations and H-Statistic
+
+- The IML book says “The H-statistic has a meaningful interpretation: The interaction is defined as the share of variance that is explained by the interaction.” But one thing I’m confused about: what variance are we talking about here (i.e., the share of variance in what)? 
+
+- In particular, I'm confused about how to interpret the H-statistic in the context of looking at all 2-way interactions with a specific feature, since sometimes those interaction strengths with that feature seem to sum to more than the overall interaction strength for that feature (e.g., looking at figures 8.20 and 8.21 in the IML book), and I don't know how that would be. 
+
+- After detecting interactions, what should we do as the next step? Is that possible to detect three-way interactions?
+
+- Can we go over more details about detecting interactions?
+
+- could you explain more about Friedman’s H-statistic
