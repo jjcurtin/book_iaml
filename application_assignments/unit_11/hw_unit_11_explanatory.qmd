@@ -1,5 +1,5 @@
 ---
-title: "Homework Unit 9: Model Comparisons and Other Explanatory Goals"
+title: "Homework Unit 11: Model Comparisons and Other Explanatory Goals"
 author: "Your name here"
 date: "`r lubridate::today()`"
 format: 
@@ -14,19 +14,19 @@ editor_options:
 
 ## Introduction
 
-To begin, download the following from the course web book (Unit 9):
+To begin, download the following from the course web book (Unit 11):
 
-* `hw_unit_9_explanatory.qmd` (notebook for this assignment)
+* `hw_unit_11_explanatory.qmd` (notebook for this assignment)
 
-* `admissions_full.csv` (data for this assignment)
+* `student_perf_cln.csv` (data for this assignment)
 
-The data for this week's assignment have information about admissions to a masters program. 
+The data for this week's assignment have information about student performance in math.  
 
-The data will be cleaned using code included for you below, and you don't need to do any modeling EDA to keep the assignment from getting too long. *However, you should still always be checking your data as you progress through the assignment!* We have described the specific steps you'll take to implement the recipes.
+The data will be cleaned using code included for you below, and you don't need to show any modeling EDA to keep the assignment from getting too long. *However, you should still always be checking your data as you progress through the assignment!* We have described the specific steps you'll take to implement the recipes.
 
-In this assignment, you will practice comparing models to determine the importance of a focal variable. In particular, you will be determining whether GRE score matters for gaining admission to graduate school. You will then use the Bayesian approach to evaluate the effect of that focal variable. 
+In this assignment, you will practice comparing models to determine the importance of a pair of focal variables. In particular, you will be determining whether parental education level (`mother_educ` and `father_educ`) matter for predicting student performance. You will then use the Bayesian approach to evaluate the effect of that focal variable. 
 
-To reduce run time we are not going to do any hyperparameter tuning and will only be using 20 splits (2 repeats of 10 fold cv), *but remember in real world applications you would be fitting many more models*. Remember that setting up parallel processing will also dramatically reduce your run times.   
+To reduce run time we are not going to do any hyperparameter tuning. We will be using 30 splits (3 repeats of 10 fold cv). Remember that setting up parallel processing and using `cache_rds()` will dramatically reduce your run times.   
 
 Let's get started!
 
@@ -45,23 +45,22 @@ Set up your notebook in this section. You will want to set your path and initiat
 
 ## Read in your data
 
-Read in the `admissions_full.csv` data file using this code to clean and glimpse it.
+Use this code chunk to read in the `student_perf_cln.csv` data file and class your focal variables. Check data as needed to be sure everything looks good!
 ```{r}
-data_all <- read_csv(here(path_hw_unit_9, "admissions.csv"),
-                     col_types = cols()) %>% 
-  clean_names(case = "snake") %>% 
-  rename(statement_quality = sop, letter_quality = lor,
-         research_experience = research, id = serial_no) %>% 
-  mutate(across(where(is.character), tidy_responses)) %>% 
-  mutate(across(where(is.character), as_factor)) %>% 
-  glimpse()
+data_all <- read_csv(here::here(path_data, "student_perf_cln.csv"),
+                     col_types = cols()) 
+
+focal_levels <- c("none", "primary", "middle", "secondary", "higher")
+data_all <- data_all |> 
+  mutate(across(ends_with("_educ"), ~ factor(.x, levels = 0:4, labels = focal_levels)),
+         across(where(is.character), as_factor)) 
 ```
 
 ## Set up splits
 
 ### Divide data into train and test
 
-Hold out 25% of the data as a test set for evaluation. Stratify on admitted. 
+Hold out 25% of the data as a test set for evaluation (`data_test`). Assign the rest of the data to `data_trn`.
 ```{r}
 set.seed(12345)
 
@@ -69,7 +68,7 @@ set.seed(12345)
 
 ### Make cross-validation splits
 
-Split `data_trn` into repeated k-fold cross-validation splits using 2 repeats, 10 folds, and stratifying on admitted. You do not need to set a new seed. Save your splits as an object named `splits`
+Split `data_trn` into repeated k-fold cross-validation splits using 3 repeats and 10 folds. You do not need to set a new seed. Save your splits as an object named `splits`
 ```{r}
 
 
@@ -77,11 +76,11 @@ Split `data_trn` into repeated k-fold cross-validation splits using 2 repeats, 1
 
 ## Build recipes
 
-Follow the instructions below to build two recipes from your training data: one for a "full" model (contains all predictors), and one for a compact model (contains all predictors except the focal variable, GRE score).
+Follow the instructions below to build two recipes from your training data: one for a "full" model (contains all predictors), and one for a compact model (contains all predictors except the two focal variables: `mother_educ` and `father_educ`).
 
 ### Recipe 1: Full model
 
-Follow these steps in your recipe. **Use your own judgment about the correct order of steps!** These are an UNORDERED list of the things you should include. 
+Follow these steps in your recipe. **Use your own judgment about the correct order of steps!** This is an UNORDERED list of the things you should include. 
 
 * Regress the outcome on all variables
 
@@ -99,34 +98,34 @@ rec_full <-
 
 ### Recipe 2: Compact model
 
-Because your recipe for the compact model will only differ from your recipe for the full model by one step (removing a variable), you can start with `rec_full`. Then add a step (after a pipe) that will remove the focal variable, GRE score.
+Because your recipe for the compact model will only differ from your recipe for the full model by one step (removing your focal variables), you can start with `rec_full`. Then add a step that will remove the focal variables `father_educ` and `mother_educ`.
 
 ```{r}
-rec_compact <- rec_full
+rec_compact <- 
 ```
 
 ## Fit models
 
 ### Fit the full model
 
-Use `rec_full` and `splits` to fit GLMs across folds. Use accuracy as your metric. Save your model fits as `fits_full`. 
+Use `rec_full` and `splits` to fit GLMs across folds. Use RMSE as your metric. Save your model fits as `fits_full`. 
 ```{r}
 
 ```
 
-Print the mean accuracy across the 20 held-out folds.
+Print the mean RMSE across the 30 held-out folds.
 ```{r}
 
 ```
 
 ### Fit the compact model
 
-Use `rec_compact` and `splits` to fit GLMs across folds. Use accuracy as your metric. Save your model fits as `fits_compact`. 
+Use `rec_compact` and `splits` to fit GLMs across folds. Use RMSE as your metric. Save your model fits as `fits_compact`. 
 ```{r}
 
 ```
 
-Print the mean accuracy across the 20 held-out folds.
+Print the mean RMSE across the 30 held-out folds.
 ```{r}
 
 ```
@@ -137,7 +136,7 @@ You will now compare your models using the Bayesian parameter estimation
 
 ### Gather performance estimates
 
-First, make a dataframe containing the 20 performance estimates from held out folds for your full and compact model
+First, make a dataframe containing the 30 performance estimates from held out folds for your full and compact model
 ```{r}
 
 
@@ -146,7 +145,7 @@ First, make a dataframe containing the 20 performance estimates from held out fo
 
 ### Posterior probabilities
 
-Next, derive the posterior probabilites for the accuracy of each of these two models
+Next, derive the posterior probabilites for the RMSE of each of these two models
 ```{r}
 
 
