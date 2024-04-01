@@ -1,0 +1,355 @@
+# The Permutation Test
+
+We have been developing regression and classification models and assessing their performance in new data
+
+A natural question is whether our model works better than would be expected if there was no relationship between the predictors and the outcome.  In other words:
+
+* Is there signal in the dataset?
+* Did the model exploit that signal beyond the performance that would we expected by chance?
+
+A simple index of performance in held out data may not be sufficient to evaluate this
+
+* What accuracy/rmse would be expected just because of characteristics in the outcome/label?
+* Is our model performance within the expected range of performance if there was no signal (no relationship between predictors and outcome)?
+
+***
+
+The permutation test has been developed to assess this question.
+
+It is a very simple (though computationally intensive) non-parametric test
+
+It works as follows:
+
+1. Calculate the performance of our final model
+
+2. Calculate the performance of similar models fit within data that have had the labels permuted (randomly shuffled)
+
+3. Fit the similar models, repeatedly, in many permutations of the data
+
+4. Determine if our model's performance is "significantly" better than the distribution of performances for all the models fit in permuted data
+
+
+You can do permutation tests on any performance metric by any method (e.g., independent test set error, k-fold CV error)
+
+Depending on the error method, you may simply evaluate the final model configuration or also the selection process (e.g., all hyper-parameters)
+
+* If the set(s) used to quantify error were not used to select the best configuration, you can just evaluate the final model configuration
+* If you are using the same sets to select and evaluate the best configuration, you should include the selection process inside of the permutation test
+
+***
+
+Let's get some data for these examples - Cleveland Heart Disease Sample
+
+```{r u9-perm-1}
+data_all <- read_csv(file.path(path_data, "cleveland.csv"), col_names = FALSE, 
+                     na = "?",col_types = cols()) %>% 
+  rename(age = X1,
+         sex = X2,
+         cp = X3,
+         rest_bp = X4,
+         chol = X5,
+         fbs = X6,
+         rest_ecg = X7,
+         exer_max_hr = X8,
+         exer_ang = X9,
+         exer_st_depress = X10,
+         exer_st_slope = X11,
+         ca = X12,
+         thal = X13,
+         disease = X14) %>% 
+  mutate(disease = if_else(disease == 0, "no", "yes"),
+         disease = factor(disease, levels = c("yes", "no")),  # pos event first
+         sex = factor(if_else(sex == 0, "female", "male")),
+         fbs = factor(if_else(fbs == 0, "normal", "elevated")),
+         exer_ang = factor(if_else(exer_ang == 0, "no", "yes")),
+         exer_st_slope = dplyr::recode(exer_st_slope, 
+                                       `1` = "upslope", 
+                                       `2` = "flat", 
+                                       `3` = "downslope"),
+         exer_st_slope = factor(exer_st_slope),
+         cp = dplyr::recode(cp, 
+                            `1` = "typ_ang", 
+                            `2` = "atyp_ang", 
+                            `3` = "non_anginal", 
+                            `4` = "non_anginal"),
+         cp = factor(cp),
+         rest_ecg = dplyr::recode(rest_ecg, 
+                                  `0` = "normal", 
+                                  `1` = "wave_abn", 
+                                  `2` = "ventric_hypertrophy"),
+         rest_ecg = factor(rest_ecg),
+         thal = dplyr::recode(thal, 
+                              `3` = "normal", 
+                              `6` = "fixeddefect", 
+                              `7` = "reversabledefect"),
+         thal = factor(thal)) %>% 
+  glimpse()
+```
+
+***
+
+And let's set up a feature engineering recipe
+```{r u9-perm-2}
+rec <- recipe(disease ~ ., data = data_all) %>% 
+  step_impute_median(all_numeric_predictors()) %>% 
+  step_impute_mode(all_nominal_predictors()) %>%   
+  step_dummy(all_nominal_predictors()) %>% 
+  step_normalize(all_predictors())
+```
+
+We can use the data and the feature engineering recipe with both examples
+
+### Permutation Test Example with Independent Test Set Metric
+
+Here is a first example with an independent test set
+
+We split the data into training and test
+
+```{r u9-perm-3}
+set.seed(20140102)
+splits_test <- data_all %>% 
+  initial_split(prop = 2/3, strata = "disease")
+
+data_trn <- splits_test %>% 
+  analysis()
+
+data_test <- splits_test %>% 
+  assessment()
+```
+
+***
+
+We tune/select best hyperparameter values via bootstrap resampling with the training data
+
+```{r u9-perm-4}
+splits_boot <- data_trn %>% 
+  bootstraps(times = 100, strata = "disease")  
+
+grid_glmnet <- expand_grid(penalty = exp(seq(-6, 3, length.out = 200)),
+                           mixture = seq(0, 1, length.out = 6))
+
+fits_glmnet <-
+  logistic_reg(penalty = tune(), 
+               mixture = tune()) %>% 
+  set_engine("glmnet") %>% 
+  set_mode("classification") %>% 
+  tune_grid(preprocessor = rec, 
+            resamples = splits_boot, grid = grid_glmnet, 
+            metrics = metric_set(accuracy))
+
+plot_hyperparameters(fits_glmnet, hp1 = "penalty", hp2 = "mixture", metric = "accuracy", log_hp1 = TRUE)
+
+show_best(fits_glmnet)
+```
+
+***
+
+Let's fit this best model configuration and evaluate it in test
+```{r u9-perm-5}
+feat_trn <- rec %>% 
+  make_features(data_trn, data_trn, FALSE)
+
+fit_glmnet <-   
+  logistic_reg(penalty = select_best(fits_glmnet)$penalty, 
+               mixture = select_best(fits_glmnet)$mixture) %>% 
+  set_engine("glmnet") %>% 
+  set_mode("classification") %>% 
+  fit(disease ~ ., data = feat_trn)
+
+feat_test <- rec %>% 
+  make_features(data_trn, data_test, FALSE)
+
+(model_accuracy <- accuracy_vec(feat_test$disease, predict(fit_glmnet, feat_test)$.pred_class))
+```
+
+So is this model using real predictive signal in the dataset or could we get an accuracy this high when no relationship exists between features and outcome?
+
+***
+
+Now for the permutation test of independent test set error
+
+What test set accuracy would we expect if there was no relationship between features and the outcome?
+
+
+Let's write a simple function to permute train and test, fit our model configuration and predict
+
+```{r u9-perm-6}
+evaluate_perm <- function(feat_trn, feat_test, best_penalty, best_mixture) {
+  # permute outcome in training feature matrix
+  n_trn <- nrow(feat_trn)
+  feat_trn$disease <- feat_trn$disease[sample(n_trn)]
+  
+  # permute outcome in test feature matrix
+  n_test<- nrow(feat_test)
+  feat_test$disease <- feat_test$disease[sample(n_test)]
+  
+  fit_glmnet <-   
+    logistic_reg(penalty = best_penalty, 
+                 mixture = best_mixture) %>% 
+    set_engine("glmnet") %>% 
+    set_mode("classification") %>% 
+    fit(disease ~ ., data = feat_trn)
+  
+  accuracy_vec(feat_test$disease, predict(fit_glmnet, feat_test)$.pred_class)
+}
+```
+
+Let's call the function once to see how it works
+```{r u9-perm-7}
+best_penalty <- select_best(fits_glmnet)$penalty
+best_mixture <- select_best(fits_glmnet)$mixture
+evaluate_perm(feat_trn, feat_test, best_penalty, best_mixture)
+```
+
+***
+
+Now let's call the function 1000 times on 1000 permutations of training and test
+
+```{r u9-perm-8}
+
+perm_accuracy <- xfun::cache_rds({
+  map_dbl(1:1000, ~ evaluate_perm(feat_trn, 
+                                  feat_test, 
+                                  best_penalty, 
+                                  best_mixture))
+},
+rerun = FALSE,
+dir = "cache/",
+file = "u9-perm-8")
+
+```
+
+3. Let's look at the distributions of accuracies when there is no relationship between the features and labels
+
+
+```{r u9-perm-9}
+hist(perm_accuracy)
+```
+
+4.  What proportion of permutation accuracies are as high or higher than our real accuracy (one-tailed test)?
+
+```{r u9-perm-10}
+sum (perm_accuracy >= model_accuracy) / length(perm_accuracy)
+```
+
+### Permutation Test Example with Bootstrapped Metric
+
+What if we selected our best model configuration and evaluated it with the bootstrap?
+
+* There would be optimization bias in our assessment of its performance (in addition to the inherent bias associated with the bootstrap method AND any resampling method)
+* We need to compare to performance in permutations with same optimization (and other) biases
+
+***
+
+Use bootstrap on full dataset
+```{r u9-perm-11}
+set.seed(1234)
+splits_boot <- data_all %>% 
+  bootstraps(times = 100, strata = "disease")  
+
+grid_glmnet <- expand_grid(penalty = exp(seq(-6, 3, length.out = 200)),
+                           mixture = seq(0, 1, length.out = 6))
+
+fits_glmnet <-
+  logistic_reg(penalty = tune(), 
+               mixture = tune()) %>% 
+  set_engine("glmnet") %>% 
+  set_mode("classification") %>% 
+  tune_grid(preprocessor = rec, 
+            resamples = splits_boot, grid = grid_glmnet, 
+            metrics = metric_set(accuracy))
+
+plot_hyperparameters(fits_glmnet, hp1 = "penalty", hp2 = "mixture", metric = "accuracy", log_hp1 = TRUE)
+
+select_best(fits_glmnet)
+```
+
+***
+
+What is the bootstrapped accuracy for this best model configuration?
+
+* It's a bit higher than before - a tad bit of optimization bias?
+```{r u9-perm-12}
+model_accuracy <- 
+  collect_metrics(fits_glmnet) %>% 
+  filter(penalty == select_best(fits_glmnet)$penalty,
+         mixture == select_best(fits_glmnet)$mixture)
+
+model_accuracy$mean
+```
+
+***
+
+So what would we expect with permuted outcomes?
+
+We need a function that both selects best configuration and evaluates that best configuration
+
+```{r u9-perm-13}
+select_evaluate_perm <- function(data_all, rec, grid_glmnet) {
+  
+  # permute outcome in full dataset
+  n_all <- nrow(data_all)
+  data_all$disease <- data_all$disease[sample(n_all)]
+  
+  # bootstrap this permuted data set
+  splits_boot <- data_all %>% 
+    bootstraps(times = 100, strata = "disease")  
+  
+  # fit all configs in all bootstrapped permutation samples
+  fits_glmnet <-
+    logistic_reg(penalty = tune(), 
+                 mixture = tune()) %>% 
+    set_engine("glmnet") %>% 
+    set_mode("classification") %>% 
+    tune_grid(preprocessor = rec, 
+              resamples = splits_boot, grid = grid_glmnet, 
+              metrics = metric_set(accuracy))
+  
+  # get accuracy from 100 bootstraps of the best configuration
+  model_accuracy <- 
+    collect_metrics(fits_glmnet) %>% 
+    filter(penalty == select_best(fits_glmnet)$penalty,
+           mixture == select_best(fits_glmnet)$mixture)
+  
+  model_accuracy$mean
+}
+```
+
+Let's call it once as a test
+```{r u9-perm-14}
+select_evaluate_perm(data_all, rec, grid_glmnet)
+```
+
+***
+
+Now select and evaluate for 100 permutations of `data_all`
+
+* This will take a while!  
+* Only doing 100 permutations to speed this up.  Should be done with at least 1000 permutations.
+* Typical to run overnight on a multi-core machine or ideally on computers in the Center for High Throughput Computing (CHTC)
+
+```{r u9-perm-15}
+perm_accuracy_2 <- xfun::cache_rds({ 
+  
+  map_dbl(1:100, ~ select_evaluate_perm(data_all, rec, grid_glmnet))
+}, 
+rerun = FALSE,
+dir = "cache/",
+file = "u9-perm-15")
+```
+
+***
+
+3. Let's look at the distributions of inaccuracies when there is no relationship between the features and labels
+
+```{r u9-perm-16}
+hist(perm_accuracy_2)
+```
+
+4.  What proportion of permutation accuracies are as high or higher than our real accuracy (one-tailed test)?
+
+```{r u9-perm-17}
+sum (perm_accuracy_2 >= model_accuracy$mean) / length(perm_accuracy)
+```
+
+
