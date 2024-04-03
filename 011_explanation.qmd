@@ -66,13 +66,6 @@ Submit the application assignment [here](https://canvas.wisc.edu/courses/395546/
 
 -----
 
-
-
-```{r}
-library(tidyposterior) # NEW: for perf_mod()
-```
-
-
 ## Model Comparisons & Feature Ablation
 
 Model comparisons can also be used for explanatory goals
@@ -868,19 +861,40 @@ Alternatively, using the approach proposed by Kruschke (2018), you can conclude 
 
 -----
 
+Finally, in some instances, you may not want to use the ROPE.   
+
+- Instead, you may simply want the posterior probability that the full model performs better than the compact model.   
+- This is probability is provided in the `probability` column of the table.
+- You can also set the size of the ROPE to 0 (though  not necessary)
+
+
+```{r}
+pp |> contrast_models(seed = 4) |> summary(size = 0)
+```
+
+-----
+
 ## Feature Importance
 
 There as been increasing focus on improving the interpretability of machine learning models that we are using.  There are numerous reasons to want to better understand why our models make the predictions that they do.  
-
+\
+\
 For our purposes, the growing set of tools to interpret our models can help address our **explanatory questions**.   But they can also help us **find errors** in our models and **detect possible bias** (we will focus explicitly on algorithmic bias in later units)
 
 -----
 
 Feature importance metrics are an important tool to better understand how our models work.
-
+\
+\
 These metrics help us understand which features in our models contribute most to the predictions that the model makes.  
-
+\
+\
 For some models, interpretation and identification of important features is easy.  For example, if we standardize the variables in a glm or glmnet model, we can interpret the absolute magnitude of the parameter estimates (i.e., the coefficients) as an index of the global (i.e., across all observations) importance of each feature.  
+
+- You can use the [vip]() package to extract these importance metrics but you can often just get them directly from the model as well
+- More info on the use of vip package is available [elsewhere](https://cran.r-project.org/web/packages/vip/vignettes/vip.html)
+
+-----
 
 But for other models, we need different approaches.  There are many approaches to quantify the importance of a feature, but we will focus on two that are model agnostic (i.e., can be used across all statistical algorithms)
 
@@ -889,81 +903,103 @@ But for other models, we need different approaches.  There are many approaches t
 
 -----
 
-We will use the `iml` package that was released along with @IML to calculate these variable importance metrics.
+We follow [recommendations from the tidymodels folks](https://www.tmwr.org/explain) and use the DALEX package for model agnostic approaches to feature importance.
 
-You can get more help on the use the functions in `iml` in this [vignette](https://cran.r-project.org/web/packages/iml/vignettes/intro.html)
+As an alternative, you can use the `iml` package that was released along with @IML to calculate these variable importance metrics.  You can get more help on the use the functions in `iml` in this [vignette](https://cran.r-project.org/web/packages/iml/vignettes/intro.html)
 
 -----
 
 Lets first get some coding issues accomplished before we dig into the details of the two feature importance metrics
 
-To calculate these metrics, the `iml` functions will need access to the raw features and outcome. Lets get those again.
+To calculate these metrics, we will need access to the raw features and outcome. Lets get those again.
 
-```{r get_data}
-feat <- rec_full |> 
-  make_features(data_all, data_all, FALSE)
+```{r}
+feat_full <-  rec_full_prep |> 
+  bake(data_all)
+```
 
-x <- feat |> select(-disease)  # x features
-y <- feat |> select(disease) # outcome
+
+We will need to have separate df for the features vs. the outcome (y)
+
+- features are easy.  Just select out the outcome
+```{r}
+x <- feat_full |> select(-disease)
+```
+
+- For outcome, we need to select it first
+- However, if is a classification model, we need to recode to 0 (negative class) and 1 (positive class) and make it a vector (not a dataframe
+
+```{r}
+y <- feat_full |> 
+  select(disease) |> 
+ # mutate(disease = if_else(disease == "yes", 1, 0)) |> 
+  pull(disease)
+
+y |> print()
 ```
 
 -----
 
-We will also need a predictor function to allow the `iml` functions to make predictions using the model.  
+We also need to load the DALEX package and an additional helper package that supports tidymodels models
 
-This is a bit more complicated for classification models because we have to first make a wrapper around `predict()` so that it returns class probabilities rather than class label predictions, which is otherwise the default.  Then we have to use that wrapper inside of the `iml` `Predictor$new()` function.   
-
-If you were calculating feature importance for a regression model, you would not need the wrapper function.
-
-```{r predictor_function}
-# only needed for classification models
-predict_wrapper <- function(model, newdata) {
-  predict(model, newdata, type = "prob") |>  # set type = "prob" for probabilities
-    dplyr::select(yes = .pred_yes, no = .pred_no)
-  
-}
-
-# make iml predictor function
-predictor <- iml::Predictor$new(model = fit_full, 
-                           data = x, 
-                           y = y,
-                           predict.fun = predict_wrapper)  
-                           # No need to set predict.fun for regression models
+```{r}
+library(DALEX, exclude= "explain")
+library(DALEXtra)
 ```
 
-We can now use this predictor function : `predictor` with various `iml` functions
+-----
+
+First, we will need an `explainer` object based on our model and data.  The `explain_tidymodels()` function in DALEXtra will create this object for us.
+
+```{r}
+predict_wrapper <- function(model, newdata) {
+  predict(model, newdata, type = "prob") |> 
+    select(.pred_yes)
+}
+```
+
+
+```{r}
+explain_full <- explain_tidymodels(fit_full, 
+                                   data = x,
+                                   y = y,
+                                   predict_function = predict_wrapper,
+                                   predict_function_target_column = ".pred_yes")
+```
+
+
+We are now ready to calculate feature importance metrics
 
 -----
 
 ### Permutation Feature Importance
 
 The first model agnostic approach to calculating feature important is called Permutation Feature Importance
-
+\
+\
 This approach is very straight forward.  This approach says - if we want to calculate the importance of any specific feature, we can compare our performance metric using the original features to the performance metric we get if we permute (i.e., shuffle) the values for the feature we are evaluating.  
-
+\
+\
 By randomly shuffling the values for the feature, we break the relationship between that feature and the outcome so it no longer contributes to the predictions.   If performance doesn't change much, then that feature is not important.  If performance goes down a lot, the feature is important.  We can see this relative change in performance by calculating the ratio of the permuted performance to the original performance ($\frac{permuted}{original}$) Simple!   
 
 -----
 
-`FeatureImp$new()` supports many performance metrics that can be passed into `loss =` as a string (e.g., `loss = "rmse"`).  See help for a full list.
+We first need to define a custom function for our performance metric
 
-`iml` doesn't directly support accuracy because it prefers "error" metrics.  As such, is supports "ce" which stands for classification error (1 - accuracy).   
+- It needs to have two parameters: `observed` and `predicted`
+- We can modify `accuracy_vec()` to fit these needs
 
-However, you can also pass in a function object instead if you need an unsupported performance metrix.   For example, you could use `loss = Metrics::accuracy` to use the accuracy function from the `Metrics` package.  See help for more details on the use of custom functions.
-
-I am OK with the shift to classification error as it is intuitive to talk about how much error increases when features are permuted
-
-Lets calculated these permuted feature importance values for each feature now.
-```{r u9-permute_rmse}
-imp_permute <- xfun::cache_rds({
-  
-  iml::FeatureImp$new(predictor, loss = "ce")
-
-},
-rerun = FALSE,
-dir = "cache/",
-file = "u9-permute_rmse.rds")
+```{r}
+custom_accuracy <- function(observed, predicted) {
+  predicted <- fct(if_else(predicted > .5, "yes", "no"), levels  = c("yes", "no"))
+  accuracy_vec(observed, predicted)
+}
 ```
+
+```{r}
+imp_permute_raw <- model_parts(explain_full, type = "raw", loss_function = custom_accuracy)
+```
+
 
 -----
 
