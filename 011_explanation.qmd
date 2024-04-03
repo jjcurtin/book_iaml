@@ -903,44 +903,8 @@ But for other models, we need different approaches.  There are many approaches t
 
 -----
 
-We follow [recommendations from the tidymodels folks](https://www.tmwr.org/explain) and use the DALEX package for model agnostic approaches to feature importance.
+We follow [recommendations from the tidymodels folks](https://www.tmwr.org/explain) and use the DALEX and DALEXtra packages for model agnostic approaches to feature importance.
 
-As an alternative, you can use the `iml` package that was released along with @IML to calculate these variable importance metrics.  You can get more help on the use the functions in `iml` in this [vignette](https://cran.r-project.org/web/packages/iml/vignettes/intro.html)
-
------
-
-Lets first get some coding issues accomplished before we dig into the details of the two feature importance metrics
-
-To calculate these metrics, we will need access to the raw features and outcome. Lets get those again.
-
-```{r}
-feat_full <-  rec_full_prep |> 
-  bake(data_all)
-```
-
-
-We will need to have separate df for the features vs. the outcome (y)
-
-- features are easy.  Just select out the outcome
-```{r}
-x <- feat_full |> select(-disease)
-```
-
-- For outcome, we need to select it first
-- However, if is a classification model, we need to recode to 0 (negative class) and 1 (positive class) and make it a vector (not a dataframe
-
-```{r}
-y <- feat_full |> 
-  select(disease) |> 
- # mutate(disease = if_else(disease == "yes", 1, 0)) |> 
-  pull(disease)
-
-y |> print()
-```
-
------
-
-We also need to load the DALEX package and an additional helper package that supports tidymodels models
 
 ```{r}
 library(DALEX, exclude= "explain")
@@ -949,7 +913,37 @@ library(DALEXtra)
 
 -----
 
-First, we will need an `explainer` object based on our model and data.  The `explain_tidymodels()` function in DALEXtra will create this object for us.
+Lets first get some coding issues accomplished before we dig into the details of the two feature importance metrics
+
+To calculate these importance metrics, we will need access to the raw features and outcome. Lets get those again.
+
+```{r}
+feat_full <-  rec_full_prep |> 
+  bake(data_all)
+```
+
+-----
+
+We will need to have a df for the features (without the outcome) and a separate vector for the outcome
+
+- features are easy.  Just select out the outcome
+```{r}
+x <- feat_full |> select(-disease)
+```
+
+- For outcome, we need to select it first and then pull the vector out of the dataframe
+
+```{r}
+y <- feat_full |> 
+  select(disease) |> 
+  pull(disease)
+```
+
+-----
+
+We also a specific predictor function that will work with the DALEX package
+
+We will write a custom function that "wraps" around our tidymodels `predict()` function
 
 ```{r}
 predict_wrapper <- function(model, newdata) {
@@ -957,6 +951,10 @@ predict_wrapper <- function(model, newdata) {
     select(.pred_yes)
 }
 ```
+-----
+
+First, we will need an `explainer` object based on our model and data.  The `explain_tidymodels()` function in DALEXtra will create this object for us.
+
 
 
 ```{r}
