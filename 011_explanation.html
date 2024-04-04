@@ -2,12 +2,12 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.551">
+<meta name="generator" content="quarto-1.4.550">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Introduction to Applied Machine Learning - 11&nbsp; Model Comparisons and Other Explanatory Goals</title>
+<title>Introduction to Applied Machine Learning - 11&nbsp; Explanatory Approaches</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -19,6 +19,40 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 /* CSS for citations */
 div.csl-bib-body { }
@@ -89,6 +123,35 @@ div.csl-indent {
   }
 }</script>
 
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN") {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
 
 <link rel="stylesheet" href="book.css">
 </head>
@@ -102,7 +165,7 @@ div.csl-indent {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./011_explanation.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Model Comparisons and Other Explanatory Goals</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./011_explanation.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Explanatory Approaches</span></a></li></ol></nav>
         <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -221,7 +284,7 @@ div.csl-indent {
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./011_explanation.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Model Comparisons and Other Explanatory Goals</span></span></a>
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Explanatory Approaches</span></span></a>
   </div>
 </li>
         <li class="sidebar-item">
@@ -311,7 +374,34 @@ div.csl-indent {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#overview-of-unit" id="toc-overview-of-unit" class="nav-link active" data-scroll-target="#overview-of-unit"><span class="header-section-number">11.1</span> Overview of Unit</a></li>
+  <li><a href="#overview-of-unit" id="toc-overview-of-unit" class="nav-link active" data-scroll-target="#overview-of-unit"><span class="header-section-number">11.1</span> Overview of Unit</a>
+  <ul class="collapse">
+  <li><a href="#learning-objectives" id="toc-learning-objectives" class="nav-link" data-scroll-target="#learning-objectives"><span class="header-section-number">11.1.1</span> Learning Objectives</a></li>
+  <li><a href="#readings" id="toc-readings" class="nav-link" data-scroll-target="#readings"><span class="header-section-number">11.1.2</span> Readings</a></li>
+  </ul></li>
+  <li><a href="#lecture-videos" id="toc-lecture-videos" class="nav-link" data-scroll-target="#lecture-videos"><span class="header-section-number">11.2</span> Lecture Videos</a></li>
+  <li><a href="#application-assignment" id="toc-application-assignment" class="nav-link" data-scroll-target="#application-assignment"><span class="header-section-number">11.3</span> Application Assignment</a></li>
+  <li><a href="#model-comparisons-feature-ablation" id="toc-model-comparisons-feature-ablation" class="nav-link" data-scroll-target="#model-comparisons-feature-ablation"><span class="header-section-number">11.4</span> Model Comparisons &amp; Feature Ablation</a></li>
+  <li><a href="#an-empirical-example-of-feature-ablation" id="toc-an-empirical-example-of-feature-ablation" class="nav-link" data-scroll-target="#an-empirical-example-of-feature-ablation"><span class="header-section-number">11.5</span> An Empirical Example of Feature Ablation</a></li>
+  <li><a href="#nadeau-and-bengio-2003-correlated-t-test" id="toc-nadeau-and-bengio-2003-correlated-t-test" class="nav-link" data-scroll-target="#nadeau-and-bengio-2003-correlated-t-test"><span class="header-section-number">11.6</span> Nadeau and Bengio (2003) Correlated t-test</a></li>
+  <li><a href="#bayesian-estimation-for-model-comparisons" id="toc-bayesian-estimation-for-model-comparisons" class="nav-link" data-scroll-target="#bayesian-estimation-for-model-comparisons"><span class="header-section-number">11.7</span> Bayesian estimation for model comparisons</a></li>
+  <li><a href="#feature-importance" id="toc-feature-importance" class="nav-link" data-scroll-target="#feature-importance"><span class="header-section-number">11.8</span> Feature Importance</a>
+  <ul class="collapse">
+  <li><a href="#permutation-feature-importance" id="toc-permutation-feature-importance" class="nav-link" data-scroll-target="#permutation-feature-importance"><span class="header-section-number">11.8.1</span> Permutation Feature Importance</a></li>
+  <li><a href="#shapley-values" id="toc-shapley-values" class="nav-link" data-scroll-target="#shapley-values"><span class="header-section-number">11.8.2</span> Shapley Values</a></li>
+  </ul></li>
+  <li><a href="#visual-approaches-to-understand-our-models" id="toc-visual-approaches-to-understand-our-models" class="nav-link" data-scroll-target="#visual-approaches-to-understand-our-models"><span class="header-section-number">11.9</span> Visual Approaches to Understand our Models</a>
+  <ul class="collapse">
+  <li><a href="#partial-dependence-pd-plots" id="toc-partial-dependence-pd-plots" class="nav-link" data-scroll-target="#partial-dependence-pd-plots"><span class="header-section-number">11.9.1</span> Partial Dependence (PD) Plots</a></li>
+  <li><a href="#accumulated-local-effects-ale-plots" id="toc-accumulated-local-effects-ale-plots" class="nav-link" data-scroll-target="#accumulated-local-effects-ale-plots"><span class="header-section-number">11.9.2</span> Accumulated Local Effects (ALE) Plots</a></li>
+  </ul></li>
+  <li><a href="#detecting-interactions" id="toc-detecting-interactions" class="nav-link" data-scroll-target="#detecting-interactions"><span class="header-section-number">11.10</span> Detecting Interactions</a></li>
+  <li><a href="#summary-and-closing-thoughts" id="toc-summary-and-closing-thoughts" class="nav-link" data-scroll-target="#summary-and-closing-thoughts"><span class="header-section-number">11.11</span> Summary and Closing Thoughts</a></li>
+  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion"><span class="header-section-number">11.12</span> Discussion</a>
+  <ul class="collapse">
+  <li><a href="#annoucements" id="toc-annoucements" class="nav-link" data-scroll-target="#annoucements"><span class="header-section-number">11.12.1</span> Annoucements</a></li>
+  <li><a href="#questions" id="toc-questions" class="nav-link" data-scroll-target="#questions"><span class="header-section-number">11.12.2</span> Questions</a></li>
+  </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/jjcurtin/book_iaml/edit/main/011_explanation.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
@@ -320,7 +410,7 @@ div.csl-indent {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Model Comparisons and Other Explanatory Goals</span></h1>
+<h1 class="title"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Explanatory Approaches</span></h1>
 </div>
 
 
@@ -339,13 +429,9 @@ div.csl-indent {
 
 <section id="overview-of-unit" class="level2" data-number="11.1">
 <h2 data-number="11.1" class="anchored" data-anchor-id="overview-of-unit"><span class="header-section-number">11.1</span> Overview of Unit</h2>
-<p><strong>Learning Objectives</strong></p>
+<section id="learning-objectives" class="level3" data-number="11.1.1">
+<h3 data-number="11.1.1" class="anchored" data-anchor-id="learning-objectives"><span class="header-section-number">11.1.1</span> Learning Objectives</h3>
 <ul>
-<li>Use of the permutation test to evaluate overall model performance
-<ul>
-<li>Using test performance</li>
-<li>Using resampled performance</li>
-</ul></li>
 <li>Use of model comparisons to compare models
 <ul>
 <li>Feature ablation</li>
@@ -357,6 +443,7 @@ div.csl-indent {
 </ul></li>
 <li>Variable important metrics for explanation
 <ul>
+<li>Model specific vs.&nbsp;model agnostic approaches</li>
 <li>Permutation feature importance</li>
 <li>Shapley values
 <ul>
@@ -370,7 +457,10 @@ div.csl-indent {
 <li>Accumulated Local Effects (ALE) plots</li>
 </ul></li>
 </ul>
-<p><strong>Readings</strong></p>
+<hr>
+</section>
+<section id="readings" class="level3" data-number="11.1.2">
+<h3 data-number="11.1.2" class="anchored" data-anchor-id="readings"><span class="header-section-number">11.1.2</span> Readings</h3>
 <ul>
 <li><span class="citation" data-cites="Benavoli2017">Benavoli et al. (<a href="#ref-Benavoli2017" role="doc-biblioref">2017</a>)</span> <a href="pdfs/benavoli_2017_bayesian_t_test.pdf">paper</a>: Read pages 1-9 that describe the correlated t-test and its limitations.</li>
 <li><span class="citation" data-cites="Kruschke2018">Kruschke (<a href="#ref-Kruschke2018" role="doc-biblioref">2018</a>)</span> <a href="pdfs/kruschke2018a.pdf">paper</a>: Describes Bayesian estimation and the ROPE (generally, not in the context of machine learning and model comparisons)</li>
@@ -379,32 +469,1755 @@ div.csl-indent {
 <li><span class="citation" data-cites="IML">Molnar (<a href="#ref-IML" role="doc-biblioref">2023</a>)</span> <a href="https://christophm.github.io/interpretable-ml-book/global-methods.html">Chapter 8 - Global Model Agnostic Methods</a>: Read setions 8.1, 8.2, 8.3, and 8.5</li>
 <li><span class="citation" data-cites="IML">Molnar (<a href="#ref-IML" role="doc-biblioref">2023</a>)</span> <a href="https://christophm.github.io/interpretable-ml-book/shapley.html">Chapter 9 - Local Model-Agnostic Methods</a>: Read section 9.5</li>
 </ul>
-<p><strong>Lecture Videos</strong></p>
+<p>Post questions to the readings channel in Slack</p>
+<hr>
+</section>
+</section>
+<section id="lecture-videos" class="level2" data-number="11.2">
+<h2 data-number="11.2" class="anchored" data-anchor-id="lecture-videos"><span class="header-section-number">11.2</span> Lecture Videos</h2>
 <ul>
-<li><p><a href="">Introduction to the Permutation Test</a></p></li>
-<li><p><a href="">Permutation Test with Single Held-Out Test set</a></p></li>
-<li><p><a href="">Permutation Test with Resampling for Selection and Evaluation</a></p></li>
-<li><p><a href="">Introduction to Model Comparisons</a></p></li>
-<li><p><a href="">The Nadeau &amp; Bengio Correlated t-test for Model Comparisons</a></p></li>
-<li><p><a href="">Bayesian Estimation for Model Comparisons</a></p></li>
-<li><p><a href="">Feature Importance Metrics to Understand Models</a></p></li>
-<li><p><a href="">Visual Approaches to Understand Models</a></p></li>
-<li><p><a href="">Exploring Interactions</a></p></li>
-<li><p><a href="">Discussion</a></p></li>
+<li><a href="">Introduction to Model Comparisons</a></li>
+<li><a href="">The Nadeau &amp; Bengio Correlated t-test for Model Comparisons</a></li>
+<li><a href="">Bayesian Estimation for Model Comparisons</a></li>
+<li><a href="">Permutation Feature Importance</a></li>
+<li><a href="">SHAP Feature Importance</a></li>
+<li><a href="">Visual Approaches to Understand Models</a></li>
+<li><a href="">Exploring Interactions</a></li>
 </ul>
-<p><strong>Application Assignment</strong></p>
+<p>Post questions to the video-lectures channel in Slack</p>
+<hr>
+</section>
+<section id="application-assignment" class="level2" data-number="11.3">
+<h2 data-number="11.3" class="anchored" data-anchor-id="application-assignment"><span class="header-section-number">11.3</span> Application Assignment</h2>
 <ul>
 <li>data: <a href="homework/unit_9/admissions.csv">admissions.csv</a></li>
-<li><a href="homework/unit_9/hw_unit_9_explanatory.Rmd">assignment rmd</a></li>
-<li>solution html: <a href="">rmd</a>; <a href="">html</a></li>
+<li><a href="homework/unit_9/hw_unit_9_explanatory.Rmd">assignment qmd</a></li>
+<li><a href="">solution html</a></li>
 </ul>
-<p>Post questions to the application_assignments Slack channel</p>
+<p>Post questions to application-assignments Slack channel</p>
 <p>Submit the application assignment <a href="https://canvas.wisc.edu/courses/395546/assignments/2187693">here</a> and complete the<a href="https://canvas.wisc.edu/courses/395546/quizzes/514055">unit quiz</a> by 8 pm on Wednesday, April 10th</p>
+<hr>
+</section>
+<section id="model-comparisons-feature-ablation" class="level2" data-number="11.4">
+<h2 data-number="11.4" class="anchored" data-anchor-id="model-comparisons-feature-ablation"><span class="header-section-number">11.4</span> Model Comparisons &amp; Feature Ablation</h2>
+<p>Model comparisons can also be used for explanatory goals<br>
+<br>
+In 610/710, you learned to think about the tests of specific parameter estimates as model comparisons of models that did vs.&nbsp;did not include the specific feature(s) in the model.</p>
+<hr>
+<p>This can be done for a single feature (e.g., <span class="math inline">\(x_3\)</span>) - compact model: <span class="math inline">\(y = b_0 + b_1*x_1 + b_2*x_2\)</span> - full (augmented) model: <span class="math inline">\(y = b_0 + b_1*x_1 + b_2*x_2 + b_3*x_3\)</span> - The comparison of these two models is equivalent to the test of <span class="math inline">\(H_0: b_3 = 0\)</span><br>
+<br>
+This can also involve sets of features if you hypothesis involves the effect of a set of features - All features that represent a categorical predictor - Set of features that represent some broad construct (e.g., psychiatric illness represented by symptoms counts for all of the major psychiatric diagnoses)<br>
+<br>
+This technique of comparing two nested models (i.e.&nbsp;feature set for the compact model is a subset of the feature set for the full/augmented model) is often called <strong>feature ablation</strong> in the machine learning world</p>
+<hr>
+<p>Model comparisons can also be done between model configurations that differ by characteristics other than their features (e.g., statistical algorithm)<br>
+<br>
+Model comparisons can be useful to determine the best available model configuration to use for a prediction goal</p>
+<ul>
+<li>In some instances, it is OK to simply choose the descriptively better performing model configuration (e.g., better validation set or resampled performance estimate)</li>
+<li>However, if the descriptively better performing model has other disadvantages (e.g., more costly to implement) you might want to only use it if you had rigorously demonstrated that it likely better for all new data.</li>
+</ul>
+<hr>
+<p>We will learn approaches to statistically compare models</p>
+<ul>
+<li>Traditional frequentist (NHST) approach using a variant of the t-test to accommodate correlated observations</li>
+<li>A Bayesian alternative to the t-test</li>
+</ul>
+<p>We will compare model configurations formed by feature ablation but nothing would be different if these model configurations different by other characteristics such as statistical algorithm</p>
+<hr>
+</section>
+<section id="an-empirical-example-of-feature-ablation" class="level2" data-number="11.5">
+<h2 data-number="11.5" class="anchored" data-anchor-id="an-empirical-example-of-feature-ablation"><span class="header-section-number">11.5</span> An Empirical Example of Feature Ablation</h2>
+<p>The context for our example will be the Cleveland heart disease dataset<br>
+<br>
+We will imagine we have developed a new diagnostic screener for heart disease based on an exercise test protocol<br>
+<br>
+We want to demonstrate the incremental improvement in our screening for heart disease using features from this test vs.&nbsp;other readily available characteristics about the patients</p>
+<hr>
+<p>Our exercise test protocol yields four scores (<span class="math inline">\(exer\_*\)</span>) that we use in combination to predict the probability of heart disease in the patient</p>
+<ul>
+<li><p>Max heart hr during the exercise test</p></li>
+<li><p>experience of angina during the test</p></li>
+<li><p>The slope of the peak exercise ST segment (don’t ask me what that is! ;-)</p></li>
+<li><p>ST depression induced by exercise test relative to rest<br>
+<br>
+We also have many other demographic and physical characteristics that we want to “control” for when evaluating the performance of our test</p></li>
+<li><p>I use control in both its senses. It likely helps to have these covariates b/c they reduce error in the outcome</p></li>
+<li><p>I also want to demonstrate that our test has incremental predictive validity above these other characteristics which are already available for screening without my complicated test</p></li>
+</ul>
+<hr>
+<p>Let’s open the data set and do some basic cleaning</p>
+<ul>
+<li>Note there were some complex issues to deal with</li>
+<li>Good examples of code to resolve those issues</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(path_data, <span class="st">"cleveland.csv"</span>), <span class="at">col_names =</span> <span class="cn">FALSE</span>, </span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">na =</span> <span class="st">"?"</span>, <span class="at">col_types =</span> <span class="fu">cols</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">age =</span> X1,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">sex =</span> X2,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">cp =</span> X3,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">rest_bp =</span> X4,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">chol =</span> X5,</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">fbs =</span> X6,</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">rest_ecg =</span> X7,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">exer_max_hr =</span> X8,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">exer_ang =</span> X9,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>         <span class="at">exer_st_depress =</span> X10,</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">exer_st_slope =</span> X11,</span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>         <span class="at">ca =</span> X12,</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>         <span class="at">thal =</span> X13,</span>
+<span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>         <span class="at">disease =</span> X14) <span class="sc">|&gt;</span> </span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">disease =</span> <span class="fu">fct</span>(<span class="fu">if_else</span>(disease <span class="sc">==</span> <span class="dv">0</span>, <span class="st">"no"</span>, <span class="st">"yes"</span>),</span>
+<span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>                       <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"yes"</span>, <span class="st">"no"</span>)), <span class="co"># pos event first</span></span>
+<span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>         <span class="at">sex =</span> <span class="fu">fct</span>(<span class="fu">if_else</span>(sex <span class="sc">==</span> <span class="dv">0</span>, <span class="st">"female"</span>, <span class="st">"male"</span>), </span>
+<span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a>                   <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"female"</span>, <span class="st">"male"</span>)),</span>
+<span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a>         <span class="at">fbs =</span> <span class="fu">fct</span>(<span class="fu">if_else</span>(fbs <span class="sc">==</span> <span class="dv">0</span>, <span class="st">"normal"</span>, <span class="st">"elevated"</span>),</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a>                   <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"normal"</span>, <span class="st">"elevated"</span>)),</span>
+<span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a>         <span class="at">exer_ang =</span> <span class="fu">fct</span>(<span class="fu">if_else</span>(exer_ang <span class="sc">==</span> <span class="dv">0</span>, <span class="st">"no"</span>, <span class="st">"yes"</span>),</span>
+<span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>                           <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"no"</span>, <span class="st">"yes"</span>)),</span>
+<span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>         <span class="at">exer_st_slope =</span> <span class="fu">fct_recode</span>(<span class="fu">as.character</span>(exer_st_slope), </span>
+<span id="cb1-26"><a href="#cb1-26" aria-hidden="true" tabindex="-1"></a>                                       <span class="at">upslope =</span> <span class="st">"1"</span>, </span>
+<span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>                                       <span class="at">flat =</span> <span class="st">"2"</span>,</span>
+<span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>                                       <span class="at">downslope =</span> <span class="st">"3"</span>),</span>
+<span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>         <span class="at">cp =</span> <span class="fu">fct_recode</span>(<span class="fu">as.character</span>(cp), </span>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>                            <span class="at">typ_ang =</span> <span class="st">"1"</span>, </span>
+<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>                            <span class="at">atyp_ang =</span> <span class="st">"2"</span>, </span>
+<span id="cb1-32"><a href="#cb1-32" aria-hidden="true" tabindex="-1"></a>                            <span class="at">non_anginal =</span> <span class="st">"3"</span>, </span>
+<span id="cb1-33"><a href="#cb1-33" aria-hidden="true" tabindex="-1"></a>                            <span class="at">non_anginal =</span> <span class="st">"4"</span>),</span>
+<span id="cb1-34"><a href="#cb1-34" aria-hidden="true" tabindex="-1"></a>         <span class="at">rest_ecg =</span> <span class="fu">fct_recode</span>(<span class="fu">as.character</span>(rest_ecg), </span>
+<span id="cb1-35"><a href="#cb1-35" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">normal =</span> <span class="st">"0"</span>, </span>
+<span id="cb1-36"><a href="#cb1-36" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">wave_abn =</span> <span class="st">"1"</span>, </span>
+<span id="cb1-37"><a href="#cb1-37" aria-hidden="true" tabindex="-1"></a>                                  <span class="at">ventric_hypertrophy =</span> <span class="st">"2"</span>),</span>
+<span id="cb1-38"><a href="#cb1-38" aria-hidden="true" tabindex="-1"></a>         <span class="at">thal =</span> <span class="fu">fct_recode</span>(<span class="fu">as.character</span>(thal), </span>
+<span id="cb1-39"><a href="#cb1-39" aria-hidden="true" tabindex="-1"></a>                              <span class="at">normal =</span> <span class="st">"3"</span>, </span>
+<span id="cb1-40"><a href="#cb1-40" aria-hidden="true" tabindex="-1"></a>                              <span class="at">fixeddefect =</span> <span class="st">"6"</span>, </span>
+<span id="cb1-41"><a href="#cb1-41" aria-hidden="true" tabindex="-1"></a>                              <span class="at">reversabledefect =</span> <span class="st">"7"</span>))  </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>Skim it to make sure we didnt break anything during our cleaning!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="sc">|&gt;</span> <span class="fu">skim_some</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<caption>Data summary</caption>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">Name</td>
+<td style="text-align: left;">data_all</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">Number of rows</td>
+<td style="text-align: left;">303</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Number of columns</td>
+<td style="text-align: left;">14</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">_______________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Column type frequency:</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">factor</td>
+<td style="text-align: left;">8</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">numeric</td>
+<td style="text-align: left;">6</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">________________________</td>
+<td style="text-align: left;"></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">Group variables</td>
+<td style="text-align: left;">None</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: factor</strong></p>
+<table class="table table-sm table-striped small">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 12%">
+<col style="width: 16%">
+<col style="width: 9%">
+<col style="width: 10%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: left;">ordered</th>
+<th style="text-align: right;">n_unique</th>
+<th style="text-align: left;">top_counts</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">sex</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">mal: 206, fem: 97</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">cp</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">non: 230, aty: 50, typ: 23</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">fbs</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">nor: 258, ele: 45</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">rest_ecg</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">nor: 151, ven: 148, wav: 4</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">exer_ang</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">no: 204, yes: 99</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">exer_st_slope</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">ups: 142, fla: 140, dow: 21</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">thal</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">0.99</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">3</td>
+<td style="text-align: left;">nor: 166, rev: 117, fix: 18</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">disease</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">no: 164, yes: 139</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Variable type: numeric</strong></p>
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: left;">skim_variable</th>
+<th style="text-align: right;">n_missing</th>
+<th style="text-align: right;">complete_rate</th>
+<th style="text-align: right;">p0</th>
+<th style="text-align: right;">p100</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">age</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">29</td>
+<td style="text-align: right;">77.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">rest_bp</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">94</td>
+<td style="text-align: right;">200.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">chol</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">126</td>
+<td style="text-align: right;">564.0</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">exer_max_hr</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">71</td>
+<td style="text-align: right;">202.0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">exer_st_depress</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1.00</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">6.2</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">ca</td>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">0.99</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">3.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<hr>
+<p>The dataset is not that large and we have a decent number of features so we will build models using regularized logistic regression (glmnet)<br>
+<br>
+It would be better to actually do some exploration to build the best compact model first but we will skip that part of the analysis here</p>
+<hr>
+<p>We are using glmnet so we need to find the optimal set of hyperparameter values for this model configuration</p>
+<p>Let’s select/tune hyperparameters using bootstrap resampling</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123456</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>splits_boot <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bootstraps</span>(<span class="at">times =</span> <span class="dv">100</span>, <span class="at">strata =</span> <span class="st">"disease"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><br>
+<br>
+And here is a grid of hyperparameters to tune</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>grid_glmnet <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(<span class="at">penalty =</span> <span class="fu">exp</span>(<span class="fu">seq</span>(<span class="sc">-</span><span class="dv">8</span>, <span class="dv">2</span>, <span class="at">length.out =</span> <span class="dv">300</span>)),</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>                           <span class="at">mixture =</span> <span class="fu">c</span>(<span class="dv">0</span>, .<span class="dv">025</span>, .<span class="dv">05</span>, .<span class="dv">1</span>, .<span class="dv">2</span>, .<span class="dv">4</span>, .<span class="dv">6</span>, .<span class="dv">8</span>, <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>Here is a feature engineering recipe for the full model with all features that is appropriate for glmnet</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>rec_full <span class="ot">&lt;-</span> <span class="fu">recipe</span>(disease <span class="sc">~</span> ., <span class="at">data =</span> data_all) <span class="sc">|&gt;</span> </span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_impute_median</span>(<span class="fu">all_numeric_predictors</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_impute_mode</span>(<span class="fu">all_nominal_predictors</span>()) <span class="sc">|&gt;</span>   </span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_dummy</span>(<span class="fu">all_nominal_predictors</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_normalize</span>(<span class="fu">all_predictors</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>Now we tune the model configuration</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fits_full <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logistic_reg</span>(<span class="at">penalty =</span> <span class="fu">tune</span>(),</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">mixture =</span> <span class="fu">tune</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_engine</span>(<span class="st">"glmnet"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tune_grid</span>(<span class="at">preprocessor =</span> rec_full,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">resamples =</span> splits_boot,</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">grid =</span> grid_glmnet,</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>              <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting,</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/011/"</span>,</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_full"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>Let’s check how the models perform (bootstrap resampled accuracy) with various values for the hyperparameters</p>
+<p>Here is accuracy by log penalty (lambda) and mixture (alpha)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fits_full <span class="sc">|&gt;</span> </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_hyperparameters</span>(<span class="at">hp1 =</span> <span class="st">"penalty"</span>, <span class="at">hp2 =</span> <span class="st">"mixture"</span>, </span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">metric =</span> <span class="st">"accuracy"</span>, <span class="at">log_hp1 =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<div class="callout callout-style-default callout-important no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Question: Does the glmnet (regularized logistic regresssion) outperform a simple logistic regression? How would these two algorithms compare?
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<details class="code-fold">
+<summary>Show Answer</summary>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>Remember that the linear model is a special case of glmnet where the penalty = 0.  </span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>Here we are looking log penalty down to exp(-8) = 0.0003354626.  That is pretty </span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>close to 0 so an approximation of how the standard logistic regression would </span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>perform.  glmnet is about 2% more accurate with its optimal hyperparameter values</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+</div>
+</div>
+</div>
+<hr>
+<p>Here are the optimal hyperparameter values for the top 10 configurations</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(fits_full) <span class="sc">|&gt;</span> </span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(mean)) <span class="sc">|&gt;</span> </span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2,700 × 8
+   penalty mixture .metric  .estimator  mean     n std_err
+     &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;
+ 1   0.279     0.1 accuracy binary     0.823   100 0.00277
+ 2   0.270     0.1 accuracy binary     0.823   100 0.00277
+ 3   0.261     0.1 accuracy binary     0.823   100 0.00273
+ 4   0.403     0.1 accuracy binary     0.823   100 0.00287
+ 5   0.476     0.1 accuracy binary     0.823   100 0.00288
+ 6   0.252     0.1 accuracy binary     0.823   100 0.00272
+ 7   0.509     0.1 accuracy binary     0.823   100 0.00281
+ 8   0.364     0.1 accuracy binary     0.823   100 0.00280
+ 9   0.228     0.1 accuracy binary     0.823   100 0.00278
+10   0.389     0.1 accuracy binary     0.823   100 0.00283
+   .config                
+   &lt;chr&gt;                  
+ 1 Preprocessor1_Model1102
+ 2 Preprocessor1_Model1101
+ 3 Preprocessor1_Model1100
+ 4 Preprocessor1_Model1113
+ 5 Preprocessor1_Model1118
+ 6 Preprocessor1_Model1099
+ 7 Preprocessor1_Model1120
+ 8 Preprocessor1_Model1110
+ 9 Preprocessor1_Model1096
+10 Preprocessor1_Model1112
+# ℹ 2,690 more rows</code></pre>
+</div>
+</div>
+<p>And here is the best</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(hp_best_full <span class="ot">&lt;-</span> <span class="fu">select_best</span>(fits_full, <span class="at">n =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 3
+  penalty mixture .config                
+    &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;                  
+1   0.279     0.1 Preprocessor1_Model1102</code></pre>
+</div>
+</div>
+<hr>
+<p>Let’s fit this model to the full sample</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>rec_full_prep <span class="ot">&lt;-</span> rec_full <span class="sc">|&gt;</span> </span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(data_all)</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>feat_full <span class="ot">&lt;-</span> rec_full_prep <span class="sc">|&gt;</span> </span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_all)</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>fit_full <span class="ot">&lt;-</span> </span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">logistic_reg</span>(<span class="at">penalty =</span> hp_best_full<span class="sc">$</span>penalty,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>               <span class="at">mixture =</span> hp_best_full<span class="sc">$</span>mixture) <span class="sc">|&gt;</span> </span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"glmnet"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(disease <span class="sc">~</span> ., <span class="at">data =</span> feat_full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>We don’t care too much about objective performance in our situation. That is not our question.</p>
+<ul>
+<li>Same sample accuracy is comparable to what you would normally have if you weren’t in a machine learning context</li>
+<li>Bootstrapped accuracy is better because it is prediction in new data vs.&nbsp;same sample</li>
+<li>K-fold would be less biased than bootstrap if we cared about performance of the overall model</li>
+<li>Some optimization bias using either k-fold or bootstrapped accuracy to both select hyperparameters AND assess performance of best model</li>
+<li>If we really cared about overall performance, we should have held back a test set (or done nested CV)</li>
+</ul>
+<hr>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy_vec</span>(feat_full<span class="sc">$</span>disease, <span class="fu">predict</span>(fit_full, feat_full)<span class="sc">$</span>.pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.8382838</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(fits_full) <span class="sc">|&gt;</span> </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(mean)) <span class="sc">|&gt;</span> </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">n =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2,700 × 8
+  penalty mixture .metric  .estimator  mean     n std_err
+    &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;
+1   0.279     0.1 accuracy binary     0.823   100 0.00277
+  .config                
+  &lt;chr&gt;                  
+1 Preprocessor1_Model1102
+# ℹ 2,699 more rows</code></pre>
+</div>
+</div>
+<hr>
+<p>Our focal question is NOT how well our full model does. It is how much do scores from our exercise test improve prediction above baseline (with baseline being all other available characteristics).<br>
+<br>
+<br>
+We need to use <strong>feature ablation</strong> to form a compact/reduced model that does not include the features associated with our exercise test</p>
+<hr>
+<p>Here is a recipe to feature engineer features associated with this compact model</p>
+<ul>
+<li>Note: <code>step_rm(contains("exer_")</code></li>
+<li>All else is the same</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>rec_compact <span class="ot">&lt;-</span> <span class="fu">recipe</span>(disease <span class="sc">~</span> ., <span class="at">data =</span> data_all) <span class="sc">|&gt;</span> </span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_rm</span>(<span class="fu">contains</span>(<span class="st">"exer_"</span>)) <span class="sc">|&gt;</span>                    <span class="co"># remove key feature(s)</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_impute_median</span>(<span class="fu">all_numeric_predictors</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_impute_mode</span>(<span class="fu">all_nominal_predictors</span>()) <span class="sc">|&gt;</span>   </span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_dummy</span>(<span class="fu">all_nominal_predictors</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_normalize</span>(<span class="fu">all_predictors</span>())</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>We need to select/tune hyperparameters for this new model. It has different complexity that the full model so might need different regularization for optimal performance.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>fits_compact <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logistic_reg</span>(<span class="at">penalty =</span> <span class="fu">tune</span>(),</span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">mixture =</span> <span class="fu">tune</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_engine</span>(<span class="st">"glmnet"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tune_grid</span>(<span class="at">preprocessor =</span> rec_compact,   <span class="co"># use recipe for compact model</span></span>
+<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">resamples =</span> splits_boot,</span>
+<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">grid =</span> grid_glmnet,</span>
+<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>              <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span>
+<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting,</span>
+<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/011/"</span>,</span>
+<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_compact"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>Confirm that we found a good set of hyperparameters</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>fits_compact <span class="sc">|&gt;</span> </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_hyperparameters</span>(<span class="at">hp1 =</span> <span class="st">"penalty"</span>, <span class="at">hp2 =</span> <span class="st">"mixture"</span>, <span class="at">metric =</span> <span class="st">"accuracy"</span>, </span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">log_hp1 =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-16-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(fits_compact) <span class="sc">|&gt;</span> </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(mean)) <span class="sc">|&gt;</span> </span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2,700 × 8
+   penalty mixture .metric  .estimator  mean     n std_err
+     &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;
+ 1  0.0362     1   accuracy binary     0.784   100 0.00318
+ 2  0.0277     1   accuracy binary     0.784   100 0.00299
+ 3  0.0350     1   accuracy binary     0.784   100 0.00318
+ 4  0.0598     0.4 accuracy binary     0.784   100 0.00303
+ 5  0.0339     1   accuracy binary     0.784   100 0.00310
+ 6  0.0296     1   accuracy binary     0.784   100 0.00310
+ 7  0.102      0.2 accuracy binary     0.784   100 0.00280
+ 8  0.0988     0.2 accuracy binary     0.784   100 0.00279
+ 9  0.0328     1   accuracy binary     0.784   100 0.00310
+10  0.0579     0.4 accuracy binary     0.784   100 0.00299
+   .config                
+   &lt;chr&gt;                  
+ 1 Preprocessor1_Model2541
+ 2 Preprocessor1_Model2533
+ 3 Preprocessor1_Model2540
+ 4 Preprocessor1_Model1656
+ 5 Preprocessor1_Model2539
+ 6 Preprocessor1_Model2535
+ 7 Preprocessor1_Model1372
+ 8 Preprocessor1_Model1371
+ 9 Preprocessor1_Model2538
+10 Preprocessor1_Model1655
+# ℹ 2,690 more rows</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>(hp_best_compact <span class="ot">&lt;-</span> <span class="fu">select_best</span>(fits_compact, <span class="at">n =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 3
+  penalty mixture .config                
+    &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;                  
+1  0.0362       1 Preprocessor1_Model2541</code></pre>
+</div>
+</div>
+<hr>
+<p>Fit this compact model configuration to the full dataset</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>rec_compact_prep <span class="ot">&lt;-</span> rec_compact <span class="sc">|&gt;</span> </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(data_all)</span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>feat_compact <span class="ot">&lt;-</span> rec_compact_prep <span class="sc">|&gt;</span> </span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_all) </span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>fit_compact <span class="ot">&lt;-</span> </span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">logistic_reg</span>(<span class="at">penalty =</span> hp_best_compact<span class="sc">$</span>penalty,</span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>               <span class="at">mixture =</span> hp_best_compact<span class="sc">$</span>mixture) <span class="sc">|&gt;</span> </span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"glmnet"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(disease <span class="sc">~</span> ., <span class="at">data =</span> feat_compact)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>Here are accuracies for full and compact models in full sample where models were fit</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy_vec</span>(feat_full<span class="sc">$</span>disease, <span class="fu">predict</span>(fit_full, feat_full)<span class="sc">$</span>.pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.8382838</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy_vec</span>(feat_compact<span class="sc">$</span>disease, <span class="fu">predict</span>(fit_compact, feat_compact)<span class="sc">$</span>.pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.7986799</code></pre>
+</div>
+</div>
+<p>Here are accuracies for these two models assessed by bootstrap resampling</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(fits_full) <span class="sc">|&gt;</span> </span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(mean)) <span class="sc">|&gt;</span> </span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 8
+  penalty mixture .metric  .estimator  mean     n std_err
+    &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;
+1   0.279     0.1 accuracy binary     0.823   100 0.00277
+  .config                
+  &lt;chr&gt;                  
+1 Preprocessor1_Model1102</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(fits_compact) <span class="sc">|&gt;</span> </span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(mean)) <span class="sc">|&gt;</span> </span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 8
+  penalty mixture .metric  .estimator  mean     n std_err
+    &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;
+1  0.0362       1 accuracy binary     0.784   100 0.00318
+  .config                
+  &lt;chr&gt;                  
+1 Preprocessor1_Model2541</code></pre>
+</div>
+</div>
+<p>It is less accurate but…..</p>
+<ul>
+<li><p>A simple descriptive comparison is not sufficient to justify the use of a costly test</p></li>
+<li><p>We need to be more confident that the test really improves screening in all possible held out samples.</p></li>
+<li><p>And by how much?</p></li>
+<li><p>How can we compare these two models?</p></li>
+</ul>
+<hr>
+</section>
+<section id="nadeau-and-bengio-2003-correlated-t-test" class="level2" data-number="11.6">
+<h2 data-number="11.6" class="anchored" data-anchor-id="nadeau-and-bengio-2003-correlated-t-test"><span class="header-section-number">11.6</span> Nadeau and Bengio (2003) Correlated t-test</h2>
+<p>We have 100 bootstrapped accuracies for each model.</p>
+<p>Could we compare these?</p>
+<ul>
+<li>We used the bootstrap but if we wanted a less biased estimate we could (should?) have used k-fold
+<ul>
+<li>We could do 10 repeats of 10-fold to still obtain 100 performance estimates for each model configuration</li>
+</ul></li>
+<li>We have used the same 100 held-out samples (we used the same splits) so these two sets of accuracies (for each of the two models) should be considered paired/repeated.
+<ul>
+<li>Not a problem, we could use paired samples t-test</li>
+<li>Easiest to thing about this paired test as testing if the differences in accuracy for each of the 100 held out sets == 0. That removes the lack of independence from using the sample 100 held-out sets twice</li>
+<li>BUT these 100 differences are still not independent</li>
+<li>Each have been estimated using models that were fit with overlapping observations (the held in sets were fit with many of the same observations for each of the k-1 held in folds)</li>
+<li>If we ignore this violation and simply do a paired-samples t-test, we will have inflation of alpha</li>
+</ul></li>
+</ul>
+<hr>
+<p><span class="citation" data-cites="Nadeau2003">Nadeau and Bengio (<a href="#ref-Nadeau2003" role="doc-biblioref">2003</a>)</span> (<a href="pdfs/nadeauC2003.pdf">see pdf</a>) and <span class="citation" data-cites="Bouckaert2003">Bouckaert (<a href="#ref-Bouckaert2003" role="doc-biblioref">2003</a>)</span> (<a href="pdfs/bouckaertR2003.pdf">see pdf</a>) have explored the degree of dependence among performance estimates using resampling.</p>
+<p>This was originally done for repeated random train/test splits (e.g., 90/10 splits) but is now also used when doing repeated k-fold.</p>
+<p>The classic paired t-test has the following formula</p>
+<p><span class="math inline">\(t = \frac{\overline{x} - 0}{\sqrt{\hat{\sigma^2}*\frac{1}{n}}}\)</span></p>
+<p>The standard error for the difference (denominator of the t-statistic formula) is too small</p>
+<p>It is adjusted by <span class="math inline">\(\frac{\rho}{1-\rho}\)</span> where <span class="math inline">\(\rho = \frac{n_{test}}{n_{total}}\)</span> or equivalent <span class="math inline">\(\frac{1}{k}\)</span></p>
+<p>This adjustment yields:</p>
+<p><span class="math inline">\(t = \frac{\overline{x} - 0}{\sqrt{\hat{\sigma^2}*(\frac{1}{n} + \frac{\rho}{1-\rho})}}\)</span></p>
+<hr>
+<p>Let’s perform this correlated t-test to compare our compact and full models</p>
+<p>We first need to evaluate both models using 10x 10-fold CV splits. Important that these are the SAME splits for both model configurations</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2468</span>)</span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>splits_cv <span class="ot">&lt;-</span></span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  data_all <span class="sc">|&gt;</span> </span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">vfold_cv</span>(<span class="at">v =</span> <span class="dv">10</span>, <span class="at">repeats =</span> <span class="dv">10</span>, <span class="at">strata =</span> <span class="st">"disease"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>Here is k-fold accuracy for the full model</p>
+<ul>
+<li>best penalty = 0.2787076</li>
+<li>best mixture = 0.1</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">NOTE</span><span class="co">:  I cant get this to accept anything but the actual numeric values for </span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="co"># penalty and mixture. Not sure why.   If no one else solves this problem, </span></span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="co"># I will simplify to a reprex and submit a bug report at some point</span></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>cv_full <span class="ot">&lt;-</span> </span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">logistic_reg</span>(<span class="at">penalty =</span> <span class="fl">0.2787076</span>, </span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">mixture =</span> <span class="fl">0.1</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"glmnet"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit_resamples</span>(<span class="at">preprocessor =</span> rec_full,  </span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">resamples =</span> splits_cv,</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>And here is</p>
+<ul>
+<li>mean performance over 100 held out folds</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(cv_full, <span class="at">summarize =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 6
+  .metric  .estimator  mean     n std_err .config             
+  &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
+1 accuracy binary     0.826   100 0.00687 Preprocessor1_Model1</code></pre>
+</div>
+</div>
+<ul>
+<li>and the first 10 rows from <code>collect_metrics</code></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(cv_full, <span class="at">summarize =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 100 × 6
+   id       id2    .metric  .estimator .estimate .config             
+   &lt;chr&gt;    &lt;chr&gt;  &lt;chr&gt;    &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;               
+ 1 Repeat01 Fold01 accuracy binary         0.871 Preprocessor1_Model1
+ 2 Repeat01 Fold02 accuracy binary         0.806 Preprocessor1_Model1
+ 3 Repeat01 Fold03 accuracy binary         0.871 Preprocessor1_Model1
+ 4 Repeat01 Fold04 accuracy binary         0.839 Preprocessor1_Model1
+ 5 Repeat01 Fold05 accuracy binary         0.933 Preprocessor1_Model1
+ 6 Repeat01 Fold06 accuracy binary         0.733 Preprocessor1_Model1
+ 7 Repeat01 Fold07 accuracy binary         0.9   Preprocessor1_Model1
+ 8 Repeat01 Fold08 accuracy binary         0.633 Preprocessor1_Model1
+ 9 Repeat01 Fold09 accuracy binary         0.867 Preprocessor1_Model1
+10 Repeat01 Fold10 accuracy binary         0.759 Preprocessor1_Model1
+# ℹ 90 more rows</code></pre>
+</div>
+</div>
+<ul>
+<li>and here we pull the 100 metrics</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(cv_full, <span class="at">summarize =</span> <span class="cn">FALSE</span>)<span class="sc">$</span>.estimate</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] 0.8709677 0.8064516 0.8709677 0.8387097 0.9333333 0.7333333 0.9000000
+  [8] 0.6333333 0.8666667 0.7586207 0.8387097 0.8064516 0.7741935 0.7741935
+ [15] 0.8333333 0.8000000 0.8333333 0.8333333 0.8666667 0.8965517 0.9032258
+ [22] 0.7419355 0.8387097 0.8387097 0.7666667 0.8666667 0.9000000 0.8333333
+ [29] 0.8333333 0.7241379 0.7419355 0.9032258 0.8064516 0.8064516 0.8666667
+ [36] 0.9000000 0.9000000 0.8000000 0.8000000 0.7586207 0.8064516 0.8064516
+ [43] 0.9354839 0.9032258 0.6333333 0.8000000 0.8333333 0.8666667 0.8000000
+ [50] 0.8965517 0.8709677 0.8064516 0.7741935 0.9032258 0.8666667 0.8666667
+ [57] 0.8333333 0.8666667 0.6666667 0.7931034 0.6129032 0.9032258 0.8387097
+ [64] 0.8387097 0.9000000 0.8000000 0.8000000 0.8333333 0.8333333 0.8965517
+ [71] 0.7419355 0.8064516 0.9354839 0.7741935 0.9333333 0.6333333 0.9000000
+ [78] 0.7666667 0.8000000 0.8965517 0.8709677 0.8709677 0.8709677 0.8064516
+ [85] 0.8666667 0.8333333 0.7666667 0.8333333 0.8333333 0.7586207 0.8064516
+ [92] 0.8064516 0.8709677 0.7741935 0.9666667 0.8000000 0.7333333 0.8666667
+ [99] 0.8333333 0.8965517</code></pre>
+</div>
+</div>
+<hr>
+<p>Now get k-fold accuracy for the compact model with</p>
+<ul>
+<li>best penalty = 0.0362351</li>
+<li>best mixture = 1</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>cv_compact <span class="ot">&lt;-</span> </span>
+<span id="cb42-2"><a href="#cb42-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">logistic_reg</span>(<span class="at">penalty =</span> .<span class="dv">03623515</span>,</span>
+<span id="cb42-3"><a href="#cb42-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">mixture =</span> <span class="dv">1</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb42-4"><a href="#cb42-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"glmnet"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb42-5"><a href="#cb42-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit_resamples</span>(<span class="at">preprocessor =</span> rec_compact,  </span>
+<span id="cb42-6"><a href="#cb42-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">resamples =</span> splits_cv,</span>
+<span id="cb42-7"><a href="#cb42-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(cv_compact, <span class="at">summarize =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 6
+  .metric  .estimator  mean     n std_err .config             
+  &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
+1 accuracy binary     0.784   100 0.00772 Preprocessor1_Model1</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(cv_compact, <span class="at">summarize =</span> <span class="cn">FALSE</span>)<span class="sc">$</span>.estimate</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] 0.7741935 0.7741935 0.9354839 0.6774194 0.8333333 0.8000000 0.8000000
+  [8] 0.6333333 0.8000000 0.7586207 0.8709677 0.8064516 0.7096774 0.6451613
+ [15] 0.8333333 0.7000000 0.8000000 0.8000000 0.7333333 0.8620690 0.8387097
+ [22] 0.6774194 0.8064516 0.8064516 0.7666667 0.8000000 0.8333333 0.7333333
+ [29] 0.9000000 0.7586207 0.6451613 0.8709677 0.6774194 0.8064516 0.7333333
+ [36] 0.8000000 0.8000000 0.7666667 0.8333333 0.8275862 0.9354839 0.7741935
+ [43] 0.8709677 0.8387097 0.5666667 0.6666667 0.7666667 0.8333333 0.8000000
+ [50] 0.7586207 0.8064516 0.8064516 0.6451613 0.9032258 0.7666667 0.7666667
+ [57] 0.8000000 0.9333333 0.7000000 0.7931034 0.7096774 0.7741935 0.6451613
+ [64] 0.8064516 0.9666667 0.7000000 0.7000000 0.8333333 0.8000000 0.8620690
+ [71] 0.7419355 0.8709677 0.8709677 0.7741935 0.8333333 0.6666667 0.8333333
+ [78] 0.7333333 0.6666667 0.8620690 0.8064516 0.7419355 0.8709677 0.6774194
+ [85] 0.8333333 0.7666667 0.7666667 0.8333333 0.6666667 0.8275862 0.7096774
+ [92] 0.7741935 0.8387097 0.7741935 0.8666667 0.8333333 0.7333333 0.8333333
+ [99] 0.7000000 0.9310345</code></pre>
+</div>
+</div>
+<hr>
+<p>Define a function for Nadeau and Bengio (2003) correlated t-test</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="co"># included in fun_ml.R</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>nb_correlated_t_test <span class="ot">&lt;-</span> <span class="cf">function</span>(cv_fits_full, cv_fits_compact, <span class="at">k =</span> <span class="dv">10</span>){</span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    cv_metrics_full <span class="ot">&lt;-</span> <span class="fu">collect_metrics</span>(cv_fits_full, <span class="at">summarize =</span> <span class="cn">FALSE</span>)<span class="sc">$</span>.estimate</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>    cv_metrics_compact <span class="ot">&lt;-</span> <span class="fu">collect_metrics</span>(cv_fits_compact, <span class="at">summarize =</span> <span class="cn">FALSE</span>)<span class="sc">$</span>.estimate</span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>    diffs <span class="ot">&lt;-</span> cv_metrics_full <span class="sc">-</span> cv_metrics_compact</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>    n <span class="ot">&lt;-</span> <span class="fu">length</span>(diffs)</span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>    mean_diff <span class="ot">&lt;-</span> <span class="fu">mean</span>(diffs)</span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>    var_diffs <span class="ot">&lt;-</span> <span class="fu">var</span>(diffs)</span>
+<span id="cb47-10"><a href="#cb47-10" aria-hidden="true" tabindex="-1"></a>    proportion_test <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> k</span>
+<span id="cb47-11"><a href="#cb47-11" aria-hidden="true" tabindex="-1"></a>    proportion_train <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> proportion_test</span>
+<span id="cb47-12"><a href="#cb47-12" aria-hidden="true" tabindex="-1"></a>    correction <span class="ot">&lt;-</span> (<span class="dv">1</span> <span class="sc">/</span> n) <span class="sc">+</span> (proportion_test <span class="sc">/</span> proportion_train)</span>
+<span id="cb47-13"><a href="#cb47-13" aria-hidden="true" tabindex="-1"></a>    se <span class="ot">=</span> <span class="fu">sqrt</span>(correction <span class="sc">*</span> var_diffs)</span>
+<span id="cb47-14"><a href="#cb47-14" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb47-15"><a href="#cb47-15" aria-hidden="true" tabindex="-1"></a>    t <span class="ot">=</span> <span class="fu">abs</span>(mean_diff<span class="sc">/</span>se)</span>
+<span id="cb47-16"><a href="#cb47-16" aria-hidden="true" tabindex="-1"></a>    p_value <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">pt</span>(t, n <span class="sc">-</span> <span class="dv">1</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb47-17"><a href="#cb47-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(<span class="at">mean_diff =</span> mean_diff, <span class="at">se =</span> se, <span class="at">t =</span> t, <span class="at">df =</span> n <span class="sc">-</span> <span class="dv">1</span>, <span class="at">p_value =</span> p_value)</span>
+<span id="cb47-18"><a href="#cb47-18" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>Calculate the t-test. In this instance we likely want a one-tailed test (though of course, that should have been planned in advanced and ideally pre-registered!).<br>
+<br>
+<br>
+My function returns a two-tailed p-value so we should cut it in half.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nb_correlated_t_test</span>(<span class="at">cv_fits_full =</span> cv_full, </span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">cv_fits_compact =</span> cv_compact, </span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">k =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 5
+  mean_diff     se     t    df p_value
+      &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
+1    0.0424 0.0228  1.86    99  0.0653</code></pre>
+</div>
+</div>
+<p>The improvement in prediction accuracy associated with the use of our exercise test protocol is significant (one-tailted).</p>
+<p>These data are unlikely if the full and compact models had the same accuracy.</p>
+<hr>
+</section>
+<section id="bayesian-estimation-for-model-comparisons" class="level2" data-number="11.7">
+<h2 data-number="11.7" class="anchored" data-anchor-id="bayesian-estimation-for-model-comparisons"><span class="header-section-number">11.7</span> Bayesian estimation for model comparisons</h2>
+<p><span class="citation" data-cites="Benavoli2017">Benavoli et al. (<a href="#ref-Benavoli2017" role="doc-biblioref">2017</a>)</span> critique the many shortcomings wrt the frequentist approach, and I must admit, I am mostly convinced</p>
+<ul>
+<li>NHST does not provide the probabilities of the null and alternative hypotheses.
+<ul>
+<li>That is what we want</li>
+<li>NHST gives us the probability of our data given the null</li>
+</ul></li>
+<li>NHST focuses on a point-wise comparison (no difference) that is almost never true.</li>
+<li>NHST yields no information about the null hypothesis (i.e., when we fail to reject)</li>
+<li>The inference depends on the sampling and testing intention (think about Bonferonni correction)</li>
+</ul>
+<hr>
+<p>They suggest to use Bayesian parameter estimation as alternative to the t-test. Bayesian estimation has now been included in tidymodels in the <code>tidyposterior</code> package using the <code>perf_mod()</code> function.<br>
+<br>
+<br>
+You can (and should!) read more about this implementation of Bayesian Estimation in the associated <a href="https://tidyposterior.tidymodels.org/articles/Getting_Started.html">vignette</a> AND by reading the help materials on <code>perf_mod()</code></p>
+<hr>
+<p>Using this approach, we will estimate the posterior probability for values associated with specific parameters of interest. For our goals, we will care about estimates of three parameters</p>
+<ul>
+<li>The accuracy of the full model</li>
+<li>The accuracy of the compact model</li>
+<li>The difference in accuracies between these two models.</li>
+</ul>
+<hr>
+<p>We want to determine the posterior probabilities associated with ranges of values for each of these three model performance parameters estimates. We can then use these posterior probability distributions to determine that probability that the accuracy of the full model is greater than the accuracy of the compact model.</p>
+<p>In addition, we can also determine if the increased accuracy of the full model is meaningful (i.e., practically important).</p>
+<p>To accomplish this latter goal, we will:</p>
+<ul>
+<li>Specify a Region of Practical Equivalence (a better alternative to the point-wise null in NHST)
+<ul>
+<li>I will define classifiers whose performance are within +-1% as equivalent (not meaningfully different from each other) for our example<br>
+</li>
+<li>Not worth the effort if my test doesn’t improve screening accuracy by at least this</li>
+</ul></li>
+</ul>
+<hr>
+<p>To estimate posterior probabilities for these three parameter estimates, we need to</p>
+<ul>
+<li>set prior probabilities for these parameter estimates. These should be broad/uninformative in most instances unless you have substantial prior information about credible values.<br>
+</li>
+<li>Collect data on these estimates. This will be the same as before - the 100 estimates of accuracy using 10x10 fold CV for both the full and compact models.</li>
+</ul>
+<p><br>
+<br>
+Using these priors and these data, we can derive the posterior probabilities for our three performance estimates</p>
+<hr>
+<p>Lets do this step by step. We will use the <code>tidyposterior</code> package. It in not included when we load <code>tidymodels</code> so we will load it now</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyposterior)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>We need to make a dataframe of our 100 performance estimates for the full and compact models. Here is the code to do this using our previous resamples of our models</p>
+<ul>
+<li>Make dataframes of the accuracies from the full model and the compact model</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>accuracy_full <span class="ot">&lt;-</span></span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect_metrics</span>(cv_full, <span class="at">summarize =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(.metric <span class="sc">==</span> <span class="st">"accuracy"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(id, id2, <span class="at">full =</span> .estimate) <span class="sc">|&gt;</span> </span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 100 × 3
+   id       id2     full
+   &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt;
+ 1 Repeat01 Fold01 0.871
+ 2 Repeat01 Fold02 0.806
+ 3 Repeat01 Fold03 0.871
+ 4 Repeat01 Fold04 0.839
+ 5 Repeat01 Fold05 0.933
+ 6 Repeat01 Fold06 0.733
+ 7 Repeat01 Fold07 0.9  
+ 8 Repeat01 Fold08 0.633
+ 9 Repeat01 Fold09 0.867
+10 Repeat01 Fold10 0.759
+# ℹ 90 more rows</code></pre>
+</div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>accuracy_compact <span class="ot">&lt;-</span></span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>     <span class="fu">collect_metrics</span>(cv_compact, <span class="at">summarize =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>     <span class="fu">filter</span>(.metric <span class="sc">==</span> <span class="st">"accuracy"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>     <span class="fu">select</span>(id, id2, <span class="at">compact =</span> .estimate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>Now we need to join these dataframes, matching on repeat and fold ids</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>resamples <span class="ot">&lt;-</span> accuracy_full <span class="sc">|&gt;</span> </span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">full_join</span>(accuracy_compact, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"id"</span>, <span class="st">"id2"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 100 × 4
+   id       id2     full compact
+   &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt;   &lt;dbl&gt;
+ 1 Repeat01 Fold01 0.871   0.774
+ 2 Repeat01 Fold02 0.806   0.774
+ 3 Repeat01 Fold03 0.871   0.935
+ 4 Repeat01 Fold04 0.839   0.677
+ 5 Repeat01 Fold05 0.933   0.833
+ 6 Repeat01 Fold06 0.733   0.8  
+ 7 Repeat01 Fold07 0.9     0.8  
+ 8 Repeat01 Fold08 0.633   0.633
+ 9 Repeat01 Fold09 0.867   0.8  
+10 Repeat01 Fold10 0.759   0.759
+# ℹ 90 more rows</code></pre>
+</div>
+</div>
+<hr>
+<p>Now we can use <code>perf_mod()</code> to derive the posterior probabilites for the accuracy of each of these two models</p>
+<ul>
+<li><p>We need to specify a model with parameters in formula. Here we indicate that we have a multi-level model with repeated observation of accuracy across folds (id2) nested within repeats (id). This handles dependence associated with repeated observations of accuracy using similar models in k-fold cv.</p></li>
+<li><p>We are interested in the intercept from this model listed in formula. The intercept value will represent the accuracy estimate for each model.</p></li>
+<li><p>The default for <code>perf_mod()</code> will be to constrain the variances of the intercept parameter estimate to be the same across models. This may be fine for some performance metrics (e.g., rmse) but for binary accuracy the variance is dependent on the mean. Therefore we allow these variances to be different using <code>hetero_var = TRUE</code></p></li>
+<li><p>In some instances (e..g., rmse), we may want to allow the errors in our model to be something other than Gaussian (though this is often a reasonable assumption by the central limit theorem). You can change the <code>family</code> for the errors if needed. See vignette and help on <code>perf_mod()</code>. Here, we use the default Gaussian distribution.</p></li>
+<li><p>This is an iterative process using a Markov chain Monte Carlo method (Hamilton Monte Carlo) so we need to set a seed (for reproducibility), and the number of iterations and chains (beyond the scope of this course to dive into this method). I provide default values for <code>iter</code> and <code>chains</code> because you may need to increase these in some instances for the method to converge on valid values. You can often address converge and other warnings by increasing <code>iter</code>, <code>chains</code> or <code>adapt_delta</code>. You can read more about these warnings and issues <a href="https://mc-stan.org/misc/warnings.html">here</a>, <a href="https://mc-stan.org/rstanarm/reference/adapt_delta.html#:~:text=For%20the%20No%2DU%2DTurn,not%20set%20to%20%22sampling%22%20.">here</a>, <a href="https://mc-stan.org/misc/warnings.html#divergent-transitions-after-warmup">here</a>, and <a href="http://singmann.org/hierarchical-mpt-in-stan-i-dealing-with-convergent-transitions-via-control-arguments/">here</a> to start.</p></li>
+</ul>
+<hr>
+<p>Here is the code</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">101</span>)</span>
+<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>pp <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
+<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">perf_mod</span>(resamples, </span>
+<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">formula =</span> statistic <span class="sc">~</span> model <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> id2<span class="sc">/</span>id),</span>
+<span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a>            <span class="co"># defaults but may require increases</span></span>
+<span id="cb56-7"><a href="#cb56-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">iter =</span> <span class="dv">2000</span>, <span class="at">chains =</span> <span class="dv">4</span>,  </span>
+<span id="cb56-8"><a href="#cb56-8" aria-hidden="true" tabindex="-1"></a>            <span class="co"># for more Gaussian distribution of accuracy</span></span>
+<span id="cb56-9"><a href="#cb56-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">transform =</span> tidyposterior<span class="sc">::</span>logit_trans,</span>
+<span id="cb56-10"><a href="#cb56-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">hetero_var =</span> <span class="cn">TRUE</span>, <span class="co"># for accuracy</span></span>
+<span id="cb56-11"><a href="#cb56-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">family =</span> gaussian, <span class="co"># default but could change depending on DV</span></span>
+<span id="cb56-12"><a href="#cb56-12" aria-hidden="true" tabindex="-1"></a>            <span class="co"># increase adapt_delta (e.g., .99, .999) to </span></span>
+<span id="cb56-13"><a href="#cb56-13" aria-hidden="true" tabindex="-1"></a>            <span class="co"># fix divergent transitions</span></span>
+<span id="cb56-14"><a href="#cb56-14" aria-hidden="true" tabindex="-1"></a>            <span class="at">adapt_delta =</span> .<span class="dv">99</span>)  </span>
+<span id="cb56-15"><a href="#cb56-15" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb56-16"><a href="#cb56-16" aria-hidden="true" tabindex="-1"></a><span class="at">rerun =</span> rerun_setting,</span>
+<span id="cb56-17"><a href="#cb56-17" aria-hidden="true" tabindex="-1"></a><span class="at">dir =</span> <span class="st">"cache/011/"</span>,</span>
+<span id="cb56-18"><a href="#cb56-18" aria-hidden="true" tabindex="-1"></a><span class="at">file =</span> <span class="st">"pp"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>In contrast to the NHST approach, we now have what we really want - posterior probabilities. Lets look at them</p>
+<p>We can view the posterior probability distributions using an autoplot method for perf_mod objects.</p>
+<ul>
+<li><p>These density plots tell how probable various values are for the accuracy of each model</p></li>
+<li><p>The probabilities associated with any region of the curve is equal to the area under that curve for that region. This will tell you the probability associated with that range of values for accuracy.</p></li>
+<li><p>You can easily see in this instance that the probable values for accuracy are higher generally for full model than the compact model</p></li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> <span class="fu">autoplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-35-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<p>You will likely want to publish a figure showing these posterior probability distributions so you may want to fine tune the plots. Here are some code options using ggplot</p>
+<p>Here is the same density plots using ggplot so you can now edit to adjust as you like</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> </span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy</span>(<span class="at">seed =</span> <span class="dv">123</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">model =</span> <span class="fu">fct_inorder</span>(model)) <span class="sc">|&gt;</span></span>
+<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="fu">aes</span>(<span class="at">x =</span> posterior, <span class="at">color =</span> model) )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-36-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<p>We are actually sampling from the posterior distribution so it might make more sense to display these as histograms rather than density plots</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> </span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy</span>(<span class="at">seed =</span> <span class="dv">123</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">model =</span> <span class="fu">fct_inorder</span>(model)) <span class="sc">|&gt;</span></span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x =</span> posterior, <span class="at">fill =</span> model), <span class="at">color =</span> <span class="st">"white"</span>, <span class="at">alpha =</span> <span class="fl">0.4</span>,</span>
+<span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">bins =</span> <span class="dv">50</span>, <span class="at">position =</span> <span class="st">"identity"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-37-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<p>Or maybe you want to facet the histograms if the overlap is difficulty to view</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> </span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy</span>(<span class="at">seed =</span> <span class="dv">123</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">model =</span> <span class="fu">fct_inorder</span>(model)) <span class="sc">|&gt;</span></span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> posterior)) <span class="sc">+</span> </span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color =</span> <span class="st">"white"</span>, <span class="at">fill =</span> <span class="st">"blue"</span>, <span class="at">bins =</span> <span class="dv">30</span>) <span class="sc">+</span> </span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> model, <span class="at">ncol =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-38-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<p>We can also calculate the 95% Higher Density Intervals (aka, 95% Credible Intervals; the Bayesian alternative to the 95% Confidence Intervals) for the accuracy of each model. This is the range of parameter estimate values that include 95% of the credible values. Kruschke described this in the <a href="pdfs/pkruschke2018a.pdf.pdf">assigned reading</a>.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> <span class="fu">tidy</span>(<span class="at">seed =</span> <span class="dv">123</span>) <span class="sc">|&gt;</span> <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 2 × 4
+  model    mean lower upper
+  &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+1 compact 0.796 0.780 0.811
+2 full    0.837 0.824 0.850</code></pre>
+</div>
+</div>
+<hr>
+<p>But what we really want is derive the posterior probability for the difference in accuracy between the two models. This will let us determine credible values for the magnitude of the difference and determine if this difference is meaningful.</p>
+<p>We said early that we would define a ROPE of +-.01 around zero. The models are only meaningful different if their accuracies differ by at least 1%</p>
+<p>Lets visualize the posterior probability distribution for the difference along with this ROPE using the built in autoplot function</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> <span class="fu">contrast_models</span>(<span class="at">seed =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span> <span class="fu">autoplot</span>(<span class="at">size =</span> .<span class="dv">01</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-39-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<p>We could make more pretty plots directly in ggplot</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> </span>
+<span id="cb64-2"><a href="#cb64-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">contrast_models</span>(<span class="at">seed =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb64-3"><a href="#cb64-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb64-4"><a href="#cb64-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="fu">aes</span>(<span class="at">x =</span> difference), <span class="at">color =</span> <span class="st">"blue"</span>)<span class="sc">+</span></span>
+<span id="cb64-5"><a href="#cb64-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> <span class="sc">-</span>.<span class="dv">01</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> </span>
+<span id="cb64-6"><a href="#cb64-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> .<span class="dv">01</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-40-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>or my prefered histogram</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> </span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">contrast_models</span>(<span class="at">seed =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> difference)) <span class="sc">+</span> </span>
+<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">50</span>, <span class="at">color =</span> <span class="st">"white"</span>, <span class="at">fill =</span> <span class="st">"blue"</span>)<span class="sc">+</span></span>
+<span id="cb65-5"><a href="#cb65-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> <span class="sc">-</span>.<span class="dv">01</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> </span>
+<span id="cb65-6"><a href="#cb65-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> .<span class="dv">01</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-41-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<p>But perhaps most important, lets calculate the probability that the full model is more accurate than the compact model</p>
+<ul>
+<li>The mean increase in accuracy is 4.13%</li>
+<li>The 95% HDI is 2.94% - 5.35%</li>
+<li>The probability that the full model is meaningfully higher than the compact model (i.e., what proportion of the credible values are above the ROPE) is 1.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> <span class="fu">contrast_models</span>(<span class="at">seed =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span> <span class="fu">summary</span>(<span class="at">size =</span> .<span class="dv">01</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 9
+  contrast        probability   mean  lower  upper  size pract_neg pract_equiv
+  &lt;chr&gt;                 &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;
+1 full vs compact           1 0.0413 0.0294 0.0535  0.01         0     0.00025
+  pract_pos
+      &lt;dbl&gt;
+1      1.00</code></pre>
+</div>
+</div>
+<p>Alternatively, using the approach proposed by Kruschke (2018), you can conclude that the full model is meaningfully better than the compact model if the 95% HDI is fully above the ROPE. In this instance it is (.0294- .0535 is all above .01)</p>
+<hr>
+<p>Finally, in some instances, you may not want to use the ROPE.</p>
+<ul>
+<li>Instead, you may simply want the posterior probability that the full model performs better than the compact model.<br>
+</li>
+<li>This is probability is provided in the <code>probability</code> column of the table.</li>
+<li>You can also set the size of the ROPE to 0 (though not necessary)</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> <span class="fu">contrast_models</span>(<span class="at">seed =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span> <span class="fu">summary</span>(<span class="at">size =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 9
+  contrast        probability   mean  lower  upper  size pract_neg pract_equiv
+  &lt;chr&gt;                 &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;
+1 full vs compact           1 0.0413 0.0294 0.0535     0        NA          NA
+  pract_pos
+      &lt;dbl&gt;
+1        NA</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="feature-importance" class="level2" data-number="11.8">
+<h2 data-number="11.8" class="anchored" data-anchor-id="feature-importance"><span class="header-section-number">11.8</span> Feature Importance</h2>
+<p>There as been increasing focus on improving the interpretability of machine learning models that we are using. There are numerous reasons to want to better understand why our models make the predictions that they do.<br>
+<br>
+<br>
+For our purposes, the growing set of tools to interpret our models can help address our <strong>explanatory questions</strong>. But they can also help us <strong>find errors</strong> in our models and <strong>detect possible bias</strong> (we will focus explicitly on algorithmic bias in later units)</p>
+<hr>
+<p>Feature importance metrics are an important tool to better understand how our models work.<br>
+<br>
+These metrics help us understand which features in our models contribute most to the predictions that the model makes.<br>
+<br>
+<br>
+For some models, interpretation and identification of important features is easy. For example, if we standardize the variables in a glm or glmnet model, we can interpret the absolute magnitude of the parameter estimates (i.e., the coefficients) as an index of the global (i.e., across all observations) importance of each feature.</p>
+<ul>
+<li>You can use the <a href="">vip</a> package to extract these importance metrics but you can often just get them directly from the model as well</li>
+<li>More info on the use of vip package is available <a href="https://cran.r-project.org/web/packages/vip/vignettes/vip.html">elsewhere</a></li>
+</ul>
+<hr>
+<p>But for other models, we need different approaches. There are many approaches to quantify the importance of a feature, but we will focus on two that are model agnostic (i.e., can be used across all statistical algorithms)</p>
+<ul>
+<li>Permutation Feature Importance</li>
+<li>Shapley Values</li>
+</ul>
+<hr>
+<p>We follow <a href="https://www.tmwr.org/explain">recommendations from the tidymodels folks</a> and use the DALEX and DALEXtra packages for model agnostic approaches to feature importance.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DALEX, <span class="at">exclude=</span> <span class="st">"explain"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Welcome to DALEX (version: 2.4.3).
+Find examples and detailed introduction at: http://ema.drwhy.ai/</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DALEXtra)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>Lets first get some coding issues accomplished before we dig into the details of the two feature importance metrics</p>
+<p>To calculate these importance metrics, we will need access to the raw features and outcome. Lets get those again.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a>feat_full <span class="ot">&lt;-</span>  rec_full_prep <span class="sc">|&gt;</span> </span>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_all)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>We will need to have a df for the features (without the outcome) and a separate vector for the outcome</p>
+<ul>
+<li>features are easy. Just select out the outcome</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> feat_full <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span>disease)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<ul>
+<li>For outcome, we need to select it first and then pull the vector out of the dataframe</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> feat_full <span class="sc">|&gt;</span> </span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(disease) <span class="sc">|&gt;</span> </span>
+<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(disease)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>We also need a specific predictor function that will work with the DALEX package</p>
+<p>We will write a custom function that “wraps” around our tidymodels <code>predict()</code> function</p>
+<ul>
+<li>It needs two parameters named <code>model</code> and <code>newdata</code> and it needs to return a single column of probabilites for classification problems</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>predict_wrapper <span class="ot">&lt;-</span> <span class="cf">function</span>(model, newdata) {</span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(model, newdata, <span class="at">type =</span> <span class="st">"prob"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(.pred_yes)</span>
+<span id="cb76-4"><a href="#cb76-4" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>We will also need an <code>explainer</code> object based on our model and data. The <code>explain_tidymodels()</code> function in DALEXtra will create this object for us.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>explain_full <span class="ot">&lt;-</span> <span class="fu">explain_tidymodels</span>(fit_full, <span class="co"># our model object </span></span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">data =</span> x, <span class="co"># features without outcome</span></span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">y =</span> y, <span class="co"># outcome</span></span>
+<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">predict_function =</span> predict_wrapper, <span class="co"># our predictor function</span></span>
+<span id="cb77-5"><a href="#cb77-5" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">predict_function_target_column =</span> <span class="st">".pred_yes"</span>) <span class="co"># the name of the column for predictions</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Preparation of a new explainer is initiated
+  -&gt; model label       :  model_fit  (  default  )
+  -&gt; data              :  303  rows  17  cols 
+  -&gt; data              :  tibble converted into a data.frame 
+  -&gt; target variable   :  303  values 
+  -&gt; predict function  :  predict_function 
+  -&gt; predicted values  :  Predict function column set to:  .pred_yes (  OK  )
+  -&gt; model_info        :  package parsnip , ver. 1.1.0.9004 , task multiclass (  default  ) 
+  -&gt; predicted values  :  predict function returns multiple columns:  1  (  default  ) 
+  -&gt; residual function :  residual_function 
+  -&gt; residuals         :  numerical, min =  0 , mean =  0 , max =  0  
+  A new explainer has been created!  </code></pre>
+</div>
+</div>
+<hr>
+<p>Finally, we need to define a custom function for our performance metric</p>
+<ul>
+<li>It needs to have two parameters: <code>observed</code> and <code>predicted</code></li>
+<li>We can create a wrapper function around <code>accuracy_vec()</code> to fit these needs</li>
+<li>For accuracy, we need to transform the predicted probabilites from our prediction function to class predictions</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a>accuracy_wrapper <span class="ot">&lt;-</span> <span class="cf">function</span>(observed, predicted) {</span>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a>  predicted <span class="ot">&lt;-</span> <span class="fu">fct</span>(<span class="fu">if_else</span>(predicted <span class="sc">&gt;</span> .<span class="dv">5</span>, <span class="st">"yes"</span>, <span class="st">"no"</span>), <span class="at">levels  =</span> <span class="fu">c</span>(<span class="st">"yes"</span>, <span class="st">"no"</span>))</span>
+<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">accuracy_vec</span>(observed, predicted)</span>
+<span id="cb79-4"><a href="#cb79-4" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><br>
+<br>
+We are now ready to calculate feature importance metrics</p>
+<hr>
+<section id="permutation-feature-importance" class="level3" data-number="11.8.1">
+<h3 data-number="11.8.1" class="anchored" data-anchor-id="permutation-feature-importance"><span class="header-section-number">11.8.1</span> Permutation Feature Importance</h3>
+<p>The first model agnostic approach to calculating feature important is called Permutation Feature Importance<br>
+<br>
+This approach is very straight forward. This approach says - if we want to calculate the importance of any specific feature, we can compare our performance metric using the original features to the performance metric we get if we permute (i.e., shuffle) the values for the feature we are evaluating.<br>
+<br>
+<br>
+By randomly shuffling the values for the feature, we break the relationship between that feature and the outcome so it no longer contributes to the predictions. If performance doesn’t change much, then that feature is not important. If performance goes down a lot, the feature is important.</p>
+<ul>
+<li>The function can provide <code>raw</code> performance (will give us performance for the non-permuted model and then performance for the model with each feature permuted, one at a time)</li>
+<li><code>difference</code> performance measure, which is the difference between the permuted model and the non-permuted mode, separately for each feature</li>
+<li><code>ratio</code> performance measure, which is (<span class="math inline">\(\frac{permuted}{original}\)</span>), separately for each feature</li>
+</ul>
+<hr>
+<p>To calculate accuracy after permuting each feature, we use <code>model_parts()</code>. We pass in</p>
+<ul>
+<li>our explainer object</li>
+<li>set the type (<code>raw</code> in this example)</li>
+<li>indicate our custom accuracy function</li>
+<li>set B to indicate number of permutations to perform</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123456</span>)</span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a>imp_permute <span class="ot">&lt;-</span> <span class="fu">model_parts</span>(explain_full, </span>
+<span id="cb80-3"><a href="#cb80-3" aria-hidden="true" tabindex="-1"></a>                               <span class="at">type =</span> <span class="st">"raw"</span>, </span>
+<span id="cb80-4"><a href="#cb80-4" aria-hidden="true" tabindex="-1"></a>                               <span class="at">loss_function =</span> accuracy_wrapper,</span>
+<span id="cb80-5"><a href="#cb80-5" aria-hidden="true" tabindex="-1"></a>                               <span class="at">B =</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>Lets look at what this function returns</p>
+<ul>
+<li>the first row contains the accuracy for the full model (with no features permuted)</li>
+<li>Each subsequent row shows the accuracy of the model when that specific feature is permuted</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a>imp_permute</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>                       variable mean_dropout_loss     label
+1                  _full_model_         0.8382838 model_fit
+2                            ca         0.7991419 model_fit
+3         thal_reversabledefect         0.8045875 model_fit
+4                  exer_ang_yes         0.8177888 model_fit
+5                   exer_max_hr         0.8309241 model_fit
+6               exer_st_depress         0.8314521 model_fit
+7                cp_non_anginal         0.8325083 model_fit
+8            exer_st_slope_flat         0.8333333 model_fit
+9                      sex_male         0.8335974 model_fit
+10             thal_fixeddefect         0.8382508 model_fit
+11                         chol         0.8382838 model_fit
+12                 fbs_elevated         0.8382838 model_fit
+13            rest_ecg_wave_abn         0.8382838 model_fit
+14      exer_st_slope_downslope         0.8382838 model_fit
+15                  cp_atyp_ang         0.8386139 model_fit
+16                      rest_bp         0.8388119 model_fit
+17 rest_ecg_ventric_hypertrophy         0.8401650 model_fit
+18                          age         0.8436964 model_fit
+19                   _baseline_         0.5059406 model_fit</code></pre>
+</div>
+</div>
+<hr>
+<p>We can use the built in plot function from DALEX to display this</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(imp_permute)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-53-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<p>Or we can plot it directly. Here is an example from the <a href="https://www.tmwr.org/explain">tidymodels folks</a></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a>full_model <span class="ot">&lt;-</span> imp_permute <span class="sc">|&gt;</span>  </span>
+<span id="cb84-2"><a href="#cb84-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(variable <span class="sc">==</span> <span class="st">"_full_model_"</span>)</span>
+<span id="cb84-3"><a href="#cb84-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb84-4"><a href="#cb84-4" aria-hidden="true" tabindex="-1"></a>imp_permute <span class="sc">|&gt;</span> </span>
+<span id="cb84-5"><a href="#cb84-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(variable <span class="sc">!=</span> <span class="st">"_full_model_"</span>,</span>
+<span id="cb84-6"><a href="#cb84-6" aria-hidden="true" tabindex="-1"></a>         variable <span class="sc">!=</span> <span class="st">"_baseline_"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb84-7"><a href="#cb84-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">variable =</span> <span class="fu">fct_reorder</span>(variable, dropout_loss)) <span class="sc">|&gt;</span> </span>
+<span id="cb84-8"><a href="#cb84-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(dropout_loss, variable)) <span class="sc">+</span></span>
+<span id="cb84-9"><a href="#cb84-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">data =</span> full_model, <span class="fu">aes</span>(<span class="at">xintercept =</span> dropout_loss),</span>
+<span id="cb84-10"><a href="#cb84-10" aria-hidden="true" tabindex="-1"></a>             <span class="at">linewidth =</span> <span class="fl">1.4</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb84-11"><a href="#cb84-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">fill =</span> <span class="st">"#91CBD765"</span>, <span class="at">alpha =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb84-12"><a href="#cb84-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb84-13"><a href="#cb84-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"accuracy"</span>, </span>
+<span id="cb84-14"><a href="#cb84-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="cn">NULL</span>,  <span class="at">fill =</span> <span class="cn">NULL</span>,  <span class="at">color =</span> <span class="cn">NULL</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-54-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<p>We can also permute a set of features to quantify the contribution of the full set<br>
+<br>
+This is what we would want for our example, were we want to know the contribution of the four features that represent our exercise test.<br>
+<br>
+To do this, we pass in a list of vectors of the groups. Here we provide just one group that we name <code>exer_test</code></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb85"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb85-1"><a href="#cb85-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123456</span>)</span>
+<span id="cb85-2"><a href="#cb85-2" aria-hidden="true" tabindex="-1"></a>imp_permute_group <span class="ot">&lt;-</span> <span class="fu">model_parts</span>(explain_full, </span>
+<span id="cb85-3"><a href="#cb85-3" aria-hidden="true" tabindex="-1"></a>                               <span class="at">type =</span> <span class="st">"raw"</span>, </span>
+<span id="cb85-4"><a href="#cb85-4" aria-hidden="true" tabindex="-1"></a>                               <span class="at">loss_function =</span> accuracy_wrapper,</span>
+<span id="cb85-5"><a href="#cb85-5" aria-hidden="true" tabindex="-1"></a>                               <span class="at">B =</span> <span class="dv">100</span>,</span>
+<span id="cb85-6"><a href="#cb85-6" aria-hidden="true" tabindex="-1"></a>                               <span class="at">variable_groups =</span> <span class="fu">list</span>(<span class="at">exer_test =</span> <span class="fu">c</span>(<span class="st">"exer_ang_yes"</span>,</span>
+<span id="cb85-7"><a href="#cb85-7" aria-hidden="true" tabindex="-1"></a>                                                                    <span class="st">"exer_max_hr"</span>,</span>
+<span id="cb85-8"><a href="#cb85-8" aria-hidden="true" tabindex="-1"></a>                                                        <span class="st">"exer_st_depress"</span>, </span>
+<span id="cb85-9"><a href="#cb85-9" aria-hidden="true" tabindex="-1"></a>                                                        <span class="st">"exer_st_slope_downslope"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>The results show that permuting these four features as a set drops accuracy from 0.838 to 0.738</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a>imp_permute_group</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>      variable mean_dropout_loss     label
+1 _full_model_         0.8382838 model_fit
+2    exer_test         0.7378218 model_fit
+3   _baseline_         0.5119472 model_fit</code></pre>
+</div>
+</div>
+<hr>
+</section>
+<section id="shapley-values" class="level3" data-number="11.8.2">
+<h3 data-number="11.8.2" class="anchored" data-anchor-id="shapley-values"><span class="header-section-number">11.8.2</span> Shapley Values</h3>
+<p>Shapley values provide insight on the importance of any feature to the prediction for a single observation - often called <strong>local importance</strong> (vs.&nbsp;global importance as per the permutation feature importance measure above).<br>
+<br>
+Shapley values can also be used to index global importance by averaging the local shapley values for a feature across all (or a random sample) of the observations.</p>
+<hr>
+<p>Shapley values are derived from Coalition Game Theory.<br>
+<br>
+<br>
+They provide the average marginal contribution to prediction (for a single observation) of a feature value across all possible coalitions of features (combinations of sets of features from the null set to all other features).<br>
+<br>
+<span class="citation" data-cites="IML">Molnar (<a href="#ref-IML" role="doc-biblioref">2023</a>)</span> provides a <a href="https://christophm.github.io/interpretable-ml-book/shapley.html#shapley">detailed account</a> of the theory behind these values and how they are calculated which I will not reproduce here.</p>
+<hr>
+<p>Lets calculate Shapley Values for the first observation in our dataset</p>
+<p>Their features values were</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb88"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a>obs_num <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb88-2"><a href="#cb88-2" aria-hidden="true" tabindex="-1"></a>x1 <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span> </span>
+<span id="cb88-3"><a href="#cb88-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(obs_num) <span class="sc">|&gt;</span> </span>
+<span id="cb88-4"><a href="#cb88-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Rows: 1
+Columns: 17
+$ age                          &lt;dbl&gt; 0.9471596
+$ rest_bp                      &lt;dbl&gt; 0.756274
+$ chol                         &lt;dbl&gt; -0.2644628
+$ exer_max_hr                  &lt;dbl&gt; 0.01716893
+$ exer_st_depress              &lt;dbl&gt; 1.085542
+$ ca                           &lt;dbl&gt; -0.7099569
+$ sex_male                     &lt;dbl&gt; 0.6850692
+$ cp_atyp_ang                  &lt;dbl&gt; -0.44382
+$ cp_non_anginal               &lt;dbl&gt; -1.772085
+$ fbs_elevated                 &lt;dbl&gt; 2.390484
+$ rest_ecg_wave_abn            &lt;dbl&gt; -0.115472
+$ rest_ecg_ventric_hypertrophy &lt;dbl&gt; 1.021685
+$ exer_ang_yes                 &lt;dbl&gt; -0.69548
+$ exer_st_slope_flat           &lt;dbl&gt; -0.9252357
+$ exer_st_slope_downslope      &lt;dbl&gt; 3.658449
+$ thal_fixeddefect             &lt;dbl&gt; 3.972541
+$ thal_reversabledefect        &lt;dbl&gt; -0.7918057</code></pre>
+</div>
+</div>
+<p>And we can get Shapley values using <code>predict_parts()</code></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a>sv <span class="ot">&lt;-</span> <span class="fu">predict_parts</span>(explain_full, </span>
+<span id="cb90-2"><a href="#cb90-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">new_observation =</span> x1,</span>
+<span id="cb90-3"><a href="#cb90-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">type =</span> <span class="st">"shap"</span>,</span>
+<span id="cb90-4"><a href="#cb90-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">B =</span> <span class="dv">25</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>There is a built in plot function for shap values<br>
+<br>
+For this first observation</p>
+<ul>
+<li>The values for each feature are listed in the left margin</li>
+<li>Bars to the right (e.g., sex_male) indicate that their feature value increases their probability of disease</li>
+<li>Bars to the left indicate that their feature value decreases their probability of disease</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb91"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sv)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-59-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+<p>We can use these Shapley values for the local importance of the features for each observation to calculate the global importance of these features.<br>
+<br>
+<br>
+Features that have big absolute Shapley values on average across observation are more important. Let’s calculate this.</p>
+<p>First we need a function to get shapley values for each observation (along with the feature values for a nicer plot)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb92"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a>get_shaps <span class="ot">&lt;-</span> <span class="cf">function</span>(df1){</span>
+<span id="cb92-2"><a href="#cb92-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict_parts</span>(explain_full, </span>
+<span id="cb92-3"><a href="#cb92-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">new_observation =</span> df1,</span>
+<span id="cb92-4"><a href="#cb92-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">type =</span> <span class="st">"shap"</span>,</span>
+<span id="cb92-5"><a href="#cb92-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">B =</span> <span class="dv">25</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb92-6"><a href="#cb92-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(B <span class="sc">==</span> <span class="dv">0</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb92-7"><a href="#cb92-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(variable_name, variable_value, contribution) <span class="sc">|&gt;</span> </span>
+<span id="cb92-8"><a href="#cb92-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as_tibble</span>()</span>
+<span id="cb92-9"><a href="#cb92-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>And then we can map this function over observations to get the Shapley values for each observation</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb93"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a><span class="co"># x_tmp = x |&gt; select(1:10)</span></span>
+<span id="cb93-2"><a href="#cb93-2" aria-hidden="true" tabindex="-1"></a><span class="co"># local_shaps &lt;- cache_rds(</span></span>
+<span id="cb93-3"><a href="#cb93-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   expr = {</span></span>
+<span id="cb93-4"><a href="#cb93-4" aria-hidden="true" tabindex="-1"></a><span class="co">#     t &lt;- x_tmp |&gt;</span></span>
+<span id="cb93-5"><a href="#cb93-5" aria-hidden="true" tabindex="-1"></a><span class="co">#       mutate(id = row_number()) |&gt; </span></span>
+<span id="cb93-6"><a href="#cb93-6" aria-hidden="true" tabindex="-1"></a><span class="co">#       nest(.by = id, .key = "dfs")     # nest a dataframe for each observation</span></span>
+<span id="cb93-7"><a href="#cb93-7" aria-hidden="true" tabindex="-1"></a><span class="co">#       mutate(shaps = map(dfs, \(df1) get_shaps(df1))) |&gt; view()</span></span>
+<span id="cb93-8"><a href="#cb93-8" aria-hidden="true" tabindex="-1"></a><span class="co">#       select(-dfs) |&gt;</span></span>
+<span id="cb93-9"><a href="#cb93-9" aria-hidden="true" tabindex="-1"></a><span class="co">#       unnest(shapleys) </span></span>
+<span id="cb93-10"><a href="#cb93-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   },</span></span>
+<span id="cb93-11"><a href="#cb93-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   rerun = rerun_setting,</span></span>
+<span id="cb93-12"><a href="#cb93-12" aria-hidden="true" tabindex="-1"></a><span class="co">#   dir = "cache/011",</span></span>
+<span id="cb93-13"><a href="#cb93-13" aria-hidden="true" tabindex="-1"></a><span class="co">#   file = "local_shaps")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a><span class="co"># local_shaps |&gt; head</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><strong>Programming note</strong>: This code demonstrates another nice R programming technique using <code>nest()</code> and <code>unnest()</code> in combination with <code>map()</code> and list-columns. For more info, see <a href="https://r4ds.had.co.nz/many-models.html">this chapter</a> in <span class="citation" data-cites="RDS2023">(<a href="#ref-RDS2023" role="doc-biblioref"><strong>RDS2023?</strong></a>)</span> and the vignette on nesting (<code>vignette("nest")</code>).</p>
+<hr>
+<p>Now that we have Shapley values for all observations, we can calculate the mean absolute Shapley value across observations and plot it.</p>
+<ul>
+<li>Across all observations, <code>ca</code> contributes to an average change of .06 from the mean predicted probability of disease.</li>
+<li>One of the features from our exercise test, <code>exer_ang_yes</code>, contributes about .05 change from mean predicted probability of disease.</li>
+<li>The other <code>exer_</code> features are not far behind.</li>
+</ul>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb95"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a><span class="co"># local_shaps |&gt;</span></span>
+<span id="cb95-2"><a href="#cb95-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::mutate(phi = abs(phi)) |&gt;</span></span>
+<span id="cb95-3"><a href="#cb95-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   group_by(feature) |&gt;</span></span>
+<span id="cb95-4"><a href="#cb95-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::summarize(mean_shapley = mean(phi)) |&gt;</span></span>
+<span id="cb95-5"><a href="#cb95-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::arrange(desc(mean_shapley)) |&gt;</span></span>
+<span id="cb95-6"><a href="#cb95-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::mutate(feature = factor(feature),</span></span>
+<span id="cb95-7"><a href="#cb95-7" aria-hidden="true" tabindex="-1"></a><span class="co">#          feature = forcats::fct_reorder(feature, mean_shapley)) |&gt;</span></span>
+<span id="cb95-8"><a href="#cb95-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   ggplot(aes(x = feature, y = mean_shapley)) +</span></span>
+<span id="cb95-9"><a href="#cb95-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point() +</span></span>
+<span id="cb95-10"><a href="#cb95-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   coord_flip()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>For a more advanced plot (not displayed here) we could superimpose the individual local Shapley values and color them based on the feature score. This would allow us to show the direction of the relationship between the Shapley values and feature values. See FIGURE 9.26 in <span class="citation" data-cites="IML">Molnar (<a href="#ref-IML" role="doc-biblioref">2023</a>)</span> for an example of this type of plot.</p>
+<hr>
+<p>Shapley values are attractive relative to other approaches because</p>
+<ul>
+<li>They have a solid theoretical basis</li>
+<li>Sound statistical properties (Efficiency, Symmetry, Dummy and Additivity - see <span class="citation" data-cites="IML">Molnar (<a href="#ref-IML" role="doc-biblioref">2023</a>)</span>)</li>
+<li>Can provided a unified perspective across both local and global importance.</li>
+</ul>
+<hr>
+<p>However, they can be VERY time consuming to calculate (particularly if you want to use them for global importance such that you need them for all/many observations).</p>
+<p>There are computational shortcuts available but even those approximately can be very time consuming.</p>
+<p>(Note that for decision tree based algorithms SHAP provides a more computationally efficient way to estimate Shapley values - see <a href="https://christophm.github.io/interpretable-ml-book/shap.html">section 9.6</a> in <span class="citation" data-cites="IML">Molnar (<a href="#ref-IML" role="doc-biblioref">2023</a>)</span> for more detail.)</p>
+</section>
+</section>
+<section id="visual-approaches-to-understand-our-models" class="level2" data-number="11.9">
+<h2 data-number="11.9" class="anchored" data-anchor-id="visual-approaches-to-understand-our-models"><span class="header-section-number">11.9</span> Visual Approaches to Understand our Models</h2>
+<p>We can also learn about how our features are used to make predictions in our models using visual approaches. There are two key plots that we can use:</p>
+<ul>
+<li>Partial Dependence (PD) Plots</li>
+<li>Accumulated Local Effects (ALE) Plots</li>
+</ul>
+<hr>
+<section id="partial-dependence-pd-plots" class="level3" data-number="11.9.1">
+<h3 data-number="11.9.1" class="anchored" data-anchor-id="partial-dependence-pd-plots"><span class="header-section-number">11.9.1</span> Partial Dependence (PD) Plots</h3>
+<p>The Partial dependence (PD) plot displays the marginal effect of a target feature or combination of features on the predictions from a model.</p>
+<p>In essence, the prediction for any value of a target feature is the average prediction across cases if we set all cases to have that value for the target feature but their observed values for all other features.</p>
+<p>We can use PD plots to understand whether the relationship between a target feature and the outcome is linear, monotonic, or more complex. It may also help us visualize and understand if interactions between features exist (if we make a PD plot for two target features).</p>
+<hr>
+<p>The PD Plot is attractive because</p>
+<ul>
+<li>it is easy to understand (prediction for each feature value averaged across observed values for all other features)</li>
+<li>if the target feature is uncorrelated with all other features, its interpretation is clear, it is how the average prediction changes as the target features changes values.</li>
+<li>it is computationally easy to implement</li>
+<li>it has a causal (for the model, not the real world!) interpretation. This is what happens to the predciction if we manipulate the values of the target feature but hold all other features constant at their observed values.</li>
+</ul>
+<hr>
+<p>However:</p>
+<ul>
+<li>The assumption that the target feature is not correlated with the other features is likely unrealistic in many/most instances</li>
+<li>This plot (but also other plot methods) are limited to 1 - 2 features in combination.</li>
+<li>It may hide effects when interactions exist</li>
+</ul>
+</section>
+<section id="accumulated-local-effects-ale-plots" class="level3" data-number="11.9.2">
+<h3 data-number="11.9.2" class="anchored" data-anchor-id="accumulated-local-effects-ale-plots"><span class="header-section-number">11.9.2</span> Accumulated Local Effects (ALE) Plots</h3>
+<p>If the features are correlated, the partial dependence plot should not be used because the plots will otherwise be based on combinations of the target feature and other features that may never occur (given the feature correlations).</p>
+<p>Molnar describes how this problem of correlated features and unrealistic combinations of features can be solved by M-Plots that plot the average effect of a target feature using the conditional values on other features (i.e., only using realistic values for the other features based on their correlations with the target feature). Unfortunately, this too is sub-optimal because it will confound the effect of the target feature with the effects of the other features that are correlated with it.</p>
+<p>Accumulated Local Effects (ALE) plots also use conditional values of other features to solve the correlated features problem. However, ALE plots solve the confounding problem by calculating <strong>differences</strong> in predictions associated with changes in the target feature rather than average predictions for each value of that target feature. These differences hold the other features values (mostly) constant to remove their effects.</p>
+<p>ALE plots are the preferred plot in situations where you expect your target feature to be correlated with other features (which is likely most situations.)</p>
+<hr>
+<p>We will use the <code>iml</code> package that accompanies <span class="citation" data-cites="IML">Molnar (<a href="#ref-IML" role="doc-biblioref">2023</a>)</span> to make PD and ALE plots.</p>
+<p>The code is very straight-forward. Here we get the predicted values for an ALE plot to examine the effect of one of the features from our exercise test (<code>exer_max_hr</code>) on disease probabilities.</p>
+<p>If we wanted a PD plot, we could simply substitute <code>pdp</code> for <code>ale</code></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ale &lt;- iml::FeatureEffect$new(predictor,</span></span>
+<span id="cb96-2"><a href="#cb96-2" aria-hidden="true" tabindex="-1"></a><span class="co">#                   feature = "exer_max_hr",</span></span>
+<span id="cb96-3"><a href="#cb96-3" aria-hidden="true" tabindex="-1"></a><span class="co">#                   method = "ale",  # or pdp</span></span>
+<span id="cb96-4"><a href="#cb96-4" aria-hidden="true" tabindex="-1"></a><span class="co">#                   grid.size = 30)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>There is a default plot function that can be used. It combines the ale/pd plot with a rug plot to show the distribution of values for the target feature. However, by default, it displays separate plots for all levels of a categorical outcome. This makes sense if your categorical outcome has three or more levels but not for a binary outcome</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb97"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ale |&gt; plot</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>With two levels for the outcome, it is redundant. In this instance, you can make your own plot. You might also do this to gain more control over the plot.</p>
+<p>We need a dataframe for the raw values of the target feature for the rug plot. We also need values for y for the rug plot but I dont plan to show them so I set those to constant (0).</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb98"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a><span class="co"># # for the rug</span></span>
+<span id="cb98-2"><a href="#cb98-2" aria-hidden="true" tabindex="-1"></a><span class="co"># feature_values &lt;- x |&gt; dplyr::select(exer_max_hr) |&gt; </span></span>
+<span id="cb98-3"><a href="#cb98-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::mutate(.value = 0) |&gt; </span></span>
+<span id="cb98-4"><a href="#cb98-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   glimpse()</span></span>
+<span id="cb98-5"><a href="#cb98-5" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
+<span id="cb98-6"><a href="#cb98-6" aria-hidden="true" tabindex="-1"></a><span class="co"># ale$results |&gt; </span></span>
+<span id="cb98-7"><a href="#cb98-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   filter(.class == "yes") |&gt; </span></span>
+<span id="cb98-8"><a href="#cb98-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   ggplot() +</span></span>
+<span id="cb98-9"><a href="#cb98-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_line(mapping = aes(x = exer_max_hr, y = .value)) + </span></span>
+<span id="cb98-10"><a href="#cb98-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_rug(mapping = aes(x = exer_max_hr, y = .value),</span></span>
+<span id="cb98-11"><a href="#cb98-11" aria-hidden="true" tabindex="-1"></a><span class="co">#            data = feature_values,</span></span>
+<span id="cb98-12"><a href="#cb98-12" aria-hidden="true" tabindex="-1"></a><span class="co">#            sides = "b", position = "jitter", alpha = 0.5) +</span></span>
+<span id="cb98-13"><a href="#cb98-13" aria-hidden="true" tabindex="-1"></a><span class="co">#   scale_y_continuous(limits = c(-.10, .15))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+</section>
+<section id="detecting-interactions" class="level2" data-number="11.10">
+<h2 data-number="11.10" class="anchored" data-anchor-id="detecting-interactions"><span class="header-section-number">11.10</span> Detecting Interactions</h2>
+<p>We can explore the magnitude of interactions among our features as well to better understand our model.</p>
+<p>We can estimate the magnitude of the interaction using the H-statistic, developed by <a href="https://arxiv.org/abs/0811.1679">Friedman and Popescu (2008)</a>.</p>
+<p>The H-statistic quantifies proportion of total variance in the predictions that is explained by the interactions.</p>
+<p>We can calculate that for total variance across all the (two-way) interactions a feature can have with other features or we can look all the specific two-way interactions individually for a target feature. Lets look at both.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb99"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a><span class="co"># int_all &lt;-xfun::cache_rds({</span></span>
+<span id="cb99-2"><a href="#cb99-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   </span></span>
+<span id="cb99-3"><a href="#cb99-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   iml::Interaction$new(predictor) </span></span>
+<span id="cb99-4"><a href="#cb99-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   </span></span>
+<span id="cb99-5"><a href="#cb99-5" aria-hidden="true" tabindex="-1"></a><span class="co"># },</span></span>
+<span id="cb99-6"><a href="#cb99-6" aria-hidden="true" tabindex="-1"></a><span class="co"># rerun = FALSE,</span></span>
+<span id="cb99-7"><a href="#cb99-7" aria-hidden="true" tabindex="-1"></a><span class="co"># dir = "cache/",</span></span>
+<span id="cb99-8"><a href="#cb99-8" aria-hidden="true" tabindex="-1"></a><span class="co"># file = "u9-all_interactions")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Here is the default plot for each features total interactions across all other features</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb100"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a><span class="co"># int_all |&gt;  plot</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>And a clearer plot</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb101"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a><span class="co"># int_all$results |&gt; </span></span>
+<span id="cb101-2"><a href="#cb101-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::filter(.class == "yes") |&gt; </span></span>
+<span id="cb101-3"><a href="#cb101-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::arrange(abs(.interaction)) |&gt; </span></span>
+<span id="cb101-4"><a href="#cb101-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::mutate(.feature = factor(.feature),</span></span>
+<span id="cb101-5"><a href="#cb101-5" aria-hidden="true" tabindex="-1"></a><span class="co">#          .feature = forcats::fct_inorder(.feature)) |&gt; </span></span>
+<span id="cb101-6"><a href="#cb101-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   ggplot() +</span></span>
+<span id="cb101-7"><a href="#cb101-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_col(mapping = aes(x = .feature, y = .interaction))  +</span></span>
+<span id="cb101-8"><a href="#cb101-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   ylab("H-stasitic") +</span></span>
+<span id="cb101-9"><a href="#cb101-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   coord_flip()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>And here are all the interactions with the <code>exer_max_hr</code> feature.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb102"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a><span class="co"># int_one &lt;- iml::Interaction$new(predictor, feature = "exer_max_hr") </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb103"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a><span class="co"># int_one$results |&gt;   </span></span>
+<span id="cb103-2"><a href="#cb103-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::filter(.class == "yes") |&gt;</span></span>
+<span id="cb103-3"><a href="#cb103-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::arrange(abs(.interaction)) |&gt; </span></span>
+<span id="cb103-4"><a href="#cb103-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::mutate(.feature = factor(.feature),</span></span>
+<span id="cb103-5"><a href="#cb103-5" aria-hidden="true" tabindex="-1"></a><span class="co">#          .feature = forcats::fct_inorder(.feature)) |&gt; </span></span>
+<span id="cb103-6"><a href="#cb103-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   ggplot() +</span></span>
+<span id="cb103-7"><a href="#cb103-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_col(mapping = aes(x = .feature, y = .interaction))  +</span></span>
+<span id="cb103-8"><a href="#cb103-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   ylab("H-stasitic") +</span></span>
+<span id="cb103-9"><a href="#cb103-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   coord_flip()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Cleveland plots are sometimes considered easier to view than bar plots and could have been used for many of the above graphs. Here is an example of a Cleveland plot for the H-statistic</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb104"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a><span class="co"># int_one$results |&gt;   </span></span>
+<span id="cb104-2"><a href="#cb104-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   filter(.class == "yes") |&gt;</span></span>
+<span id="cb104-3"><a href="#cb104-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::arrange(abs(.interaction)) |&gt; </span></span>
+<span id="cb104-4"><a href="#cb104-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::mutate(.feature = factor(.feature),</span></span>
+<span id="cb104-5"><a href="#cb104-5" aria-hidden="true" tabindex="-1"></a><span class="co">#          .feature = forcats::fct_inorder(.feature)) |&gt; </span></span>
+<span id="cb104-6"><a href="#cb104-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   ggplot(mapping = aes(x = .feature, y = .interaction)) +</span></span>
+<span id="cb104-7"><a href="#cb104-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(size = 2, color = "red") +</span></span>
+<span id="cb104-8"><a href="#cb104-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_segment(aes(x = .feature, y = .interaction, xend = .feature), yend = 0, colour = "grey50")  +</span></span>
+<span id="cb104-9"><a href="#cb104-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   ylab("H-stasitic") +</span></span>
+<span id="cb104-10"><a href="#cb104-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   coord_flip()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+</section>
+<section id="summary-and-closing-thoughts" class="level2" data-number="11.11">
+<h2 data-number="11.11" class="anchored" data-anchor-id="summary-and-closing-thoughts"><span class="header-section-number">11.11</span> Summary and Closing Thoughts</h2>
+<p>When pursuing purely explanatory goals with machine learning methods, we can:</p>
+<ul>
+<li><p>Use resampling with the full dataset to determine appropriate model configuration</p>
+<ul>
+<li>Best statistical algorithm</li>
+<li>Which covariates</li>
+<li>Other “researcher degrees of freedom” such as handling of outliers, transformations of predictors</li>
+</ul></li>
+<li><p>Use permutation test for a test that is analogous to the linear model test of R<sup>2</sup></p>
+<ul>
+<li>Useful if we have a question about our full set of features</li>
+</ul></li>
+<li><p>Use model comparisons (Frequentist or Bayesian) in combination with feature ablation to test effect of feature or set of features</p></li>
+<li><p>We can use feature importance measures (permutation or Shapley) to understand the contributions that various features make to prediction for an observation (local) or across observations (global)</p></li>
+<li><p>We can explore the shape (and magnitude?) of relationships using PD and ALE plots</p></li>
+<li><p>We can explore the strength of interactions among our features</p></li>
+</ul>
+</section>
+<section id="discussion" class="level2" data-number="11.12">
+<h2 data-number="11.12" class="anchored" data-anchor-id="discussion"><span class="header-section-number">11.12</span> Discussion</h2>
+<section id="annoucements" class="level3" data-number="11.12.1">
+<h3 data-number="11.12.1" class="anchored" data-anchor-id="annoucements"><span class="header-section-number">11.12.1</span> Annoucements</h3>
+<ul>
+<li>Review conceptual exam</li>
+<li>RMD files</li>
+</ul>
+</section>
+<section id="questions" class="level3" data-number="11.12.2">
+<h3 data-number="11.12.2" class="anchored" data-anchor-id="questions"><span class="header-section-number">11.12.2</span> Questions</h3>
+<section id="ale-and-pd-plots" class="level4" data-number="11.12.2.1">
+<h4 data-number="11.12.2.1" class="anchored" data-anchor-id="ale-and-pd-plots"><span class="header-section-number">11.12.2.1</span> ALE and PD plots</h4>
+<ul>
+<li><p>What is the difference between PD plot and ALE plot? And when should we use they for specific?</p></li>
+<li><p>I am still confused about partial dependence plots and ale plots and when we want to use them.</p></li>
+<li><p>I am confused about the question in the unit 9 quiz. when you have moderate or stronger correlations among your features, ALE and M-plots both could be used to visualize the effects of your features on the outcome. Based on the web book, we learned that M-plot is sub-optimal, which means we better use ALE right? and M-plots are not recommended.</p></li>
+</ul>
+</section>
+<section id="prediction-vs.-explanation" class="level4" data-number="11.12.2.2">
+<h4 data-number="11.12.2.2" class="anchored" data-anchor-id="prediction-vs.-explanation"><span class="header-section-number">11.12.2.2</span> Prediction vs.&nbsp;explanation</h4>
+<ul>
+<li><p>I think it would be useful to talk about how to use these same models that we have been building for explanatory purposes rather than predictive ones. Is that when interpretability matters most? I feel like some of the reading on interpretability contradicted what we talked about earlier on in the semester about how in a predictive model, interpretability doesn’t necessarily matter.</p></li>
+<li><p>It seems that there is a trade-off regarding interpretability. How to make a good decision about the degree of the interpretability so that the system will be not manipulated when there is a misalignment/mismatch between the goals of the creator and the user?</p></li>
+<li><p>If I understood correctly, interpretability/explainability is about the model predictions, while comprehensibility is about users’ understanding of the explanations. Transparency is about the algorithms. These concepts are kind of confusing. It would be nice if you could help us distinguish them more conceptually.</p></li>
+</ul>
+</section>
+<section id="permutation-test" class="level4" data-number="11.12.2.3">
+<h4 data-number="11.12.2.3" class="anchored" data-anchor-id="permutation-test"><span class="header-section-number">11.12.2.3</span> Permutation test</h4>
+<ul>
+<li><p>Mathematically, is there not a way to estimate what the accuracy would be even if there were not a relationship between predictors and outcome? Wouldn’t the estimated accuracy simply be the proportion of observations in the dominant class? I guess I do not see why the permutation test is necessary, then.</p></li>
+<li><p>shuffling a feature’s values removes the relationship between that feature and the outcome, and I think the prediction error of the model increases.</p></li>
+</ul>
+</section>
+<section id="bayesian-estimation" class="level4" data-number="11.12.2.4">
+<h4 data-number="11.12.2.4" class="anchored" data-anchor-id="bayesian-estimation"><span class="header-section-number">11.12.2.4</span> Bayesian estimation</h4>
+<ul>
+<li><p>In case of unit 9, K-fold is preferred, the question goes how to balance the choice between K-fold and bootstrap?</p></li>
+<li><p>What’s are prior posterior probabilities?</p></li>
+<li><p>HDI and ROPE.</p></li>
+<li><p>I’m still a little confused about HDI values. I understand that when HDI values are above the ROPE it tells us that our full model is meaningfully better than our compact model, but I don’t understand what the HDI values themselves represent or how they are calculated.</p></li>
+<li><p>If there’s no difference between our model’s performance and the performance of a similar model in a permuted dataset, (how) can we distinguish whether that’s because there’s no signal in our predictors or because our model failed to exploit that signal?</p></li>
+<li><p>I am especially confused about Bayesian estimation for model comparisons. Does convergence mean that the best parameters for the model have been found, and why do we do this specifically with Bayesian estimation</p></li>
+</ul>
+</section>
+<section id="shapley-values-1" class="level4" data-number="11.12.2.5">
+<h4 data-number="11.12.2.5" class="anchored" data-anchor-id="shapley-values-1"><span class="header-section-number">11.12.2.5</span> Shapley values</h4>
+<ul>
+<li><p>I think I just need a deep dive into shapely values</p></li>
+<li><p>What are shapley values and how do we interpret them?</p></li>
+<li><p>Revisiting Shapley values</p></li>
+<li><p>Since Shapley values average across all possible coalitions, do they implicitly take into account interactions?</p></li>
+</ul>
+</section>
+<section id="interations-and-h-statistic" class="level4" data-number="11.12.2.6">
+<h4 data-number="11.12.2.6" class="anchored" data-anchor-id="interations-and-h-statistic"><span class="header-section-number">11.12.2.6</span> Interations and H-Statistic</h4>
+<ul>
+<li><p>The IML book says “The H-statistic has a meaningful interpretation: The interaction is defined as the share of variance that is explained by the interaction.” But one thing I’m confused about: what variance are we talking about here (i.e., the share of variance in what)?</p></li>
+<li><p>In particular, I’m confused about how to interpret the H-statistic in the context of looking at all 2-way interactions with a specific feature, since sometimes those interaction strengths with that feature seem to sum to more than the overall interaction strength for that feature (e.g., looking at figures 8.20 and 8.21 in the IML book), and I don’t know how that would be.</p></li>
+<li><p>After detecting interactions, what should we do as the next step? Is that possible to detect three-way interactions?</p></li>
+<li><p>Can we go over more details about detecting interactions?</p></li>
+<li><p>could you explain more about Friedman’s H-statistic</p></li>
+</ul>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" data-entry-spacing="0" role="list">
 <div id="ref-Benavoli2017" class="csl-entry" role="listitem">
 Benavoli, Alessio, Giorgio Coraniy, Janez Demsar, and Marco Zaffalon. 2017. <span>“Time for a Change: A Tutorial for Comparing Multiple Classifiers Through Bayesian Analysis.”</span> <em>Journal of Machine Learning Research</em> 18: 1–36.
+</div>
+<div id="ref-Bouckaert2003" class="csl-entry" role="listitem">
+Bouckaert, Remco R. 2003. <span>“Choosing Between Two Learning Algorithms Based on Calibrated Tests.”</span> In <em>Proceedings of the <span>Twentieth</span> <span>International</span> <span>Conference</span> on <span>International</span> <span>Conference</span> on <span>Machine</span> <span>Learning</span></em>, 51–58. <span>ICML</span>’03. Washington, DC, USA: AAAI Press.
 </div>
 <div id="ref-Kruschke2018" class="csl-entry" role="listitem">
 Kruschke, John K. 2018. <span>“Rejecting or Accepting Parameter Values in Bayesian Estimation.”</span> <em>Advances in Methods and Practices in Psychological Science</em> 1: 270–80.
@@ -412,7 +2225,12 @@ Kruschke, John K. 2018. <span>“Rejecting or Accepting Parameter Values in Baye
 <div id="ref-IML" class="csl-entry" role="listitem">
 Molnar, Christoph. 2023. <em>Intepretable Machine Learning: A Guide for Makiong Black Box MOdels Explainable</em>. 2nd ed. <a href="https://christophm.github.io/interpretable-ml-book/">https://christophm.github.io/interpretable-ml-book/</a>.
 </div>
+<div id="ref-Nadeau2003" class="csl-entry" role="listitem">
+Nadeau, Claude, and Yoshua Bengio. 2003. <span>“Inference for the <span>Generalization</span> <span>Error</span>.”</span> <em>Machine Learning</em> 52 (3): 239–81. <a href="https://doi.org/10.1023/A:1024068626366">https://doi.org/10.1023/A:1024068626366</a>.
 </div>
+</div>
+</section>
+</section>
 </section>
 
 </main> <!-- /main -->
@@ -495,24 +2313,6 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
-    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
-    var mailtoRegex = new RegExp(/^mailto:/);
-      var filterRegex = new RegExp("https:\/\/github\.io\/jjcurtin\/book_iaml");
-    var isInternal = (href) => {
-        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
-    }
-    // Inspect non-navigation links and adorn them if external
- 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
-    for (var i=0; i<links.length; i++) {
-      const link = links[i];
-      if (!isInternal(link.href)) {
-        // undo the damage that might have been done by quarto-nav.js in the case of
-        // links that we want to consider external
-        if (link.dataset.originalHref !== undefined) {
-          link.href = link.dataset.originalHref;
-        }
-      }
-    }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
@@ -547,11 +2347,7 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      if (note) {
-        return note.innerHTML;
-      } else {
-        return "";
-      }
+      return note.innerHTML;
     });
   }
   const xrefs = window.document.querySelectorAll('a.quarto-xref');
