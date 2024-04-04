@@ -46,7 +46,8 @@ Post questions to the readings channel in Slack
 - [Introduction to Model Comparisons]()
 - [The Nadeau & Bengio Correlated t-test for Model Comparisons]()
 - [Bayesian Estimation for Model Comparisons]()
-- [Feature Importance Metrics to Understand Models]()
+- [Permutation Feature Importance]()
+- [SHAP Feature Importance]()
 - [Visual Approaches to Understand Models]()
 - [Exploring Interactions]()
 
@@ -1161,23 +1162,23 @@ get_shaps <- function(df1){
 And then we can map this function over observations to get the Shapley values for each observation
 
 ```{r}
-x_tmp = x |> select(1:10)
-local_shaps <- cache_rds(
-  expr = {
-    t <- x_tmp |>
-      mutate(id = row_number()) |> 
-      nest(.by = id, .key = "dfs")     # nest a dataframe for each observation
-      mutate(shaps = map(dfs, \(df1) get_shaps(df1))) |> view()
-      select(-dfs) |>
-      unnest(shapleys) 
-  },
-  rerun = rerun_setting,
-  dir = "cache/011",
-  file = "local_shaps")
+# x_tmp = x |> select(1:10)
+# local_shaps <- cache_rds(
+#   expr = {
+#     t <- x_tmp |>
+#       mutate(id = row_number()) |> 
+#       nest(.by = id, .key = "dfs")     # nest a dataframe for each observation
+#       mutate(shaps = map(dfs, \(df1) get_shaps(df1))) |> view()
+#       select(-dfs) |>
+#       unnest(shapleys) 
+#   },
+#   rerun = rerun_setting,
+#   dir = "cache/011",
+#   file = "local_shaps")
 ```
 
 ```{r}
-local_shaps |> head
+# local_shaps |> head
 ```
 
 **Programming note**:  This code demonstrates another nice R programming technique using `nest()` and `unnest()` in combination with `map()` and list-columns. For more info, see [this chapter](https://r4ds.had.co.nz/many-models.html) in @RDS2023 and the vignette on nesting (`vignette("nest")`).
@@ -1191,16 +1192,16 @@ Now that we have Shapley values for all observations, we can calculate the mean 
 - The other `exer_` features are not far behind.
 
 ```{r}
-local_shaps |>
-  dplyr::mutate(phi = abs(phi)) |>
-  group_by(feature) |>
-  dplyr::summarize(mean_shapley = mean(phi)) |>
-  dplyr::arrange(desc(mean_shapley)) |>
-  dplyr::mutate(feature = factor(feature),
-         feature = forcats::fct_reorder(feature, mean_shapley)) |>
-  ggplot(aes(x = feature, y = mean_shapley)) +
-  geom_point() +
-  coord_flip()
+# local_shaps |>
+#   dplyr::mutate(phi = abs(phi)) |>
+#   group_by(feature) |>
+#   dplyr::summarize(mean_shapley = mean(phi)) |>
+#   dplyr::arrange(desc(mean_shapley)) |>
+#   dplyr::mutate(feature = factor(feature),
+#          feature = forcats::fct_reorder(feature, mean_shapley)) |>
+#   ggplot(aes(x = feature, y = mean_shapley)) +
+#   geom_point() +
+#   coord_flip()
 ```
 
 For a more advanced plot (not displayed here) we could superimpose the individual local Shapley values and color them based on the feature score.   This would allow us to show the direction of the relationship between the Shapley values and feature values.  See FIGURE 9.26 in @IML for an example of this type of plot.
@@ -1277,10 +1278,10 @@ The code is very straight-forward.  Here we get the predicted values for an ALE 
 If we wanted a PD plot, we could simply substitute `pdp` for `ale`
 
 ```{r pdp_plots}
-ale <- iml::FeatureEffect$new(predictor,
-                  feature = "exer_max_hr",
-                  method = "ale",  # or pdp
-                  grid.size = 30)
+# ale <- iml::FeatureEffect$new(predictor,
+#                   feature = "exer_max_hr",
+#                   method = "ale",  # or pdp
+#                   grid.size = 30)
 ```
 
 -----
@@ -1288,7 +1289,7 @@ ale <- iml::FeatureEffect$new(predictor,
 There is a default plot function that can be used.  It combines the ale/pd plot with a rug plot to show the distribution of values for the target feature.  However, by default, it displays separate plots for all levels of a categorical outcome.   This makes sense if your categorical outcome has three or more levels but not for a binary outcome
 
 ```{r}
-ale |> plot
+# ale |> plot
 ```
 
 -----
@@ -1298,19 +1299,19 @@ With two levels for the outcome, it is redundant.  In this instance, you can mak
 We need a dataframe for the raw values of the target feature for the rug plot.  We also need values for y for the rug plot but I dont plan to show them so I set those to constant (0).
 
 ```{r}
-# for the rug
-feature_values <- x |> dplyr::select(exer_max_hr) |> 
-  dplyr::mutate(.value = 0) |> 
-  glimpse()
-
-ale$results |> 
-  filter(.class == "yes") |> 
-  ggplot() +
-  geom_line(mapping = aes(x = exer_max_hr, y = .value)) + 
-  geom_rug(mapping = aes(x = exer_max_hr, y = .value),
-           data = feature_values,
-           sides = "b", position = "jitter", alpha = 0.5) +
-  scale_y_continuous(limits = c(-.10, .15))
+# # for the rug
+# feature_values <- x |> dplyr::select(exer_max_hr) |> 
+#   dplyr::mutate(.value = 0) |> 
+#   glimpse()
+# 
+# ale$results |> 
+#   filter(.class == "yes") |> 
+#   ggplot() +
+#   geom_line(mapping = aes(x = exer_max_hr, y = .value)) + 
+#   geom_rug(mapping = aes(x = exer_max_hr, y = .value),
+#            data = feature_values,
+#            sides = "b", position = "jitter", alpha = 0.5) +
+#   scale_y_continuous(limits = c(-.10, .15))
 ```
 
 
@@ -1325,65 +1326,65 @@ The H-statistic quantifies proportion of total variance in the predictions that 
 We can calculate that for total variance across all the (two-way) interactions a feature can have with other features or we can look all the specific two-way interactions individually for a target feature.  Lets look at both.
 
 ```{r u9-all_interactions}
-int_all <-xfun::cache_rds({
-  
-  iml::Interaction$new(predictor) 
-  
-},
-rerun = FALSE,
-dir = "cache/",
-file = "u9-all_interactions")
+# int_all <-xfun::cache_rds({
+#   
+#   iml::Interaction$new(predictor) 
+#   
+# },
+# rerun = FALSE,
+# dir = "cache/",
+# file = "u9-all_interactions")
 ```
 
 Here is the default plot for each features total interactions across all other features
 ```{r}
-int_all |>  plot
+# int_all |>  plot
 ```
 
 And a clearer plot
 ```{r}
-int_all$results |> 
-  dplyr::filter(.class == "yes") |> 
-  dplyr::arrange(abs(.interaction)) |> 
-  dplyr::mutate(.feature = factor(.feature),
-         .feature = forcats::fct_inorder(.feature)) |> 
-  ggplot() +
-  geom_col(mapping = aes(x = .feature, y = .interaction))  +
-  ylab("H-stasitic") +
-  coord_flip()
+# int_all$results |> 
+#   dplyr::filter(.class == "yes") |> 
+#   dplyr::arrange(abs(.interaction)) |> 
+#   dplyr::mutate(.feature = factor(.feature),
+#          .feature = forcats::fct_inorder(.feature)) |> 
+#   ggplot() +
+#   geom_col(mapping = aes(x = .feature, y = .interaction))  +
+#   ylab("H-stasitic") +
+#   coord_flip()
 ```
 
 And here are all the interactions with the `exer_max_hr` feature. 
 ```{r specific_interactions}
-int_one <- iml::Interaction$new(predictor, feature = "exer_max_hr") 
+# int_one <- iml::Interaction$new(predictor, feature = "exer_max_hr") 
 ```
 
 ```{r}
-int_one$results |>   
-  dplyr::filter(.class == "yes") |>
-  dplyr::arrange(abs(.interaction)) |> 
-  dplyr::mutate(.feature = factor(.feature),
-         .feature = forcats::fct_inorder(.feature)) |> 
-  ggplot() +
-  geom_col(mapping = aes(x = .feature, y = .interaction))  +
-  ylab("H-stasitic") +
-  coord_flip()
+# int_one$results |>   
+#   dplyr::filter(.class == "yes") |>
+#   dplyr::arrange(abs(.interaction)) |> 
+#   dplyr::mutate(.feature = factor(.feature),
+#          .feature = forcats::fct_inorder(.feature)) |> 
+#   ggplot() +
+#   geom_col(mapping = aes(x = .feature, y = .interaction))  +
+#   ylab("H-stasitic") +
+#   coord_flip()
 ```
 
 
 Cleveland plots are sometimes considered easier to view than bar plots and could have been used for many of the above graphs.  Here is an example of a Cleveland plot for the H-statistic
 
 ```{r}
-int_one$results |>   
-  filter(.class == "yes") |>
-  dplyr::arrange(abs(.interaction)) |> 
-  dplyr::mutate(.feature = factor(.feature),
-         .feature = forcats::fct_inorder(.feature)) |> 
-  ggplot(mapping = aes(x = .feature, y = .interaction)) +
-  geom_point(size = 2, color = "red") +
-  geom_segment(aes(x = .feature, y = .interaction, xend = .feature), yend = 0, colour = "grey50")  +
-  ylab("H-stasitic") +
-  coord_flip()
+# int_one$results |>   
+#   filter(.class == "yes") |>
+#   dplyr::arrange(abs(.interaction)) |> 
+#   dplyr::mutate(.feature = factor(.feature),
+#          .feature = forcats::fct_inorder(.feature)) |> 
+#   ggplot(mapping = aes(x = .feature, y = .interaction)) +
+#   geom_point(size = 2, color = "red") +
+#   geom_segment(aes(x = .feature, y = .interaction, xend = .feature), yend = 0, colour = "grey50")  +
+#   ylab("H-stasitic") +
+#   coord_flip()
 ```
 
 
