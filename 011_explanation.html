@@ -395,12 +395,11 @@ window.Quarto = {
   <li><a href="#partial-dependence-pd-plots" id="toc-partial-dependence-pd-plots" class="nav-link" data-scroll-target="#partial-dependence-pd-plots"><span class="header-section-number">11.9.1</span> Partial Dependence (PD) Plots</a></li>
   <li><a href="#accumulated-local-effects-ale-plots" id="toc-accumulated-local-effects-ale-plots" class="nav-link" data-scroll-target="#accumulated-local-effects-ale-plots"><span class="header-section-number">11.9.2</span> Accumulated Local Effects (ALE) Plots</a></li>
   </ul></li>
-  <li><a href="#detecting-interactions" id="toc-detecting-interactions" class="nav-link" data-scroll-target="#detecting-interactions"><span class="header-section-number">11.10</span> Detecting Interactions</a></li>
-  <li><a href="#summary-and-closing-thoughts" id="toc-summary-and-closing-thoughts" class="nav-link" data-scroll-target="#summary-and-closing-thoughts"><span class="header-section-number">11.11</span> Summary and Closing Thoughts</a></li>
-  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion"><span class="header-section-number">11.12</span> Discussion</a>
+  <li><a href="#summary-and-closing-thoughts" id="toc-summary-and-closing-thoughts" class="nav-link" data-scroll-target="#summary-and-closing-thoughts"><span class="header-section-number">11.10</span> Summary and Closing Thoughts</a></li>
+  <li><a href="#discussion" id="toc-discussion" class="nav-link" data-scroll-target="#discussion"><span class="header-section-number">11.11</span> Discussion</a>
   <ul class="collapse">
-  <li><a href="#annoucements" id="toc-annoucements" class="nav-link" data-scroll-target="#annoucements"><span class="header-section-number">11.12.1</span> Annoucements</a></li>
-  <li><a href="#questions" id="toc-questions" class="nav-link" data-scroll-target="#questions"><span class="header-section-number">11.12.2</span> Questions</a></li>
+  <li><a href="#annoucements" id="toc-annoucements" class="nav-link" data-scroll-target="#annoucements"><span class="header-section-number">11.11.1</span> Annoucements</a></li>
+  <li><a href="#questions" id="toc-questions" class="nav-link" data-scroll-target="#questions"><span class="header-section-number">11.11.2</span> Questions</a></li>
   </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/jjcurtin/book_iaml/edit/main/011_explanation.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
@@ -482,7 +481,6 @@ window.Quarto = {
 <li><a href="">Permutation Feature Importance</a></li>
 <li><a href="">SHAP Feature Importance</a></li>
 <li><a href="">Visual Approaches to Understand Models</a></li>
-<li><a href="">Exploring Interactions</a></li>
 </ul>
 <p>Post questions to the video-lectures channel in Slack</p>
 <hr>
@@ -1672,12 +1670,13 @@ Find examples and detailed introduction at: http://ema.drwhy.ai/</code></pre>
 <div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> feat_full <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span>disease)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ul>
-<li>For outcome, we need to select it first and then pull the vector out of the dataframe</li>
+<li>For outcome, we need to select it first, convert to 0/1, and then pull the vector out of the dataframe</li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> feat_full <span class="sc">|&gt;</span> </span>
-<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(disease) <span class="sc">|&gt;</span> </span>
-<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(disease)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(disease) <span class="sc">|&gt;</span></span>
+<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">disease =</span> <span class="fu">if_else</span>(disease <span class="sc">==</span> <span class="st">"yes"</span>, <span class="dv">1</span>, <span class="dv">0</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(disease)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <p>We also need a specific predictor function that will work with the DALEX package</p>
@@ -1688,7 +1687,7 @@ Find examples and detailed introduction at: http://ema.drwhy.ai/</code></pre>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>predict_wrapper <span class="ot">&lt;-</span> <span class="cf">function</span>(model, newdata) {</span>
 <span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(model, newdata, <span class="at">type =</span> <span class="st">"prob"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(.pred_yes)</span>
+<span id="cb76-3"><a href="#cb76-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pull</span>(.pred_yes)</span>
 <span id="cb76-4"><a href="#cb76-4" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
@@ -1697,8 +1696,7 @@ Find examples and detailed introduction at: http://ema.drwhy.ai/</code></pre>
 <div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>explain_full <span class="ot">&lt;-</span> <span class="fu">explain_tidymodels</span>(fit_full, <span class="co"># our model object </span></span>
 <span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">data =</span> x, <span class="co"># features without outcome</span></span>
 <span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">y =</span> y, <span class="co"># outcome</span></span>
-<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">predict_function =</span> predict_wrapper, <span class="co"># our predictor function</span></span>
-<span id="cb77-5"><a href="#cb77-5" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">predict_function_target_column =</span> <span class="st">".pred_yes"</span>) <span class="co"># the name of the column for predictions</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">predict_function =</span> predict_wrapper) <span class="co"># our predictor function</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Preparation of a new explainer is initiated
   -&gt; model label       :  model_fit  (  default  )
@@ -1706,9 +1704,9 @@ Find examples and detailed introduction at: http://ema.drwhy.ai/</code></pre>
   -&gt; data              :  tibble converted into a data.frame 
   -&gt; target variable   :  303  values 
   -&gt; predict function  :  predict_function 
-  -&gt; predicted values  :  Predict function column set to:  .pred_yes (  OK  )
-  -&gt; model_info        :  package parsnip , ver. 1.1.0.9004 , task multiclass (  default  ) 
-  -&gt; predicted values  :  predict function returns multiple columns:  1  (  default  ) 
+  -&gt; predicted values  :  No value for predict function target column. (  default  )
+  -&gt; model_info        :  package parsnip , ver. 1.1.0.9004 , task classification (  default  ) 
+  -&gt; predicted values  :  numerical, min =  0.1257285 , mean =  0.4587467 , max =  0.9100119  
   -&gt; residual function :  residual_function 
   -&gt; residuals         :  numerical, min =  0 , mean =  0 , max =  0  
   A new explainer has been created!  </code></pre>
@@ -1723,9 +1721,11 @@ Find examples and detailed introduction at: http://ema.drwhy.ai/</code></pre>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a>accuracy_wrapper <span class="ot">&lt;-</span> <span class="cf">function</span>(observed, predicted) {</span>
-<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a>  predicted <span class="ot">&lt;-</span> <span class="fu">fct</span>(<span class="fu">if_else</span>(predicted <span class="sc">&gt;</span> .<span class="dv">5</span>, <span class="st">"yes"</span>, <span class="st">"no"</span>), <span class="at">levels  =</span> <span class="fu">c</span>(<span class="st">"yes"</span>, <span class="st">"no"</span>))</span>
-<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">accuracy_vec</span>(observed, predicted)</span>
-<span id="cb79-4"><a href="#cb79-4" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb79-2"><a href="#cb79-2" aria-hidden="true" tabindex="-1"></a>  observed <span class="ot">&lt;-</span> <span class="fu">fct</span>(<span class="fu">if_else</span>(observed <span class="sc">==</span> <span class="dv">1</span>, <span class="st">"yes"</span>, <span class="st">"no"</span>),</span>
+<span id="cb79-3"><a href="#cb79-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"yes"</span>, <span class="st">"no"</span>))</span>
+<span id="cb79-4"><a href="#cb79-4" aria-hidden="true" tabindex="-1"></a>  predicted <span class="ot">&lt;-</span> <span class="fu">fct</span>(<span class="fu">if_else</span>(predicted <span class="sc">&gt;</span> .<span class="dv">5</span>, <span class="st">"yes"</span>, <span class="st">"no"</span>), <span class="at">levels  =</span> <span class="fu">c</span>(<span class="st">"yes"</span>, <span class="st">"no"</span>))</span>
+<span id="cb79-5"><a href="#cb79-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">accuracy_vec</span>(observed, predicted)</span>
+<span id="cb79-6"><a href="#cb79-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><br>
 <br>
@@ -1763,7 +1763,8 @@ By randomly shuffling the values for the feature, we break the relationship betw
 <p>Lets look at what this function returns</p>
 <ul>
 <li>the first row contains the accuracy for the full model (with no features permuted)</li>
-<li>Each subsequent row shows the accuracy of the model when that specific feature is permuted</li>
+<li>last row is a baseline models (performance with all features permuted)</li>
+<li>Other row show the accuracy of the model when that specific feature is permuted</li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a>imp_permute</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -1929,8 +1930,9 @@ For this first observation</p>
 <p>We can use these Shapley values for the local importance of the features for each observation to calculate the global importance of these features.<br>
 <br>
 <br>
-Features that have big absolute Shapley values on average across observation are more important. Let’s calculate this.</p>
-<p>First we need a function to get shapley values for each observation (along with the feature values for a nicer plot)</p>
+Features that have big absolute Shapley values on average across observation are more important. Let’s calculate this.<br>
+<br>
+First we need a function to get shapley values for each observation (along with the feature values for a nicer plot)</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb92"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a>get_shaps <span class="ot">&lt;-</span> <span class="cf">function</span>(df1){</span>
 <span id="cb92-2"><a href="#cb92-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict_parts</span>(explain_full, </span>
@@ -1945,22 +1947,33 @@ Features that have big absolute Shapley values on average across observation are
 <hr>
 <p>And then we can map this function over observations to get the Shapley values for each observation</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb93"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a><span class="co"># x_tmp = x |&gt; select(1:10)</span></span>
-<span id="cb93-2"><a href="#cb93-2" aria-hidden="true" tabindex="-1"></a><span class="co"># local_shaps &lt;- cache_rds(</span></span>
-<span id="cb93-3"><a href="#cb93-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   expr = {</span></span>
-<span id="cb93-4"><a href="#cb93-4" aria-hidden="true" tabindex="-1"></a><span class="co">#     t &lt;- x_tmp |&gt;</span></span>
-<span id="cb93-5"><a href="#cb93-5" aria-hidden="true" tabindex="-1"></a><span class="co">#       mutate(id = row_number()) |&gt; </span></span>
-<span id="cb93-6"><a href="#cb93-6" aria-hidden="true" tabindex="-1"></a><span class="co">#       nest(.by = id, .key = "dfs")     # nest a dataframe for each observation</span></span>
-<span id="cb93-7"><a href="#cb93-7" aria-hidden="true" tabindex="-1"></a><span class="co">#       mutate(shaps = map(dfs, \(df1) get_shaps(df1))) |&gt; view()</span></span>
-<span id="cb93-8"><a href="#cb93-8" aria-hidden="true" tabindex="-1"></a><span class="co">#       select(-dfs) |&gt;</span></span>
-<span id="cb93-9"><a href="#cb93-9" aria-hidden="true" tabindex="-1"></a><span class="co">#       unnest(shapleys) </span></span>
-<span id="cb93-10"><a href="#cb93-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   },</span></span>
-<span id="cb93-11"><a href="#cb93-11" aria-hidden="true" tabindex="-1"></a><span class="co">#   rerun = rerun_setting,</span></span>
-<span id="cb93-12"><a href="#cb93-12" aria-hidden="true" tabindex="-1"></a><span class="co">#   dir = "cache/011",</span></span>
-<span id="cb93-13"><a href="#cb93-13" aria-hidden="true" tabindex="-1"></a><span class="co">#   file = "local_shaps")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb93"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb93-1"><a href="#cb93-1" aria-hidden="true" tabindex="-1"></a>local_shaps <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
+<span id="cb93-2"><a href="#cb93-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
+<span id="cb93-3"><a href="#cb93-3" aria-hidden="true" tabindex="-1"></a>    x <span class="sc">|&gt;</span></span>
+<span id="cb93-4"><a href="#cb93-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">slice_sample</span>(<span class="at">prop =</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">5</span>) <span class="sc">|&gt;</span> <span class="co"># take random sample to reduce computation time</span></span>
+<span id="cb93-5"><a href="#cb93-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">mutate</span>(<span class="at">id =</span> <span class="fu">row_number</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb93-6"><a href="#cb93-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">nest</span>(<span class="at">.by =</span> id, <span class="at">.key =</span> <span class="st">"dfs"</span>) <span class="sc">|&gt;</span>   <span class="co"># nest a dataframe for each observation</span></span>
+<span id="cb93-7"><a href="#cb93-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">mutate</span>(<span class="at">shaps =</span> <span class="fu">map</span>(dfs, \(df1) <span class="fu">get_shaps</span>(df1))) <span class="sc">|&gt;</span> </span>
+<span id="cb93-8"><a href="#cb93-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">select</span>(<span class="sc">-</span>dfs) <span class="sc">|&gt;</span></span>
+<span id="cb93-9"><a href="#cb93-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">unnest</span>(shaps)</span>
+<span id="cb93-10"><a href="#cb93-10" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb93-11"><a href="#cb93-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting,</span>
+<span id="cb93-12"><a href="#cb93-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/011"</span>,</span>
+<span id="cb93-13"><a href="#cb93-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"local_shaps"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a><span class="co"># local_shaps |&gt; head</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a>local_shaps <span class="sc">|&gt;</span> <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 6 × 4
+     id variable_name  variable_value contribution
+  &lt;int&gt; &lt;chr&gt;          &lt;chr&gt;                 &lt;dbl&gt;
+1     1 age            1.058             0.00704  
+2     1 ca             -0.71            -0.0486   
+3     1 chol           1.281             0.0000232
+4     1 cp_atyp_ang    -0.4438           0.00286  
+5     1 cp_non_anginal 0.5624            0.0107   
+6     1 exer_ang_yes   -0.6955          -0.0362   </code></pre>
+</div>
 </div>
 <p><strong>Programming note</strong>: This code demonstrates another nice R programming technique using <code>nest()</code> and <code>unnest()</code> in combination with <code>map()</code> and list-columns. For more info, see <a href="https://r4ds.had.co.nz/many-models.html">this chapter</a> in <span class="citation" data-cites="RDS2023">(<a href="#ref-RDS2023" role="doc-biblioref"><strong>RDS2023?</strong></a>)</span> and the vignette on nesting (<code>vignette("nest")</code>).</p>
 <hr>
@@ -1971,18 +1984,32 @@ Features that have big absolute Shapley values on average across observation are
 <li>The other <code>exer_</code> features are not far behind.</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb95"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a><span class="co"># local_shaps |&gt;</span></span>
-<span id="cb95-2"><a href="#cb95-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::mutate(phi = abs(phi)) |&gt;</span></span>
-<span id="cb95-3"><a href="#cb95-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   group_by(feature) |&gt;</span></span>
-<span id="cb95-4"><a href="#cb95-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::summarize(mean_shapley = mean(phi)) |&gt;</span></span>
-<span id="cb95-5"><a href="#cb95-5" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::arrange(desc(mean_shapley)) |&gt;</span></span>
-<span id="cb95-6"><a href="#cb95-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::mutate(feature = factor(feature),</span></span>
-<span id="cb95-7"><a href="#cb95-7" aria-hidden="true" tabindex="-1"></a><span class="co">#          feature = forcats::fct_reorder(feature, mean_shapley)) |&gt;</span></span>
-<span id="cb95-8"><a href="#cb95-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   ggplot(aes(x = feature, y = mean_shapley)) +</span></span>
-<span id="cb95-9"><a href="#cb95-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point() +</span></span>
-<span id="cb95-10"><a href="#cb95-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   coord_flip()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a>local_shaps <span class="sc">|&gt;</span></span>
+<span id="cb96-2"><a href="#cb96-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">contribution =</span> <span class="fu">abs</span>(contribution)) <span class="sc">|&gt;</span></span>
+<span id="cb96-3"><a href="#cb96-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(variable_name) <span class="sc">|&gt;</span></span>
+<span id="cb96-4"><a href="#cb96-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">mean_shap =</span> <span class="fu">mean</span>(contribution)) <span class="sc">|&gt;</span></span>
+<span id="cb96-5"><a href="#cb96-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(mean_shap)) <span class="sc">|&gt;</span></span>
+<span id="cb96-6"><a href="#cb96-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">variable_name =</span> <span class="fu">factor</span>(variable_name),</span>
+<span id="cb96-7"><a href="#cb96-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">variable_name =</span> <span class="fu">fct_reorder</span>(variable_name, mean_shap)) <span class="sc">|&gt;</span></span>
+<span id="cb96-8"><a href="#cb96-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> variable_name, <span class="at">y =</span> mean_shap)) <span class="sc">+</span></span>
+<span id="cb96-9"><a href="#cb96-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb96-10"><a href="#cb96-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-63-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
 </div>
-<p>For a more advanced plot (not displayed here) we could superimpose the individual local Shapley values and color them based on the feature score. This would allow us to show the direction of the relationship between the Shapley values and feature values. See FIGURE 9.26 in <span class="citation" data-cites="IML">Molnar (<a href="#ref-IML" role="doc-biblioref">2023</a>)</span> for an example of this type of plot.</p>
+</div>
+</div>
+<hr>
+<p>For a more advanced plot (a sina plot; not displayed here) we could superimpose the individual local Shapley values and color them based on the feature score.<br>
+<br>
+<br>
+This would allow us to show the direction of the relationship between the Shapley values and feature values.<br>
+<br>
+<br>
+See FIGURE 9.26 in <span class="citation" data-cites="IML">Molnar (<a href="#ref-IML" role="doc-biblioref">2023</a>)</span> for an example of this type of plot.</p>
 <hr>
 <p>Shapley values are attractive relative to other approaches because</p>
 <ul>
@@ -1992,13 +2019,17 @@ Features that have big absolute Shapley values on average across observation are
 </ul>
 <hr>
 <p>However, they can be VERY time consuming to calculate (particularly if you want to use them for global importance such that you need them for all/many observations).</p>
-<p>There are computational shortcuts available but even those approximately can be very time consuming.</p>
+<p>There are computational shortcuts available but even those can be very time consuming in some instances (though XGBoost has a very fast implementation that we use regularly).</p>
 <p>(Note that for decision tree based algorithms SHAP provides a more computationally efficient way to estimate Shapley values - see <a href="https://christophm.github.io/interpretable-ml-book/shap.html">section 9.6</a> in <span class="citation" data-cites="IML">Molnar (<a href="#ref-IML" role="doc-biblioref">2023</a>)</span> for more detail.)</p>
+<hr>
 </section>
 </section>
 <section id="visual-approaches-to-understand-our-models" class="level2" data-number="11.9">
 <h2 data-number="11.9" class="anchored" data-anchor-id="visual-approaches-to-understand-our-models"><span class="header-section-number">11.9</span> Visual Approaches to Understand our Models</h2>
-<p>We can also learn about how our features are used to make predictions in our models using visual approaches. There are two key plots that we can use:</p>
+<p>We can also learn about how our features are used to make predictions in our models using visual approaches.<br>
+<br>
+<br>
+There are two key plots that we can use:</p>
 <ul>
 <li>Partial Dependence (PD) Plots</li>
 <li>Accumulated Local Effects (ALE) Plots</li>
@@ -2006,9 +2037,12 @@ Features that have big absolute Shapley values on average across observation are
 <hr>
 <section id="partial-dependence-pd-plots" class="level3" data-number="11.9.1">
 <h3 data-number="11.9.1" class="anchored" data-anchor-id="partial-dependence-pd-plots"><span class="header-section-number">11.9.1</span> Partial Dependence (PD) Plots</h3>
-<p>The Partial dependence (PD) plot displays the marginal effect of a target feature or combination of features on the predictions from a model.</p>
-<p>In essence, the prediction for any value of a target feature is the average prediction across cases if we set all cases to have that value for the target feature but their observed values for all other features.</p>
-<p>We can use PD plots to understand whether the relationship between a target feature and the outcome is linear, monotonic, or more complex. It may also help us visualize and understand if interactions between features exist (if we make a PD plot for two target features).</p>
+<p>The Partial dependence (PD) plot displays the marginal effect of a target feature or combination of features on the predictions from a model.<br>
+<br>
+<br>
+In essence, the prediction for any value of a target feature is the average prediction across cases if we set all cases to have that value for the target feature but their observed values for all other features.<br>
+<br>
+We can use PD plots to understand whether the relationship between a target feature and the outcome is linear, monotonic, or more complex. It may also help us visualize and understand if interactions between features exist (if we make a PD plot for two target features).</p>
 <hr>
 <p>The PD Plot is attractive because</p>
 <ul>
@@ -2024,111 +2058,50 @@ Features that have big absolute Shapley values on average across observation are
 <li>This plot (but also other plot methods) are limited to 1 - 2 features in combination.</li>
 <li>It may hide effects when interactions exist</li>
 </ul>
+<hr>
 </section>
 <section id="accumulated-local-effects-ale-plots" class="level3" data-number="11.9.2">
 <h3 data-number="11.9.2" class="anchored" data-anchor-id="accumulated-local-effects-ale-plots"><span class="header-section-number">11.9.2</span> Accumulated Local Effects (ALE) Plots</h3>
-<p>If the features are correlated, the partial dependence plot should not be used because the plots will otherwise be based on combinations of the target feature and other features that may never occur (given the feature correlations).</p>
-<p>Molnar describes how this problem of correlated features and unrealistic combinations of features can be solved by M-Plots that plot the average effect of a target feature using the conditional values on other features (i.e., only using realistic values for the other features based on their correlations with the target feature). Unfortunately, this too is sub-optimal because it will confound the effect of the target feature with the effects of the other features that are correlated with it.</p>
-<p>Accumulated Local Effects (ALE) plots also use conditional values of other features to solve the correlated features problem. However, ALE plots solve the confounding problem by calculating <strong>differences</strong> in predictions associated with changes in the target feature rather than average predictions for each value of that target feature. These differences hold the other features values (mostly) constant to remove their effects.</p>
-<p>ALE plots are the preferred plot in situations where you expect your target feature to be correlated with other features (which is likely most situations.)</p>
+<p>If the features are correlated, the partial dependence plot should not be used because the plots will otherwise be based on combinations of the target feature and other features that may never occur (given the feature correlations).<br>
+<br>
+Molnar describes how this problem of correlated features and unrealistic combinations of features can be solved by M-Plots that plot the average effect of a target feature using the conditional values on other features (i.e., only using realistic values for the other features based on their correlations with the target feature). Unfortunately, this too is sub-optimal because it will confound the effect of the target feature with the effects of the other features that are correlated with it.</p>
 <hr>
-<p>We will use the <code>iml</code> package that accompanies <span class="citation" data-cites="IML">Molnar (<a href="#ref-IML" role="doc-biblioref">2023</a>)</span> to make PD and ALE plots.</p>
-<p>The code is very straight-forward. Here we get the predicted values for an ALE plot to examine the effect of one of the features from our exercise test (<code>exer_max_hr</code>) on disease probabilities.</p>
-<p>If we wanted a PD plot, we could simply substitute <code>pdp</code> for <code>ale</code></p>
+<p>Accumulated Local Effects (ALE) plots also use conditional values of other features to solve the correlated features problem. However, ALE plots solve the confounding problem by calculating <strong>differences</strong> in predictions associated with changes in the target feature rather than average predictions for each value of that target feature. These differences hold the other features values (mostly) constant to remove their effects.<br>
+<br>
+<br>
+ALE plots are the preferred plot in situations where you expect your target feature to be correlated with other features (which is likely most situations.)</p>
+<hr>
+<p>We will use the <code>DALEX</code> package again to make these PD and ALE plots.<br>
+<br>
+It will require the explainer object we created earlier for feature importance<br>
+<br>
+Otherwise, the code is very straight-forward. Here we get the predicted values for an ALE plot to examine the effect of one of the features from our exercise test (<code>exer_max_hr</code>) on disease probabilities.</p>
+<p>If we wanted a PD plot, we could simply substitute <code>partial</code> for <code>accumulated</code></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ale &lt;- iml::FeatureEffect$new(predictor,</span></span>
-<span id="cb96-2"><a href="#cb96-2" aria-hidden="true" tabindex="-1"></a><span class="co">#                   feature = "exer_max_hr",</span></span>
-<span id="cb96-3"><a href="#cb96-3" aria-hidden="true" tabindex="-1"></a><span class="co">#                   method = "ale",  # or pdp</span></span>
-<span id="cb96-4"><a href="#cb96-4" aria-hidden="true" tabindex="-1"></a><span class="co">#                   grid.size = 30)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb97"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a>ale <span class="ot">&lt;-</span> <span class="fu">model_profile</span>(<span class="at">explainer =</span> explain_full,</span>
+<span id="cb97-2"><a href="#cb97-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">type =</span> <span class="st">"accumulated"</span>,</span>
+<span id="cb97-3"><a href="#cb97-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">variables =</span> <span class="st">"exer_max_hr"</span>,</span>
+<span id="cb97-4"><a href="#cb97-4" aria-hidden="true" tabindex="-1"></a>                     <span class="at">N =</span> <span class="cn">NULL</span>)  <span class="co"># to use full sample (default is 100)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
-<p>There is a default plot function that can be used. It combines the ale/pd plot with a rug plot to show the distribution of values for the target feature. However, by default, it displays separate plots for all levels of a categorical outcome. This makes sense if your categorical outcome has three or more levels but not for a binary outcome</p>
+<p>There is a default plot function for these plot object (or you could use the data in the object to make your own ggplot)<br>
+<br>
+The probability of disease decreases as max hr increases in the exercise test</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb97"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb97-1"><a href="#cb97-1" aria-hidden="true" tabindex="-1"></a><span class="co"># ale |&gt; plot</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb98"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a>ale <span class="sc">|&gt;</span> <span class="fu">plot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-65-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
 </div>
 <hr>
-<p>With two levels for the outcome, it is redundant. In this instance, you can make your own plot. You might also do this to gain more control over the plot.</p>
-<p>We need a dataframe for the raw values of the target feature for the rug plot. We also need values for y for the rug plot but I dont plan to show them so I set those to constant (0).</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb98"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb98-1"><a href="#cb98-1" aria-hidden="true" tabindex="-1"></a><span class="co"># # for the rug</span></span>
-<span id="cb98-2"><a href="#cb98-2" aria-hidden="true" tabindex="-1"></a><span class="co"># feature_values &lt;- x |&gt; dplyr::select(exer_max_hr) |&gt; </span></span>
-<span id="cb98-3"><a href="#cb98-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::mutate(.value = 0) |&gt; </span></span>
-<span id="cb98-4"><a href="#cb98-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   glimpse()</span></span>
-<span id="cb98-5"><a href="#cb98-5" aria-hidden="true" tabindex="-1"></a><span class="co"># </span></span>
-<span id="cb98-6"><a href="#cb98-6" aria-hidden="true" tabindex="-1"></a><span class="co"># ale$results |&gt; </span></span>
-<span id="cb98-7"><a href="#cb98-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   filter(.class == "yes") |&gt; </span></span>
-<span id="cb98-8"><a href="#cb98-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   ggplot() +</span></span>
-<span id="cb98-9"><a href="#cb98-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_line(mapping = aes(x = exer_max_hr, y = .value)) + </span></span>
-<span id="cb98-10"><a href="#cb98-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_rug(mapping = aes(x = exer_max_hr, y = .value),</span></span>
-<span id="cb98-11"><a href="#cb98-11" aria-hidden="true" tabindex="-1"></a><span class="co">#            data = feature_values,</span></span>
-<span id="cb98-12"><a href="#cb98-12" aria-hidden="true" tabindex="-1"></a><span class="co">#            sides = "b", position = "jitter", alpha = 0.5) +</span></span>
-<span id="cb98-13"><a href="#cb98-13" aria-hidden="true" tabindex="-1"></a><span class="co">#   scale_y_continuous(limits = c(-.10, .15))</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
 </section>
 </section>
-<section id="detecting-interactions" class="level2" data-number="11.10">
-<h2 data-number="11.10" class="anchored" data-anchor-id="detecting-interactions"><span class="header-section-number">11.10</span> Detecting Interactions</h2>
-<p>We can explore the magnitude of interactions among our features as well to better understand our model.</p>
-<p>We can estimate the magnitude of the interaction using the H-statistic, developed by <a href="https://arxiv.org/abs/0811.1679">Friedman and Popescu (2008)</a>.</p>
-<p>The H-statistic quantifies proportion of total variance in the predictions that is explained by the interactions.</p>
-<p>We can calculate that for total variance across all the (two-way) interactions a feature can have with other features or we can look all the specific two-way interactions individually for a target feature. Lets look at both.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb99"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb99-1"><a href="#cb99-1" aria-hidden="true" tabindex="-1"></a><span class="co"># int_all &lt;-xfun::cache_rds({</span></span>
-<span id="cb99-2"><a href="#cb99-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   </span></span>
-<span id="cb99-3"><a href="#cb99-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   iml::Interaction$new(predictor) </span></span>
-<span id="cb99-4"><a href="#cb99-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   </span></span>
-<span id="cb99-5"><a href="#cb99-5" aria-hidden="true" tabindex="-1"></a><span class="co"># },</span></span>
-<span id="cb99-6"><a href="#cb99-6" aria-hidden="true" tabindex="-1"></a><span class="co"># rerun = FALSE,</span></span>
-<span id="cb99-7"><a href="#cb99-7" aria-hidden="true" tabindex="-1"></a><span class="co"># dir = "cache/",</span></span>
-<span id="cb99-8"><a href="#cb99-8" aria-hidden="true" tabindex="-1"></a><span class="co"># file = "u9-all_interactions")</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Here is the default plot for each features total interactions across all other features</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb100"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb100-1"><a href="#cb100-1" aria-hidden="true" tabindex="-1"></a><span class="co"># int_all |&gt;  plot</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>And a clearer plot</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb101"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb101-1"><a href="#cb101-1" aria-hidden="true" tabindex="-1"></a><span class="co"># int_all$results |&gt; </span></span>
-<span id="cb101-2"><a href="#cb101-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::filter(.class == "yes") |&gt; </span></span>
-<span id="cb101-3"><a href="#cb101-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::arrange(abs(.interaction)) |&gt; </span></span>
-<span id="cb101-4"><a href="#cb101-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::mutate(.feature = factor(.feature),</span></span>
-<span id="cb101-5"><a href="#cb101-5" aria-hidden="true" tabindex="-1"></a><span class="co">#          .feature = forcats::fct_inorder(.feature)) |&gt; </span></span>
-<span id="cb101-6"><a href="#cb101-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   ggplot() +</span></span>
-<span id="cb101-7"><a href="#cb101-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_col(mapping = aes(x = .feature, y = .interaction))  +</span></span>
-<span id="cb101-8"><a href="#cb101-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   ylab("H-stasitic") +</span></span>
-<span id="cb101-9"><a href="#cb101-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   coord_flip()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>And here are all the interactions with the <code>exer_max_hr</code> feature.</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb102"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb102-1"><a href="#cb102-1" aria-hidden="true" tabindex="-1"></a><span class="co"># int_one &lt;- iml::Interaction$new(predictor, feature = "exer_max_hr") </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb103"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb103-1"><a href="#cb103-1" aria-hidden="true" tabindex="-1"></a><span class="co"># int_one$results |&gt;   </span></span>
-<span id="cb103-2"><a href="#cb103-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::filter(.class == "yes") |&gt;</span></span>
-<span id="cb103-3"><a href="#cb103-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::arrange(abs(.interaction)) |&gt; </span></span>
-<span id="cb103-4"><a href="#cb103-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::mutate(.feature = factor(.feature),</span></span>
-<span id="cb103-5"><a href="#cb103-5" aria-hidden="true" tabindex="-1"></a><span class="co">#          .feature = forcats::fct_inorder(.feature)) |&gt; </span></span>
-<span id="cb103-6"><a href="#cb103-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   ggplot() +</span></span>
-<span id="cb103-7"><a href="#cb103-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_col(mapping = aes(x = .feature, y = .interaction))  +</span></span>
-<span id="cb103-8"><a href="#cb103-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   ylab("H-stasitic") +</span></span>
-<span id="cb103-9"><a href="#cb103-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   coord_flip()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<p>Cleveland plots are sometimes considered easier to view than bar plots and could have been used for many of the above graphs. Here is an example of a Cleveland plot for the H-statistic</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb104"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb104-1"><a href="#cb104-1" aria-hidden="true" tabindex="-1"></a><span class="co"># int_one$results |&gt;   </span></span>
-<span id="cb104-2"><a href="#cb104-2" aria-hidden="true" tabindex="-1"></a><span class="co">#   filter(.class == "yes") |&gt;</span></span>
-<span id="cb104-3"><a href="#cb104-3" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::arrange(abs(.interaction)) |&gt; </span></span>
-<span id="cb104-4"><a href="#cb104-4" aria-hidden="true" tabindex="-1"></a><span class="co">#   dplyr::mutate(.feature = factor(.feature),</span></span>
-<span id="cb104-5"><a href="#cb104-5" aria-hidden="true" tabindex="-1"></a><span class="co">#          .feature = forcats::fct_inorder(.feature)) |&gt; </span></span>
-<span id="cb104-6"><a href="#cb104-6" aria-hidden="true" tabindex="-1"></a><span class="co">#   ggplot(mapping = aes(x = .feature, y = .interaction)) +</span></span>
-<span id="cb104-7"><a href="#cb104-7" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_point(size = 2, color = "red") +</span></span>
-<span id="cb104-8"><a href="#cb104-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   geom_segment(aes(x = .feature, y = .interaction, xend = .feature), yend = 0, colour = "grey50")  +</span></span>
-<span id="cb104-9"><a href="#cb104-9" aria-hidden="true" tabindex="-1"></a><span class="co">#   ylab("H-stasitic") +</span></span>
-<span id="cb104-10"><a href="#cb104-10" aria-hidden="true" tabindex="-1"></a><span class="co">#   coord_flip()</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-</section>
-<section id="summary-and-closing-thoughts" class="level2" data-number="11.11">
-<h2 data-number="11.11" class="anchored" data-anchor-id="summary-and-closing-thoughts"><span class="header-section-number">11.11</span> Summary and Closing Thoughts</h2>
+<section id="summary-and-closing-thoughts" class="level2" data-number="11.10">
+<h2 data-number="11.10" class="anchored" data-anchor-id="summary-and-closing-thoughts"><span class="header-section-number">11.10</span> Summary and Closing Thoughts</h2>
 <p>When pursuing purely explanatory goals with machine learning methods, we can:</p>
 <ul>
 <li><p>Use resampling with the full dataset to determine appropriate model configuration</p>
@@ -2147,42 +2120,42 @@ Features that have big absolute Shapley values on average across observation are
 <li><p>We can explore the strength of interactions among our features</p></li>
 </ul>
 </section>
-<section id="discussion" class="level2" data-number="11.12">
-<h2 data-number="11.12" class="anchored" data-anchor-id="discussion"><span class="header-section-number">11.12</span> Discussion</h2>
-<section id="annoucements" class="level3" data-number="11.12.1">
-<h3 data-number="11.12.1" class="anchored" data-anchor-id="annoucements"><span class="header-section-number">11.12.1</span> Annoucements</h3>
+<section id="discussion" class="level2" data-number="11.11">
+<h2 data-number="11.11" class="anchored" data-anchor-id="discussion"><span class="header-section-number">11.11</span> Discussion</h2>
+<section id="annoucements" class="level3" data-number="11.11.1">
+<h3 data-number="11.11.1" class="anchored" data-anchor-id="annoucements"><span class="header-section-number">11.11.1</span> Annoucements</h3>
 <ul>
 <li>Review conceptual exam</li>
 <li>RMD files</li>
 </ul>
 </section>
-<section id="questions" class="level3" data-number="11.12.2">
-<h3 data-number="11.12.2" class="anchored" data-anchor-id="questions"><span class="header-section-number">11.12.2</span> Questions</h3>
-<section id="ale-and-pd-plots" class="level4" data-number="11.12.2.1">
-<h4 data-number="11.12.2.1" class="anchored" data-anchor-id="ale-and-pd-plots"><span class="header-section-number">11.12.2.1</span> ALE and PD plots</h4>
+<section id="questions" class="level3" data-number="11.11.2">
+<h3 data-number="11.11.2" class="anchored" data-anchor-id="questions"><span class="header-section-number">11.11.2</span> Questions</h3>
+<section id="ale-and-pd-plots" class="level4" data-number="11.11.2.1">
+<h4 data-number="11.11.2.1" class="anchored" data-anchor-id="ale-and-pd-plots"><span class="header-section-number">11.11.2.1</span> ALE and PD plots</h4>
 <ul>
 <li><p>What is the difference between PD plot and ALE plot? And when should we use they for specific?</p></li>
 <li><p>I am still confused about partial dependence plots and ale plots and when we want to use them.</p></li>
 <li><p>I am confused about the question in the unit 9 quiz. when you have moderate or stronger correlations among your features, ALE and M-plots both could be used to visualize the effects of your features on the outcome. Based on the web book, we learned that M-plot is sub-optimal, which means we better use ALE right? and M-plots are not recommended.</p></li>
 </ul>
 </section>
-<section id="prediction-vs.-explanation" class="level4" data-number="11.12.2.2">
-<h4 data-number="11.12.2.2" class="anchored" data-anchor-id="prediction-vs.-explanation"><span class="header-section-number">11.12.2.2</span> Prediction vs.&nbsp;explanation</h4>
+<section id="prediction-vs.-explanation" class="level4" data-number="11.11.2.2">
+<h4 data-number="11.11.2.2" class="anchored" data-anchor-id="prediction-vs.-explanation"><span class="header-section-number">11.11.2.2</span> Prediction vs.&nbsp;explanation</h4>
 <ul>
 <li><p>I think it would be useful to talk about how to use these same models that we have been building for explanatory purposes rather than predictive ones. Is that when interpretability matters most? I feel like some of the reading on interpretability contradicted what we talked about earlier on in the semester about how in a predictive model, interpretability doesn’t necessarily matter.</p></li>
 <li><p>It seems that there is a trade-off regarding interpretability. How to make a good decision about the degree of the interpretability so that the system will be not manipulated when there is a misalignment/mismatch between the goals of the creator and the user?</p></li>
 <li><p>If I understood correctly, interpretability/explainability is about the model predictions, while comprehensibility is about users’ understanding of the explanations. Transparency is about the algorithms. These concepts are kind of confusing. It would be nice if you could help us distinguish them more conceptually.</p></li>
 </ul>
 </section>
-<section id="permutation-test" class="level4" data-number="11.12.2.3">
-<h4 data-number="11.12.2.3" class="anchored" data-anchor-id="permutation-test"><span class="header-section-number">11.12.2.3</span> Permutation test</h4>
+<section id="permutation-test" class="level4" data-number="11.11.2.3">
+<h4 data-number="11.11.2.3" class="anchored" data-anchor-id="permutation-test"><span class="header-section-number">11.11.2.3</span> Permutation test</h4>
 <ul>
 <li><p>Mathematically, is there not a way to estimate what the accuracy would be even if there were not a relationship between predictors and outcome? Wouldn’t the estimated accuracy simply be the proportion of observations in the dominant class? I guess I do not see why the permutation test is necessary, then.</p></li>
 <li><p>shuffling a feature’s values removes the relationship between that feature and the outcome, and I think the prediction error of the model increases.</p></li>
 </ul>
 </section>
-<section id="bayesian-estimation" class="level4" data-number="11.12.2.4">
-<h4 data-number="11.12.2.4" class="anchored" data-anchor-id="bayesian-estimation"><span class="header-section-number">11.12.2.4</span> Bayesian estimation</h4>
+<section id="bayesian-estimation" class="level4" data-number="11.11.2.4">
+<h4 data-number="11.11.2.4" class="anchored" data-anchor-id="bayesian-estimation"><span class="header-section-number">11.11.2.4</span> Bayesian estimation</h4>
 <ul>
 <li><p>In case of unit 9, K-fold is preferred, the question goes how to balance the choice between K-fold and bootstrap?</p></li>
 <li><p>What’s are prior posterior probabilities?</p></li>
@@ -2192,8 +2165,8 @@ Features that have big absolute Shapley values on average across observation are
 <li><p>I am especially confused about Bayesian estimation for model comparisons. Does convergence mean that the best parameters for the model have been found, and why do we do this specifically with Bayesian estimation</p></li>
 </ul>
 </section>
-<section id="shapley-values-1" class="level4" data-number="11.12.2.5">
-<h4 data-number="11.12.2.5" class="anchored" data-anchor-id="shapley-values-1"><span class="header-section-number">11.12.2.5</span> Shapley values</h4>
+<section id="shapley-values-1" class="level4" data-number="11.11.2.5">
+<h4 data-number="11.11.2.5" class="anchored" data-anchor-id="shapley-values-1"><span class="header-section-number">11.11.2.5</span> Shapley values</h4>
 <ul>
 <li><p>I think I just need a deep dive into shapely values</p></li>
 <li><p>What are shapley values and how do we interpret them?</p></li>
@@ -2201,8 +2174,8 @@ Features that have big absolute Shapley values on average across observation are
 <li><p>Since Shapley values average across all possible coalitions, do they implicitly take into account interactions?</p></li>
 </ul>
 </section>
-<section id="interations-and-h-statistic" class="level4" data-number="11.12.2.6">
-<h4 data-number="11.12.2.6" class="anchored" data-anchor-id="interations-and-h-statistic"><span class="header-section-number">11.12.2.6</span> Interations and H-Statistic</h4>
+<section id="interations-and-h-statistic" class="level4" data-number="11.11.2.6">
+<h4 data-number="11.11.2.6" class="anchored" data-anchor-id="interations-and-h-statistic"><span class="header-section-number">11.11.2.6</span> Interations and H-Statistic</h4>
 <ul>
 <li><p>The IML book says “The H-statistic has a meaningful interpretation: The interaction is defined as the share of variance that is explained by the interaction.” But one thing I’m confused about: what variance are we talking about here (i.e., the share of variance in what)?</p></li>
 <li><p>In particular, I’m confused about how to interpret the H-statistic in the context of looking at all 2-way interactions with a specific feature, since sometimes those interaction strengths with that feature seem to sum to more than the overall interaction strength for that feature (e.g., looking at figures 8.20 and 8.21 in the IML book), and I don’t know how that would be.</p></li>

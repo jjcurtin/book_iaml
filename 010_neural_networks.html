@@ -373,7 +373,16 @@ window.Quarto = {
   </ul></li>
   <li><a href="#using-resampling-to-select-best-model-configuration" id="toc-using-resampling-to-select-best-model-configuration" class="nav-link" data-scroll-target="#using-resampling-to-select-best-model-configuration"><span class="header-section-number">10.7</span> Using Resampling to Select Best Model Configuration</a></li>
   <li><a href="#other-details" id="toc-other-details" class="nav-link" data-scroll-target="#other-details"><span class="header-section-number">10.8</span> Other Details</a></li>
-  <li><a href="#discussion-notes" id="toc-discussion-notes" class="nav-link" data-scroll-target="#discussion-notes"><span class="header-section-number">10.9</span> Discussion Notes</a></li>
+  <li><a href="#discussion-notes" id="toc-discussion-notes" class="nav-link" data-scroll-target="#discussion-notes"><span class="header-section-number">10.9</span> Discussion Notes</a>
+  <ul class="collapse">
+  <li><a href="#announcements" id="toc-announcements" class="nav-link" data-scroll-target="#announcements"><span class="header-section-number">10.9.1</span> Announcements</a></li>
+  <li><a href="#keras-vs-nnet" id="toc-keras-vs-nnet" class="nav-link" data-scroll-target="#keras-vs-nnet"><span class="header-section-number">10.9.2</span> keras vs nnet</a></li>
+  <li><a href="#overview" id="toc-overview" class="nav-link" data-scroll-target="#overview"><span class="header-section-number">10.9.3</span> Overview</a></li>
+  <li><a href="#activation-functions" id="toc-activation-functions" class="nav-link" data-scroll-target="#activation-functions"><span class="header-section-number">10.9.4</span> Activation functions</a></li>
+  <li><a href="#addressing-overfitting" id="toc-addressing-overfitting" class="nav-link" data-scroll-target="#addressing-overfitting"><span class="header-section-number">10.9.5</span> Addressing overfitting</a></li>
+  <li><a href="#autoencoders" id="toc-autoencoders" class="nav-link" data-scroll-target="#autoencoders"><span class="header-section-number">10.9.6</span> Autoencoders</a></li>
+  <li><a href="#comparison-of-statistical-algorithms" id="toc-comparison-of-statistical-algorithms" class="nav-link" data-scroll-target="#comparison-of-statistical-algorithms"><span class="header-section-number">10.9.7</span> Comparison of statistical algorithms</a></li>
+  </ul></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/jjcurtin/book_iaml/edit/main/010_neural_networks.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
@@ -452,7 +461,7 @@ window.Quarto = {
 <ul>
 <li>wine quality datasets: <a href="application_assignments/unit_10/wine_quality_trn.csv">training</a>; <a href="application_assignments/unit_10/wine_quality_test.csv">test</a></li>
 <li><a href="https://raw.githubusercontent.com/jjcurtin/book_iaml/main/application_assignments/unit_10/hw_unit_10_neural_nets.qmd">qmd shell</a></li>
-<li><a href="">solution</a></li>
+<li><a href="https://dionysus.psych.wisc.edu/iaml/key_unit_10_neural_nets.html">solution</a></li>
 </ul>
 <p>Post questions to application-assignments Slack channel</p>
 <p>Submit the application assignment <a href="https://canvas.wisc.edu/courses/395546/assignments/2187685">here</a> and complete the <a href="https://canvas.wisc.edu/courses/395546/quizzes/514045">unit quiz</a> by 8 pm on Wednesday, April 3rd</p>
@@ -919,10 +928,10 @@ It’s not that great (<span class="red">What would you expect by chance?</span>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy_vec</span>(feat_test<span class="sc">$</span>y, <span class="fu">predict</span>(fit_1, feat_test)<span class="sc">$</span>.pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>313/313 - 0s - 442ms/epoch - 1ms/step</code></pre>
+<pre><code>313/313 - 1s - 529ms/epoch - 2ms/step</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.207</code></pre>
+<pre><code>[1] 0.2063</code></pre>
 </div>
 </div>
 <hr>
@@ -1037,10 +1046,10 @@ Question: What went wrong and what should we do?
 <div class="cell">
 <div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy_vec</span>(feat_test<span class="sc">$</span>y, <span class="fu">predict</span>(fit_2, feat_test)<span class="sc">$</span>.pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>313/313 - 0s - 401ms/epoch - 1ms/step</code></pre>
+<pre><code>313/313 - 1s - 513ms/epoch - 2ms/step</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.496</code></pre>
+<pre><code>[1] 0.4958</code></pre>
 </div>
 </div>
 <hr>
@@ -1070,10 +1079,10 @@ Question: What went wrong and what should we do?
 <div class="cell">
 <div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy_vec</span>(feat_test<span class="sc">$</span>y, <span class="fu">predict</span>(fit_5units, feat_test)<span class="sc">$</span>.pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>313/313 - 0s - 412ms/epoch - 1ms/step</code></pre>
+<pre><code>313/313 - 1s - 554ms/epoch - 2ms/step</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.9397</code></pre>
+<pre><code>[1] 0.9386</code></pre>
 </div>
 </div>
 <hr>
@@ -1088,10 +1097,10 @@ Question: What went wrong and what should we do?
 <div class="cell">
 <div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy_vec</span>(feat_test<span class="sc">$</span>y, <span class="fu">predict</span>(fit_relu, feat_test)<span class="sc">$</span>.pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>313/313 - 0s - 408ms/epoch - 1ms/step</code></pre>
+<pre><code>313/313 - 0s - 414ms/epoch - 1ms/step</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.9651</code></pre>
+<pre><code>[1] 0.9647</code></pre>
 </div>
 </div>
 <hr>
@@ -1160,10 +1169,10 @@ ________________________________________________________________________________
 <div class="cell">
 <div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy_vec</span>(feat_test<span class="sc">$</span>y, <span class="fu">predict</span>(fit_penalty, feat_test)<span class="sc">$</span>.pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>313/313 - 0s - 405ms/epoch - 1ms/step</code></pre>
+<pre><code>313/313 - 0s - 355ms/epoch - 1ms/step</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.965</code></pre>
+<pre><code>[1] 0.9661</code></pre>
 </div>
 </div>
 <hr>
@@ -1207,10 +1216,10 @@ In tidymodels, you can set or tune the amount of dropout via the <code>dropout</
 <div class="cell">
 <div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy_vec</span>(feat_test<span class="sc">$</span>y, <span class="fu">predict</span>(fit_dropout, feat_test)<span class="sc">$</span>.pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>313/313 - 0s - 432ms/epoch - 1ms/step</code></pre>
+<pre><code>313/313 - 1s - 515ms/epoch - 2ms/step</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.9665</code></pre>
+<pre><code>[1] 0.9653</code></pre>
 </div>
 </div>
 <hr>
@@ -1304,10 +1313,10 @@ We can instead set the number of epochs to be high but use an early stopping cal
 <div class="cell">
 <div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy_vec</span>(feat_test<span class="sc">$</span>y, <span class="fu">predict</span>(fit_early, feat_test)<span class="sc">$</span>.pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>313/313 - 0s - 410ms/epoch - 1ms/step</code></pre>
+<pre><code>313/313 - 0s - 430ms/epoch - 1ms/step</code></pre>
 </div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.9649</code></pre>
+<pre><code>[1] 0.9642</code></pre>
 </div>
 </div>
 <hr>
@@ -1354,45 +1363,41 @@ And you can see more info about <code>callback_early_stopping()</code> <a href="
 <span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>splits_validation <span class="ot">&lt;-</span></span>
 <span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a>  data_trn <span class="sc">|&gt;</span> </span>
 <span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">validation_split</span>(<span class="at">prop =</span> <span class="dv">5</span><span class="sc">/</span><span class="dv">6</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: `validation_split()` was deprecated in rsample 1.2.0.
-ℹ Please use `initial_validation_split()` instead.</code></pre>
-</div>
 </div>
 <hr>
 <ul>
 <li>Set up grid of hyperparameter values</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>grid_keras <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(<span class="at">hidden_units =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>, <span class="dv">50</span>, <span class="dv">100</span>), </span>
-<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>                          <span class="at">penalty =</span> <span class="fu">c</span>(.<span class="dv">00001</span>, .<span class="dv">0001</span>, .<span class="dv">01</span>, .<span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>grid_keras <span class="ot">&lt;-</span> <span class="fu">expand_grid</span>(<span class="at">hidden_units =</span> <span class="fu">c</span>(<span class="dv">5</span>, <span class="dv">10</span>, <span class="dv">20</span>, <span class="dv">30</span>, <span class="dv">50</span>, <span class="dv">100</span>), </span>
+<span id="cb76-2"><a href="#cb76-2" aria-hidden="true" tabindex="-1"></a>                          <span class="at">penalty =</span> <span class="fu">c</span>(.<span class="dv">00001</span>, .<span class="dv">0001</span>, .<span class="dv">01</span>, .<span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <ul>
 <li>Use <code>tune_grid()</code> to fit models in training and predict into validation set for each combination of hyperparameter values</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>fits_nn <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
-<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
-<span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mlp</span>(<span class="at">hidden_units =</span> <span class="fu">tune</span>(), <span class="at">penalty =</span> <span class="fu">tune</span>(), <span class="at">activation =</span> <span class="st">"relu"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb78-4"><a href="#cb78-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_mode</span>(<span class="st">"classification"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb78-5"><a href="#cb78-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># setting to verbose = 1 to track progress.  Training error not that useful</span></span>
-<span id="cb78-6"><a href="#cb78-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_engine</span>(<span class="st">"keras"</span>, <span class="at">verbose =</span> <span class="dv">1</span>, <span class="at">seeds =</span> fit_seeds) <span class="sc">|&gt;</span>  </span>
-<span id="cb78-7"><a href="#cb78-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tune_grid</span>(<span class="at">preprocessor =</span> rec_scaled, </span>
-<span id="cb78-8"><a href="#cb78-8" aria-hidden="true" tabindex="-1"></a>                  <span class="at">grid =</span> grid_keras,</span>
-<span id="cb78-9"><a href="#cb78-9" aria-hidden="true" tabindex="-1"></a>                  <span class="at">resamples =</span> splits_validation,</span>
-<span id="cb78-10"><a href="#cb78-10" aria-hidden="true" tabindex="-1"></a>                  <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span>
-<span id="cb78-11"><a href="#cb78-11" aria-hidden="true" tabindex="-1"></a>  },</span>
-<span id="cb78-12"><a href="#cb78-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting,</span>
-<span id="cb78-13"><a href="#cb78-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/010/"</span>,</span>
-<span id="cb78-14"><a href="#cb78-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_nn"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>fits_nn <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
+<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
+<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mlp</span>(<span class="at">hidden_units =</span> <span class="fu">tune</span>(), <span class="at">penalty =</span> <span class="fu">tune</span>(), <span class="at">activation =</span> <span class="st">"relu"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_mode</span>(<span class="st">"classification"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb77-5"><a href="#cb77-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># setting to verbose = 1 to track progress.  Training error not that useful</span></span>
+<span id="cb77-6"><a href="#cb77-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_engine</span>(<span class="st">"keras"</span>, <span class="at">verbose =</span> <span class="dv">1</span>, <span class="at">seeds =</span> fit_seeds) <span class="sc">|&gt;</span>  </span>
+<span id="cb77-7"><a href="#cb77-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tune_grid</span>(<span class="at">preprocessor =</span> rec_scaled, </span>
+<span id="cb77-8"><a href="#cb77-8" aria-hidden="true" tabindex="-1"></a>                  <span class="at">grid =</span> grid_keras,</span>
+<span id="cb77-9"><a href="#cb77-9" aria-hidden="true" tabindex="-1"></a>                  <span class="at">resamples =</span> splits_validation,</span>
+<span id="cb77-10"><a href="#cb77-10" aria-hidden="true" tabindex="-1"></a>                  <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span>
+<span id="cb77-11"><a href="#cb77-11" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb77-12"><a href="#cb77-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting,</span>
+<span id="cb77-13"><a href="#cb77-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/010/"</span>,</span>
+<span id="cb77-14"><a href="#cb77-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_nn"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <ul>
 <li>Find model configuration with best performance in the held-out validation set</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_best</span>(fits_nn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="fu">show_best</span>(fits_nn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 5 × 8
   hidden_units penalty .metric  .estimator  mean     n std_err
@@ -1417,10 +1422,10 @@ And you can see more info about <code>callback_early_stopping()</code> <a href="
 <h2 data-number="10.8" class="anchored" data-anchor-id="other-details"><span class="header-section-number">10.8</span> Other Details</h2>
 <p>We can get a better sense of how tidymodels is interacting with Keras by looking at the function that is called</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mlp</span>(<span class="at">hidden_units =</span> <span class="dv">30</span>, <span class="at">activation =</span> <span class="st">"relu"</span>, <span class="at">dropout =</span> .<span class="dv">1</span>) <span class="sc">|&gt;</span></span>
-<span id="cb81-2"><a href="#cb81-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"classification"</span>) <span class="sc">|&gt;</span>  </span>
-<span id="cb81-3"><a href="#cb81-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"keras"</span>, <span class="at">verbose =</span> <span class="dv">0</span>, <span class="at">seeds =</span> fit_seeds) <span class="sc">|&gt;</span> </span>
-<span id="cb81-4"><a href="#cb81-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">translate</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a><span class="fu">mlp</span>(<span class="at">hidden_units =</span> <span class="dv">30</span>, <span class="at">activation =</span> <span class="st">"relu"</span>, <span class="at">dropout =</span> .<span class="dv">1</span>) <span class="sc">|&gt;</span></span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_mode</span>(<span class="st">"classification"</span>) <span class="sc">|&gt;</span>  </span>
+<span id="cb80-3"><a href="#cb80-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"keras"</span>, <span class="at">verbose =</span> <span class="dv">0</span>, <span class="at">seeds =</span> fit_seeds) <span class="sc">|&gt;</span> </span>
+<span id="cb80-4"><a href="#cb80-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">translate</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Single Layer Neural Network Model Specification (classification)
 
@@ -1443,14 +1448,12 @@ parsnip::keras_mlp(x = missing_arg(), y = missing_arg(), hidden_units = 30,
 <hr>
 <p><code>keras_mlp()</code> is a wrapper around the calls to Keras. Lets see what it does</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a>keras_mlp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a>keras_mlp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>function (x, y, hidden_units = 5, penalty = 0, dropout = 0, epochs = 20, 
     activation = "softmax", seeds = sample.int(10^5, size = 3), 
     ...) 
 {
-    act_funs &lt;- c("linear", "softmax", "relu", "elu")
-    rlang::arg_match(activation, act_funs, )
     if (penalty &gt; 0 &amp; dropout &gt; 0) {
         rlang::abort("Please use either dropoput or weight decay.", 
             call. = FALSE)
@@ -1520,7 +1523,7 @@ parsnip::keras_mlp(x = missing_arg(), y = missing_arg(), hidden_units = 30,
     model$y_names &lt;- colnames(y)
     model
 }
-&lt;bytecode: 0x5bc53877a4b8&gt;
+&lt;bytecode: 0x58b8ad98f570&gt;
 &lt;environment: namespace:parsnip&gt;</code></pre>
 </div>
 </div>
@@ -1551,48 +1554,82 @@ parsnip::keras_mlp(x = missing_arg(), y = missing_arg(), hidden_units = 30,
 </section>
 <section id="discussion-notes" class="level2" data-number="10.9">
 <h2 data-number="10.9" class="anchored" data-anchor-id="discussion-notes"><span class="header-section-number">10.9</span> Discussion Notes</h2>
-<ol start="0" type="1">
-<li>Keras and tidymodels</li>
-</ol>
+<section id="announcements" class="level3" data-number="10.9.1">
+<h3 data-number="10.9.1" class="anchored" data-anchor-id="announcements"><span class="header-section-number">10.9.1</span> Announcements</h3>
 <ul>
-<li>power/flexibility vs.&nbsp;simplicity</li>
+<li>Readings for unit 11 ready</li>
+<li>Videos/slides will be delayed a bit (complete by early weekend)</li>
+</ul>
+</section>
+<section id="keras-vs-nnet" class="level3" data-number="10.9.2">
+<h3 data-number="10.9.2" class="anchored" data-anchor-id="keras-vs-nnet"><span class="header-section-number">10.9.2</span> keras vs nnet</h3>
+<ul>
+<li>power/flexibility vs.&nbsp;simplicity (but in tidymodels)</li>
 <li><code>nnet</code> package</li>
 </ul>
-<ol type="1">
-<li>Discuss conceptual questions about neural networks</li>
-</ol>
+</section>
+<section id="overview" class="level3" data-number="10.9.3">
+<h3 data-number="10.9.3" class="anchored" data-anchor-id="overview"><span class="header-section-number">10.9.3</span> Overview</h3>
 <ul>
-<li>The MLP (and deeper learning)</li>
-<li>Compare algorithms
+<li>layers</li>
+<li>units</li>
+<li>weights, biases</li>
+<li>activation functions</li>
+<li>gradient descent</li>
+<li>back propagation of errors</li>
+<li>epochs</li>
+<li>stochastic gradient descent (and Adam)</li>
+<li>batches</li>
+<li>deep learning</li>
+</ul>
+</section>
+<section id="activation-functions" class="level3" data-number="10.9.4">
+<h3 data-number="10.9.4" class="anchored" data-anchor-id="activation-functions"><span class="header-section-number">10.9.4</span> Activation functions</h3>
 <ul>
-<li>native feature engineering for very complex non-linear, non-linear interactions, combinations, etc</li>
-<li>better with more units and more layers</li>
-</ul></li>
-<li>Handling overfitting
+<li>perceptron</li>
+<li>sigmoid</li>
+<li>softmax</li>
+<li>relu</li>
+</ul>
+</section>
+<section id="addressing-overfitting" class="level3" data-number="10.9.5">
+<h3 data-number="10.9.5" class="anchored" data-anchor-id="addressing-overfitting"><span class="header-section-number">10.9.5</span> Addressing overfitting</h3>
 <ul>
-<li>L2</li>
-<li>dropout</li>
-<li>number of epochs</li>
+<li>L2 regularization</li>
+<li>Dropout</li>
+</ul>
+</section>
+<section id="autoencoders" class="level3" data-number="10.9.6">
+<h3 data-number="10.9.6" class="anchored" data-anchor-id="autoencoders"><span class="header-section-number">10.9.6</span> Autoencoders</h3>
+<ul>
+<li>Overview/example</li>
+<li>Costs/benefits vs.&nbsp;PCA
+<ul>
+<li>autoencoders accommodate non-linearity</li>
+<li>lots of variants of autoencoders to address different types of data (images, time-series)</li>
+<li>autoencoders are very flexible (lots of parameters) - overfitting</li>
+<li>autoencoders are computationally costly</li>
+<li>autoencoders require expertise to set up and train</li>
+<li>PCA <strong>may</strong> be more interpretable (linear combo of features)</li>
 </ul></li>
 </ul>
-<ol start="2" type="1">
-<li>Continued meta-discussion</li>
-</ol>
+</section>
+<section id="comparison-of-statistical-algorithms" class="level3" data-number="10.9.7">
+<h3 data-number="10.9.7" class="anchored" data-anchor-id="comparison-of-statistical-algorithms"><span class="header-section-number">10.9.7</span> Comparison of statistical algorithms</h3>
 <ul>
-<li><p>Why/When do we estimate model performance?</p>
-<ul>
-<li><p>What approaches have we discussed to estimate model performance</p></li>
-<li><p>What types of problems can we encounter when we estimate performance and what factors influence the degree to which these problems will manifest</p></li>
-<li><p>What are the strengths and weaknesses of each of these model performance estimation approaches (e.g., how much do they suffer from the problems you described)</p></li>
-</ul></li>
-<li><p>What inferential tests have we discussed [We will discuss this point only if time permits]</p>
-<ul>
-<li>When would we use them?</li>
-<li>How do we do them?</li>
-</ul></li>
+<li>linear regression (linear model)</li>
+<li>logistic regression (from generalized linear model)</li>
+<li>glmnet (LASSO, Ridge)</li>
+<li>KNN</li>
+<li>LDA, QDA</li>
+<li>decision trees</li>
+<li>bagged decision trees</li>
+<li>random forest</li>
+<li>MLPs (neural networks)</li>
 </ul>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->
