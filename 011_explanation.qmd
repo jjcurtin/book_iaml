@@ -941,10 +941,11 @@ y <- feat_full |>
 
 -----
 
-We also a specific predictor function that will work with the DALEX package
+We also need a specific predictor function that will work with the DALEX package
 
 We will write a custom function that "wraps" around our tidymodels `predict()` function
 
+- It needs two parameters named `model` and `newdata` and it needs to return a single column of probabilites for classification problems
 ```{r}
 predict_wrapper <- function(model, newdata) {
   predict(model, newdata, type = "prob") |> 
@@ -953,20 +954,34 @@ predict_wrapper <- function(model, newdata) {
 ```
 -----
 
-First, we will need an `explainer` object based on our model and data.  The `explain_tidymodels()` function in DALEXtra will create this object for us.
-
-
+We will also need an `explainer` object based on our model and data.  The `explain_tidymodels()` function in DALEXtra will create this object for us.
 
 ```{r}
-explain_full <- explain_tidymodels(fit_full, 
-                                   data = x,
-                                   y = y,
-                                   predict_function = predict_wrapper,
-                                   predict_function_target_column = ".pred_yes")
+explain_full <- explain_tidymodels(fit_full, # our model object 
+                                   data = x, # features without outcome
+                                   y = y, # outcome
+                                   predict_function = predict_wrapper, # our predictor function
+                                   predict_function_target_column = ".pred_yes") # the name of the column for predictions
 ```
 
+-----
 
+Finally, we need to define a custom function for our performance metric
+
+- It needs to have two parameters: `observed` and `predicted`
+- We can create a wrapper function around `accuracy_vec()` to fit these needs
+- For accuracy, we need to transform the predicted probabilites from our prediction function to class predictions
+
+```{r}
+accuracy_wrapper <- function(observed, predicted) {
+  predicted <- fct(if_else(predicted > .5, "yes", "no"), levels  = c("yes", "no"))
+  accuracy_vec(observed, predicted)
+}
+```
+\
+\
 We are now ready to calculate feature importance metrics
+
 
 -----
 
@@ -978,50 +993,112 @@ The first model agnostic approach to calculating feature important is called Per
 This approach is very straight forward.  This approach says - if we want to calculate the importance of any specific feature, we can compare our performance metric using the original features to the performance metric we get if we permute (i.e., shuffle) the values for the feature we are evaluating.  
 \
 \
-By randomly shuffling the values for the feature, we break the relationship between that feature and the outcome so it no longer contributes to the predictions.   If performance doesn't change much, then that feature is not important.  If performance goes down a lot, the feature is important.  We can see this relative change in performance by calculating the ratio of the permuted performance to the original performance ($\frac{permuted}{original}$) Simple!   
+By randomly shuffling the values for the feature, we break the relationship between that feature and the outcome so it no longer contributes to the predictions.   If performance doesn't change much, then that feature is not important.  If performance goes down a lot, the feature is important.  
+
+- The function can provide `raw` performance (will give us performance for the non-permuted model and then performance for the model with each feature permuted, one at a time) 
+- `difference` performance measure, which is the difference between the permuted model and the non-permuted mode, separately for each feature
+- `ratio` performance measure, which is ($\frac{permuted}{original}$), separately for each feature
 
 -----
 
-We first need to define a custom function for our performance metric
+To calculate accuracy after permuting each feature, we use `model_parts()`.  We pass in 
 
-- It needs to have two parameters: `observed` and `predicted`
-- We can modify `accuracy_vec()` to fit these needs
-
+- our explainer object
+- set the type (`raw` in this example)
+- indicate our custom accuracy function
+- set B to indicate number of permutations to perform
 ```{r}
-custom_accuracy <- function(observed, predicted) {
-  predicted <- fct(if_else(predicted > .5, "yes", "no"), levels  = c("yes", "no"))
-  accuracy_vec(observed, predicted)
-}
+set.seed(123456)
+imp_permute <- model_parts(explain_full, 
+                               type = "raw", 
+                               loss_function = accuracy_wrapper,
+                               B = 100)
 ```
-
-```{r}
-imp_permute_raw <- model_parts(explain_full, type = "raw", loss_function = custom_accuracy)
-```
-
 
 -----
 
-We can use the built in plot function to display the prediction accuracy (with a 95% confidence interval) when each feature is permuted.  We see that when `ca` is permuted, classification error increases by a factor of approximately 1.3.
+Lets look at what this function returns
 
-The next most important feature is from our exercise test: `exer_ang_yes`
+- the first row contains the accuracy for the full model (with no features permuted)
+- Each subsequent row shows the accuracy of the model when that specific feature is permuted
 
 ```{r}
-imp_permute |> plot
+imp_permute
 ```
 
-**PROGRAMMING NOTE**:  If you wanted to have more control over the plot, you can pipe the results directly into ggplot using `imp_permuate$results |> `
+-----
 
+We can use the built in plot function from DALEX to display this
+
+```{r}
+plot(imp_permute)
+```
+
+-----
+
+Or we can plot it directly.  Here is an example from the [tidymodels folks](https://www.tmwr.org/explain)    
+```{r}
+full_model <- imp_permute |>  
+    filter(variable == "_full_model_")
+  
+imp_permute |> 
+  filter(variable != "_full_model_",
+         variable != "_baseline_") |> 
+  mutate(variable = fct_reorder(variable, dropout_loss)) |> 
+  ggplot(aes(dropout_loss, variable)) +
+  geom_vline(data = full_model, aes(xintercept = dropout_loss),
+             linewidth = 1.4, lty = 2, alpha = 0.7) +
+  geom_boxplot(fill = "#91CBD765", alpha = 0.4) +
+  theme(legend.position = "none") +
+  labs(x = "accuracy", 
+       y = NULL,  fill = NULL,  color = NULL)
+```
+
+-----
+
+We can also permute a set of features to quantify the contribution of the full set
+\
+\
+This is what we would want for our example, were we want to know the contribution of the four features that represent our exercise test.
+\
+\
+To do this, we pass in a list of vectors of the groups.  Here we provide just one group that we name `exer_test`
+```{r}
+set.seed(123456)
+imp_permute_group <- model_parts(explain_full, 
+                               type = "raw", 
+                               loss_function = accuracy_wrapper,
+                               B = 100,
+                               variable_groups = list(exer_test = c("exer_ang_yes",
+                                                                    "exer_max_hr",
+                                                        "exer_st_depress", 
+                                                        "exer_st_slope_downslope")))
+```
+
+-----
+
+The results show that permuting these four features as a set drops accuracy from 0.838 to 0.738
+```{r}
+imp_permute_group
+```
+
+-----
 
 ### Shapley Values
 
 Shapley values provide insight on the importance of any feature to the prediction for a single observation - often called **local importance** (vs. global importance as per the permutation feature importance measure above).
-
+\
+\
 Shapley values can also be used to index global importance by averaging the local shapley values for a feature across all (or a random sample) of the observations.
 
+-----
+
 Shapley values are derived from Coalition Game Theory.  
-
+\
+\
 They provide the average marginal contribution to prediction (for a single observation) of a feature value across all possible coalitions of features (combinations of sets of features from the null set to all other features).
-
+\
+\
 @IML provides a [detailed account](https://christophm.github.io/interpretable-ml-book/shapley.html#shapley) of the theory behind these values and how they are calculated which I will not reproduce here.
 
 -----
@@ -1033,81 +1110,73 @@ Their features values were
 obs_num <- 1
 x1 <- x |> 
   slice(obs_num) |> 
-  glimpse
+  glimpse()
 ```
 
-And we can get Shapley values using `Shapley$new()`
-```{r local_shapley}
-sv <- iml::Shapley$new(predictor, x.interest = x1)
-```
-
-There is a standard plot method but its not pretty and for binary classification, the plot of both levels is redundant
+And we can get Shapley values using `predict_parts()`
 ```{r}
-
-sv |> plot
+sv <- predict_parts(explain_full, 
+                    new_observation = x1,
+                    type = "shap",
+                    B = 25)
 ```
 
-I prefer to take control directly with the raw output and ggplot.  The raw output is in `$results`
+-----
 
+There is a built in plot function for shap values
+\
+\
+For this first observation
+
+- The values for each feature are listed in the left margin
+- Bars to the right (e.g., sex_male) indicate that their feature value increases their probability of disease
+- Bars to the left indicate that their feature value decreases their probability of disease  
 ```{r}
-sv$results |> 
-  head
+plot(sv)
 ```
-
-And here is a start to a nicer plot
-
-- This participant's value for `thal_normal` increases the probability of disease by ~ .05 from the mean predicted disease probability.
-- This participant's value for `thal_reverseabledefect` decreases their probability of disease by ~ .05 from the mean predicted disease probability.
-
-
-```{r}
-sv$results |> 
-  filter(class == "yes") |> 
-  arrange(abs(phi)) |> 
-  mutate(feature = factor(feature),
-         feature = forcats::fct_inorder(feature)) |> 
-  ggplot(aes(x = feature, y = phi)) +
-  geom_col() +
-  coord_flip()
-```
-
 
 -----
 
 We can use these Shapley values for the local importance of the features for each observation to calculate the global importance of these features.  
-
+\
+\
 Features that have big absolute Shapley values on average across observation are more important.   Let's calculate this.
 
 First we need a function to get shapley values for each observation (along with the feature values for a nicer plot)
 
-```{r global_shapley_function}
-
-get_shapley_values <- function(df1, predictor){
-  iml::Shapley$new(predictor, x.interest = df1)$results |>
-    separate_wider_delim(feature.value, delim = "=",
-                         names = c("tmp", "feature_value")) |>
-    dplyr::mutate(feature_value = as.numeric(feature_value)) |>
-    dplyr::select(feature, feature_value, phi)
+```{r}
+get_shaps <- function(df1){
+  predict_parts(explain_full, 
+                new_observation = df1,
+                type = "shap",
+                B = 25) |> 
+    filter(B == 0) |> 
+    select(variable_name, variable_value, contribution) |> 
+    as_tibble()
 }
 ```
 
-And then we can map this function over observations to get the Shapley values for each observation.   
-```{r u9-global_shapley}
-local_shaps <- xfun::cache_rds({
-  
-  x |>
-    dplyr::mutate(id = row_number()) |>
-    nest(.by = id, .key = "dfs") |>   # nest a dataframe for each observation
-    dplyr::mutate(shapleys = purrr::map(dfs, \(df1) get_shapley_values(df1,
-                                                                       predictor))) |>
-    dplyr::select(-dfs) |>
-    unnest(shapleys) 
+-----
 
-},
-rerun = FALSE,
-dir = "cache/",
-file = "u9-global_shapley.rds")
+And then we can map this function over observations to get the Shapley values for each observation
 
+```{r}
+x_tmp = x |> select(1:10)
+local_shaps <- cache_rds(
+  expr = {
+    t <- x_tmp |>
+      mutate(id = row_number()) |> 
+      nest(.by = id, .key = "dfs")     # nest a dataframe for each observation
+      mutate(shaps = map(dfs, \(df1) get_shaps(df1))) |> view()
+      select(-dfs) |>
+      unnest(shapleys) 
+  },
+  rerun = rerun_setting,
+  dir = "cache/011",
+  file = "local_shaps")
+```
+
+```{r}
 local_shaps |> head
 ```
 
