@@ -209,14 +209,13 @@ Use the following code to define your predictor function (`predict_wrapper`) and
 ```{r}
 predict_wrapper <- function(model, newdata) {
   predict(model, newdata) |>  
-    select(grade = .pred)
+    pull(.pred)
 }
 
 explain_full <- explain_tidymodels(fit_all_data, 
                                    data = x, 
                                    y = y, 
-                                   predict_function = predict_wrapper,
-                                   predict_function_target_column = "grade")
+                                   predict_function = predict_wrapper)
 ```
 
 ### Calculate Shapely Values for a single participant
