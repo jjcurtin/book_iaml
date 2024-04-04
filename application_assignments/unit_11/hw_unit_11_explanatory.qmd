@@ -22,7 +22,7 @@ To begin, download the following from the course web book (Unit 11):
 
 The data for this week's assignment have information about student performance in math.  
 
-The data will be cleaned using code included for you below, and you don't need to show any modeling EDA to keep the assignment from getting too long. *However, you should still always be checking your data as you progress through the assignment!* We have described the specific steps you'll take to implement the recipes.
+The data will be cleaned using code included for you below, and you don't need to show any modeling EDA to keep the assignment from getting too long. *However, you should still always be checking your data as you progress through the assignment!*
 
 In this assignment, you will practice comparing models to determine the importance of a pair of focal variables. In particular, you will be determining whether parental education level (`mother_educ` and `father_educ`) matter for predicting student performance. You will then use the Bayesian approach to evaluate the effect of that focal variable. 
 
@@ -80,17 +80,13 @@ Follow the instructions below to build two recipes from your training data: one 
 
 ### Recipe 1: Full model
 
-Follow these steps in your recipe. **Use your own judgment about the correct order of steps!** This is an UNORDERED list of the things you should include. 
+Follow these steps in your recipe. **Use your own judgment about the correct order of steps!** This is an UNORDERED list of the things you should include. Feel free to add any additional steps!
 
 * Regress the outcome on all variables
 
 * Create dummy coded features for categorical predictors
 
-* Handle missing data for both categorical and numeric predictors where needed
-
 * Remove near-zero variance features
-
-* Remove the id variable
 
 ```{r}
 rec_full <- 
@@ -98,7 +94,7 @@ rec_full <-
 
 ### Recipe 2: Compact model
 
-Because your recipe for the compact model will only differ from your recipe for the full model by one step (removing your focal variables), you can start with `rec_full`. Then add a step that will remove the focal variables `father_educ` and `mother_educ`.
+Because your recipe for the compact model will only differ from your recipe for the full model by one step (removing your focal variables), you can start with `rec_full`. Then add a step that will remove the *dummy coded* focal variables `father_educ` and `mother_educ`. Remember you can make a feature matrix to see what these dummy coded variables end up being named!
 
 ```{r}
 rec_compact <- 
@@ -106,37 +102,59 @@ rec_compact <-
 
 ## Fit models
 
+### Set up a hyperparemeter tuning grid
+```{r}
+tune_grid <- 
+```
+
+
 ### Fit the full model
 
-Use `rec_full` and `splits` to fit GLMs across folds. Use RMSE as your metric. Save your model fits as `fits_full`. 
+Use `rec_full`, `splits`, and `tune_grid` to fit GLM's across folds.  Use RMSE as your metric. Save your model fits as `fits_full`. 
 ```{r}
 
 ```
 
-Print the mean RMSE across the 30 held-out folds.
+Make sure you considered a good range of hyperparameter values
 ```{r}
 
+```
+
+Select best model configuration
+```{r}
+
+```
+
+Print the mean RMSE of the best model configuration across the 30 held-out folds.
+```{r}
+collect_metrics(fits_full, summarize = TRUE) |> 
+  filter(.config == select_best(fits_full)$.config)
 ```
 
 ### Fit the compact model
 
-Use `rec_compact` and `splits` to fit GLMs across folds. Use RMSE as your metric. Save your model fits as `fits_compact`. 
+Use `rec_compact`, `splits`, and `tune_grid` to fit GLM's across folds. Use RMSE as your metric. Save your model fits as `fits_compact`. 
 ```{r}
 
 ```
 
-Print the mean RMSE across the 30 held-out folds.
+Select best model configuration
 ```{r}
 
 ```
 
+Print the mean RMSE of the best model configuration across the 30 held-out folds.
+```{r}
+collect_metrics(fits_full, summarize = TRUE) |> 
+  filter(.config == select_best(fits_compact)$.config)
+```
 
 ## Model comparison with the Bayesian approach
 You will now compare your models using the Bayesian parameter estimation
 
 ### Gather performance estimates
 
-First, make a dataframe containing the 30 performance estimates from held out folds for your full and compact model
+First, make a dataframe containing the 30 performance estimates from held out folds for your full and compact model. Hint you can use the code abover but change `summarize = TRUE` to `summarize = FALSE`. Filter down so you only have the following variables (`id`, `id2`, `.estimate`). Rename `.estimate` to `full` or `compact` before joining your estimates.
 ```{r}
 
 
@@ -145,7 +163,7 @@ First, make a dataframe containing the 30 performance estimates from held out fo
 
 ### Posterior probabilities
 
-Next, derive the posterior probabilites for the RMSE of each of these two models
+Next, derive the posterior probabilities for the RMSE of each of these two models
 ```{r}
 
 
@@ -159,9 +177,9 @@ Display your posterior probabilities using both a density plot and a histogram. 
 
 ```
 
-### Determine if the full model is more accurate
+### Determine if the full model has better performance
 
-Calculate the probability that the full model is more accurate than the compact model. 
+Calculate the probability that the full model is performing with lower error than the compact model. 
 
 ```{r}
 
@@ -170,12 +188,19 @@ Calculate the probability that the full model is more accurate than the compact 
 
 Type out a summary of what you find that includes:
 
-* Your interpretation of what the mean increase in accuracy and 95% HDI values represent
+* Your interpretation of what the mean increase in RMSE and 95% HDI values represent
 
 * Your conclusion if the full model is meaningfully better than your compact model and why   
 
 *Type your summary here*
 
+### Evaluate best model performance
+
+Finally, get a final performance estimate for your best model using `data_test` 
+
+```{r}
+
+```
 
 
 ## Feature importance
@@ -183,44 +208,62 @@ Type out a summary of what you find that includes:
 You will now look at feature importance in your full model using Shapely Values.
 
 ### Prep data
-Get your data ready for use with the `iml` package. Do the following:
+Get your data ready for use with the `DALEX` package. Do the following:    
 
-* Create a feature matrix of your full model 
+Create a feature matrix of your full model 
 
-* Pull out your raw features and outcome to be utilized in calculating feature importance
-
-* Define a predictor function so we can make predictions from our model using the `iml` package
 ```{r}
 
+```
 
 
+Pull out your raw features and outcome to be utilized in calculating feature importance
+
+```{r}
+
+```
+
+
+Use the following code to define your predictor function (`predict_wrapper`), explainer object (`explain_full`), and RMSE wrapper function (`rmse_wrapper`).
+```{r}
+predict_wrapper <- function(model, newdata) {
+  predict(model, newdata) |>  
+    dplyr::select(grade = .pred)
+}
+
+explain_full <- explain_tidymodels(fit_all_data, 
+                                   data = x, 
+                                   y = y, 
+                                   predict_function = predict_wrapper,
+                                   predict_function_target_column = "grade")
+
+rmse_wrapper <- function(observed, predicted) {
+  rmse_vec(observed, predicted)
+}
 ```
 
 ### Calculate Shapely Values for a single participant
 
 First, we will look at shapely values for a single participant. For this example, lets look at the last participant in our data set. Do the following:
 
-* Print the raw feature values for the last participant. (Be sure to do this in a way that will print your output in your knit document)
+* Print the raw feature values for the last participant. 
 
-* Generate Shapely Values for this participant and output the raw results
+* Generate Shapely Values for this participant (you might consider caching this!)
 
-* Use ggplot to plot the Shapely Values for this participant
+* Use `ggplot()` to plot the Shapely Values for this participant
 
 ```{r}
 
 
 ```
 
-Provide a brief interpretation of what the top shapely value means.    
-
-*Type your response here*
 
 
 ### Calculate mean absolute Shapely Values across all participants
 
-Now we will look at feature importance across all participants. Include the following steps (and make sure each step prints to your knit document):
+Now we will look at feature importance across all participants. Include the following steps:
 
-* Calculate Shapely Values for each observation and glimpse() the resulting tibble
+* Calculate Shapely Values for each observation and `glimpse()` the resulting tibble
 
 * Plot the mean absolute Shapely Values across all participants
 
@@ -229,29 +272,11 @@ Now we will look at feature importance across all participants. Include the foll
 
 ```
 
-Write a brief description of your top take-aways from this plot.    
+Write a brief description of your top takeaways from this plot.    
 
 *Type your response here.*
 
 
-## Interactions
-
-Lastly, you will explore interactions among all features in your full model. 
-
-*Generate a plot (using ggplot) of the total variance across all the (two-way) interactions a feature can have with other features 
-
-* Generate a plot displaying we all specific two-way interactions individually for our target GRE score feature
-
-```{r}
-
-
-
-```
-
-
-Provide a brief summary of what you notice about the plots.
-
-*Type your response here*
 
 
 
