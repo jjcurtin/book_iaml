@@ -981,11 +981,12 @@ We will need to have a df for the features (without the outcome) and a separate 
 x <- feat_full |> select(-disease)
 ```
 
-- For outcome, we need to select it first and then pull the vector out of the dataframe
+- For outcome, we need to select it first, convert to 0/1, and then pull the vector out of the dataframe
 
 ```{r}
 y <- feat_full |> 
-  select(disease) |> 
+  select(disease) |>
+  mutate(disease = if_else(disease == "yes", 1, 0)) |> 
   pull(disease)
 ```
 
@@ -996,10 +997,11 @@ We also need a specific predictor function that will work with the DALEX package
 We will write a custom function that "wraps" around our tidymodels `predict()` function
 
 - It needs two parameters named `model` and `newdata` and it needs to return a single column of probabilites for classification problems
+
 ```{r}
 predict_wrapper <- function(model, newdata) {
   predict(model, newdata, type = "prob") |> 
-    select(.pred_yes)
+    pull(.pred_yes)
 }
 ```
 
@@ -1011,10 +1013,14 @@ We will also need an `explainer` object based on our model and data.  The `expla
 explain_full <- explain_tidymodels(fit_full, # our model object 
                                    data = x, # features without outcome
                                    y = y, # outcome
+<<<<<<< Updated upstream
                                    # our predictor function
                                    predict_function = predict_wrapper, 
                                    # the name of the column for predictions
                                    predict_function_target_column = ".pred_yes") 
+=======
+                                   predict_function = predict_wrapper) # our predictor function
+>>>>>>> Stashed changes
 ```
 
 -----
@@ -1027,6 +1033,8 @@ Finally, we need to define a custom function for our performance metric
 
 ```{r}
 accuracy_wrapper <- function(observed, predicted) {
+  observed <- fct(if_else(observed == 1, "yes", "no"),
+                  levels = c("yes", "no"))
   predicted <- fct(if_else(predicted > .5, "yes", "no"), levels  = c("yes", "no"))
   accuracy_vec(observed, predicted)
 }
@@ -1034,7 +1042,6 @@ accuracy_wrapper <- function(observed, predicted) {
 \
 \
 We are now ready to calculate feature importance metrics
-
 
 -----
 
@@ -1073,7 +1080,8 @@ imp_permute <- model_parts(explain_full,
 Lets look at what this function returns
 
 - the first row contains the accuracy for the full model (with no features permuted)
-- Each subsequent row shows the accuracy of the model when that specific feature is permuted
+- last row is a baseline models (performance with all features permuted)
+- Other row show the accuracy of the model when that specific feature is permuted
 
 ```{r}
 imp_permute
@@ -1194,7 +1202,8 @@ We can use these Shapley values for the local importance of the features for eac
 \
 \
 Features that have big absolute Shapley values on average across observation are more important.   Let's calculate this.
-
+\
+\
 First we need a function to get shapley values for each observation (along with the feature values for a nicer plot)
 
 ```{r}
@@ -1214,23 +1223,25 @@ get_shaps <- function(df1){
 And then we can map this function over observations to get the Shapley values for each observation
 
 ```{r}
-# x_tmp = x |> select(1:10)
-# local_shaps <- cache_rds(
-#   expr = {
-#     t <- x_tmp |>
-#       mutate(id = row_number()) |> 
-#       nest(.by = id, .key = "dfs")     # nest a dataframe for each observation
-#       mutate(shaps = map(dfs, \(df1) get_shaps(df1))) |> view()
-#       select(-dfs) |>
-#       unnest(shapleys) 
-#   },
-#   rerun = rerun_setting,
-#   dir = "cache/011",
-#   file = "local_shaps")
+#| label: calc_global_shaps
+
+local_shaps <- cache_rds(
+  expr = {
+    x |>
+      slice_sample(prop = 1/5) |> # take random sample to reduce computation time
+      mutate(id = row_number()) |>
+      nest(.by = id, .key = "dfs") |>   # nest a dataframe for each observation
+      mutate(shaps = map(dfs, \(df1) get_shaps(df1))) |> 
+      select(-dfs) |>
+      unnest(shaps)
+  },
+  rerun = rerun_setting,
+  dir = "cache/011",
+  file = "local_shaps")
 ```
 
 ```{r}
-# local_shaps |> head
+local_shaps |> head()
 ```
 
 **Programming note**:  This code demonstrates another nice R programming technique using `nest()` and `unnest()` in combination with `map()` and list-columns. For more info, see [this chapter](https://r4ds.had.co.nz/many-models.html) in @RDS and the vignette on nesting (`vignette("nest")`).
@@ -1244,19 +1255,27 @@ Now that we have Shapley values for all observations, we can calculate the mean 
 - The other `exer_` features are not far behind.
 
 ```{r}
-# local_shaps |>
-#   dplyr::mutate(phi = abs(phi)) |>
-#   group_by(feature) |>
-#   dplyr::summarize(mean_shapley = mean(phi)) |>
-#   dplyr::arrange(desc(mean_shapley)) |>
-#   dplyr::mutate(feature = factor(feature),
-#          feature = forcats::fct_reorder(feature, mean_shapley)) |>
-#   ggplot(aes(x = feature, y = mean_shapley)) +
-#   geom_point() +
-#   coord_flip()
+local_shaps |>
+  mutate(contribution = abs(contribution)) |>
+  group_by(variable_name) |>
+  summarize(mean_shap = mean(contribution)) |>
+  arrange(desc(mean_shap)) |>
+  mutate(variable_name = factor(variable_name),
+         variable_name = fct_reorder(variable_name, mean_shap)) |>
+  ggplot(aes(x = variable_name, y = mean_shap)) +
+  geom_point() +
+  coord_flip()
 ```
 
-For a more advanced plot (not displayed here) we could superimpose the individual local Shapley values and color them based on the feature score.   This would allow us to show the direction of the relationship between the Shapley values and feature values.  See FIGURE 9.26 in @IML for an example of this type of plot.
+-----
+
+For a more advanced plot (a sina plot; not displayed here) we could superimpose the individual local Shapley values and color them based on the feature score.   
+\
+\
+This would allow us to show the direction of the relationship between the Shapley values and feature values.  
+\
+\
+See FIGURE 9.26 in @IML for an example of this type of plot.
 
 -----
 
@@ -1270,28 +1289,33 @@ Shapley values are attractive relative to other approaches because
 
 However, they can be VERY time consuming to calculate (particularly if you want to use them for global importance such that you need them for all/many observations).  
 
-There are computational shortcuts available but even those approximately can be very time consuming.
+There are computational shortcuts available but even those can be very time consuming in some instances (though XGBoost has a very fast implementation that we use regularly).
 
 (Note that for decision tree based algorithms SHAP provides a more computationally efficient way to estimate Shapley values - see [section 9.6](https://christophm.github.io/interpretable-ml-book/shap.html) in @IML for more detail.)
 
+-----
+
 ## Visual Approaches to Understand our Models
 
-We can also learn about how our features are used to make predictions in our models using visual approaches.   There are two key plots that we can use:
+We can also learn about how our features are used to make predictions in our models using visual approaches.   
+\
+\
+There are two key plots that we can use:
 
 - Partial Dependence (PD) Plots
 - Accumulated Local Effects (ALE) Plots
-
 
 -----
 
 ### Partial Dependence (PD) Plots
 
 The Partial dependence (PD) plot displays the marginal effect of a target feature or combination of features on the predictions from a model.  
-
+\
+\
 In essence, the prediction for any value of a target feature is the average prediction across cases if we set all cases to have that value for the target feature but their observed values for all other features.
-
+\
+\
 We can use PD plots to understand whether the relationship between a target feature and the outcome is linear, monotonic, or more complex.  It may also help us visualize and understand if interactions between features exist (if we make a PD plot for two target features).  
-
 
 -----
 
@@ -1310,134 +1334,53 @@ However:
 - This plot (but also other plot methods) are limited to 1 - 2 features in combination.
 - It may hide effects when interactions exist
 
+-----
 
 ### Accumulated Local Effects (ALE) Plots
 
 If the features are correlated, the partial dependence plot should not be used because the plots will otherwise be based on combinations of the target feature and other features that may never occur (given the feature correlations).
-
+\
+\
 Molnar describes how this problem of correlated features and unrealistic combinations of features can be solved by M-Plots that plot the average effect of a target feature using the conditional values on other features (i.e., only using realistic values for the other features based on their correlations with the target feature).  Unfortunately, this too is sub-optimal because it will confound the effect of the target feature with the effects of the other features that are correlated with it.
 
-Accumulated Local Effects (ALE) plots also use conditional values of other features to solve the correlated features problem.  However, ALE plots solve the confounding problem by calculating **differences** in predictions associated with changes in the target feature rather than average predictions for each value of that target feature. These differences hold the other features values (mostly) constant to remove their effects.  
+-----
 
+Accumulated Local Effects (ALE) plots also use conditional values of other features to solve the correlated features problem.  However, ALE plots solve the confounding problem by calculating **differences** in predictions associated with changes in the target feature rather than average predictions for each value of that target feature. These differences hold the other features values (mostly) constant to remove their effects.  
+\
+\
 ALE plots are the preferred plot in situations where  you expect your target feature to be correlated with other features (which is likely most situations.)
 
 -----
 
-We will use the `iml`  package that accompanies @IML to make PD and ALE plots.
+We will use the `DALEX` package again to make these PD and ALE plots.
+\
+\
+It will require the explainer object we created earlier for feature importance
+\
+\
+Otherwise, the code is very straight-forward.  Here we get the predicted values for an ALE plot to examine the effect of one of the features from our exercise test (`exer_max_hr`) on disease probabilities. 
 
-The code is very straight-forward.  Here we get the predicted values for an ALE plot to examine the effect of one of the features from our exercise test (`exer_max_hr`) on disease probabilities. 
+If we wanted a PD plot, we could simply substitute `partial` for `accumulated`
 
-If we wanted a PD plot, we could simply substitute `pdp` for `ale`
-
-```{r pdp_plots}
-# ale <- iml::FeatureEffect$new(predictor,
-#                   feature = "exer_max_hr",
-#                   method = "ale",  # or pdp
-#                   grid.size = 30)
+```{r}
+ale <- model_profile(explainer = explain_full,
+                     type = "accumulated",
+                     variables = "exer_max_hr",
+                     N = NULL)  # to use full sample (default is 100)
 ```
 
 -----
 
-There is a default plot function that can be used.  It combines the ale/pd plot with a rug plot to show the distribution of values for the target feature.  However, by default, it displays separate plots for all levels of a categorical outcome.   This makes sense if your categorical outcome has three or more levels but not for a binary outcome
-
+There is a default plot function for these plot object (or you could use the data in the object to make your own ggplot)
+\
+\
+The probability of disease decreases as max hr increases in the exercise test
 ```{r}
-# ale |> plot
+ale |> plot()
 ```
 
 -----
 
-With two levels for the outcome, it is redundant.  In this instance, you can make your own plot.  You might also do this to gain more control over the plot.
-
-We need a dataframe for the raw values of the target feature for the rug plot.  We also need values for y for the rug plot but I dont plan to show them so I set those to constant (0).
-
-```{r}
-# # for the rug
-# feature_values <- x |> dplyr::select(exer_max_hr) |> 
-#   dplyr::mutate(.value = 0) |> 
-#   glimpse()
-# 
-# ale$results |> 
-#   filter(.class == "yes") |> 
-#   ggplot() +
-#   geom_line(mapping = aes(x = exer_max_hr, y = .value)) + 
-#   geom_rug(mapping = aes(x = exer_max_hr, y = .value),
-#            data = feature_values,
-#            sides = "b", position = "jitter", alpha = 0.5) +
-#   scale_y_continuous(limits = c(-.10, .15))
-```
-
-
-## Detecting Interactions
-
-We can explore the magnitude of interactions among our features as well to better understand our model.  
-
-We can estimate the magnitude of the interaction using the H-statistic, developed by [Friedman and Popescu (2008)](https://arxiv.org/abs/0811.1679).
-
-The H-statistic quantifies proportion of total variance in the predictions that is explained by the interactions.
-
-We can calculate that for total variance across all the (two-way) interactions a feature can have with other features or we can look all the specific two-way interactions individually for a target feature.  Lets look at both.
-
-```{r u9-all_interactions}
-# int_all <-xfun::cache_rds({
-#   
-#   iml::Interaction$new(predictor) 
-#   
-# },
-# rerun = FALSE,
-# dir = "cache/",
-# file = "u9-all_interactions")
-```
-
-Here is the default plot for each features total interactions across all other features
-```{r}
-# int_all |>  plot
-```
-
-And a clearer plot
-```{r}
-# int_all$results |> 
-#   dplyr::filter(.class == "yes") |> 
-#   dplyr::arrange(abs(.interaction)) |> 
-#   dplyr::mutate(.feature = factor(.feature),
-#          .feature = forcats::fct_inorder(.feature)) |> 
-#   ggplot() +
-#   geom_col(mapping = aes(x = .feature, y = .interaction))  +
-#   ylab("H-stasitic") +
-#   coord_flip()
-```
-
-And here are all the interactions with the `exer_max_hr` feature. 
-```{r specific_interactions}
-# int_one <- iml::Interaction$new(predictor, feature = "exer_max_hr") 
-```
-
-```{r}
-# int_one$results |>   
-#   dplyr::filter(.class == "yes") |>
-#   dplyr::arrange(abs(.interaction)) |> 
-#   dplyr::mutate(.feature = factor(.feature),
-#          .feature = forcats::fct_inorder(.feature)) |> 
-#   ggplot() +
-#   geom_col(mapping = aes(x = .feature, y = .interaction))  +
-#   ylab("H-stasitic") +
-#   coord_flip()
-```
-
-
-Cleveland plots are sometimes considered easier to view than bar plots and could have been used for many of the above graphs.  Here is an example of a Cleveland plot for the H-statistic
-
-```{r}
-# int_one$results |>   
-#   filter(.class == "yes") |>
-#   dplyr::arrange(abs(.interaction)) |> 
-#   dplyr::mutate(.feature = factor(.feature),
-#          .feature = forcats::fct_inorder(.feature)) |> 
-#   ggplot(mapping = aes(x = .feature, y = .interaction)) +
-#   geom_point(size = 2, color = "red") +
-#   geom_segment(aes(x = .feature, y = .interaction, xend = .feature), yend = 0, colour = "grey50")  +
-#   ylab("H-stasitic") +
-#   coord_flip()
-```
 
 
 ## Summary and Closing Thoughts
