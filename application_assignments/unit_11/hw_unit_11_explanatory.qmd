@@ -20,13 +20,13 @@ To begin, download the following from the course web book (Unit 11):
 
 * `student_perf_cln.csv` (data for this assignment)
 
-The data for this week's assignment have information about student performance in math.  
+The data for this week's assignment have information about students and their final grade performance in a math class.  
 
 The data will be cleaned using code included for you below, and you don't need to show any modeling EDA to keep the assignment from getting too long. *However, you should still always be checking your data as you progress through the assignment!*
 
 In this assignment, you will practice comparing models to determine the importance of a pair of focal variables. In particular, you will be determining whether parental education level (`mother_educ` and `father_educ`) matter for predicting student performance. You will then use the Bayesian approach to evaluate the effect of that focal variable. 
 
-To reduce run time we are not going to do any hyperparameter tuning. We will be using 30 splits (3 repeats of 10 fold cv). Remember that setting up parallel processing and using `cache_rds()` will dramatically reduce your run times.   
+We will be using 30 splits (3 repeats of 10 fold cv) to tune and select the best GLM model configuration for two feature sets: a full model (with all of the predictors) and a compact model (with all predictors except the two focal variables: `mother_educ` and `father_educ`). We will also be introducing a new performance metric: **R-squared**. Yay!    
 
 Let's get started!
 
@@ -35,7 +35,7 @@ Let's get started!
 
 ##  Setup
 
-Set up your notebook in this section. You will want to set your path and initiate parallel processing here!
+Set up your notebook in this section.
 
 ```{r}
 
@@ -45,30 +45,24 @@ Set up your notebook in this section. You will want to set your path and initiat
 
 ## Read in your data
 
-Use this code chunk to read in the `student_perf_cln.csv` data file and class your focal variables. Check data as needed to be sure everything looks good!
-```{r}
-data_all <- read_csv(here::here(path_data, "student_perf_cln.csv"),
-                     col_types = cols()) 
+Read in the `student_perf_cln.csv` data file as `data_all`. Class variables as appropriate.    
 
-focal_levels <- c("none", "primary", "middle", "secondary", "higher")
-data_all <- data_all |> 
-  mutate(across(ends_with("_educ"), ~ factor(.x, levels = 0:4, labels = focal_levels)),
-         across(where(is.character), as_factor)) 
+Note the following levels for your focal variables (`mother_educ` and `father_educ`) are:   
+
+0 - none    
+1 - primary education (4th grade)     
+2 – 5th to 9th grade    
+3 – secondary education   
+4 – higher education   
+
+```{r}
+
 ```
 
 ## Set up splits
 
-### Divide data into train and test
+Split `data_all` into repeated k-fold cross-validation splits using 3 repeats and 10 folds. Save your splits as an object named `splits` 
 
-Hold out 25% of the data as a test set for evaluation (`data_test`). Assign the rest of the data to `data_trn`.
-```{r}
-set.seed(12345)
-
-```
-
-### Make cross-validation splits
-
-Split `data_trn` into repeated k-fold cross-validation splits using 3 repeats and 10 folds. You do not need to set a new seed. Save your splits as an object named `splits`
 ```{r}
 
 
@@ -76,17 +70,11 @@ Split `data_trn` into repeated k-fold cross-validation splits using 3 repeats an
 
 ## Build recipes
 
-Follow the instructions below to build two recipes from your training data: one for a "full" model (contains all predictors), and one for a compact model (contains all predictors except the two focal variables: `mother_educ` and `father_educ`).
+We will be fitting GLM models tuned on `penalty` and `mixture` for two feature sets: one for a "full" model (contains all predictors), and one for a compact model (contains all predictors except the two focal variables: `mother_educ` and `father_educ`). 
 
 ### Recipe 1: Full model
 
-Follow these steps in your recipe. **Use your own judgment about the correct order of steps!** This is an UNORDERED list of the things you should include. Feel free to add any additional steps!
-
-* Regress the outcome on all variables
-
-* Create dummy coded features for categorical predictors
-
-* Remove near-zero variance features
+Create a recipe for setting up features for your full model.
 
 ```{r}
 rec_full <- 
@@ -102,7 +90,7 @@ rec_compact <-
 
 ## Fit models
 
-### Set up a hyperparemeter tuning grid
+### Set up a hyperparameter tuning grid
 ```{r}
 tune_grid <- 
 ```
@@ -110,7 +98,7 @@ tune_grid <-
 
 ### Fit the full model
 
-Use `rec_full`, `splits`, and `tune_grid` to fit GLM's across folds.  Use RMSE as your metric. Save your model fits as `fits_full`. 
+Use `rec_full`, `splits`, and `tune_grid` to fit GLM's across folds.  Use R squared (`rsq`) as your metric. Save your model fits as `fits_full`. 
 ```{r}
 
 ```
@@ -125,7 +113,7 @@ Select best model configuration
 
 ```
 
-Print the mean RMSE of the best model configuration across the 30 held-out folds.
+Print the mean R squared of the best model configuration across the 30 held-out folds.
 ```{r}
 collect_metrics(fits_full, summarize = TRUE) |> 
   filter(.config == select_best(fits_full)$.config)
@@ -133,7 +121,7 @@ collect_metrics(fits_full, summarize = TRUE) |>
 
 ### Fit the compact model
 
-Use `rec_compact`, `splits`, and `tune_grid` to fit GLM's across folds. Use RMSE as your metric. Save your model fits as `fits_compact`. 
+Use `rec_compact`, `splits`, and `tune_grid` to fit GLM's across folds. Use R-squared as your metric. Save your model fits as `fits_compact`. 
 ```{r}
 
 ```
@@ -143,7 +131,7 @@ Select best model configuration
 
 ```
 
-Print the mean RMSE of the best model configuration across the 30 held-out folds.
+Print the mean R squared of the best model configuration across the 30 held-out folds.
 ```{r}
 collect_metrics(fits_full, summarize = TRUE) |> 
   filter(.config == select_best(fits_compact)$.config)
@@ -154,7 +142,7 @@ You will now compare your models using the Bayesian parameter estimation
 
 ### Gather performance estimates
 
-First, make a dataframe containing the 30 performance estimates from held out folds for your full and compact model. Hint you can use the code abover but change `summarize = TRUE` to `summarize = FALSE`. Filter down so you only have the following variables (`id`, `id2`, `.estimate`). Rename `.estimate` to `full` or `compact` before joining your estimates.
+First, make a data frame containing the 30 performance estimates from held out folds for your full and compact model. Hint you can use the code above but change `summarize = TRUE` to `summarize = FALSE`. Filter down so you only have the following variables (`id`, `id2`, `.estimate`). Rename `.estimate` to `full` or `compact` before joining your estimates.
 ```{r}
 
 
@@ -163,7 +151,7 @@ First, make a dataframe containing the 30 performance estimates from held out fo
 
 ### Posterior probabilities
 
-Next, derive the posterior probabilities for the RMSE of each of these two models
+Next, derive the posterior probabilities for R squared of each of these two models
 ```{r}
 
 
@@ -179,7 +167,7 @@ Display your posterior probabilities using both a density plot and a histogram. 
 
 ### Determine if the full model has better performance
 
-Calculate the probability that the full model is performing with lower error than the compact model. 
+Calculate the probability that the full model is performing better than the compact model. 
 
 ```{r}
 
@@ -188,19 +176,12 @@ Calculate the probability that the full model is performing with lower error tha
 
 Type out a summary of what you find that includes:
 
-* Your interpretation of what the mean increase in RMSE and 95% HDI values represent
+* Your interpretation of what the mean increase in R  squared and 95% HDI values represent
 
 * Your conclusion if the full model is meaningfully better than your compact model and why   
 
 *Type your summary here*
 
-### Evaluate best model performance
-
-Finally, get a final performance estimate for your best model using `data_test` 
-
-```{r}
-
-```
 
 
 ## Feature importance
@@ -210,36 +191,31 @@ You will now look at feature importance in your full model using Shapely Values.
 ### Prep data
 Get your data ready for use with the `DALEX` package. Do the following:    
 
-Create a feature matrix of your full model 
+Create a feature matrix from the whole data set
 
 ```{r}
 
 ```
 
 
-Pull out your raw features and outcome to be utilized in calculating feature importance
+Pull out your features (`x`) and outcome (`y`) to be used in calculating feature importance
 
 ```{r}
 
 ```
 
 
-Use the following code to define your predictor function (`predict_wrapper`), explainer object (`explain_full`), and RMSE wrapper function (`rmse_wrapper`).
+Use the following code to define your predictor function (`predict_wrapper`) and explainer object (`explain_full`).
 ```{r}
 predict_wrapper <- function(model, newdata) {
   predict(model, newdata) |>  
-    dplyr::select(grade = .pred)
+    pull(.pred)
 }
 
 explain_full <- explain_tidymodels(fit_all_data, 
                                    data = x, 
                                    y = y, 
-                                   predict_function = predict_wrapper,
-                                   predict_function_target_column = "grade")
-
-rmse_wrapper <- function(observed, predicted) {
-  rmse_vec(observed, predicted)
-}
+                                   predict_function = predict_wrapper)
 ```
 
 ### Calculate Shapely Values for a single participant
@@ -261,11 +237,15 @@ First, we will look at shapely values for a single participant. For this example
 
 ### Calculate mean absolute Shapely Values across all participants
 
-Now we will look at feature importance across all participants. Include the following steps:
+Now we will look at feature importance across all participants. Since this process is extremely computationally intensive, we are going to select a random set of participants to demonstrate this on.    
 
-* Calculate Shapely Values for each observation and `glimpse()` the resulting tibble
+Include the following steps:    
 
-* Plot the mean absolute Shapely Values across all participants
+* Use the function `slice_sample()` with `n` set to 20 to get a random subset of features from `x`. Don't forget to set a seed first. Remember you can type `?slice_sample()` into your console to learn more about a function. 
+
+* Calculate Shapely Values for each observation (in your reduced feature set) and `glimpse()` the resulting tibble
+
+* Plot the mean absolute Shapely Values across participants
 
 ```{r}
 

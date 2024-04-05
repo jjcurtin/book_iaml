@@ -9,21 +9,20 @@ editor_options:
 
 ### Learning Objectives
 
-- Use of model comparisons to compare models
-  - Feature ablation
+- Use of feature ablation to statisticall compare model configurations
   - Frequentist correlated t-test using CV
   - Bayesian estimation for model comparisons
     - ROPE
 
-- Variable important metrics for explanation
+- Feature importance metrics for explanation
   - Model specific vs. model agnostic approaches
   - Permutation feature importance
-  - Shapley values
+  - Shapley values (SHAP)
     - local importance
     - global importance
 
 - Visual approaches for explanation
-  - Partial dependence plots
+  - Partial Dependence plots
   - Accumulated Local Effects (ALE) plots
  
 -----
@@ -37,20 +36,23 @@ editor_options:
 - @IML [Chapter 8 - Global Model Agnostic Methods](https://christophm.github.io/interpretable-ml-book/global-methods.html): Read setions 8.1, 8.2, 8.3, and 8.5
 - @IML [Chapter 9 - Local Model-Agnostic Methods](https://christophm.github.io/interpretable-ml-book/shapley.html): Read section 9.5
 
+\
+\
 Post questions to the readings channel in Slack
 
 -----
 
 ## Lecture Videos
 
-- [Introduction to Model Comparisons]()
-- [The Nadeau & Bengio Correlated t-test for Model Comparisons]()
-- [Bayesian Estimation for Model Comparisons]()
+- [Introduction to Model Comparisons](https://mediaspace.wisc.edu/media/iaml+unit+11-1/1_sz7we4by) ~ 23 mins
+- [The Nadeau & Bengio Correlated t-test for Model Comparisons](https://mediaspace.wisc.edu/media/iaml+unit+11-2/1_0iykku1l) ~ 10 mins
+- [Bayesian Estimation for Model Comparisons](https://mediaspace.wisc.edu/media/iaml+unit+11-3/1_mvczl7cn) ~ 28 mins
 - [Permutation Feature Importance]()
 - [SHAP Feature Importance]()
 - [Visual Approaches to Understand Models]()
-- [Exploring Interactions]()
 
+\
+\
 Post questions to the video-lectures channel in Slack
 
 -----
@@ -61,28 +63,33 @@ Post questions to the video-lectures channel in Slack
 - [assignment qmd](homework/unit_9/hw_unit_9_explanatory.Rmd)
 - [solution html]()
 
+\
+\
 Post questions to application-assignments Slack channel
-
-Submit the application assignment [here](https://canvas.wisc.edu/courses/395546/assignments/2187693) and complete the[unit quiz](https://canvas.wisc.edu/courses/395546/quizzes/514055) by 8 pm on Wednesday, April 10th 
+\
+\
+Submit the application assignment [here](https://canvas.wisc.edu/courses/395546/assignments/2187693) and complete the [unit quiz](https://canvas.wisc.edu/courses/395546/quizzes/514055) by 8 pm on Wednesday, April 10th 
 
 -----
 
 ## Model Comparisons & Feature Ablation
 
-Model comparisons can also be used for explanatory goals
+In 610/710, you learned to think about the tests of specific parameter estimates as model comparisons of models that did vs. did not include the specific feature(s) in the model
 \
 \
-In 610/710, you learned to think about the tests of specific parameter estimates as model comparisons of models that did vs. did not include the specific feature(s) in the model.
+Model comparisons can be used in a similar way for explanatory goals with machine learning
 
 -----
 
 This can be done for a single feature (e.g., $x_3$)
+
   - compact model:  $y = b_0 + b_1*x_1 + b_2*x_2$
   - full (augmented) model: $y = b_0 + b_1*x_1 + b_2*x_2 + b_3*x_3$
   - The comparison of these two models is equivalent to the test of $H_0: b_3 = 0$
 \
 \
 This can also involve sets of features if you hypothesis involves the effect of a set of features
+
   - All features that represent a categorical predictor
   - Set of features that represent some broad construct (e.g., psychiatric illness represented by symptoms counts for all of the major psychiatric diagnoses)
 \
@@ -101,12 +108,17 @@ Model comparisons can be useful to determine the best available model configurat
 
 -----
 
-We will learn approaches to statistically compare models
+In this unit, we will learn two approaches to statistically compare models
 
 - Traditional frequentist (NHST) approach using a variant of the t-test to accommodate correlated observations
 - A Bayesian alternative to the t-test
 
-We will compare model configurations formed by feature ablation but nothing would be different if these model configurations different by other characteristics such as statistical algorithm
+\
+\
+We will compare model nested model configurations formed by feature ablation (i.e., full and compact models will differ by features included)
+\
+\
+However, nothing would be different when implementing these comparison methods if these model configurations different by other characteristics such as statistical algorithm
 
 ---
 
@@ -124,10 +136,11 @@ We want to demonstrate the incremental improvement in our screening for heart di
 
 Our exercise test protocol yields four scores ($exer\_*$) that we use in combination to predict the probability of heart disease in the patient
 
-- Max heart hr during the exercise test
-- experience of angina during the test
-- The slope of the peak exercise ST segment (don't ask me what that is!  ;-)
+- Max heart rate during the exercise test
+- Experience of angina during the test
+- Slope of the peak exercise ST segment (don't ask me what that is!  ;-)
 - ST depression induced by exercise test relative to rest
+
 \
 \
 We also have many other demographic and physical characteristics that we want to "control" for when evaluating the performance of our test
@@ -229,7 +242,8 @@ It would be better to actually do some exploration to build the best compact mod
 ----- 
 
 We are using glmnet so we need to find the optimal set of hyperparameter values for this model configuration
-
+\
+\
 Let's select/tune hyperparameters using bootstrap resampling
 
 ```{r}
@@ -279,9 +293,9 @@ fits_full <- cache_rds(
 -----
 
 Let's check how the models perform (bootstrap resampled accuracy) with various values for the hyperparameters
-
+\
+\
 Here is accuracy by log penalty (lambda) and mixture (alpha)
-
 
 ```{r}
 fits_full |> 
@@ -313,6 +327,8 @@ collect_metrics(fits_full) |>
   print(n = 10)
 ```
 
+-----
+
 And here is the best
 ```{r}
 (hp_best_full <- select_best(fits_full, n = 1))
@@ -338,19 +354,16 @@ fit_full <-
 
 -----
 
-We don't care too much about objective performance in our situation.  That is not our question.
+Here are two ways to quantify model performance
 
-- Same sample accuracy is comparable to what you would normally have if you weren't in a machine learning context
-- Bootstrapped accuracy is better because it is prediction in new data vs. same sample
-- K-fold would be less biased than bootstrap if we cared about performance of the overall model
-- Some optimization bias using either k-fold or bootstrapped accuracy to both select hyperparameters AND assess performance of best model
-- If we really cared about overall performance, we should have held back a test set (or done nested CV)
-
------
-
+- How does the optimal model configuration perform in the full dataset
 ```{r}
 accuracy_vec(feat_full$disease, predict(fit_full, feat_full)$.pred_class)
+```
 
+- And how does the optimal model configuration perform in held-out data
+
+```{r}
 collect_metrics(fits_full) |> 
   arrange(desc(mean)) |> 
   print(n = 1)
@@ -358,30 +371,43 @@ collect_metrics(fits_full) |>
 
 -----
 
-Our focal question is NOT how well our full model does.  It is how much do scores from our exercise test improve prediction above baseline (with baseline being all other available characteristics).  
+We don't care too much about objective performance in our situation.  That is not our question.
+
+- Same sample accuracy is comparable to what you would normally have if you weren't in a machine learning context (except that we did use held-out data to determine the optimal hyperparameter values)
+- Bootstrapped accuracy will remove bias due to overfitting the training data from our performance estimate because it is prediction in new data vs. same sample
+- K-fold would be less biased than bootstrap if we cared about performance of the overall model
+- Some optimization bias remains using either k-fold or bootstrapped accuracy to both select hyperparameters AND assess performance of best model
+- If we really cared about overall performance, we should have held back a test set (or done nested CV)
+
+-----
+
+Our focal question is NOT how well our full model does.  
 \
 \
-We need to use **feature ablation** to form a compact/reduced model that does not include the features associated with our exercise test
+Instead, we want to know how much do scores from our exercise test improve prediction above baseline (with baseline being all other available characteristics).  This is a relative comparison, not based on absolute performance.
+\
+\
+To quantify this relative comparison, we need to use **feature ablation** to form a compact/reduced model that does not include the features associated with our exercise test
 
 -----
  
 Here is a recipe to feature engineer features associated with this compact model
 
-- Note: `step_rm(contains("exer_")`
-- All else is the same
+- We can start with the full recipe and add one more step to remove the features we want to evaluate
+- `step_rm(contains("exer_")`
+- All previous recipe steps remain the same
 
 ```{r}
-rec_compact <- recipe(disease ~ ., data = data_all) |> 
-  step_rm(contains("exer_")) |>                    # remove key feature(s)
-  step_impute_median(all_numeric_predictors()) |> 
-  step_impute_mode(all_nominal_predictors()) |>   
-  step_dummy(all_nominal_predictors()) |> 
-  step_normalize(all_predictors())
+rec_compact <- rec_full |> 
+  step_rm(contains("exer_"))
 ```
 
 -----
 
-We need to select/tune hyperparameters for this new model.  It has different complexity that the full model so might need different regularization for optimal performance.
+We need to select/tune hyperparameters for this new model
+\
+\
+It has different complexity than the full model so it might need different (less?) regularization for optimal performance
 
 ```{r}
 fits_compact <- cache_rds(
@@ -397,8 +423,6 @@ fits_compact <- cache_rds(
   rerun = rerun_setting,
   dir = "cache/011/",
   file = "fits_compact")
-
-
 ```
 
 -----
@@ -446,6 +470,8 @@ accuracy_vec(feat_full$disease, predict(fit_full, feat_full)$.pred_class)
 accuracy_vec(feat_compact$disease, predict(fit_compact, feat_compact)$.pred_class)
 ```
 
+-----
+
 Here are accuracies for these two models assessed by bootstrap resampling
 ```{r}
 collect_metrics(fits_full) |> 
@@ -457,14 +483,13 @@ collect_metrics(fits_compact) |>
   slice(1)
 ```
 
-It is less accurate but.....
+-----
+
+The compact model is less accurate but.....
 
 - A simple descriptive comparison is not sufficient to justify the use of a costly test
-
-- We need to be more confident that the test really improves screening in all possible held out samples.
-
+- We need to be more confident that the test really improves screening in all possible held out samples from our dataset
 - And by how much?
-
 - How can we compare these two models?
 
 -----
@@ -472,45 +497,60 @@ It is less accurate but.....
 ## Nadeau and Bengio (2003) Correlated t-test
 
 We have 100 bootstrapped accuracies for each model.
-
+\
+\
 Could we compare these?
 
 - We used the bootstrap but if we wanted a less biased estimate we could (should?) have used k-fold
-  - We could do 10 repeats of 10-fold to still obtain 100 performance estimates for each model configuration
+- We could do 10 repeats of 10-fold to still obtain 100 performance estimates for each model configuration
 
-- We have used the same 100 held-out samples (we used the same splits) so these two sets of accuracies (for each of the two models) should be considered paired/repeated.   
+\
+\
+Either way, we have the same 100 held-out samples (we used the same splits) for both compact and full models so these two sets of accuracies (for each of the two models) should be considered paired/repeated.   
+
   - Not a problem, we could use paired samples t-test
-  - Easiest to thing about this paired test as testing if the differences in accuracy for each of the 100 held out sets == 0.  That removes the lack of independence from using the sample 100 held-out sets twice
-  - BUT these 100 differences are still not independent
-  - Each have been estimated using models that were fit with overlapping observations (the held in sets were fit with many of the same observations for each of the k-1 held in folds)
-  - If we ignore this violation and simply do a paired-samples t-test, we will have inflation of alpha
+  - Easiest to think about this paired test as testing if the differences in accuracy for each of the 100 held out sets == 0.  That removes the lack of independence from using the sample 100 held-out sets twice
+
+\
+\
+BUT these 100 differences are still not independent
+
+- Each have been estimated using models that were fit with overlapping observations (the held in sets were fit with many of the same observations for each of the k-1 held in folds)
+- If we ignore this violation and simply do a paired-samples t-test, we will have inflation of alpha
 
 -----
 
 @Nadeau2003 ([see pdf](pdfs/nadeauC2003.pdf)) and @Bouckaert2003 ([see pdf](pdfs/bouckaertR2003.pdf)) have explored the degree of dependence among performance estimates using resampling.   
-
+\
+\
 This was originally done for repeated random train/test splits (e.g., 90/10 splits) but is now also used when doing repeated k-fold.
-
+\
+\
 The classic paired t-test has the following formula
 
 $t = \frac{\overline{x} - 0}{\sqrt{\hat{\sigma^2}*\frac{1}{n}}}$
-
+\
+\
 The standard error for the difference (denominator of the t-statistic formula) is too small
 
-It is adjusted by $\frac{\rho}{1-\rho}$ where $\rho = \frac{n_{test}}{n_{total}}$ or equivalent $\frac{1}{k}$
+-----
 
-
+Nadeau and Benigo adjusted it by $\frac{\rho}{1-\rho}$ where $\rho = \frac{n_{test}}{n_{total}}$ or equivalent $\frac{1}{k}$
+\
+\
 This adjustment yields:
 
-
 $t = \frac{\overline{x} - 0}{\sqrt{\hat{\sigma^2}*(\frac{1}{n} + \frac{\rho}{1-\rho})}}$
-
 
 -----
 
 Let's perform this correlated t-test to compare our compact and full models
-
-We first need to evaluate both models using 10x 10-fold CV splits.  Important that these are the SAME splits for both model configurations
+\
+\
+We first need to evaluate both models using 10x 10-fold CV splits. 
+\
+\
+Important that these are the SAME splits for both model configurations
 ```{r}
 set.seed(2468)
 splits_cv <-
@@ -520,7 +560,7 @@ splits_cv <-
 
 -----
 
-Here is k-fold accuracy for the full model
+Lets get k-fold accuracy for the full model
 
 - best penalty = `r hp_best_full$penalty`
 - best mixture = `r hp_best_full$mixture`
@@ -539,16 +579,11 @@ cv_full <-
 
 -----
 
-And here is
+Here is
 
 - mean performance over 100 held out folds
 ```{r}
 collect_metrics(cv_full, summarize = TRUE)
-```
-
-- and the first 10 rows from `collect_metrics`
-```{r}
-collect_metrics(cv_full, summarize = FALSE)
 ```
 
 - and here we pull the 100 metrics
@@ -574,10 +609,12 @@ cv_compact <-
 
 -----
 
+Mean performance of compact model
 ```{r}
 collect_metrics(cv_compact, summarize = TRUE)
 ```
 
+and the 100 metrics
 ```{r}
 collect_metrics(cv_compact, summarize = FALSE)$.estimate
 ```
@@ -585,7 +622,7 @@ collect_metrics(cv_compact, summarize = FALSE)$.estimate
 -----
 
 Define a function for Nadeau and Bengio (2003) correlated t-test
-```{r u9-compare-19}
+```{r}
 # included in fun_ml.R
 nb_correlated_t_test <- function(cv_fits_full, cv_fits_compact, k = 10){
 
@@ -608,7 +645,10 @@ nb_correlated_t_test <- function(cv_fits_full, cv_fits_compact, k = 10){
 
 ----- 
 
-Calculate the t-test.  In this instance we likely want a one-tailed test (though of course, that should have been planned in advanced and ideally pre-registered!).   
+Calculate the t-test.  
+\
+\
+In this instance we likely want a one-tailed test (though of course, that should have been planned in advanced and ideally pre-registered!).   
 \
 \
 My function returns a two-tailed p-value so we should cut it in half.
@@ -618,8 +658,9 @@ nb_correlated_t_test(cv_fits_full = cv_full,
                      k = 10)
 ```
 
-The improvement in prediction accuracy associated with the use of our exercise test protocol is significant (one-tailted).
-
+The improvement in prediction accuracy associated with the use of our exercise test protocol is significant (one-tailed).
+\
+\
 These data are unlikely if the full and compact models had the same accuracy.  
 
 -----
@@ -878,9 +919,10 @@ pp |> contrast_models(seed = 4) |> summary(size = 0)
 ## Feature Importance
 
 There as been increasing focus on improving the interpretability of machine learning models that we are using.  There are numerous reasons to want to better understand why our models make the predictions that they do.  
-\
-\
-For our purposes, the growing set of tools to interpret our models can help address our **explanatory questions**.   But they can also help us **find errors** in our models and **detect possible bias** (we will focus explicitly on algorithmic bias in later units)
+
+- The growing set of tools to interpret our models can help address our **explanatory questions**
+- But they can also help us **find errors** in our models
+- And they can **detect possible bias** (we will focus explicitly on algorithmic bias in later units)
 
 -----
 
@@ -890,14 +932,20 @@ Feature importance metrics are an important tool to better understand how our mo
 These metrics help us understand which features in our models contribute most to the predictions that the model makes.  
 \
 \
-For some models, interpretation and identification of important features is easy.  For example, if we standardize the variables in a glm or glmnet model, we can interpret the absolute magnitude of the parameter estimates (i.e., the coefficients) as an index of the global (i.e., across all observations) importance of each feature.  
+For some models, interpretation and identification of important features is easy.  
+\
+\
+For example, if we standardize the features in a glm or glmnet model, we can interpret the absolute magnitude of the parameter estimates (i.e., the coefficients) as an index of the global (i.e., across all observations) importance of each feature.  
 
-- You can use the [vip]() package to extract these importance metrics but you can often just get them directly from the model as well
+- You can use the [vip]() package to extract these **model-specific** feature importance metrics, but you can often just get them directly from the model as well
 - More info on the use of vip package is available [elsewhere](https://cran.r-project.org/web/packages/vip/vignettes/vip.html)
 
 -----
 
-But for other models, we need different approaches.  There are many approaches to quantify the importance of a feature, but we will focus on two that are model agnostic (i.e., can be used across all statistical algorithms)
+But for other models, we need different approaches.  
+\
+\
+There are many **model-agnostic** (i.e., can be used across all statistical algorithms) approaches to quantify the importance of a feature, but we will focus on two:  
 
 - Permutation Feature Importance
 - Shapley Values
@@ -905,7 +953,6 @@ But for other models, we need different approaches.  There are many approaches t
 -----
 
 We follow [recommendations from the tidymodels folks](https://www.tmwr.org/explain) and use the DALEX and DALEXtra packages for model agnostic approaches to feature importance.
-
 
 ```{r}
 library(DALEX, exclude= "explain")
@@ -915,7 +962,8 @@ library(DALEXtra)
 -----
 
 Lets first get some coding issues accomplished before we dig into the details of the two feature importance metrics
-
+\
+\
 To calculate these importance metrics, we will need access to the raw features and outcome. Lets get those again.
 
 ```{r}
@@ -928,6 +976,7 @@ feat_full <-  rec_full_prep |>
 We will need to have a df for the features (without the outcome) and a separate vector for the outcome
 
 - features are easy.  Just select out the outcome
+
 ```{r}
 x <- feat_full |> select(-disease)
 ```
@@ -953,6 +1002,7 @@ predict_wrapper <- function(model, newdata) {
     select(.pred_yes)
 }
 ```
+
 -----
 
 We will also need an `explainer` object based on our model and data.  The `explain_tidymodels()` function in DALEXtra will create this object for us.
@@ -961,8 +1011,10 @@ We will also need an `explainer` object based on our model and data.  The `expla
 explain_full <- explain_tidymodels(fit_full, # our model object 
                                    data = x, # features without outcome
                                    y = y, # outcome
-                                   predict_function = predict_wrapper, # our predictor function
-                                   predict_function_target_column = ".pred_yes") # the name of the column for predictions
+                                   # our predictor function
+                                   predict_function = predict_wrapper, 
+                                   # the name of the column for predictions
+                                   predict_function_target_column = ".pred_yes") 
 ```
 
 -----
@@ -1181,7 +1233,7 @@ And then we can map this function over observations to get the Shapley values fo
 # local_shaps |> head
 ```
 
-**Programming note**:  This code demonstrates another nice R programming technique using `nest()` and `unnest()` in combination with `map()` and list-columns. For more info, see [this chapter](https://r4ds.had.co.nz/many-models.html) in @RDS2023 and the vignette on nesting (`vignette("nest")`).
+**Programming note**:  This code demonstrates another nice R programming technique using `nest()` and `unnest()` in combination with `map()` and list-columns. For more info, see [this chapter](https://r4ds.had.co.nz/many-models.html) in @RDS and the vignette on nesting (`vignette("nest")`).
 
 -----
 
