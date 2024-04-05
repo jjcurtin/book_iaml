@@ -516,7 +516,7 @@ Either way, we have the same 100 held-out samples (we used the same splits) for 
 BUT these 100 differences are still not independent
 
 - Each have been estimated using models that were fit with overlapping observations (the held in sets were fit with many of the same observations for each of the k-1 held in folds)
-  - If we ignore this violation and simply do a paired-samples t-test, we will have inflation of alpha
+- If we ignore this violation and simply do a paired-samples t-test, we will have inflation of alpha
 
 -----
 
@@ -547,7 +547,10 @@ $t = \frac{\overline{x} - 0}{\sqrt{\hat{\sigma^2}*(\frac{1}{n} + \frac{\rho}{1-\
 Let's perform this correlated t-test to compare our compact and full models
 \
 \
-We first need to evaluate both models using 10x 10-fold CV splits.  Important that these are the SAME splits for both model configurations
+We first need to evaluate both models using 10x 10-fold CV splits. 
+\
+\
+Important that these are the SAME splits for both model configurations
 ```{r}
 set.seed(2468)
 splits_cv <-
@@ -557,7 +560,7 @@ splits_cv <-
 
 -----
 
-Here is k-fold accuracy for the full model
+Lets get k-fold accuracy for the full model
 
 - best penalty = `r hp_best_full$penalty`
 - best mixture = `r hp_best_full$mixture`
@@ -576,16 +579,11 @@ cv_full <-
 
 -----
 
-And here is
+Here is
 
 - mean performance over 100 held out folds
 ```{r}
 collect_metrics(cv_full, summarize = TRUE)
-```
-
-- and the first 10 rows from `collect_metrics`
-```{r}
-collect_metrics(cv_full, summarize = FALSE)
 ```
 
 - and here we pull the 100 metrics
