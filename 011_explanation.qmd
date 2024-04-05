@@ -44,9 +44,9 @@ Post questions to the readings channel in Slack
 
 ## Lecture Videos
 
-- [Introduction to Model Comparisons]()
-- [The Nadeau & Bengio Correlated t-test for Model Comparisons]()
-- [Bayesian Estimation for Model Comparisons]()
+- [Introduction to Model Comparisons](https://mediaspace.wisc.edu/media/iaml+unit+11-1/1_sz7we4by) ~ 23 mins
+- [The Nadeau & Bengio Correlated t-test for Model Comparisons](https://mediaspace.wisc.edu/media/iaml+unit+11-2/1_0iykku1l) ~ 10 mins
+- [Bayesian Estimation for Model Comparisons](https://mediaspace.wisc.edu/media/iaml+unit+11-3/1_mvczl7cn) ~ 28 mins
 - [Permutation Feature Importance]()
 - [SHAP Feature Importance]()
 - [Visual Approaches to Understand Models]()
@@ -919,9 +919,10 @@ pp |> contrast_models(seed = 4) |> summary(size = 0)
 ## Feature Importance
 
 There as been increasing focus on improving the interpretability of machine learning models that we are using.  There are numerous reasons to want to better understand why our models make the predictions that they do.  
-\
-\
-For our purposes, the growing set of tools to interpret our models can help address our **explanatory questions**.   But they can also help us **find errors** in our models and **detect possible bias** (we will focus explicitly on algorithmic bias in later units)
+
+- The growing set of tools to interpret our models can help address our **explanatory questions**
+- But they can also help us **find errors** in our models
+- And they can **detect possible bias** (we will focus explicitly on algorithmic bias in later units)
 
 -----
 
@@ -931,14 +932,20 @@ Feature importance metrics are an important tool to better understand how our mo
 These metrics help us understand which features in our models contribute most to the predictions that the model makes.  
 \
 \
-For some models, interpretation and identification of important features is easy.  For example, if we standardize the variables in a glm or glmnet model, we can interpret the absolute magnitude of the parameter estimates (i.e., the coefficients) as an index of the global (i.e., across all observations) importance of each feature.  
+For some models, interpretation and identification of important features is easy.  
+\
+\
+For example, if we standardize the features in a glm or glmnet model, we can interpret the absolute magnitude of the parameter estimates (i.e., the coefficients) as an index of the global (i.e., across all observations) importance of each feature.  
 
-- You can use the [vip]() package to extract these importance metrics but you can often just get them directly from the model as well
+- You can use the [vip]() package to extract these **model-specific** feature importance metrics, but you can often just get them directly from the model as well
 - More info on the use of vip package is available [elsewhere](https://cran.r-project.org/web/packages/vip/vignettes/vip.html)
 
 -----
 
-But for other models, we need different approaches.  There are many approaches to quantify the importance of a feature, but we will focus on two that are model agnostic (i.e., can be used across all statistical algorithms)
+But for other models, we need different approaches.  
+\
+\
+There are many **model-agnostic** (i.e., can be used across all statistical algorithms) approaches to quantify the importance of a feature, but we will focus on two:  
 
 - Permutation Feature Importance
 - Shapley Values
@@ -946,7 +953,6 @@ But for other models, we need different approaches.  There are many approaches t
 -----
 
 We follow [recommendations from the tidymodels folks](https://www.tmwr.org/explain) and use the DALEX and DALEXtra packages for model agnostic approaches to feature importance.
-
 
 ```{r}
 library(DALEX, exclude= "explain")
@@ -956,7 +962,8 @@ library(DALEXtra)
 -----
 
 Lets first get some coding issues accomplished before we dig into the details of the two feature importance metrics
-
+\
+\
 To calculate these importance metrics, we will need access to the raw features and outcome. Lets get those again.
 
 ```{r}
@@ -969,6 +976,7 @@ feat_full <-  rec_full_prep |>
 We will need to have a df for the features (without the outcome) and a separate vector for the outcome
 
 - features are easy.  Just select out the outcome
+
 ```{r}
 x <- feat_full |> select(-disease)
 ```
@@ -994,6 +1002,7 @@ predict_wrapper <- function(model, newdata) {
     select(.pred_yes)
 }
 ```
+
 -----
 
 We will also need an `explainer` object based on our model and data.  The `explain_tidymodels()` function in DALEXtra will create this object for us.
@@ -1002,8 +1011,10 @@ We will also need an `explainer` object based on our model and data.  The `expla
 explain_full <- explain_tidymodels(fit_full, # our model object 
                                    data = x, # features without outcome
                                    y = y, # outcome
-                                   predict_function = predict_wrapper, # our predictor function
-                                   predict_function_target_column = ".pred_yes") # the name of the column for predictions
+                                   # our predictor function
+                                   predict_function = predict_wrapper, 
+                                   # the name of the column for predictions
+                                   predict_function_target_column = ".pred_yes") 
 ```
 
 -----
