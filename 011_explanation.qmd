@@ -502,13 +502,19 @@ We have 100 bootstrapped accuracies for each model.
 Could we compare these?
 
 - We used the bootstrap but if we wanted a less biased estimate we could (should?) have used k-fold
-  - We could do 10 repeats of 10-fold to still obtain 100 performance estimates for each model configuration
+- We could do 10 repeats of 10-fold to still obtain 100 performance estimates for each model configuration
 
-- We have used the same 100 held-out samples (we used the same splits) so these two sets of accuracies (for each of the two models) should be considered paired/repeated.   
+\
+\
+Either way, we have the same 100 held-out samples (we used the same splits) for both compact and full models so these two sets of accuracies (for each of the two models) should be considered paired/repeated.   
   - Not a problem, we could use paired samples t-test
-  - Easiest to thing about this paired test as testing if the differences in accuracy for each of the 100 held out sets == 0.  That removes the lack of independence from using the sample 100 held-out sets twice
-  - BUT these 100 differences are still not independent
-  - Each have been estimated using models that were fit with overlapping observations (the held in sets were fit with many of the same observations for each of the k-1 held in folds)
+  - Easiest to think about this paired test as testing if the differences in accuracy for each of the 100 held out sets == 0.  That removes the lack of independence from using the sample 100 held-out sets twice
+
+\
+\
+BUT these 100 differences are still not independent
+
+- Each have been estimated using models that were fit with overlapping observations (the held in sets were fit with many of the same observations for each of the k-1 held in folds)
   - If we ignore this violation and simply do a paired-samples t-test, we will have inflation of alpha
 
 -----
