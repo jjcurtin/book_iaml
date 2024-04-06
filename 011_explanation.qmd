@@ -919,7 +919,10 @@ pp |> contrast_models(seed = 4) |> summary(size = 0)
 
 ## Feature Importance
 
-There as been increasing focus on improving the interpretability of machine learning models that we are using.  There are numerous reasons to want to better understand why our models make the predictions that they do.  
+There as been increasing focus on improving the interpretability of machine learning models that we are using.  
+\
+\
+There are numerous reasons to want to better understand why our models make the predictions that they do.  
 
 - The growing set of tools to interpret our models can help address our **explanatory questions**
 - But they can also help us **find errors** in our models
@@ -982,11 +985,10 @@ We will need to have a df for the features (without the outcome) and a separate 
 x <- feat_full |> select(-disease)
 ```
 
-- For outcome, we need to select it first, convert to 0/1, and then pull the vector out of the dataframe
+- For outcome, we need to convert to 0/1 (if classification), and then pull the vector out of the dataframe
 
 ```{r}
 y <- feat_full |> 
-  select(disease) |>
   mutate(disease = if_else(disease == "yes", 1, 0)) |> 
   pull(disease)
 ```
@@ -997,7 +999,10 @@ We also need a specific predictor function that will work with the DALEX package
 
 We will write a custom function that "wraps" around our tidymodels `predict()` function
 
-- It needs two parameters named `model` and `newdata` and it needs to return a single column of probabilites for classification problems
+DALEX needs:
+
+- the prediction function to have two parameters named `model` and `newdata` 
+- the prediction function must return a vector of probabilites for the positive class for classification problems (for regression, it simply returns a vector of the predicted values for $y$)
 
 ```{r}
 predict_wrapper <- function(model, newdata) {
@@ -1008,23 +1013,27 @@ predict_wrapper <- function(model, newdata) {
 
 -----
 
-We will also need an `explainer` object based on our model and data.  The `explain_tidymodels()` function in DALEXtra will create this object for us.
+We will also need an `explainer` object based on our model and data
+\
+\
+The `explain_tidymodels()` function in DALEXtra will create (and check) this object for us.
 
 ```{r}
 explain_full <- explain_tidymodels(fit_full, # our model object 
-                                   data = x, # features without outcome
-                                   y = y, # outcome
-                                   # our predictor function
+                                   data = x, # df with features without outcome
+                                   y = y, # outcome vector
+                                   # our custom predictor function
                                    predict_function = predict_wrapper)
 ```
 
 -----
 
-Finally, we need to define a custom function for our performance metric
+Finally, we need to define a custom function for our performance metric as well
 
 - It needs to have two parameters: `observed` and `predicted`
 - We can create a wrapper function around `accuracy_vec()` to fit these needs
-- For accuracy, we need to transform the predicted probabilites from our prediction function to class predictions
+- For accuracy, we need to transform the predicted probabilites from our prediction function to class predictions (e.g.. yes/no)
+- And because we converted our labels to 0/1 in the outcome vector, we need to transform `observed` back to yes/no as well 
 
 ```{r}
 accuracy_wrapper <- function(observed, predicted) {
