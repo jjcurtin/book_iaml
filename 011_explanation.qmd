@@ -44,7 +44,8 @@ Post questions to the readings channel in Slack
 
 ## Lecture Videos
 
-- [Introduction to Model Comparisons](https://mediaspace.wisc.edu/media/iaml+unit+11-1/1_sz7we4by) ~ 23 mins
+- [Introduction to Model Comparisons](https://mediaspace.wisc.edu/media/iaml+unit+11-1a/1_qnvnn5s2) ~ 6 mins
+- [An Empirical Example of Feature Ablation]()
 - [The Nadeau & Bengio Correlated t-test for Model Comparisons](https://mediaspace.wisc.edu/media/iaml+unit+11-2/1_0iykku1l) ~ 10 mins
 - [Bayesian Estimation for Model Comparisons](https://mediaspace.wisc.edu/media/iaml+unit+11-3/1_mvczl7cn) ~ 28 mins
 - [Introduction to Feature Importance and the DALEX package](https://mediaspace.wisc.edu/media/iaml+unit+11-4/1_ppfee7t7) ~ 11 mins
@@ -87,12 +88,14 @@ This can be done for a single feature (e.g., $x_3$)
   - compact model:  $y = b_0 + b_1*x_1 + b_2*x_2$
   - full (augmented) model: $y = b_0 + b_1*x_1 + b_2*x_2 + b_3*x_3$
   - The comparison of these two models is equivalent to the test of $H_0: b_3 = 0$
+
 \
 \
 This can also involve sets of features if you hypothesis involves the effect of a set of features
 
   - All features that represent a categorical predictor
   - Set of features that represent some broad construct (e.g., psychiatric illness represented by symptoms counts for all of the major psychiatric diagnoses)
+  
 \
 \
 This technique of comparing two nested models (i.e. feature set for the compact model is a subset of the feature set for the full/augmented model) is often called **feature ablation** in the machine learning world
@@ -245,12 +248,12 @@ It would be better to actually do some exploration to build the best compact mod
 We are using glmnet so we need to find the optimal set of hyperparameter values for this model configuration
 \
 \
-Let's select/tune hyperparameters using bootstrap resampling
+Let's select/tune hyperparameters using 10 repeats of 10-fold CV (more on why this many in a few moments) 
 
 ```{r}
 set.seed(123456)
-splits_boot <- data_all |> 
-  bootstraps(times = 100, strata = "disease")
+splits <- data_all |> 
+  vfold_cv(v = 10, repeats = 10, strata = "disease")
 ```
 \
 \
@@ -282,7 +285,7 @@ fits_full <- cache_rds(
                  mixture = tune()) |> 
     set_engine("glmnet") |> 
     tune_grid(preprocessor = rec_full,
-              resamples = splits_boot,
+              resamples = splits,
               grid = grid_glmnet,
               metrics = metric_set(accuracy))
   },
@@ -293,7 +296,7 @@ fits_full <- cache_rds(
 
 -----
 
-Let's check how the models perform (bootstrap resampled accuracy) with various values for the hyperparameters
+Let's check how the models perform (k-fold resampled accuracy) with various values for the hyperparameters
 \
 \
 Here is accuracy by log penalty (lambda) and mixture (alpha)
@@ -315,13 +318,19 @@ fits_full |>
 Remember that the linear model is a special case of glmnet where the penalty = 0.  
 Here we are looking log penalty down to exp(-8) = 0.0003354626.  That is pretty 
 close to 0 so an approximation of how the standard logistic regression would 
-perform.  glmnet is about 2% more accurate with its optimal hyperparameter values
+perform.  glmnet is slightly more accurate with its optimal hyperparameter values
 ```
 :::
 
 -----
 
-Here are the optimal hyperparameter values for the top 10 configurations
+Here we show the mean performance of the top 10 configurations
+\
+\
+We use these performance estimates to select the top optimal values for the hyperparameters
+\
+\
+We will choose the hyperparameter values from the configuration displayed in the first row of this table
 ```{r}
 collect_metrics(fits_full) |> 
   arrange(desc(mean)) |> 
@@ -330,71 +339,44 @@ collect_metrics(fits_full) |>
 
 -----
 
-And here is the best
+Here we are storing that best configuration in an object so that we could later fit that configuration to the full dataset
+\
+\
 ```{r}
 (hp_best_full <- select_best(fits_full, n = 1))
 ```
 
 -----
 
-Let's fit this model to the full sample 
+::: {.callout-important collapse="false"}
+### Question: Tell me about bias if we use this mean performance from the 100 held-out folds as an estimate of how well that model fit to the full N will perform 
+```{html}
+#| echo: true
+#| code-fold: true
+#| code-summary: "Show Answer"
+There is some optimization bias in this performance estimate because we already used these 100 held-out folds to select the best configuration.  This will be a second use of those folds.  This will lead us to over-estimate the models true performance in new data.  We would need a test set to remove this bias.
 
-```{r}
-rec_full_prep <- rec_full |> 
-  prep(data_all)
-
-feat_full <- rec_full_prep |> 
-  bake(data_all)
-
-fit_full <- 
-  logistic_reg(penalty = hp_best_full$penalty,
-               mixture = hp_best_full$mixture) |> 
-  set_engine("glmnet") |> 
-  fit(disease ~ ., data = feat_full)
+There is also some bias because we are using less that the full sample (k-1 folds) to estimate performance of a model that will eventually have N unique observations across all k folds.  This will lead  us to underestimate the true performance of our model in new data. 
 ```
+:::
 
 -----
 
-Here are two ways to quantify model performance
+When we (eventually) compare the full and compact models, the presence of some bias may not be as important (and there will always be some bias anyway, because of the latter concern from the last slide).
+\
+\
+We are focused on a relative comparison in performance across the two models so what is most important is that the bias is comparable for our assessments of the two models.
 
-- How does the optimal model configuration perform in the full dataset
-```{r}
-accuracy_vec(feat_full$disease, predict(fit_full, feat_full)$.pred_class)
-```
-
-- And how does the optimal model configuration perform in held-out data
-
-```{r}
-collect_metrics(fits_full) |> 
-  arrange(desc(mean)) |> 
-  print(n = 1)
-```
+- If we use validation data (e.g., our 100 held-out folds), there will be comparable optimization bias for both models so this may not be too problematic.  We don't need test data.
 
 -----
 
-We don't care too much about objective performance in our situation.  That is not our question.
-
-- Same sample accuracy is comparable to what you would normally have if you weren't in a machine learning context (except that we did use held-out data to determine the optimal hyperparameter values)
-- Bootstrapped accuracy will remove bias due to overfitting the training data from our performance estimate because it is prediction in new data vs. same sample
-- K-fold would be less biased than bootstrap if we cared about performance of the overall model
-- Some optimization bias remains using either k-fold or bootstrapped accuracy to both select hyperparameters AND assess performance of best model
-- If we really cared about overall performance, we should have held back a test set (or done nested CV)
-
------
-
-Our focal question is NOT how well our full model does.  
+But before we go further, we need to have a compact model to compare to our full model
 \
 \
-Instead, we want to know how much do scores from our exercise test improve prediction above baseline (with baseline being all other available characteristics).  This is a relative comparison, not based on absolute performance.
-\
-\
-To quantify this relative comparison, we need to use **feature ablation** to form a compact/reduced model that does not include the features associated with our exercise test
-
------
- 
 Here is a recipe to feature engineer features associated with this compact model
 
-- We can start with the full recipe and add one more step to remove the features we want to evaluate
+- We can start with the full recipe and add one more step to remove (i.e., ablate) the features we want to evaluate
 - `step_rm(contains("exer_")`
 - All previous recipe steps remain the same
 
@@ -417,7 +399,7 @@ fits_compact <- cache_rds(
                  mixture = tune()) |> 
     set_engine("glmnet") |> 
     tune_grid(preprocessor = rec_compact,   # use recipe for compact model
-              resamples = splits_boot,
+              resamples = splits,
               grid = grid_glmnet,
               metrics = metric_set(accuracy))
   },
@@ -437,43 +419,17 @@ fits_compact |>
 
 -----
 
+And here is our best configuration, for when we want to train the compact model on all the data at a later stage
 ```{r}
-collect_metrics(fits_compact) |> 
-  arrange(desc(mean)) |> 
-  print(n = 10)
-
 (hp_best_compact <- select_best(fits_compact, n = 1))
 ```
 
 -----
 
-Fit this compact model configuration to the full dataset
-```{r}
+Now, here are accuracies for these two models assessed by 10 repeats of 10-fold
 
-rec_compact_prep <- rec_compact |> 
-  prep(data_all)
-
-feat_compact <- rec_compact_prep |> 
-  bake(data_all) 
-
-fit_compact <- 
-  logistic_reg(penalty = hp_best_compact$penalty,
-               mixture = hp_best_compact$mixture) |> 
-  set_engine("glmnet") |> 
-  fit(disease ~ ., data = feat_compact)
-```
-
------
-
-Here are accuracies for full and compact models in full sample where models were fit
-```{r}
-accuracy_vec(feat_full$disease, predict(fit_full, feat_full)$.pred_class)
-accuracy_vec(feat_compact$disease, predict(fit_compact, feat_compact)$.pred_class)
-```
-
------
-
-Here are accuracies for these two models assessed by bootstrap resampling
+- This is the mean performance for the best configuration
+- These means are based on 100 individual held-out folds
 ```{r}
 collect_metrics(fits_full) |> 
   arrange(desc(mean)) |> 
@@ -497,23 +453,19 @@ The compact model is less accurate but.....
 
 ## Nadeau and Bengio (2003) Correlated t-test
 
-We have 100 bootstrapped accuracies for each model.
+We have 100 held-out accuracies for each model.
 \
 \
 Could we compare these?
-
-- We used the bootstrap but if we wanted a less biased estimate we could (should?) have used k-fold
-- We could do 10 repeats of 10-fold to still obtain 100 performance estimates for each model configuration
-
 \
 \
-Either way, we have the same 100 held-out samples (we used the same splits) for both compact and full models so these two sets of accuracies (for each of the two models) should be considered paired/repeated.   
+Well, we have the same 100 held-out samples (we used the same splits) for both compact and full models so these two sets of accuracies (for each of the two models) should be considered paired/repeated.   
 
   - Not a problem, we could use paired samples t-test
   - Easiest to think about this paired test as testing if the differences in accuracy for each of the 100 held out sets == 0.  That removes the lack of independence from using the sample 100 held-out sets twice
-
-\
-\
+  
+-----
+  
 BUT these 100 differences are still not independent
 
 - Each have been estimated using models that were fit with overlapping observations (the held in sets were fit with many of the same observations for each of the k-1 held in folds)
@@ -548,80 +500,55 @@ $t = \frac{\overline{x} - 0}{\sqrt{\hat{\sigma^2}*(\frac{1}{n} + \frac{\rho}{1-\
 Let's perform this correlated t-test to compare our compact and full models
 \
 \
-We first need to evaluate both models using 10x 10-fold CV splits. 
+We first need to extract the 100 held-out folds from `fits_full` and `fits_compact`
 \
 \
-Important that these are the SAME splits for both model configurations
+When we have used `collect_metrics()` in the past, we always used the default for summarize (which is TRUE).  This gave us average performance for each model configuration across all the held-out folds.  But the individual folds for each configuration are in that object too
+
+----
+
+Our best model configuration for the full model was
 ```{r}
-set.seed(2468)
-splits_cv <-
-  data_all |> 
-  vfold_cv(v = 10, repeats = 10, strata = "disease")
+hp_best_full
+
+hp_best_full$.config
+```
+
+We can see that label assigned to that specific configuration in the `.config` column.  We can use that to pull out the 100 folds for that configuration
+
+```{r}
+cv_full <- collect_metrics(fits_full, summarize = FALSE) |> 
+  filter(.config == hp_best_full$.config) |> 
+  pull(.estimate)
+
+cv_full |> print()
 ```
 
 -----
 
-Lets get k-fold accuracy for the full model
+And lets get the 100 folds for the compact model
 
-- best penalty = `r hp_best_full$penalty`
-- best mixture = `r hp_best_full$mixture`
 ```{r}
-# NOTE:  I cant get this to accept anything but the actual numeric values for 
-# penalty and mixture. Not sure why.   If no one else solves this problem, 
-# I will simplify to a reprex and submit a bug report at some point
-cv_full <- 
-  logistic_reg(penalty = 0.2787076, 
-               mixture = 0.1) |> 
-  set_engine("glmnet") |> 
-  fit_resamples(preprocessor = rec_full,  
-            resamples = splits_cv,
-            metrics = metric_set(accuracy))
+hp_best_compact
+
+hp_best_compact$.config
 ```
+
+```{r}
+cv_compact <- collect_metrics(fits_compact, summarize = FALSE) |> 
+  filter(.config == hp_best_compact$.config) |> 
+  pull(.estimate)
+
+cv_full |> print()
+```
+
+NOTE: It is important that these are the SAME splits for both model configurations
 
 -----
 
-Here is
-
-- mean performance over 100 held out folds
-```{r}
-collect_metrics(cv_full, summarize = TRUE)
-```
-
-- and here we pull the 100 metrics
-```{r}
-collect_metrics(cv_full, summarize = FALSE)$.estimate
-```
-
------
-
-Now get k-fold accuracy for the compact model with
-
-- best penalty = `r hp_best_compact$penalty`
-- best mixture = `r hp_best_compact$mixture`
-```{r}
-cv_compact <- 
-  logistic_reg(penalty = .03623515,
-               mixture = 1) |> 
-  set_engine("glmnet") |> 
-  fit_resamples(preprocessor = rec_compact,  
-            resamples = splits_cv,
-            metrics = metric_set(accuracy))
-```
-
------
-
-Mean performance of compact model
-```{r}
-collect_metrics(cv_compact, summarize = TRUE)
-```
-
-and the 100 metrics
-```{r}
-collect_metrics(cv_compact, summarize = FALSE)$.estimate
-```
-
------
-
+Now we can compare these 100 folds across the two models using the correlated t-test
+\
+\
 Define a function for Nadeau and Bengio (2003) correlated t-test
 ```{r}
 # included in fun_ml.R
