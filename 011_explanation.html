@@ -476,8 +476,9 @@ Post questions to the readings channel in Slack</p>
 <section id="lecture-videos" class="level2" data-number="11.2">
 <h2 data-number="11.2" class="anchored" data-anchor-id="lecture-videos"><span class="header-section-number">11.2</span> Lecture Videos</h2>
 <ul>
-<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+11-1/1_sz7we4by">Introduction to Model Comparisons</a> ~ 23 mins</li>
-<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+11-2/1_0iykku1l">The Nadeau &amp; Bengio Correlated t-test for Model Comparisons</a> ~ 10 mins</li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+11-1a/1_qnvnn5s2">Introduction to Model Comparisons</a> ~ 6 mins</li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+11-1b/1_p15t634g">An Empirical Example of Feature Ablation</a> ~ 13 mins</li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+11-2/1_oa94e6ld">The Nadeau &amp; Bengio Correlated t-test for Model Comparisons</a> ~ 9 mins</li>
 <li><a href="https://mediaspace.wisc.edu/media/iaml+unit+11-3/1_mvczl7cn">Bayesian Estimation for Model Comparisons</a> ~ 28 mins</li>
 <li><a href="https://mediaspace.wisc.edu/media/iaml+unit+11-4/1_ppfee7t7">Introduction to Feature Importance and the DALEX package</a> ~ 11 mins</li>
 <li><a href="">Permutation Feature Importance</a></li>
@@ -492,8 +493,8 @@ Post questions to the video-lectures channel in Slack</p>
 <section id="application-assignment" class="level2" data-number="11.3">
 <h2 data-number="11.3" class="anchored" data-anchor-id="application-assignment"><span class="header-section-number">11.3</span> Application Assignment</h2>
 <ul>
-<li>data: <a href="homework/unit_9/admissions.csv">admissions.csv</a></li>
-<li><a href="homework/unit_9/hw_unit_9_explanatory.Rmd">assignment qmd</a></li>
+<li>data: <a href="application_assignments/unit_11/student_perf_cln.csv">admissions.csv</a></li>
+<li>[assignment qmd]((https://raw.githubusercontent.com/jjcurtin/book_iaml/main/application_assignments/unit_10/hw_unit_11_explanatory.qmd)</li>
 <li><a href="">solution html</a></li>
 </ul>
 <p><br>
@@ -511,16 +512,20 @@ Model comparisons can be used in a similar way for explanatory goals with machin
 <hr>
 <p>This can be done for a single feature (e.g., <span class="math inline">\(x_3\)</span>)</p>
 <ul>
-<li><p>compact model: <span class="math inline">\(y = b_0 + b_1*x_1 + b_2*x_2\)</span></p></li>
-<li><p>full (augmented) model: <span class="math inline">\(y = b_0 + b_1*x_1 + b_2*x_2 + b_3*x_3\)</span></p></li>
-<li><p>The comparison of these two models is equivalent to the test of <span class="math inline">\(H_0: b_3 = 0\)</span><br>
-<br>
-This can also involve sets of features if you hypothesis involves the effect of a set of features</p></li>
-<li><p>All features that represent a categorical predictor</p></li>
-<li><p>Set of features that represent some broad construct (e.g., psychiatric illness represented by symptoms counts for all of the major psychiatric diagnoses)<br>
-<br>
-This technique of comparing two nested models (i.e.&nbsp;feature set for the compact model is a subset of the feature set for the full/augmented model) is often called <strong>feature ablation</strong> in the machine learning world</p></li>
+<li>compact model: <span class="math inline">\(y = b_0 + b_1*x_1 + b_2*x_2\)</span></li>
+<li>full (augmented) model: <span class="math inline">\(y = b_0 + b_1*x_1 + b_2*x_2 + b_3*x_3\)</span></li>
+<li>The comparison of these two models is equivalent to the test of <span class="math inline">\(H_0: b_3 = 0\)</span></li>
 </ul>
+<p><br>
+<br>
+This can also involve sets of features if you hypothesis involves the effect of a set of features</p>
+<ul>
+<li>All features that represent a categorical predictor</li>
+<li>Set of features that represent some broad construct (e.g., psychiatric illness represented by symptoms counts for all of the major psychiatric diagnoses)</li>
+</ul>
+<p><br>
+<br>
+This technique of comparing two nested models (i.e.&nbsp;feature set for the compact model is a subset of the feature set for the full/augmented model) is often called <strong>feature ablation</strong> in the machine learning world</p>
 <hr>
 <p>Model comparisons can also be done between model configurations that differ by characteristics other than their features (e.g., statistical algorithm)<br>
 <br>
@@ -811,11 +816,11 @@ It would be better to actually do some exploration to build the best compact mod
 <hr>
 <p>We are using glmnet so we need to find the optimal set of hyperparameter values for this model configuration<br>
 <br>
-Let’s select/tune hyperparameters using bootstrap resampling</p>
+Let’s select/tune hyperparameters using 10 repeats of 10-fold CV (more on why this many in a few moments)</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123456</span>)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>splits_boot <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bootstraps</span>(<span class="at">times =</span> <span class="dv">100</span>, <span class="at">strata =</span> <span class="st">"disease"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>splits <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">vfold_cv</span>(<span class="at">v =</span> <span class="dv">10</span>, <span class="at">repeats =</span> <span class="dv">10</span>, <span class="at">strata =</span> <span class="st">"disease"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><br>
 <br>
@@ -842,7 +847,7 @@ And here is a grid of hyperparameters to tune</p>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">mixture =</span> <span class="fu">tune</span>()) <span class="sc">|&gt;</span> </span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_engine</span>(<span class="st">"glmnet"</span>) <span class="sc">|&gt;</span> </span>
 <span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tune_grid</span>(<span class="at">preprocessor =</span> rec_full,</span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">resamples =</span> splits_boot,</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">resamples =</span> splits,</span>
 <span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">grid =</span> grid_glmnet,</span>
 <span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>              <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span>
 <span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>  },</span>
@@ -851,7 +856,7 @@ And here is a grid of hyperparameters to tune</p>
 <span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_full"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
-<p>Let’s check how the models perform (bootstrap resampled accuracy) with various values for the hyperparameters<br>
+<p>Let’s check how the models perform (k-fold resampled accuracy) with various values for the hyperparameters<br>
 <br>
 Here is accuracy by log penalty (lambda) and mixture (alpha)</p>
 <div class="cell">
@@ -885,14 +890,18 @@ Question: Does the glmnet (regularized logistic regresssion) outperform a simple
 <div class="sourceCode cell-code" id="cb8"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>Remember that the linear model is a special case of glmnet where the penalty = 0.  </span>
 <span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>Here we are looking log penalty down to exp(-8) = 0.0003354626.  That is pretty </span>
 <span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>close to 0 so an approximation of how the standard logistic regression would </span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>perform.  glmnet is about 2% more accurate with its optimal hyperparameter values</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>perform.  glmnet is slightly more accurate with its optimal hyperparameter values</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 </div>
 </div>
 </div>
 <hr>
-<p>Here are the optimal hyperparameter values for the top 10 configurations</p>
+<p>Here we show the mean performance of the top 10 configurations<br>
+<br>
+We use these performance estimates to select the top optimal values for the hyperparameters<br>
+<br>
+We will choose the hyperparameter values from the configuration displayed in the first row of this table</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(fits_full) <span class="sc">|&gt;</span> </span>
 <span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(mean)) <span class="sc">|&gt;</span> </span>
@@ -901,240 +910,167 @@ Question: Does the glmnet (regularized logistic regresssion) outperform a simple
 <pre><code># A tibble: 2,700 × 8
    penalty mixture .metric  .estimator  mean     n std_err
      &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;
- 1   0.279     0.1 accuracy binary     0.823   100 0.00277
- 2   0.270     0.1 accuracy binary     0.823   100 0.00277
- 3   0.261     0.1 accuracy binary     0.823   100 0.00273
- 4   0.403     0.1 accuracy binary     0.823   100 0.00287
- 5   0.476     0.1 accuracy binary     0.823   100 0.00288
- 6   0.252     0.1 accuracy binary     0.823   100 0.00272
- 7   0.509     0.1 accuracy binary     0.823   100 0.00281
- 8   0.364     0.1 accuracy binary     0.823   100 0.00280
- 9   0.228     0.1 accuracy binary     0.823   100 0.00278
-10   0.389     0.1 accuracy binary     0.823   100 0.00283
+ 1   0.929   0.05  accuracy binary     0.829   100 0.00610
+ 2   1.17    0.025 accuracy binary     0.829   100 0.00607
+ 3   0.509   0.1   accuracy binary     0.828   100 0.00618
+ 4   0.544   0.1   accuracy binary     0.828   100 0.00614
+ 5   0.622   0.1   accuracy binary     0.828   100 0.00618
+ 6   0.665   0.1   accuracy binary     0.828   100 0.00615
+ 7   0.526   0.1   accuracy binary     0.828   100 0.00611
+ 8   0.688   0.1   accuracy binary     0.828   100 0.00623
+ 9   0.869   0.05  accuracy binary     0.828   100 0.00623
+10   1.03    0.025 accuracy binary     0.828   100 0.00601
    .config                
    &lt;chr&gt;                  
- 1 Preprocessor1_Model1102
- 2 Preprocessor1_Model1101
- 3 Preprocessor1_Model1100
- 4 Preprocessor1_Model1113
- 5 Preprocessor1_Model1118
- 6 Preprocessor1_Model1099
- 7 Preprocessor1_Model1120
- 8 Preprocessor1_Model1110
- 9 Preprocessor1_Model1096
-10 Preprocessor1_Model1112
+ 1 Preprocessor1_Model0838
+ 2 Preprocessor1_Model0545
+ 3 Preprocessor1_Model1120
+ 4 Preprocessor1_Model1122
+ 5 Preprocessor1_Model1126
+ 6 Preprocessor1_Model1128
+ 7 Preprocessor1_Model1121
+ 8 Preprocessor1_Model1129
+ 9 Preprocessor1_Model0836
+10 Preprocessor1_Model0541
 # ℹ 2,690 more rows</code></pre>
 </div>
 </div>
 <hr>
-<p>And here is the best</p>
+<p>Here we are storing that best configuration in an object so that we could later fit that configuration to the full dataset<br>
+<br>
+</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>(hp_best_full <span class="ot">&lt;-</span> <span class="fu">select_best</span>(fits_full, <span class="at">n =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 3
   penalty mixture .config                
     &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;                  
-1   0.279     0.1 Preprocessor1_Model1102</code></pre>
+1   0.929    0.05 Preprocessor1_Model0838</code></pre>
 </div>
 </div>
 <hr>
-<p>Let’s fit this model to the full sample</p>
+<div class="callout callout-style-default callout-important no-icon callout-titled">
+<div class="callout-header d-flex align-content-center" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="true" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Question: Tell me about bias if we use this mean performance from the 100 held-out folds as an estimate of how well that model fit to the full N will perform
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse show">
+<div class="callout-body-container callout-body">
 <div class="cell">
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>rec_full_prep <span class="ot">&lt;-</span> rec_full <span class="sc">|&gt;</span> </span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(data_all)</span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>feat_full <span class="ot">&lt;-</span> rec_full_prep <span class="sc">|&gt;</span> </span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_all)</span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>fit_full <span class="ot">&lt;-</span> </span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">logistic_reg</span>(<span class="at">penalty =</span> hp_best_full<span class="sc">$</span>penalty,</span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>               <span class="at">mixture =</span> hp_best_full<span class="sc">$</span>mixture) <span class="sc">|&gt;</span> </span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"glmnet"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(disease <span class="sc">~</span> ., <span class="at">data =</span> feat_full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<hr>
-<p>Here are two ways to quantify model performance</p>
-<ul>
-<li>How does the optimal model configuration perform in the full dataset</li>
-</ul>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy_vec</span>(feat_full<span class="sc">$</span>disease, <span class="fu">predict</span>(fit_full, feat_full)<span class="sc">$</span>.pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.8382838</code></pre>
+<details class="code-fold">
+<summary>Show Answer</summary>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode html code-with-copy"><code class="sourceCode html"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>There is some optimization bias in this performance estimate because we already</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>used these 100 held-out folds to select the best configuration.  This will be a </span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>second use of those folds.  This will lead us to over-estimate the models true </span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>performance in new data.  We would need a test set to remove this bias.</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>There is also some bias because we are using less that the full sample (k-1 folds) </span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>to estimate performance of a model that will eventually have N unique observations </span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>across all k folds.  This will lead  us to underestimate the true performance of </span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>our model in new data. </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 </div>
 </div>
-<ul>
-<li>And how does the optimal model configuration perform in held-out data</li>
-</ul>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(fits_full) <span class="sc">|&gt;</span> </span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(mean)) <span class="sc">|&gt;</span> </span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">n =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 2,700 × 8
-  penalty mixture .metric  .estimator  mean     n std_err
-    &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;
-1   0.279     0.1 accuracy binary     0.823   100 0.00277
-  .config                
-  &lt;chr&gt;                  
-1 Preprocessor1_Model1102
-# ℹ 2,699 more rows</code></pre>
 </div>
 </div>
 <hr>
-<p>We don’t care too much about objective performance in our situation. That is not our question.</p>
-<ul>
-<li>Same sample accuracy is comparable to what you would normally have if you weren’t in a machine learning context (except that we did use held-out data to determine the optimal hyperparameter values)</li>
-<li>Bootstrapped accuracy will remove bias due to overfitting the training data from our performance estimate because it is prediction in new data vs.&nbsp;same sample</li>
-<li>K-fold would be less biased than bootstrap if we cared about performance of the overall model</li>
-<li>Some optimization bias remains using either k-fold or bootstrapped accuracy to both select hyperparameters AND assess performance of best model</li>
-<li>If we really cared about overall performance, we should have held back a test set (or done nested CV)</li>
-</ul>
-<hr>
-<p>Our focal question is NOT how well our full model does.<br>
+<p>When we (eventually) compare the full and compact models, the presence of some bias may not be as important (and there will always be some bias anyway, because of the latter concern from the last slide).<br>
 <br>
+We are focused on a relative comparison in performance across the two models so what is most important is that the bias is comparable for our assessments of the two models.<br>
 <br>
-Instead, we want to know how much do scores from our exercise test improve prediction above baseline (with baseline being all other available characteristics). This is a relative comparison, not based on absolute performance.<br>
-<br>
-To quantify this relative comparison, we need to use <strong>feature ablation</strong> to form a compact/reduced model that does not include the features associated with our exercise test</p>
+If we use validation data (e.g., our 100 held-out folds), there will be comparable optimization bias for both models so this may not be too problematic. We don’t need test data.</p>
 <hr>
-<p>Here is a recipe to feature engineer features associated with this compact model</p>
+<p>But before we go further, we need to have a compact model to compare to our full model<br>
+<br>
+Here is a recipe to feature engineer features associated with this compact model</p>
 <ul>
-<li>We can start with the full recipe and add one more step to remove the features we want to evaluate</li>
+<li>We can start with the full recipe and add one more step to remove (i.e., ablate) the features we want to evaluate</li>
 <li><code>step_rm(contains("exer_")</code></li>
 <li>All previous recipe steps remain the same</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>rec_compact <span class="ot">&lt;-</span> rec_full <span class="sc">|&gt;</span> </span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_rm</span>(<span class="fu">contains</span>(<span class="st">"exer_"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>rec_compact <span class="ot">&lt;-</span> rec_full <span class="sc">|&gt;</span> </span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">step_rm</span>(<span class="fu">contains</span>(<span class="st">"exer_"</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <p>We need to select/tune hyperparameters for this new model<br>
 <br>
 It has different complexity than the full model so it might need different (less?) regularization for optimal performance</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>fits_compact <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
-<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logistic_reg</span>(<span class="at">penalty =</span> <span class="fu">tune</span>(),</span>
-<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">mixture =</span> <span class="fu">tune</span>()) <span class="sc">|&gt;</span> </span>
-<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_engine</span>(<span class="st">"glmnet"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb19-6"><a href="#cb19-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tune_grid</span>(<span class="at">preprocessor =</span> rec_compact,   <span class="co"># use recipe for compact model</span></span>
-<span id="cb19-7"><a href="#cb19-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">resamples =</span> splits_boot,</span>
-<span id="cb19-8"><a href="#cb19-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">grid =</span> grid_glmnet,</span>
-<span id="cb19-9"><a href="#cb19-9" aria-hidden="true" tabindex="-1"></a>              <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span>
-<span id="cb19-10"><a href="#cb19-10" aria-hidden="true" tabindex="-1"></a>  },</span>
-<span id="cb19-11"><a href="#cb19-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting,</span>
-<span id="cb19-12"><a href="#cb19-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/011/"</span>,</span>
-<span id="cb19-13"><a href="#cb19-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_compact"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>fits_compact <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">logistic_reg</span>(<span class="at">penalty =</span> <span class="fu">tune</span>(),</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">mixture =</span> <span class="fu">tune</span>()) <span class="sc">|&gt;</span> </span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_engine</span>(<span class="st">"glmnet"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tune_grid</span>(<span class="at">preprocessor =</span> rec_compact,   <span class="co"># use recipe for compact model</span></span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">resamples =</span> splits,</span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">grid =</span> grid_glmnet,</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>              <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting,</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/011/"</span>,</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"fits_compact"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <p>Confirm that we found a good set of hyperparameters</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>fits_compact <span class="sc">|&gt;</span> </span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_hyperparameters</span>(<span class="at">hp1 =</span> <span class="st">"penalty"</span>, <span class="at">hp2 =</span> <span class="st">"mixture"</span>, <span class="at">metric =</span> <span class="st">"accuracy"</span>, </span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">log_hp1 =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>fits_compact <span class="sc">|&gt;</span> </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_hyperparameters</span>(<span class="at">hp1 =</span> <span class="st">"penalty"</span>, <span class="at">hp2 =</span> <span class="st">"mixture"</span>, <span class="at">metric =</span> <span class="st">"accuracy"</span>, </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">log_hp1 =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="011_explanation_files/figure-html/unnamed-chunk-17-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-15-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
 <hr>
+<p>And here is our best configuration, for when we want to train the compact model on all the data at a later stage</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(fits_compact) <span class="sc">|&gt;</span> </span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(mean)) <span class="sc">|&gt;</span> </span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">n =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 2,700 × 8
-   penalty mixture .metric  .estimator  mean     n std_err
-     &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;
- 1  0.0362     1   accuracy binary     0.784   100 0.00318
- 2  0.0277     1   accuracy binary     0.784   100 0.00299
- 3  0.0350     1   accuracy binary     0.784   100 0.00318
- 4  0.0598     0.4 accuracy binary     0.784   100 0.00303
- 5  0.0339     1   accuracy binary     0.784   100 0.00310
- 6  0.0296     1   accuracy binary     0.784   100 0.00310
- 7  0.102      0.2 accuracy binary     0.784   100 0.00280
- 8  0.0988     0.2 accuracy binary     0.784   100 0.00279
- 9  0.0328     1   accuracy binary     0.784   100 0.00310
-10  0.0579     0.4 accuracy binary     0.784   100 0.00299
-   .config                
-   &lt;chr&gt;                  
- 1 Preprocessor1_Model2541
- 2 Preprocessor1_Model2533
- 3 Preprocessor1_Model2540
- 4 Preprocessor1_Model1656
- 5 Preprocessor1_Model2539
- 6 Preprocessor1_Model2535
- 7 Preprocessor1_Model1372
- 8 Preprocessor1_Model1371
- 9 Preprocessor1_Model2538
-10 Preprocessor1_Model1655
-# ℹ 2,690 more rows</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>(hp_best_compact <span class="ot">&lt;-</span> <span class="fu">select_best</span>(fits_compact, <span class="at">n =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>(hp_best_compact <span class="ot">&lt;-</span> <span class="fu">select_best</span>(fits_compact, <span class="at">n =</span> <span class="dv">1</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 3
   penalty mixture .config                
     &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;                  
-1  0.0362       1 Preprocessor1_Model2541</code></pre>
+1 0.00116   0.025 Preprocessor1_Model0338</code></pre>
 </div>
 </div>
 <hr>
-<p>Fit this compact model configuration to the full dataset</p>
+<p>Now, here are accuracies for these two models assessed by 10 repeats of 10-fold</p>
+<ul>
+<li>This is the mean performance for the best configuration</li>
+<li>These means are based on 100 individual held-out folds</li>
+</ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>rec_compact_prep <span class="ot">&lt;-</span> rec_compact <span class="sc">|&gt;</span> </span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(data_all)</span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>feat_compact <span class="ot">&lt;-</span> rec_compact_prep <span class="sc">|&gt;</span> </span>
-<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_all) </span>
-<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>fit_compact <span class="ot">&lt;-</span> </span>
-<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">logistic_reg</span>(<span class="at">penalty =</span> hp_best_compact<span class="sc">$</span>penalty,</span>
-<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>               <span class="at">mixture =</span> hp_best_compact<span class="sc">$</span>mixture) <span class="sc">|&gt;</span> </span>
-<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"glmnet"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(disease <span class="sc">~</span> ., <span class="at">data =</span> feat_compact)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<hr>
-<p>Here are accuracies for full and compact models in full sample where models were fit</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy_vec</span>(feat_full<span class="sc">$</span>disease, <span class="fu">predict</span>(fit_full, feat_full)<span class="sc">$</span>.pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.8382838</code></pre>
-</div>
-<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy_vec</span>(feat_compact<span class="sc">$</span>disease, <span class="fu">predict</span>(fit_compact, feat_compact)<span class="sc">$</span>.pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stdout">
-<pre><code>[1] 0.7986799</code></pre>
-</div>
-</div>
-<hr>
-<p>Here are accuracies for these two models assessed by bootstrap resampling</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(fits_full) <span class="sc">|&gt;</span> </span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(mean)) <span class="sc">|&gt;</span> </span>
-<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(fits_full) <span class="sc">|&gt;</span> </span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(mean)) <span class="sc">|&gt;</span> </span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 8
   penalty mixture .metric  .estimator  mean     n std_err
     &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;
-1   0.279     0.1 accuracy binary     0.823   100 0.00277
+1   0.929    0.05 accuracy binary     0.829   100 0.00610
   .config                
   &lt;chr&gt;                  
-1 Preprocessor1_Model1102</code></pre>
+1 Preprocessor1_Model0838</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(fits_compact) <span class="sc">|&gt;</span> </span>
-<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(mean)) <span class="sc">|&gt;</span> </span>
-<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(fits_compact) <span class="sc">|&gt;</span> </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(mean)) <span class="sc">|&gt;</span> </span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 8
   penalty mixture .metric  .estimator  mean     n std_err
     &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;
-1  0.0362       1 accuracy binary     0.784   100 0.00318
+1 0.00116   0.025 accuracy binary     0.795   100 0.00706
   .config                
   &lt;chr&gt;                  
-1 Preprocessor1_Model2541</code></pre>
+1 Preprocessor1_Model0338</code></pre>
 </div>
 </div>
 <hr>
@@ -1149,23 +1085,17 @@ It has different complexity than the full model so it might need different (less
 </section>
 <section id="nadeau-and-bengio-2003-correlated-t-test" class="level2" data-number="11.6">
 <h2 data-number="11.6" class="anchored" data-anchor-id="nadeau-and-bengio-2003-correlated-t-test"><span class="header-section-number">11.6</span> Nadeau and Bengio (2003) Correlated t-test</h2>
-<p>We have 100 bootstrapped accuracies for each model.<br>
+<p>We have 100 held-out accuracies for each model.<br>
 <br>
-Could we compare these?</p>
-<ul>
-<li>We used the bootstrap but if we wanted a less biased estimate we could (should?) have used k-fold</li>
-<li>We could do 10 repeats of 10-fold to still obtain 100 performance estimates for each model configuration</li>
-</ul>
-<p><br>
+Could we compare these?<br>
 <br>
-Either way, we have the same 100 held-out samples (we used the same splits) for both compact and full models so these two sets of accuracies (for each of the two models) should be considered paired/repeated.</p>
+Well, we have the same 100 held-out samples (we used the same splits) for both compact and full models so these two sets of accuracies (for each of the two models) should be considered paired/repeated.</p>
 <ul>
 <li>Not a problem, we could use paired samples t-test</li>
 <li>Easiest to think about this paired test as testing if the differences in accuracy for each of the 100 held out sets == 0. That removes the lack of independence from using the sample 100 held-out sets twice</li>
 </ul>
-<p><br>
-<br>
-BUT these 100 differences are still not independent</p>
+<hr>
+<p>BUT these 100 differences are still not independent</p>
 <ul>
 <li>Each have been estimated using models that were fit with overlapping observations (the held in sets were fit with many of the same observations for each of the k-1 held in folds)</li>
 <li>If we ignore this violation and simply do a paired-samples t-test, we will have inflation of alpha</li>
@@ -1188,138 +1118,110 @@ This adjustment yields:</p>
 <hr>
 <p>Let’s perform this correlated t-test to compare our compact and full models<br>
 <br>
-We first need to evaluate both models using 10x 10-fold CV splits.<br>
+We first need to extract the 100 held-out folds from <code>fits_full</code> and <code>fits_compact</code><br>
 <br>
-Important that these are the SAME splits for both model configurations</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">2468</span>)</span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>splits_cv <span class="ot">&lt;-</span></span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  data_all <span class="sc">|&gt;</span> </span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">vfold_cv</span>(<span class="at">v =</span> <span class="dv">10</span>, <span class="at">repeats =</span> <span class="dv">10</span>, <span class="at">strata =</span> <span class="st">"disease"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
+When we have used <code>collect_metrics()</code> in the past, we always used the default for summarize (which is TRUE). This gave us average performance for each model configuration across all the held-out folds. But the individual folds for each configuration are in that object too</p>
 <hr>
-<p>Lets get k-fold accuracy for the full model</p>
-<ul>
-<li>best penalty = 0.2787076</li>
-<li>best mixture = 0.1</li>
-</ul>
+<p>Our best model configuration for the full model was</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># </span><span class="al">NOTE</span><span class="co">:  I cant get this to accept anything but the actual numeric values for </span></span>
-<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a><span class="co"># penalty and mixture. Not sure why.   If no one else solves this problem, </span></span>
-<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a><span class="co"># I will simplify to a reprex and submit a bug report at some point</span></span>
-<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>cv_full <span class="ot">&lt;-</span> </span>
-<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">logistic_reg</span>(<span class="at">penalty =</span> <span class="fl">0.2787076</span>, </span>
-<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>               <span class="at">mixture =</span> <span class="fl">0.1</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"glmnet"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit_resamples</span>(<span class="at">preprocessor =</span> rec_full,  </span>
-<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">resamples =</span> splits_cv,</span>
-<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<hr>
-<p>Here is</p>
-<ul>
-<li>mean performance over 100 held out folds</li>
-</ul>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(cv_full, <span class="at">summarize =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>hp_best_full</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 6
-  .metric  .estimator  mean     n std_err .config             
-  &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
-1 accuracy binary     0.826   100 0.00687 Preprocessor1_Model1</code></pre>
+<pre><code># A tibble: 1 × 3
+  penalty mixture .config                
+    &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;                  
+1   0.929    0.05 Preprocessor1_Model0838</code></pre>
 </div>
-</div>
-<ul>
-<li>and here we pull the 100 metrics</li>
-</ul>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(cv_full, <span class="at">summarize =</span> <span class="cn">FALSE</span>)<span class="sc">$</span>.estimate</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>hp_best_full<span class="sc">$</span>.config</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>  [1] 0.8709677 0.8064516 0.8709677 0.8387097 0.9333333 0.7333333 0.9000000
-  [8] 0.6333333 0.8666667 0.7586207 0.8387097 0.8064516 0.7741935 0.7741935
- [15] 0.8333333 0.8000000 0.8333333 0.8333333 0.8666667 0.8965517 0.9032258
- [22] 0.7419355 0.8387097 0.8387097 0.7666667 0.8666667 0.9000000 0.8333333
- [29] 0.8333333 0.7241379 0.7419355 0.9032258 0.8064516 0.8064516 0.8666667
- [36] 0.9000000 0.9000000 0.8000000 0.8000000 0.7586207 0.8064516 0.8064516
- [43] 0.9354839 0.9032258 0.6333333 0.8000000 0.8333333 0.8666667 0.8000000
- [50] 0.8965517 0.8709677 0.8064516 0.7741935 0.9032258 0.8666667 0.8666667
- [57] 0.8333333 0.8666667 0.6666667 0.7931034 0.6129032 0.9032258 0.8387097
- [64] 0.8387097 0.9000000 0.8000000 0.8000000 0.8333333 0.8333333 0.8965517
- [71] 0.7419355 0.8064516 0.9354839 0.7741935 0.9333333 0.6333333 0.9000000
- [78] 0.7666667 0.8000000 0.8965517 0.8709677 0.8709677 0.8709677 0.8064516
- [85] 0.8666667 0.8333333 0.7666667 0.8333333 0.8333333 0.7586207 0.8064516
- [92] 0.8064516 0.8709677 0.7741935 0.9666667 0.8000000 0.7333333 0.8666667
- [99] 0.8333333 0.8965517</code></pre>
+<pre><code>[1] "Preprocessor1_Model0838"</code></pre>
+</div>
+</div>
+<p>We can see that label assigned to that specific configuration in the <code>.config</code> column. We can use that to pull out the 100 folds for that configuration</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>cv_full <span class="ot">&lt;-</span> <span class="fu">collect_metrics</span>(fits_full, <span class="at">summarize =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(.config <span class="sc">==</span> hp_best_full<span class="sc">$</span>.config) <span class="sc">|&gt;</span> </span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(.estimate)</span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>cv_full <span class="sc">|&gt;</span> <span class="fu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] 0.8387097 0.9032258 0.8387097 0.8709677 0.8000000 0.7333333 0.8666667
+  [8] 0.7333333 0.8666667 0.8275862 0.8064516 0.8064516 0.7741935 0.8709677
+ [15] 0.8666667 0.8666667 0.8000000 0.8000000 0.7666667 0.8965517 0.8064516
+ [22] 0.8387097 0.8709677 0.8709677 0.9000000 0.9000000 0.9000000 0.6666667
+ [29] 0.7666667 0.7586207 0.9354839 0.8064516 0.8709677 0.7419355 0.7666667
+ [36] 0.9333333 0.7666667 0.7666667 0.9000000 0.7586207 0.7419355 0.8387097
+ [43] 0.8709677 0.9354839 0.8333333 0.9000000 0.8333333 0.7333333 0.7666667
+ [50] 0.8275862 0.8387097 0.9354839 0.8064516 0.7741935 0.8333333 0.8000000
+ [57] 0.9000000 0.7666667 0.9000000 0.7931034 0.7741935 0.8387097 0.8387097
+ [64] 0.9032258 0.9000000 0.8000000 0.8666667 0.7000000 0.8333333 0.8620690
+ [71] 0.7741935 0.8387097 0.8387097 0.8064516 0.7000000 0.9000000 0.8333333
+ [78] 0.8666667 0.8666667 0.8275862 0.8387097 0.8387097 0.8709677 0.8387097
+ [85] 0.7333333 0.8000000 0.8000000 0.9333333 0.7666667 0.8620690 0.6774194
+ [92] 0.7741935 0.9032258 0.8709677 0.8666667 0.9333333 0.8333333 0.8666667
+ [99] 0.7666667 0.8275862</code></pre>
 </div>
 </div>
 <hr>
-<p>Now get k-fold accuracy for the compact model with</p>
-<ul>
-<li>best penalty = 0.0362351</li>
-<li>best mixture = 1</li>
-</ul>
+<p>And lets get the 100 folds for the compact model</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>cv_compact <span class="ot">&lt;-</span> </span>
-<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">logistic_reg</span>(<span class="at">penalty =</span> .<span class="dv">03623515</span>,</span>
-<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">mixture =</span> <span class="dv">1</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"glmnet"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit_resamples</span>(<span class="at">preprocessor =</span> rec_compact,  </span>
-<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">resamples =</span> splits_cv,</span>
-<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<hr>
-<p>Mean performance of compact model</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(cv_compact, <span class="at">summarize =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>hp_best_compact</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 6
-  .metric  .estimator  mean     n std_err .config             
-  &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
-1 accuracy binary     0.784   100 0.00772 Preprocessor1_Model1</code></pre>
+<pre><code># A tibble: 1 × 3
+  penalty mixture .config                
+    &lt;dbl&gt;   &lt;dbl&gt; &lt;chr&gt;                  
+1 0.00116   0.025 Preprocessor1_Model0338</code></pre>
 </div>
-</div>
-<p>and the 100 metrics</p>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="fu">collect_metrics</span>(cv_compact, <span class="at">summarize =</span> <span class="cn">FALSE</span>)<span class="sc">$</span>.estimate</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>hp_best_compact<span class="sc">$</span>.config</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>  [1] 0.7741935 0.7741935 0.9354839 0.6774194 0.8333333 0.8000000 0.8000000
-  [8] 0.6333333 0.8000000 0.7586207 0.8709677 0.8064516 0.7096774 0.6451613
- [15] 0.8333333 0.7000000 0.8000000 0.8000000 0.7333333 0.8620690 0.8387097
- [22] 0.6774194 0.8064516 0.8064516 0.7666667 0.8000000 0.8333333 0.7333333
- [29] 0.9000000 0.7586207 0.6451613 0.8709677 0.6774194 0.8064516 0.7333333
- [36] 0.8000000 0.8000000 0.7666667 0.8333333 0.8275862 0.9354839 0.7741935
- [43] 0.8709677 0.8387097 0.5666667 0.6666667 0.7666667 0.8333333 0.8000000
- [50] 0.7586207 0.8064516 0.8064516 0.6451613 0.9032258 0.7666667 0.7666667
- [57] 0.8000000 0.9333333 0.7000000 0.7931034 0.7096774 0.7741935 0.6451613
- [64] 0.8064516 0.9666667 0.7000000 0.7000000 0.8333333 0.8000000 0.8620690
- [71] 0.7419355 0.8709677 0.8709677 0.7741935 0.8333333 0.6666667 0.8333333
- [78] 0.7333333 0.6666667 0.8620690 0.8064516 0.7419355 0.8709677 0.6774194
- [85] 0.8333333 0.7666667 0.7666667 0.8333333 0.6666667 0.8275862 0.7096774
- [92] 0.7741935 0.8387097 0.7741935 0.8666667 0.8333333 0.7333333 0.8333333
- [99] 0.7000000 0.9310345</code></pre>
+<pre><code>[1] "Preprocessor1_Model0338"</code></pre>
 </div>
 </div>
-<hr>
-<p>Define a function for Nadeau and Bengio (2003) correlated t-test</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="co"># included in fun_ml.R</span></span>
-<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>nb_correlated_t_test <span class="ot">&lt;-</span> <span class="cf">function</span>(cv_fits_full, cv_fits_compact, <span class="at">k =</span> <span class="dv">10</span>){</span>
-<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>    cv_metrics_full <span class="ot">&lt;-</span> <span class="fu">collect_metrics</span>(cv_fits_full, <span class="at">summarize =</span> <span class="cn">FALSE</span>)<span class="sc">$</span>.estimate</span>
-<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>    cv_metrics_compact <span class="ot">&lt;-</span> <span class="fu">collect_metrics</span>(cv_fits_compact, <span class="at">summarize =</span> <span class="cn">FALSE</span>)<span class="sc">$</span>.estimate</span>
-<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>    diffs <span class="ot">&lt;-</span> cv_metrics_full <span class="sc">-</span> cv_metrics_compact</span>
-<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>    n <span class="ot">&lt;-</span> <span class="fu">length</span>(diffs)</span>
-<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>    mean_diff <span class="ot">&lt;-</span> <span class="fu">mean</span>(diffs)</span>
-<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>    var_diffs <span class="ot">&lt;-</span> <span class="fu">var</span>(diffs)</span>
-<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>    proportion_test <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> k</span>
-<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>    proportion_train <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> proportion_test</span>
-<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a>    correction <span class="ot">&lt;-</span> (<span class="dv">1</span> <span class="sc">/</span> n) <span class="sc">+</span> (proportion_test <span class="sc">/</span> proportion_train)</span>
-<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a>    se <span class="ot">=</span> <span class="fu">sqrt</span>(correction <span class="sc">*</span> var_diffs)</span>
-<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a>    t <span class="ot">=</span> <span class="fu">abs</span>(mean_diff<span class="sc">/</span>se)</span>
-<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a>    p_value <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">pt</span>(t, n <span class="sc">-</span> <span class="dv">1</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
-<span id="cb45-17"><a href="#cb45-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(<span class="at">mean_diff =</span> mean_diff, <span class="at">se =</span> se, <span class="at">t =</span> t, <span class="at">df =</span> n <span class="sc">-</span> <span class="dv">1</span>, <span class="at">p_value =</span> p_value)</span>
-<span id="cb45-18"><a href="#cb45-18" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>cv_compact <span class="ot">&lt;-</span> <span class="fu">collect_metrics</span>(fits_compact, <span class="at">summarize =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(.config <span class="sc">==</span> hp_best_compact<span class="sc">$</span>.config) <span class="sc">|&gt;</span> </span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(.estimate)</span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>cv_full <span class="sc">|&gt;</span> <span class="fu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  [1] 0.8387097 0.9032258 0.8387097 0.8709677 0.8000000 0.7333333 0.8666667
+  [8] 0.7333333 0.8666667 0.8275862 0.8064516 0.8064516 0.7741935 0.8709677
+ [15] 0.8666667 0.8666667 0.8000000 0.8000000 0.7666667 0.8965517 0.8064516
+ [22] 0.8387097 0.8709677 0.8709677 0.9000000 0.9000000 0.9000000 0.6666667
+ [29] 0.7666667 0.7586207 0.9354839 0.8064516 0.8709677 0.7419355 0.7666667
+ [36] 0.9333333 0.7666667 0.7666667 0.9000000 0.7586207 0.7419355 0.8387097
+ [43] 0.8709677 0.9354839 0.8333333 0.9000000 0.8333333 0.7333333 0.7666667
+ [50] 0.8275862 0.8387097 0.9354839 0.8064516 0.7741935 0.8333333 0.8000000
+ [57] 0.9000000 0.7666667 0.9000000 0.7931034 0.7741935 0.8387097 0.8387097
+ [64] 0.9032258 0.9000000 0.8000000 0.8666667 0.7000000 0.8333333 0.8620690
+ [71] 0.7741935 0.8387097 0.8387097 0.8064516 0.7000000 0.9000000 0.8333333
+ [78] 0.8666667 0.8666667 0.8275862 0.8387097 0.8387097 0.8709677 0.8387097
+ [85] 0.7333333 0.8000000 0.8000000 0.9333333 0.7666667 0.8620690 0.6774194
+ [92] 0.7741935 0.9032258 0.8709677 0.8666667 0.9333333 0.8333333 0.8666667
+ [99] 0.7666667 0.8275862</code></pre>
+</div>
+</div>
+<p>NOTE: It is important that these are the SAME splits for both model configurations</p>
+<hr>
+<p>Now we can compare these 100 folds across the two models using the correlated t-test<br>
+<br>
+Define a function for Nadeau and Bengio (2003) correlated t-test</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a><span class="co"># included in fun_ml.R</span></span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>nb_correlated_t_test <span class="ot">&lt;-</span> <span class="cf">function</span>(cv_full, cv_compact, <span class="at">k =</span> <span class="dv">10</span>){</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>    diffs <span class="ot">&lt;-</span> cv_full <span class="sc">-</span> cv_compact</span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>    n <span class="ot">&lt;-</span> <span class="fu">length</span>(diffs)</span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>    mean_diff <span class="ot">&lt;-</span> <span class="fu">mean</span>(diffs)</span>
+<span id="cb35-7"><a href="#cb35-7" aria-hidden="true" tabindex="-1"></a>    var_diffs <span class="ot">&lt;-</span> <span class="fu">var</span>(diffs)</span>
+<span id="cb35-8"><a href="#cb35-8" aria-hidden="true" tabindex="-1"></a>    proportion_test <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">/</span> k</span>
+<span id="cb35-9"><a href="#cb35-9" aria-hidden="true" tabindex="-1"></a>    proportion_train <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> proportion_test</span>
+<span id="cb35-10"><a href="#cb35-10" aria-hidden="true" tabindex="-1"></a>    correction <span class="ot">&lt;-</span> (<span class="dv">1</span> <span class="sc">/</span> n) <span class="sc">+</span> (proportion_test <span class="sc">/</span> proportion_train)</span>
+<span id="cb35-11"><a href="#cb35-11" aria-hidden="true" tabindex="-1"></a>    se <span class="ot">=</span> <span class="fu">sqrt</span>(correction <span class="sc">*</span> var_diffs)</span>
+<span id="cb35-12"><a href="#cb35-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-13"><a href="#cb35-13" aria-hidden="true" tabindex="-1"></a>    t <span class="ot">=</span> <span class="fu">abs</span>(mean_diff<span class="sc">/</span>se)</span>
+<span id="cb35-14"><a href="#cb35-14" aria-hidden="true" tabindex="-1"></a>    p_value <span class="ot">&lt;-</span> <span class="dv">2</span> <span class="sc">*</span> <span class="fu">pt</span>(t, n <span class="sc">-</span> <span class="dv">1</span>, <span class="at">lower.tail =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb35-15"><a href="#cb35-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(<span class="at">mean_diff =</span> mean_diff, <span class="at">se =</span> se, <span class="at">t =</span> t, <span class="at">df =</span> n <span class="sc">-</span> <span class="dv">1</span>, <span class="at">p_value =</span> p_value)</span>
+<span id="cb35-16"><a href="#cb35-16" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <p>Calculate the t-test.<br>
@@ -1330,19 +1232,17 @@ In this instance we likely want a one-tailed test (though of course, that should
 <br>
 My function returns a two-tailed p-value so we should cut it in half.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nb_correlated_t_test</span>(<span class="at">cv_fits_full =</span> cv_full, </span>
-<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">cv_fits_compact =</span> cv_compact, </span>
-<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">k =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">nb_correlated_t_test</span>(cv_full, </span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>                     cv_compact, </span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">k =</span> <span class="dv">10</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 5
   mean_diff     se     t    df p_value
       &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;   &lt;dbl&gt;
-1    0.0424 0.0228  1.86    99  0.0653</code></pre>
+1    0.0333 0.0271  1.23    99   0.222</code></pre>
 </div>
 </div>
-<p>The improvement in prediction accuracy associated with the use of our exercise test protocol is significant (one-tailed).<br>
-<br>
-These data are unlikely if the full and compact models had the same accuracy.</p>
+<p>The improvement in prediction accuracy associated with the use of our exercise test protocol is not significant (p = 0.11, one-tailed).</p>
 <hr>
 </section>
 <section id="bayesian-estimation-for-model-comparisons" class="level2" data-number="11.7">
@@ -1395,7 +1295,7 @@ Using these priors and these data, we can derive the posterior probabilities for
 <hr>
 <p>Lets do this step by step. We will use the <code>tidyposterior</code> package. It in not included when we load <code>tidymodels</code> so we will load it now</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyposterior)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyposterior)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <p>We need to make a dataframe of our 100 performance estimates for the full and compact models. Here is the code to do this using our previous resamples of our models</p>
@@ -1403,54 +1303,69 @@ Using these priors and these data, we can derive the posterior probabilities for
 <li>Make dataframes of the accuracies from the full model and the compact model</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>accuracy_full <span class="ot">&lt;-</span></span>
-<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect_metrics</span>(cv_full, <span class="at">summarize =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
-<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(.metric <span class="sc">==</span> <span class="st">"accuracy"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(id, id2, <span class="at">full =</span> .estimate) <span class="sc">|&gt;</span> </span>
-<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>accuracy_full <span class="ot">&lt;-</span> <span class="fu">collect_metrics</span>(fits_full, <span class="at">summarize =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(.config <span class="sc">==</span> hp_best_full<span class="sc">$</span>.config) <span class="sc">|&gt;</span>   <span class="co"># as before - the best config</span></span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(id, id2, <span class="at">full =</span> .estimate) <span class="sc">|&gt;</span> </span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 100 × 3
    id       id2     full
    &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt;
- 1 Repeat01 Fold01 0.871
- 2 Repeat01 Fold02 0.806
- 3 Repeat01 Fold03 0.871
- 4 Repeat01 Fold04 0.839
- 5 Repeat01 Fold05 0.933
+ 1 Repeat01 Fold01 0.839
+ 2 Repeat01 Fold02 0.903
+ 3 Repeat01 Fold03 0.839
+ 4 Repeat01 Fold04 0.871
+ 5 Repeat01 Fold05 0.8  
  6 Repeat01 Fold06 0.733
- 7 Repeat01 Fold07 0.9  
- 8 Repeat01 Fold08 0.633
+ 7 Repeat01 Fold07 0.867
+ 8 Repeat01 Fold08 0.733
  9 Repeat01 Fold09 0.867
-10 Repeat01 Fold10 0.759
+10 Repeat01 Fold10 0.828
 # ℹ 90 more rows</code></pre>
 </div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>accuracy_compact <span class="ot">&lt;-</span></span>
-<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>     <span class="fu">collect_metrics</span>(cv_compact, <span class="at">summarize =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
-<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>     <span class="fu">filter</span>(.metric <span class="sc">==</span> <span class="st">"accuracy"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>     <span class="fu">select</span>(id, id2, <span class="at">compact =</span> .estimate)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>accuracy_compact <span class="ot">&lt;-</span> <span class="fu">collect_metrics</span>(fits_compact, <span class="at">summarize =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(.config <span class="sc">==</span> hp_best_compact<span class="sc">$</span>.config) <span class="sc">|&gt;</span>   <span class="co"># as before - the best config</span></span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(id, id2, <span class="at">compact =</span> .estimate) <span class="sc">|&gt;</span> </span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 100 × 3
+   id       id2    compact
+   &lt;chr&gt;    &lt;chr&gt;    &lt;dbl&gt;
+ 1 Repeat01 Fold01   0.774
+ 2 Repeat01 Fold02   0.806
+ 3 Repeat01 Fold03   0.774
+ 4 Repeat01 Fold04   0.806
+ 5 Repeat01 Fold05   0.867
+ 6 Repeat01 Fold06   0.7  
+ 7 Repeat01 Fold07   0.733
+ 8 Repeat01 Fold08   0.9  
+ 9 Repeat01 Fold09   0.7  
+10 Repeat01 Fold10   0.759
+# ℹ 90 more rows</code></pre>
+</div>
 </div>
 <hr>
 <p>Now we need to join these dataframes, matching on repeat and fold ids</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>resamples <span class="ot">&lt;-</span> accuracy_full <span class="sc">|&gt;</span> </span>
-<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">full_join</span>(accuracy_compact, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"id"</span>, <span class="st">"id2"</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>resamples <span class="ot">&lt;-</span> accuracy_full <span class="sc">|&gt;</span> </span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">full_join</span>(accuracy_compact, <span class="at">by =</span> <span class="fu">c</span>(<span class="st">"id"</span>, <span class="st">"id2"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 100 × 4
    id       id2     full compact
    &lt;chr&gt;    &lt;chr&gt;  &lt;dbl&gt;   &lt;dbl&gt;
- 1 Repeat01 Fold01 0.871   0.774
- 2 Repeat01 Fold02 0.806   0.774
- 3 Repeat01 Fold03 0.871   0.935
- 4 Repeat01 Fold04 0.839   0.677
- 5 Repeat01 Fold05 0.933   0.833
- 6 Repeat01 Fold06 0.733   0.8  
- 7 Repeat01 Fold07 0.9     0.8  
- 8 Repeat01 Fold08 0.633   0.633
- 9 Repeat01 Fold09 0.867   0.8  
-10 Repeat01 Fold10 0.759   0.759
+ 1 Repeat01 Fold01 0.839   0.774
+ 2 Repeat01 Fold02 0.903   0.806
+ 3 Repeat01 Fold03 0.839   0.774
+ 4 Repeat01 Fold04 0.871   0.806
+ 5 Repeat01 Fold05 0.8     0.867
+ 6 Repeat01 Fold06 0.733   0.7  
+ 7 Repeat01 Fold07 0.867   0.733
+ 8 Repeat01 Fold08 0.733   0.9  
+ 9 Repeat01 Fold09 0.867   0.7  
+10 Repeat01 Fold10 0.828   0.759
 # ℹ 90 more rows</code></pre>
 </div>
 </div>
@@ -1466,24 +1381,24 @@ Using these priors and these data, we can derive the posterior probabilities for
 <hr>
 <p>Here is the code</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">101</span>)</span>
-<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>pp <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
-<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
-<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">perf_mod</span>(resamples, </span>
-<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">formula =</span> statistic <span class="sc">~</span> model <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> id2<span class="sc">/</span>id),</span>
-<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>            <span class="co"># defaults but may require increases</span></span>
-<span id="cb54-7"><a href="#cb54-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">iter =</span> <span class="dv">2000</span>, <span class="at">chains =</span> <span class="dv">4</span>,  </span>
-<span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a>            <span class="co"># for more Gaussian distribution of accuracy</span></span>
-<span id="cb54-9"><a href="#cb54-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">transform =</span> tidyposterior<span class="sc">::</span>logit_trans,</span>
-<span id="cb54-10"><a href="#cb54-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">hetero_var =</span> <span class="cn">TRUE</span>, <span class="co"># for accuracy</span></span>
-<span id="cb54-11"><a href="#cb54-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">family =</span> gaussian, <span class="co"># default but could change depending on DV</span></span>
-<span id="cb54-12"><a href="#cb54-12" aria-hidden="true" tabindex="-1"></a>            <span class="co"># increase adapt_delta (e.g., .99, .999) to </span></span>
-<span id="cb54-13"><a href="#cb54-13" aria-hidden="true" tabindex="-1"></a>            <span class="co"># fix divergent transitions</span></span>
-<span id="cb54-14"><a href="#cb54-14" aria-hidden="true" tabindex="-1"></a>            <span class="at">adapt_delta =</span> .<span class="dv">99</span>)  </span>
-<span id="cb54-15"><a href="#cb54-15" aria-hidden="true" tabindex="-1"></a>  },</span>
-<span id="cb54-16"><a href="#cb54-16" aria-hidden="true" tabindex="-1"></a><span class="at">rerun =</span> rerun_setting,</span>
-<span id="cb54-17"><a href="#cb54-17" aria-hidden="true" tabindex="-1"></a><span class="at">dir =</span> <span class="st">"cache/011/"</span>,</span>
-<span id="cb54-18"><a href="#cb54-18" aria-hidden="true" tabindex="-1"></a><span class="at">file =</span> <span class="st">"pp"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">101</span>)</span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>pp <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">perf_mod</span>(resamples, </span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">formula =</span> statistic <span class="sc">~</span> model <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> id2<span class="sc">/</span>id),</span>
+<span id="cb45-6"><a href="#cb45-6" aria-hidden="true" tabindex="-1"></a>            <span class="co"># defaults but may require increases</span></span>
+<span id="cb45-7"><a href="#cb45-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">iter =</span> <span class="dv">2000</span>, <span class="at">chains =</span> <span class="dv">4</span>,  </span>
+<span id="cb45-8"><a href="#cb45-8" aria-hidden="true" tabindex="-1"></a>            <span class="co"># for more Gaussian distribution of accuracy</span></span>
+<span id="cb45-9"><a href="#cb45-9" aria-hidden="true" tabindex="-1"></a>            <span class="at">transform =</span> tidyposterior<span class="sc">::</span>logit_trans,</span>
+<span id="cb45-10"><a href="#cb45-10" aria-hidden="true" tabindex="-1"></a>            <span class="at">hetero_var =</span> <span class="cn">TRUE</span>, <span class="co"># for accuracy</span></span>
+<span id="cb45-11"><a href="#cb45-11" aria-hidden="true" tabindex="-1"></a>            <span class="at">family =</span> gaussian, <span class="co"># default but could change depending on DV</span></span>
+<span id="cb45-12"><a href="#cb45-12" aria-hidden="true" tabindex="-1"></a>            <span class="co"># increase adapt_delta (e.g., .99, .999) to </span></span>
+<span id="cb45-13"><a href="#cb45-13" aria-hidden="true" tabindex="-1"></a>            <span class="co"># fix divergent transitions</span></span>
+<span id="cb45-14"><a href="#cb45-14" aria-hidden="true" tabindex="-1"></a>            <span class="at">adapt_delta =</span> .<span class="dv">99</span>)  </span>
+<span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a><span class="at">rerun =</span> rerun_setting,</span>
+<span id="cb45-17"><a href="#cb45-17" aria-hidden="true" tabindex="-1"></a><span class="at">dir =</span> <span class="st">"cache/011/"</span>,</span>
+<span id="cb45-18"><a href="#cb45-18" aria-hidden="true" tabindex="-1"></a><span class="at">file =</span> <span class="st">"pp"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <p>In contrast to the NHST approach, we now have what we really want - posterior probabilities. Lets look at them</p>
@@ -1494,11 +1409,11 @@ Using these priors and these data, we can derive the posterior probabilities for
 <li><p>You can easily see in this instance that the probable values for accuracy are higher generally for full model than the compact model</p></li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> <span class="fu">autoplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> <span class="fu">autoplot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="011_explanation_files/figure-html/unnamed-chunk-36-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-29-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1507,15 +1422,15 @@ Using these priors and these data, we can derive the posterior probabilities for
 <p>You will likely want to publish a figure showing these posterior probability distributions so you may want to fine tune the plots. Here are some code options using ggplot</p>
 <p>Here is the same density plots using ggplot so you can now edit to adjust as you like</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> </span>
-<span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy</span>(<span class="at">seed =</span> <span class="dv">123</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">model =</span> <span class="fu">fct_inorder</span>(model)) <span class="sc">|&gt;</span></span>
-<span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
-<span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="fu">aes</span>(<span class="at">x =</span> posterior, <span class="at">color =</span> model) )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> </span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy</span>(<span class="at">seed =</span> <span class="dv">123</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">model =</span> <span class="fu">fct_inorder</span>(model)) <span class="sc">|&gt;</span></span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="fu">aes</span>(<span class="at">x =</span> posterior, <span class="at">color =</span> model) )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="011_explanation_files/figure-html/unnamed-chunk-37-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-30-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1523,16 +1438,16 @@ Using these priors and these data, we can derive the posterior probabilities for
 <hr>
 <p>We are actually sampling from the posterior distribution so it might make more sense to display these as histograms rather than density plots</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> </span>
-<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy</span>(<span class="at">seed =</span> <span class="dv">123</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">model =</span> <span class="fu">fct_inorder</span>(model)) <span class="sc">|&gt;</span></span>
-<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
-<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x =</span> posterior, <span class="at">fill =</span> model), <span class="at">color =</span> <span class="st">"white"</span>, <span class="at">alpha =</span> <span class="fl">0.4</span>,</span>
-<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">bins =</span> <span class="dv">50</span>, <span class="at">position =</span> <span class="st">"identity"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> </span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy</span>(<span class="at">seed =</span> <span class="dv">123</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">model =</span> <span class="fu">fct_inorder</span>(model)) <span class="sc">|&gt;</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span> </span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="fu">aes</span>(<span class="at">x =</span> posterior, <span class="at">fill =</span> model), <span class="at">color =</span> <span class="st">"white"</span>, <span class="at">alpha =</span> <span class="fl">0.4</span>,</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">bins =</span> <span class="dv">50</span>, <span class="at">position =</span> <span class="st">"identity"</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="011_explanation_files/figure-html/unnamed-chunk-38-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-31-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1540,16 +1455,16 @@ Using these priors and these data, we can derive the posterior probabilities for
 <hr>
 <p>Or maybe you want to facet the histograms if the overlap is difficulty to view</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> </span>
-<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy</span>(<span class="at">seed =</span> <span class="dv">123</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb58-3"><a href="#cb58-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">model =</span> <span class="fu">fct_inorder</span>(model)) <span class="sc">|&gt;</span></span>
-<span id="cb58-4"><a href="#cb58-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> posterior)) <span class="sc">+</span> </span>
-<span id="cb58-5"><a href="#cb58-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color =</span> <span class="st">"white"</span>, <span class="at">fill =</span> <span class="st">"blue"</span>, <span class="at">bins =</span> <span class="dv">30</span>) <span class="sc">+</span> </span>
-<span id="cb58-6"><a href="#cb58-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> model, <span class="at">ncol =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> </span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tidy</span>(<span class="at">seed =</span> <span class="dv">123</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">model =</span> <span class="fu">fct_inorder</span>(model)) <span class="sc">|&gt;</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> posterior)) <span class="sc">+</span> </span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">color =</span> <span class="st">"white"</span>, <span class="at">fill =</span> <span class="st">"blue"</span>, <span class="at">bins =</span> <span class="dv">30</span>) <span class="sc">+</span> </span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> model, <span class="at">ncol =</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="011_explanation_files/figure-html/unnamed-chunk-39-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1557,13 +1472,13 @@ Using these priors and these data, we can derive the posterior probabilities for
 <hr>
 <p>We can also calculate the 95% Higher Density Intervals (aka, 95% Credible Intervals; the Bayesian alternative to the 95% Confidence Intervals) for the accuracy of each model. This is the range of parameter estimate values that include 95% of the credible values. Kruschke described this in the <a href="pdfs/pkruschke2018a.pdf.pdf">assigned reading</a>.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> <span class="fu">tidy</span>(<span class="at">seed =</span> <span class="dv">123</span>) <span class="sc">|&gt;</span> <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> <span class="fu">tidy</span>(<span class="at">seed =</span> <span class="dv">123</span>) <span class="sc">|&gt;</span> <span class="fu">summary</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 2 × 4
   model    mean lower upper
   &lt;chr&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
-1 compact 0.796 0.780 0.811
-2 full    0.837 0.824 0.850</code></pre>
+1 compact 0.805 0.791 0.820
+2 full    0.838 0.825 0.850</code></pre>
 </div>
 </div>
 <hr>
@@ -1571,11 +1486,11 @@ Using these priors and these data, we can derive the posterior probabilities for
 <p>We said early that we would define a ROPE of +-.01 around zero. The models are only meaningful different if their accuracies differ by at least 1%</p>
 <p>Lets visualize the posterior probability distribution for the difference along with this ROPE using the built in autoplot function</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> <span class="fu">contrast_models</span>(<span class="at">seed =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span> <span class="fu">autoplot</span>(<span class="at">size =</span> .<span class="dv">01</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> <span class="fu">contrast_models</span>(<span class="at">seed =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span> <span class="fu">autoplot</span>(<span class="at">size =</span> .<span class="dv">01</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="011_explanation_files/figure-html/unnamed-chunk-40-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-33-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1583,32 +1498,32 @@ Using these priors and these data, we can derive the posterior probabilities for
 <hr>
 <p>We could make more pretty plots directly in ggplot</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> </span>
-<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">contrast_models</span>(<span class="at">seed =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
-<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="fu">aes</span>(<span class="at">x =</span> difference), <span class="at">color =</span> <span class="st">"blue"</span>)<span class="sc">+</span></span>
-<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> <span class="sc">-</span>.<span class="dv">01</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> </span>
-<span id="cb62-6"><a href="#cb62-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> .<span class="dv">01</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> </span>
+<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">contrast_models</span>(<span class="at">seed =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>() <span class="sc">+</span></span>
+<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density</span>(<span class="fu">aes</span>(<span class="at">x =</span> difference), <span class="at">color =</span> <span class="st">"blue"</span>)<span class="sc">+</span></span>
+<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> <span class="sc">-</span>.<span class="dv">01</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> </span>
+<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> .<span class="dv">01</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="011_explanation_files/figure-html/unnamed-chunk-41-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-34-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>or my prefered histogram</p>
+<p>or my preferred histogram</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> </span>
-<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">contrast_models</span>(<span class="at">seed =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> difference)) <span class="sc">+</span> </span>
-<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">50</span>, <span class="at">color =</span> <span class="st">"white"</span>, <span class="at">fill =</span> <span class="st">"blue"</span>)<span class="sc">+</span></span>
-<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> <span class="sc">-</span>.<span class="dv">01</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> </span>
-<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> .<span class="dv">01</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> </span>
+<span id="cb54-2"><a href="#cb54-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">contrast_models</span>(<span class="at">seed =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb54-3"><a href="#cb54-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> difference)) <span class="sc">+</span> </span>
+<span id="cb54-4"><a href="#cb54-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">bins =</span> <span class="dv">50</span>, <span class="at">color =</span> <span class="st">"white"</span>, <span class="at">fill =</span> <span class="st">"blue"</span>)<span class="sc">+</span></span>
+<span id="cb54-5"><a href="#cb54-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> <span class="sc">-</span>.<span class="dv">01</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>) <span class="sc">+</span> </span>
+<span id="cb54-6"><a href="#cb54-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="fu">aes</span>(<span class="at">xintercept =</span> .<span class="dv">01</span>), <span class="at">linetype =</span> <span class="st">"dashed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="011_explanation_files/figure-html/unnamed-chunk-42-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-35-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1616,23 +1531,23 @@ Using these priors and these data, we can derive the posterior probabilities for
 <hr>
 <p>But perhaps most important, lets calculate the probability that the full model is more accurate than the compact model</p>
 <ul>
-<li>The mean increase in accuracy is 4.13%</li>
-<li>The 95% HDI is 2.94% - 5.35%</li>
-<li>The probability that the full model is meaningfully higher than the compact model (i.e., what proportion of the credible values are above the ROPE) is 1.</li>
+<li>The mean increase in accuracy is in the <code>mean</code>column</li>
+<li>The 95% HDI is given by lower and upper</li>
+<li>The probability that the full model is meaningfully higher than the compact model (i.e., what proportion of the credible values are above the ROPE) is in the <code>prac_pos</code> column.</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> <span class="fu">contrast_models</span>(<span class="at">seed =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span> <span class="fu">summary</span>(<span class="at">size =</span> .<span class="dv">01</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb55"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb55-1"><a href="#cb55-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> <span class="fu">contrast_models</span>(<span class="at">seed =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span> <span class="fu">summary</span>(<span class="at">size =</span> .<span class="dv">01</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 9
   contrast        probability   mean  lower  upper  size pract_neg pract_equiv
   &lt;chr&gt;                 &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;
-1 full vs compact           1 0.0413 0.0294 0.0535  0.01         0     0.00025
+1 full vs compact           1 0.0324 0.0191 0.0458  0.01         0      0.0035
   pract_pos
       &lt;dbl&gt;
-1      1.00</code></pre>
+1     0.996</code></pre>
 </div>
 </div>
-<p>Alternatively, using the approach proposed by Kruschke (2018), you can conclude that the full model is meaningfully better than the compact model if the 95% HDI is fully above the ROPE. In this instance it is (.0294- .0535 is all above .01)</p>
+<p>Alternatively, using the approach proposed by Kruschke (2018), you can conclude that the full model is meaningfully better than the compact model if the 95% HDI is fully above the ROPE. This is also true!</p>
 <hr>
 <p>Finally, in some instances, you may not want to use the ROPE.</p>
 <ul>
@@ -1642,12 +1557,12 @@ Using these priors and these data, we can derive the posterior probabilities for
 <li>You can also set the size of the ROPE to 0 (though not necessary)</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> <span class="fu">contrast_models</span>(<span class="at">seed =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span> <span class="fu">summary</span>(<span class="at">size =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>pp <span class="sc">|&gt;</span> <span class="fu">contrast_models</span>(<span class="at">seed =</span> <span class="dv">4</span>) <span class="sc">|&gt;</span> <span class="fu">summary</span>(<span class="at">size =</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 9
   contrast        probability   mean  lower  upper  size pract_neg pract_equiv
   &lt;chr&gt;                 &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt;  &lt;dbl&gt; &lt;dbl&gt;     &lt;dbl&gt;       &lt;dbl&gt;
-1 full vs compact           1 0.0413 0.0294 0.0535     0        NA          NA
+1 full vs compact           1 0.0324 0.0191 0.0458     0        NA          NA
   pract_pos
       &lt;dbl&gt;
 1        NA</code></pre>
@@ -1692,22 +1607,34 @@ There are many <strong>model-agnostic</strong> (i.e., can be used across all sta
 <hr>
 <p>We follow <a href="https://www.tmwr.org/explain">recommendations from the tidymodels folks</a> and use the DALEX and DALEXtra packages for model agnostic approaches to feature importance.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DALEX, <span class="at">exclude=</span> <span class="st">"explain"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DALEX, <span class="at">exclude=</span> <span class="st">"explain"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Welcome to DALEX (version: 2.4.3).
 Find examples and detailed introduction at: http://ema.drwhy.ai/
 Additional features will be available after installation of: ggpubr.
 Use 'install_dependencies()' to get all suggested dependencies</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DALEXtra)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DALEXtra)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <p>Lets first get some coding issues accomplished before we dig into the details of the two feature importance metrics<br>
 <br>
-To calculate these importance metrics, we will need access to the raw features and outcome. Lets get those again.</p>
+To calculate these importance metrics, we will need access to the raw features and outcome.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>feat_full <span class="ot">&lt;-</span>  rec_full_prep <span class="sc">|&gt;</span> </span>
-<span id="cb71-2"><a href="#cb71-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_all)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a>rec_full_prep <span class="ot">&lt;-</span> rec_full <span class="sc">|&gt;</span> </span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(data_all)</span>
+<span id="cb62-3"><a href="#cb62-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb62-4"><a href="#cb62-4" aria-hidden="true" tabindex="-1"></a>feat_full <span class="ot">&lt;-</span>  rec_full_prep <span class="sc">|&gt;</span> </span>
+<span id="cb62-5"><a href="#cb62-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_all)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>And we now will need to fit the full model trained on all the data</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>fit_full <span class="ot">&lt;-</span> </span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">logistic_reg</span>(<span class="at">penalty =</span> hp_best_full<span class="sc">$</span>penalty,</span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">mixture =</span> hp_best_full<span class="sc">$</span>mixture) <span class="sc">|&gt;</span> </span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">set_engine</span>(<span class="st">"glmnet"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(disease <span class="sc">~</span> ., <span class="at">data =</span> feat_full)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <p>We will need to have a df for the features (without the outcome) and a separate vector for the outcome</p>
@@ -1715,15 +1642,15 @@ To calculate these importance metrics, we will need access to the raw features a
 <li>features are easy. Just select out the outcome</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> feat_full <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span>disease)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb64"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb64-1"><a href="#cb64-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> feat_full <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span>disease)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ul>
 <li>For outcome, we need to convert to 0/1 (if classification), and then pull the vector out of the dataframe</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> feat_full <span class="sc">|&gt;</span> </span>
-<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">disease =</span> <span class="fu">if_else</span>(disease <span class="sc">==</span> <span class="st">"yes"</span>, <span class="dv">1</span>, <span class="dv">0</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(disease)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> feat_full <span class="sc">|&gt;</span> </span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">disease =</span> <span class="fu">if_else</span>(disease <span class="sc">==</span> <span class="st">"yes"</span>, <span class="dv">1</span>, <span class="dv">0</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(disease)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <p>We also need a specific predictor function that will work with the DALEX package</p>
@@ -1734,21 +1661,21 @@ To calculate these importance metrics, we will need access to the raw features a
 <li>the prediction function must return a vector of probabilites for the positive class for classification problems (for regression, it simply returns a vector of the predicted values for <span class="math inline">\(y\)</span>)</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>predict_wrapper <span class="ot">&lt;-</span> <span class="cf">function</span>(model, newdata) {</span>
-<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(model, newdata, <span class="at">type =</span> <span class="st">"prob"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb74-3"><a href="#cb74-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pull</span>(.pred_yes)</span>
-<span id="cb74-4"><a href="#cb74-4" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>predict_wrapper <span class="ot">&lt;-</span> <span class="cf">function</span>(model, newdata) {</span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(model, newdata, <span class="at">type =</span> <span class="st">"prob"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb66-3"><a href="#cb66-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pull</span>(.pred_yes)</span>
+<span id="cb66-4"><a href="#cb66-4" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <p>We will also need an <code>explainer</code> object based on our model and data<br>
 <br>
 The <code>explain_tidymodels()</code> function in DALEXtra will create (and check) this object for us.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>explain_full <span class="ot">&lt;-</span> <span class="fu">explain_tidymodels</span>(fit_full, <span class="co"># our model object </span></span>
-<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">data =</span> x, <span class="co"># df with features without outcome</span></span>
-<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">y =</span> y, <span class="co"># outcome vector</span></span>
-<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a>                                   <span class="co"># our custom predictor function</span></span>
-<span id="cb75-5"><a href="#cb75-5" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">predict_function =</span> predict_wrapper)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb67"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb67-1"><a href="#cb67-1" aria-hidden="true" tabindex="-1"></a>explain_full <span class="ot">&lt;-</span> <span class="fu">explain_tidymodels</span>(fit_full, <span class="co"># our model object </span></span>
+<span id="cb67-2"><a href="#cb67-2" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">data =</span> x, <span class="co"># df with features without outcome</span></span>
+<span id="cb67-3"><a href="#cb67-3" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">y =</span> y, <span class="co"># outcome vector</span></span>
+<span id="cb67-4"><a href="#cb67-4" aria-hidden="true" tabindex="-1"></a>                                   <span class="co"># our custom predictor function</span></span>
+<span id="cb67-5"><a href="#cb67-5" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">predict_function =</span> predict_wrapper)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Preparation of a new explainer is initiated
   -&gt; model label       :  model_fit  (  default  )
@@ -1758,7 +1685,7 @@ The <code>explain_tidymodels()</code> function in DALEXtra will create (and chec
   -&gt; predict function  :  predict_function 
   -&gt; predicted values  :  No value for predict function target column. (  default  )
   -&gt; model_info        :  package parsnip , ver. 1.2.0 , task classification (  default  ) 
-  -&gt; predicted values  :  numerical, min =  0.1257285 , mean =  0.4587467 , max =  0.9100119  
+  -&gt; predicted values  :  numerical, min =  0.2574049 , mean =  0.458745 , max =  0.7385297  
   -&gt; residual function :  residual_function 
   -&gt; residuals         :  numerical, min =  0 , mean =  0 , max =  0  
   A new explainer has been created!  </code></pre>
@@ -1773,12 +1700,12 @@ The <code>explain_tidymodels()</code> function in DALEXtra will create (and chec
 <li>And because we converted our labels to 0/1 in the outcome vector, we need to transform <code>observed</code> back to yes/no as well</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>accuracy_wrapper <span class="ot">&lt;-</span> <span class="cf">function</span>(observed, predicted) {</span>
-<span id="cb77-2"><a href="#cb77-2" aria-hidden="true" tabindex="-1"></a>  observed <span class="ot">&lt;-</span> <span class="fu">fct</span>(<span class="fu">if_else</span>(observed <span class="sc">==</span> <span class="dv">1</span>, <span class="st">"yes"</span>, <span class="st">"no"</span>),</span>
-<span id="cb77-3"><a href="#cb77-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"yes"</span>, <span class="st">"no"</span>))</span>
-<span id="cb77-4"><a href="#cb77-4" aria-hidden="true" tabindex="-1"></a>  predicted <span class="ot">&lt;-</span> <span class="fu">fct</span>(<span class="fu">if_else</span>(predicted <span class="sc">&gt;</span> .<span class="dv">5</span>, <span class="st">"yes"</span>, <span class="st">"no"</span>), <span class="at">levels  =</span> <span class="fu">c</span>(<span class="st">"yes"</span>, <span class="st">"no"</span>))</span>
-<span id="cb77-5"><a href="#cb77-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">accuracy_vec</span>(observed, predicted)</span>
-<span id="cb77-6"><a href="#cb77-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb69"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb69-1"><a href="#cb69-1" aria-hidden="true" tabindex="-1"></a>accuracy_wrapper <span class="ot">&lt;-</span> <span class="cf">function</span>(observed, predicted) {</span>
+<span id="cb69-2"><a href="#cb69-2" aria-hidden="true" tabindex="-1"></a>  observed <span class="ot">&lt;-</span> <span class="fu">fct</span>(<span class="fu">if_else</span>(observed <span class="sc">==</span> <span class="dv">1</span>, <span class="st">"yes"</span>, <span class="st">"no"</span>),</span>
+<span id="cb69-3"><a href="#cb69-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"yes"</span>, <span class="st">"no"</span>))</span>
+<span id="cb69-4"><a href="#cb69-4" aria-hidden="true" tabindex="-1"></a>  predicted <span class="ot">&lt;-</span> <span class="fu">fct</span>(<span class="fu">if_else</span>(predicted <span class="sc">&gt;</span> .<span class="dv">5</span>, <span class="st">"yes"</span>, <span class="st">"no"</span>), <span class="at">levels  =</span> <span class="fu">c</span>(<span class="st">"yes"</span>, <span class="st">"no"</span>))</span>
+<span id="cb69-5"><a href="#cb69-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">accuracy_vec</span>(observed, predicted)</span>
+<span id="cb69-6"><a href="#cb69-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p><br>
 <br>
@@ -1806,11 +1733,11 @@ By randomly shuffling the values for the feature, we break the relationship betw
 <li>set B to indicate number of permutations to perform</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123456</span>)</span>
-<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a>imp_permute <span class="ot">&lt;-</span> <span class="fu">model_parts</span>(explain_full, </span>
-<span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a>                               <span class="at">type =</span> <span class="st">"raw"</span>, </span>
-<span id="cb78-4"><a href="#cb78-4" aria-hidden="true" tabindex="-1"></a>                               <span class="at">loss_function =</span> accuracy_wrapper,</span>
-<span id="cb78-5"><a href="#cb78-5" aria-hidden="true" tabindex="-1"></a>                               <span class="at">B =</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb70"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb70-1"><a href="#cb70-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123456</span>)</span>
+<span id="cb70-2"><a href="#cb70-2" aria-hidden="true" tabindex="-1"></a>imp_permute <span class="ot">&lt;-</span> <span class="fu">model_parts</span>(explain_full, </span>
+<span id="cb70-3"><a href="#cb70-3" aria-hidden="true" tabindex="-1"></a>                               <span class="at">type =</span> <span class="st">"raw"</span>, </span>
+<span id="cb70-4"><a href="#cb70-4" aria-hidden="true" tabindex="-1"></a>                               <span class="at">loss_function =</span> accuracy_wrapper,</span>
+<span id="cb70-5"><a href="#cb70-5" aria-hidden="true" tabindex="-1"></a>                               <span class="at">B =</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <p>Lets look at what this function returns</p>
@@ -1820,38 +1747,38 @@ By randomly shuffling the values for the feature, we break the relationship betw
 <li>Other row show the accuracy of the model when that specific feature is permuted</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb79"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb79-1"><a href="#cb79-1" aria-hidden="true" tabindex="-1"></a>imp_permute</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb71"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb71-1"><a href="#cb71-1" aria-hidden="true" tabindex="-1"></a>imp_permute</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                       variable mean_dropout_loss     label
 1                  _full_model_         0.8382838 model_fit
-2                            ca         0.7991419 model_fit
-3         thal_reversabledefect         0.8045875 model_fit
-4                  exer_ang_yes         0.8177888 model_fit
-5                   exer_max_hr         0.8309241 model_fit
-6               exer_st_depress         0.8314521 model_fit
-7                cp_non_anginal         0.8325083 model_fit
-8            exer_st_slope_flat         0.8333333 model_fit
-9                      sex_male         0.8335974 model_fit
-10             thal_fixeddefect         0.8382508 model_fit
-11                         chol         0.8382838 model_fit
-12                 fbs_elevated         0.8382838 model_fit
-13            rest_ecg_wave_abn         0.8382838 model_fit
-14      exer_st_slope_downslope         0.8382838 model_fit
-15                  cp_atyp_ang         0.8386139 model_fit
-16                      rest_bp         0.8388119 model_fit
-17 rest_ecg_ventric_hypertrophy         0.8401650 model_fit
-18                          age         0.8436964 model_fit
-19                   _baseline_         0.5059406 model_fit</code></pre>
+2                            ca         0.7944224 model_fit
+3         thal_reversabledefect         0.8002640 model_fit
+4                  exer_ang_yes         0.8116172 model_fit
+5                   exer_max_hr         0.8161386 model_fit
+6               exer_st_depress         0.8189769 model_fit
+7            exer_st_slope_flat         0.8237294 model_fit
+8                cp_non_anginal         0.8249505 model_fit
+9                      sex_male         0.8304620 model_fit
+10                  cp_atyp_ang         0.8338284 model_fit
+11                      rest_bp         0.8351155 model_fit
+12                          age         0.8355116 model_fit
+13 rest_ecg_ventric_hypertrophy         0.8378878 model_fit
+14                         chol         0.8382838 model_fit
+15                 fbs_elevated         0.8382838 model_fit
+16            rest_ecg_wave_abn         0.8382838 model_fit
+17      exer_st_slope_downslope         0.8382838 model_fit
+18             thal_fixeddefect         0.8382838 model_fit
+19                   _baseline_         0.5082508 model_fit</code></pre>
 </div>
 </div>
 <hr>
 <p>We can use the built in plot function from DALEX to display this</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(imp_permute)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(imp_permute)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="011_explanation_files/figure-html/unnamed-chunk-54-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-48-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1859,24 +1786,24 @@ By randomly shuffling the values for the feature, we break the relationship betw
 <hr>
 <p>Or we can plot it directly. Here is an example from the <a href="https://www.tmwr.org/explain">tidymodels folks</a></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a>full_model <span class="ot">&lt;-</span> imp_permute <span class="sc">|&gt;</span>  </span>
-<span id="cb82-2"><a href="#cb82-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(variable <span class="sc">==</span> <span class="st">"_full_model_"</span>)</span>
-<span id="cb82-3"><a href="#cb82-3" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb82-4"><a href="#cb82-4" aria-hidden="true" tabindex="-1"></a>imp_permute <span class="sc">|&gt;</span> </span>
-<span id="cb82-5"><a href="#cb82-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(variable <span class="sc">!=</span> <span class="st">"_full_model_"</span>,</span>
-<span id="cb82-6"><a href="#cb82-6" aria-hidden="true" tabindex="-1"></a>         variable <span class="sc">!=</span> <span class="st">"_baseline_"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb82-7"><a href="#cb82-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">variable =</span> <span class="fu">fct_reorder</span>(variable, dropout_loss)) <span class="sc">|&gt;</span> </span>
-<span id="cb82-8"><a href="#cb82-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(dropout_loss, variable)) <span class="sc">+</span></span>
-<span id="cb82-9"><a href="#cb82-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">data =</span> full_model, <span class="fu">aes</span>(<span class="at">xintercept =</span> dropout_loss),</span>
-<span id="cb82-10"><a href="#cb82-10" aria-hidden="true" tabindex="-1"></a>             <span class="at">linewidth =</span> <span class="fl">1.4</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
-<span id="cb82-11"><a href="#cb82-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">fill =</span> <span class="st">"#91CBD765"</span>, <span class="at">alpha =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
-<span id="cb82-12"><a href="#cb82-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
-<span id="cb82-13"><a href="#cb82-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"accuracy"</span>, </span>
-<span id="cb82-14"><a href="#cb82-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="cn">NULL</span>,  <span class="at">fill =</span> <span class="cn">NULL</span>,  <span class="at">color =</span> <span class="cn">NULL</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>full_model <span class="ot">&lt;-</span> imp_permute <span class="sc">|&gt;</span>  </span>
+<span id="cb74-2"><a href="#cb74-2" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(variable <span class="sc">==</span> <span class="st">"_full_model_"</span>)</span>
+<span id="cb74-3"><a href="#cb74-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb74-4"><a href="#cb74-4" aria-hidden="true" tabindex="-1"></a>imp_permute <span class="sc">|&gt;</span> </span>
+<span id="cb74-5"><a href="#cb74-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(variable <span class="sc">!=</span> <span class="st">"_full_model_"</span>,</span>
+<span id="cb74-6"><a href="#cb74-6" aria-hidden="true" tabindex="-1"></a>         variable <span class="sc">!=</span> <span class="st">"_baseline_"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb74-7"><a href="#cb74-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">variable =</span> <span class="fu">fct_reorder</span>(variable, dropout_loss)) <span class="sc">|&gt;</span> </span>
+<span id="cb74-8"><a href="#cb74-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(dropout_loss, variable)) <span class="sc">+</span></span>
+<span id="cb74-9"><a href="#cb74-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">data =</span> full_model, <span class="fu">aes</span>(<span class="at">xintercept =</span> dropout_loss),</span>
+<span id="cb74-10"><a href="#cb74-10" aria-hidden="true" tabindex="-1"></a>             <span class="at">linewidth =</span> <span class="fl">1.4</span>, <span class="at">lty =</span> <span class="dv">2</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb74-11"><a href="#cb74-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_boxplot</span>(<span class="at">fill =</span> <span class="st">"#91CBD765"</span>, <span class="at">alpha =</span> <span class="fl">0.4</span>) <span class="sc">+</span></span>
+<span id="cb74-12"><a href="#cb74-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(<span class="at">legend.position =</span> <span class="st">"none"</span>) <span class="sc">+</span></span>
+<span id="cb74-13"><a href="#cb74-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">x =</span> <span class="st">"accuracy"</span>, </span>
+<span id="cb74-14"><a href="#cb74-14" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="cn">NULL</span>,  <span class="at">fill =</span> <span class="cn">NULL</span>,  <span class="at">color =</span> <span class="cn">NULL</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="011_explanation_files/figure-html/unnamed-chunk-55-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-49-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1888,26 +1815,26 @@ This is what we would want for our example, were we want to know the contributio
 <br>
 To do this, we pass in a list of vectors of the groups. Here we provide just one group that we name <code>exer_test</code></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123456</span>)</span>
-<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a>imp_permute_group <span class="ot">&lt;-</span> <span class="fu">model_parts</span>(explain_full, </span>
-<span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a>                               <span class="at">type =</span> <span class="st">"raw"</span>, </span>
-<span id="cb83-4"><a href="#cb83-4" aria-hidden="true" tabindex="-1"></a>                               <span class="at">loss_function =</span> accuracy_wrapper,</span>
-<span id="cb83-5"><a href="#cb83-5" aria-hidden="true" tabindex="-1"></a>                               <span class="at">B =</span> <span class="dv">100</span>,</span>
-<span id="cb83-6"><a href="#cb83-6" aria-hidden="true" tabindex="-1"></a>                               <span class="at">variable_groups =</span> <span class="fu">list</span>(<span class="at">exer_test =</span> </span>
-<span id="cb83-7"><a href="#cb83-7" aria-hidden="true" tabindex="-1"></a>                                                        <span class="fu">c</span>(<span class="st">"exer_ang_yes"</span>,</span>
-<span id="cb83-8"><a href="#cb83-8" aria-hidden="true" tabindex="-1"></a>                                                          <span class="st">"exer_max_hr"</span>,</span>
-<span id="cb83-9"><a href="#cb83-9" aria-hidden="true" tabindex="-1"></a>                                                          <span class="st">"exer_st_depress"</span>, </span>
-<span id="cb83-10"><a href="#cb83-10" aria-hidden="true" tabindex="-1"></a>                                                          <span class="st">"exer_st_slope_downslope"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123456</span>)</span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>imp_permute_group <span class="ot">&lt;-</span> <span class="fu">model_parts</span>(explain_full, </span>
+<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a>                               <span class="at">type =</span> <span class="st">"raw"</span>, </span>
+<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a>                               <span class="at">loss_function =</span> accuracy_wrapper,</span>
+<span id="cb75-5"><a href="#cb75-5" aria-hidden="true" tabindex="-1"></a>                               <span class="at">B =</span> <span class="dv">100</span>,</span>
+<span id="cb75-6"><a href="#cb75-6" aria-hidden="true" tabindex="-1"></a>                               <span class="at">variable_groups =</span> <span class="fu">list</span>(<span class="at">exer_test =</span> </span>
+<span id="cb75-7"><a href="#cb75-7" aria-hidden="true" tabindex="-1"></a>                                                        <span class="fu">c</span>(<span class="st">"exer_ang_yes"</span>,</span>
+<span id="cb75-8"><a href="#cb75-8" aria-hidden="true" tabindex="-1"></a>                                                          <span class="st">"exer_max_hr"</span>,</span>
+<span id="cb75-9"><a href="#cb75-9" aria-hidden="true" tabindex="-1"></a>                                                          <span class="st">"exer_st_depress"</span>, </span>
+<span id="cb75-10"><a href="#cb75-10" aria-hidden="true" tabindex="-1"></a>                                                          <span class="st">"exer_st_slope_downslope"</span>)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <p>The results show that permuting these four features as a set drops accuracy from 0.838 to 0.738</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a>imp_permute_group</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb76"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb76-1"><a href="#cb76-1" aria-hidden="true" tabindex="-1"></a>imp_permute_group</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>      variable mean_dropout_loss     label
 1 _full_model_         0.8382838 model_fit
-2    exer_test         0.7378218 model_fit
-3   _baseline_         0.5119472 model_fit</code></pre>
+2    exer_test         0.7128713 model_fit
+3   _baseline_         0.5145215 model_fit</code></pre>
 </div>
 </div>
 <hr>
@@ -1928,10 +1855,10 @@ They provide the average marginal contribution to prediction (for a single obser
 <p>Lets calculate Shapley Values for the first observation in our dataset</p>
 <p>Their features values were</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a>obs_num <span class="ot">&lt;-</span> <span class="dv">1</span></span>
-<span id="cb86-2"><a href="#cb86-2" aria-hidden="true" tabindex="-1"></a>x1 <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span> </span>
-<span id="cb86-3"><a href="#cb86-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(obs_num) <span class="sc">|&gt;</span> </span>
-<span id="cb86-4"><a href="#cb86-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb78"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb78-1"><a href="#cb78-1" aria-hidden="true" tabindex="-1"></a>obs_num <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb78-2"><a href="#cb78-2" aria-hidden="true" tabindex="-1"></a>x1 <span class="ot">&lt;-</span> x <span class="sc">|&gt;</span> </span>
+<span id="cb78-3"><a href="#cb78-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(obs_num) <span class="sc">|&gt;</span> </span>
+<span id="cb78-4"><a href="#cb78-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 1
 Columns: 17
@@ -1956,10 +1883,10 @@ $ thal_reversabledefect        &lt;dbl&gt; -0.7918057</code></pre>
 </div>
 <p>And we can get Shapley values using <code>predict_parts()</code></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb88"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a>sv <span class="ot">&lt;-</span> <span class="fu">predict_parts</span>(explain_full, </span>
-<span id="cb88-2"><a href="#cb88-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">new_observation =</span> x1,</span>
-<span id="cb88-3"><a href="#cb88-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">type =</span> <span class="st">"shap"</span>,</span>
-<span id="cb88-4"><a href="#cb88-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">B =</span> <span class="dv">25</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb80"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb80-1"><a href="#cb80-1" aria-hidden="true" tabindex="-1"></a>sv <span class="ot">&lt;-</span> <span class="fu">predict_parts</span>(explain_full, </span>
+<span id="cb80-2"><a href="#cb80-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">new_observation =</span> x1,</span>
+<span id="cb80-3"><a href="#cb80-3" aria-hidden="true" tabindex="-1"></a>                    <span class="at">type =</span> <span class="st">"shap"</span>,</span>
+<span id="cb80-4"><a href="#cb80-4" aria-hidden="true" tabindex="-1"></a>                    <span class="at">B =</span> <span class="dv">25</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <p>There is a built in plot function for shap values<br>
@@ -1971,11 +1898,11 @@ For this first observation</p>
 <li>Bars to the left indicate that their feature value decreases their probability of disease</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb89"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb89-1"><a href="#cb89-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sv)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb81"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb81-1"><a href="#cb81-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(sv)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="011_explanation_files/figure-html/unnamed-chunk-60-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-54-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -1988,35 +1915,35 @@ Features that have big absolute Shapley values on average across observation are
 <br>
 First we need a function to get shapley values for each observation (along with the feature values for a nicer plot)</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb90"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb90-1"><a href="#cb90-1" aria-hidden="true" tabindex="-1"></a>get_shaps <span class="ot">&lt;-</span> <span class="cf">function</span>(df1){</span>
-<span id="cb90-2"><a href="#cb90-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict_parts</span>(explain_full, </span>
-<span id="cb90-3"><a href="#cb90-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">new_observation =</span> df1,</span>
-<span id="cb90-4"><a href="#cb90-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">type =</span> <span class="st">"shap"</span>,</span>
-<span id="cb90-5"><a href="#cb90-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">B =</span> <span class="dv">25</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb90-6"><a href="#cb90-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(B <span class="sc">==</span> <span class="dv">0</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb90-7"><a href="#cb90-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(variable_name, variable_value, contribution) <span class="sc">|&gt;</span> </span>
-<span id="cb90-8"><a href="#cb90-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as_tibble</span>()</span>
-<span id="cb90-9"><a href="#cb90-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb82"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb82-1"><a href="#cb82-1" aria-hidden="true" tabindex="-1"></a>get_shaps <span class="ot">&lt;-</span> <span class="cf">function</span>(df1){</span>
+<span id="cb82-2"><a href="#cb82-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict_parts</span>(explain_full, </span>
+<span id="cb82-3"><a href="#cb82-3" aria-hidden="true" tabindex="-1"></a>                <span class="at">new_observation =</span> df1,</span>
+<span id="cb82-4"><a href="#cb82-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">type =</span> <span class="st">"shap"</span>,</span>
+<span id="cb82-5"><a href="#cb82-5" aria-hidden="true" tabindex="-1"></a>                <span class="at">B =</span> <span class="dv">25</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb82-6"><a href="#cb82-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">filter</span>(B <span class="sc">==</span> <span class="dv">0</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb82-7"><a href="#cb82-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">select</span>(variable_name, variable_value, contribution) <span class="sc">|&gt;</span> </span>
+<span id="cb82-8"><a href="#cb82-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">as_tibble</span>()</span>
+<span id="cb82-9"><a href="#cb82-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <p>And then we can map this function over observations to get the Shapley values for each observation</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb91"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb91-1"><a href="#cb91-1" aria-hidden="true" tabindex="-1"></a>local_shaps <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
-<span id="cb91-2"><a href="#cb91-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
-<span id="cb91-3"><a href="#cb91-3" aria-hidden="true" tabindex="-1"></a>    x <span class="sc">|&gt;</span></span>
-<span id="cb91-4"><a href="#cb91-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">slice_sample</span>(<span class="at">prop =</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">5</span>) <span class="sc">|&gt;</span> <span class="co"># take random sample to reduce computation time</span></span>
-<span id="cb91-5"><a href="#cb91-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">mutate</span>(<span class="at">id =</span> <span class="fu">row_number</span>()) <span class="sc">|&gt;</span></span>
-<span id="cb91-6"><a href="#cb91-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">nest</span>(<span class="at">.by =</span> id, <span class="at">.key =</span> <span class="st">"dfs"</span>) <span class="sc">|&gt;</span>   <span class="co"># nest a dataframe for each observation</span></span>
-<span id="cb91-7"><a href="#cb91-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">mutate</span>(<span class="at">shaps =</span> <span class="fu">map</span>(dfs, \(df1) <span class="fu">get_shaps</span>(df1))) <span class="sc">|&gt;</span> </span>
-<span id="cb91-8"><a href="#cb91-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">select</span>(<span class="sc">-</span>dfs) <span class="sc">|&gt;</span></span>
-<span id="cb91-9"><a href="#cb91-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">unnest</span>(shaps)</span>
-<span id="cb91-10"><a href="#cb91-10" aria-hidden="true" tabindex="-1"></a>  },</span>
-<span id="cb91-11"><a href="#cb91-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting,</span>
-<span id="cb91-12"><a href="#cb91-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/011/"</span>,</span>
-<span id="cb91-13"><a href="#cb91-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"local_shaps"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb83"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb83-1"><a href="#cb83-1" aria-hidden="true" tabindex="-1"></a>local_shaps <span class="ot">&lt;-</span> <span class="fu">cache_rds</span>(</span>
+<span id="cb83-2"><a href="#cb83-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">expr =</span> {</span>
+<span id="cb83-3"><a href="#cb83-3" aria-hidden="true" tabindex="-1"></a>    x <span class="sc">|&gt;</span></span>
+<span id="cb83-4"><a href="#cb83-4" aria-hidden="true" tabindex="-1"></a>      <span class="fu">slice_sample</span>(<span class="at">prop =</span> <span class="dv">1</span><span class="sc">/</span><span class="dv">5</span>) <span class="sc">|&gt;</span> <span class="co"># take random sample to reduce computation time</span></span>
+<span id="cb83-5"><a href="#cb83-5" aria-hidden="true" tabindex="-1"></a>      <span class="fu">mutate</span>(<span class="at">id =</span> <span class="fu">row_number</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb83-6"><a href="#cb83-6" aria-hidden="true" tabindex="-1"></a>      <span class="fu">nest</span>(<span class="at">.by =</span> id, <span class="at">.key =</span> <span class="st">"dfs"</span>) <span class="sc">|&gt;</span>   <span class="co"># nest a dataframe for each observation</span></span>
+<span id="cb83-7"><a href="#cb83-7" aria-hidden="true" tabindex="-1"></a>      <span class="fu">mutate</span>(<span class="at">shaps =</span> <span class="fu">map</span>(dfs, \(df1) <span class="fu">get_shaps</span>(df1))) <span class="sc">|&gt;</span> </span>
+<span id="cb83-8"><a href="#cb83-8" aria-hidden="true" tabindex="-1"></a>      <span class="fu">select</span>(<span class="sc">-</span>dfs) <span class="sc">|&gt;</span></span>
+<span id="cb83-9"><a href="#cb83-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">unnest</span>(shaps)</span>
+<span id="cb83-10"><a href="#cb83-10" aria-hidden="true" tabindex="-1"></a>  },</span>
+<span id="cb83-11"><a href="#cb83-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting,</span>
+<span id="cb83-12"><a href="#cb83-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/011/"</span>,</span>
+<span id="cb83-13"><a href="#cb83-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"local_shaps"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb92"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb92-1"><a href="#cb92-1" aria-hidden="true" tabindex="-1"></a>local_shaps <span class="sc">|&gt;</span> <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb84"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb84-1"><a href="#cb84-1" aria-hidden="true" tabindex="-1"></a>local_shaps <span class="sc">|&gt;</span> <span class="fu">head</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 6 × 4
      id variable_name  variable_value contribution
@@ -2038,20 +1965,20 @@ First we need a function to get shapley values for each observation (along with 
 <li>The other <code>exer_</code> features are not far behind.</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb94"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb94-1"><a href="#cb94-1" aria-hidden="true" tabindex="-1"></a>local_shaps <span class="sc">|&gt;</span></span>
-<span id="cb94-2"><a href="#cb94-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">contribution =</span> <span class="fu">abs</span>(contribution)) <span class="sc">|&gt;</span></span>
-<span id="cb94-3"><a href="#cb94-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(variable_name) <span class="sc">|&gt;</span></span>
-<span id="cb94-4"><a href="#cb94-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">mean_shap =</span> <span class="fu">mean</span>(contribution)) <span class="sc">|&gt;</span></span>
-<span id="cb94-5"><a href="#cb94-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(mean_shap)) <span class="sc">|&gt;</span></span>
-<span id="cb94-6"><a href="#cb94-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">variable_name =</span> <span class="fu">factor</span>(variable_name),</span>
-<span id="cb94-7"><a href="#cb94-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">variable_name =</span> <span class="fu">fct_reorder</span>(variable_name, mean_shap)) <span class="sc">|&gt;</span></span>
-<span id="cb94-8"><a href="#cb94-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> variable_name, <span class="at">y =</span> mean_shap)) <span class="sc">+</span></span>
-<span id="cb94-9"><a href="#cb94-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb94-10"><a href="#cb94-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb86"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb86-1"><a href="#cb86-1" aria-hidden="true" tabindex="-1"></a>local_shaps <span class="sc">|&gt;</span></span>
+<span id="cb86-2"><a href="#cb86-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">contribution =</span> <span class="fu">abs</span>(contribution)) <span class="sc">|&gt;</span></span>
+<span id="cb86-3"><a href="#cb86-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(variable_name) <span class="sc">|&gt;</span></span>
+<span id="cb86-4"><a href="#cb86-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">mean_shap =</span> <span class="fu">mean</span>(contribution)) <span class="sc">|&gt;</span></span>
+<span id="cb86-5"><a href="#cb86-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(mean_shap)) <span class="sc">|&gt;</span></span>
+<span id="cb86-6"><a href="#cb86-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">variable_name =</span> <span class="fu">factor</span>(variable_name),</span>
+<span id="cb86-7"><a href="#cb86-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">variable_name =</span> <span class="fu">fct_reorder</span>(variable_name, mean_shap)) <span class="sc">|&gt;</span></span>
+<span id="cb86-8"><a href="#cb86-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> variable_name, <span class="at">y =</span> mean_shap)) <span class="sc">+</span></span>
+<span id="cb86-9"><a href="#cb86-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb86-10"><a href="#cb86-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="011_explanation_files/figure-html/unnamed-chunk-64-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-58-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -2132,21 +2059,21 @@ It will require the explainer object we created earlier for feature importance<b
 Otherwise, the code is very straight-forward. Here we get the predicted values for an ALE plot to examine the effect of one of the features from our exercise test (<code>exer_max_hr</code>) on disease probabilities.</p>
 <p>If we wanted a PD plot, we could simply substitute <code>partial</code> for <code>accumulated</code></p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb95"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb95-1"><a href="#cb95-1" aria-hidden="true" tabindex="-1"></a>ale <span class="ot">&lt;-</span> <span class="fu">model_profile</span>(<span class="at">explainer =</span> explain_full,</span>
-<span id="cb95-2"><a href="#cb95-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">type =</span> <span class="st">"accumulated"</span>,</span>
-<span id="cb95-3"><a href="#cb95-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">variables =</span> <span class="st">"exer_max_hr"</span>,</span>
-<span id="cb95-4"><a href="#cb95-4" aria-hidden="true" tabindex="-1"></a>                     <span class="at">N =</span> <span class="cn">NULL</span>)  <span class="co"># to use full sample (default is 100)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb87"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb87-1"><a href="#cb87-1" aria-hidden="true" tabindex="-1"></a>ale <span class="ot">&lt;-</span> <span class="fu">model_profile</span>(<span class="at">explainer =</span> explain_full,</span>
+<span id="cb87-2"><a href="#cb87-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">type =</span> <span class="st">"accumulated"</span>,</span>
+<span id="cb87-3"><a href="#cb87-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">variables =</span> <span class="st">"exer_max_hr"</span>,</span>
+<span id="cb87-4"><a href="#cb87-4" aria-hidden="true" tabindex="-1"></a>                     <span class="at">N =</span> <span class="cn">NULL</span>)  <span class="co"># to use full sample (default is 100)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <p>There is a default plot function for these plot object (or you could use the data in the object to make your own ggplot)<br>
 <br>
 The probability of disease decreases as max hr increases in the exercise test</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb96"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb96-1"><a href="#cb96-1" aria-hidden="true" tabindex="-1"></a>ale <span class="sc">|&gt;</span> <span class="fu">plot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb88"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb88-1"><a href="#cb88-1" aria-hidden="true" tabindex="-1"></a>ale <span class="sc">|&gt;</span> <span class="fu">plot</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="011_explanation_files/figure-html/unnamed-chunk-66-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="011_explanation_files/figure-html/unnamed-chunk-60-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
