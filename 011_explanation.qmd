@@ -552,11 +552,9 @@ Now we can compare these 100 folds across the two models using the correlated t-
 Define a function for Nadeau and Bengio (2003) correlated t-test
 ```{r}
 # included in fun_ml.R
-nb_correlated_t_test <- function(cv_fits_full, cv_fits_compact, k = 10){
+nb_correlated_t_test <- function(cv_full, cv_compact, k = 10){
 
-    cv_metrics_full <- collect_metrics(cv_fits_full, summarize = FALSE)$.estimate
-    cv_metrics_compact <- collect_metrics(cv_fits_compact, summarize = FALSE)$.estimate
-    diffs <- cv_metrics_full - cv_metrics_compact
+    diffs <- cv_full - cv_compact
     n <- length(diffs)
     mean_diff <- mean(diffs)
     var_diffs <- var(diffs)
@@ -581,15 +579,12 @@ In this instance we likely want a one-tailed test (though of course, that should
 \
 My function returns a two-tailed p-value so we should cut it in half.
 ```{r}
-nb_correlated_t_test(cv_fits_full = cv_full, 
-                     cv_fits_compact = cv_compact, 
+nb_correlated_t_test(cv_full, 
+                     cv_compact, 
                      k = 10)
 ```
 
-The improvement in prediction accuracy associated with the use of our exercise test protocol is significant (one-tailed).
-\
-\
-These data are unlikely if the full and compact models had the same accuracy.  
+The improvement in prediction accuracy associated with the use of our exercise test protocol is not significant (p = 0.11, one-tailed).
 
 -----
 
@@ -656,18 +651,17 @@ We need to make a dataframe of our 100 performance estimates for the full and co
 
 - Make dataframes of the accuracies from the full model and the compact model
 ```{r}
-accuracy_full <-
-  collect_metrics(cv_full, summarize = FALSE) |>
-  filter(.metric == "accuracy") |>
+accuracy_full <- collect_metrics(fits_full, summarize = FALSE) |> 
+  filter(.config == hp_best_full$.config) |>   # as before - the best config
   select(id, id2, full = .estimate) |> 
   print()
 ```
 
 ```{r}
-accuracy_compact <-
-     collect_metrics(cv_compact, summarize = FALSE) |>
-     filter(.metric == "accuracy") |>
-     select(id, id2, compact = .estimate)
+accuracy_compact <- collect_metrics(fits_compact, summarize = FALSE) |> 
+  filter(.config == hp_best_compact$.config) |>   # as before - the best config
+  select(id, id2, compact = .estimate) |> 
+  print()
 ```
 
 -----
@@ -805,7 +799,7 @@ pp |>
   geom_vline(aes(xintercept = .01), linetype = "dashed")
 ```
 
-or my prefered histogram
+or my preferred histogram
 ```{r}
 pp |> 
   contrast_models(seed = 4) |> 
@@ -819,15 +813,15 @@ pp |>
 
 But perhaps most important, lets calculate the probability that the full model is more accurate than the compact model
 
-- The mean increase in accuracy is 4.13%
-- The 95% HDI is 2.94% - 5.35%
-- The probability that the full model is meaningfully higher than the compact model (i.e., what proportion of the credible values are above the ROPE) is 1.
+- The mean increase in accuracy is in the `mean`column
+- The 95% HDI is given by lower and  upper 
+- The probability that the full model is meaningfully higher than the compact model (i.e., what proportion of the credible values are above the ROPE) is in the `prac_pos` column.
 
 ```{r}
 pp |> contrast_models(seed = 4) |> summary(size = .01)
 ```
 
-Alternatively, using the approach proposed by Kruschke (2018), you can conclude that the full model is meaningfully better than the compact model if the 95% HDI is fully above the ROPE.  In this instance it is (.0294- .0535 is all above .01)
+Alternatively, using the approach proposed by Kruschke (2018), you can conclude that the full model is meaningfully better than the compact model if the 95% HDI is fully above the ROPE. This is also true!
 
 -----
 
@@ -895,11 +889,26 @@ library(DALEXtra)
 Lets first get some coding issues accomplished before we dig into the details of the two feature importance metrics
 \
 \
-To calculate these importance metrics, we will need access to the raw features and outcome. Lets get those again.
+To calculate these importance metrics, we will need access to the raw features and outcome.
 
 ```{r}
+rec_full_prep <- rec_full |> 
+  prep(data_all)
+
 feat_full <-  rec_full_prep |> 
   bake(data_all)
+```
+
+-----
+
+And we now will need to fit the full model trained on all the data
+
+```{r}
+fit_full <- 
+  logistic_reg(penalty = hp_best_full$penalty,
+               mixture = hp_best_full$mixture) |> 
+  set_engine("glmnet") |> 
+  fit(disease ~ ., data = feat_full)
 ```
 
 -----
