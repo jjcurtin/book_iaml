@@ -479,6 +479,7 @@ Post questions to the readings channel in Slack</p>
 <li><a href="https://mediaspace.wisc.edu/media/iaml+unit+11-1/1_sz7we4by">Introduction to Model Comparisons</a> ~ 23 mins</li>
 <li><a href="https://mediaspace.wisc.edu/media/iaml+unit+11-2/1_0iykku1l">The Nadeau &amp; Bengio Correlated t-test for Model Comparisons</a> ~ 10 mins</li>
 <li><a href="https://mediaspace.wisc.edu/media/iaml+unit+11-3/1_mvczl7cn">Bayesian Estimation for Model Comparisons</a> ~ 28 mins</li>
+<li><a href="https://mediaspace.wisc.edu/media/iaml+unit+11-4/1_ppfee7t7">Introduction to Feature Importance and the DALEX package</a> ~ 11 mins</li>
 <li><a href="">Permutation Feature Importance</a></li>
 <li><a href="">SHAP Feature Importance</a></li>
 <li><a href="">Visual Approaches to Understand Models</a></li>
@@ -1656,7 +1657,10 @@ Using these priors and these data, we can derive the posterior probabilities for
 </section>
 <section id="feature-importance" class="level2" data-number="11.8">
 <h2 data-number="11.8" class="anchored" data-anchor-id="feature-importance"><span class="header-section-number">11.8</span> Feature Importance</h2>
-<p>There as been increasing focus on improving the interpretability of machine learning models that we are using. There are numerous reasons to want to better understand why our models make the predictions that they do.</p>
+<p>There as been increasing focus on improving the interpretability of machine learning models that we are using.<br>
+<br>
+<br>
+There are numerous reasons to want to better understand why our models make the predictions that they do.</p>
 <ul>
 <li>The growing set of tools to interpret our models can help address our <strong>explanatory questions</strong></li>
 <li>But they can also help us <strong>find errors</strong> in our models</li>
@@ -1714,19 +1718,20 @@ To calculate these importance metrics, we will need access to the raw features a
 <div class="sourceCode cell-code" id="cb72"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb72-1"><a href="#cb72-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> feat_full <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span>disease)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <ul>
-<li>For outcome, we need to select it first, convert to 0/1, and then pull the vector out of the dataframe</li>
+<li>For outcome, we need to convert to 0/1 (if classification), and then pull the vector out of the dataframe</li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb73"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb73-1"><a href="#cb73-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> feat_full <span class="sc">|&gt;</span> </span>
-<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(disease) <span class="sc">|&gt;</span></span>
-<span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">disease =</span> <span class="fu">if_else</span>(disease <span class="sc">==</span> <span class="st">"yes"</span>, <span class="dv">1</span>, <span class="dv">0</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb73-4"><a href="#cb73-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(disease)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb73-2"><a href="#cb73-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">disease =</span> <span class="fu">if_else</span>(disease <span class="sc">==</span> <span class="st">"yes"</span>, <span class="dv">1</span>, <span class="dv">0</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb73-3"><a href="#cb73-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(disease)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
 <p>We also need a specific predictor function that will work with the DALEX package</p>
 <p>We will write a custom function that “wraps” around our tidymodels <code>predict()</code> function</p>
+<p>DALEX needs:</p>
 <ul>
-<li>It needs two parameters named <code>model</code> and <code>newdata</code> and it needs to return a single column of probabilites for classification problems</li>
+<li>the prediction function to have two parameters named <code>model</code> and <code>newdata</code></li>
+<li>the prediction function must return a vector of probabilites for the positive class for classification problems (for regression, it simply returns a vector of the predicted values for <span class="math inline">\(y\)</span>)</li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb74"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb74-1"><a href="#cb74-1" aria-hidden="true" tabindex="-1"></a>predict_wrapper <span class="ot">&lt;-</span> <span class="cf">function</span>(model, newdata) {</span>
@@ -1735,12 +1740,14 @@ To calculate these importance metrics, we will need access to the raw features a
 <span id="cb74-4"><a href="#cb74-4" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
-<p>We will also need an <code>explainer</code> object based on our model and data. The <code>explain_tidymodels()</code> function in DALEXtra will create this object for us.</p>
+<p>We will also need an <code>explainer</code> object based on our model and data<br>
+<br>
+The <code>explain_tidymodels()</code> function in DALEXtra will create (and check) this object for us.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb75"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb75-1"><a href="#cb75-1" aria-hidden="true" tabindex="-1"></a>explain_full <span class="ot">&lt;-</span> <span class="fu">explain_tidymodels</span>(fit_full, <span class="co"># our model object </span></span>
-<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">data =</span> x, <span class="co"># features without outcome</span></span>
-<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">y =</span> y, <span class="co"># outcome</span></span>
-<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a>                                   <span class="co"># our predictor function</span></span>
+<span id="cb75-2"><a href="#cb75-2" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">data =</span> x, <span class="co"># df with features without outcome</span></span>
+<span id="cb75-3"><a href="#cb75-3" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">y =</span> y, <span class="co"># outcome vector</span></span>
+<span id="cb75-4"><a href="#cb75-4" aria-hidden="true" tabindex="-1"></a>                                   <span class="co"># our custom predictor function</span></span>
 <span id="cb75-5"><a href="#cb75-5" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">predict_function =</span> predict_wrapper)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Preparation of a new explainer is initiated
@@ -1758,11 +1765,12 @@ To calculate these importance metrics, we will need access to the raw features a
 </div>
 </div>
 <hr>
-<p>Finally, we need to define a custom function for our performance metric</p>
+<p>Finally, we need to define a custom function for our performance metric as well</p>
 <ul>
 <li>It needs to have two parameters: <code>observed</code> and <code>predicted</code></li>
 <li>We can create a wrapper function around <code>accuracy_vec()</code> to fit these needs</li>
-<li>For accuracy, we need to transform the predicted probabilites from our prediction function to class predictions</li>
+<li>For accuracy, we need to transform the predicted probabilites from our prediction function to class predictions (e.g.. yes/no)</li>
+<li>And because we converted our labels to 0/1 in the outcome vector, we need to transform <code>observed</code> back to yes/no as well</li>
 </ul>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb77"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb77-1"><a href="#cb77-1" aria-hidden="true" tabindex="-1"></a>accuracy_wrapper <span class="ot">&lt;-</span> <span class="cf">function</span>(observed, predicted) {</span>
@@ -2004,7 +2012,7 @@ First we need a function to get shapley values for each observation (along with 
 <span id="cb91-9"><a href="#cb91-9" aria-hidden="true" tabindex="-1"></a>      <span class="fu">unnest</span>(shaps)</span>
 <span id="cb91-10"><a href="#cb91-10" aria-hidden="true" tabindex="-1"></a>  },</span>
 <span id="cb91-11"><a href="#cb91-11" aria-hidden="true" tabindex="-1"></a>  <span class="at">rerun =</span> rerun_setting,</span>
-<span id="cb91-12"><a href="#cb91-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/011"</span>,</span>
+<span id="cb91-12"><a href="#cb91-12" aria-hidden="true" tabindex="-1"></a>  <span class="at">dir =</span> <span class="st">"cache/011/"</span>,</span>
 <span id="cb91-13"><a href="#cb91-13" aria-hidden="true" tabindex="-1"></a>  <span class="at">file =</span> <span class="st">"local_shaps"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <div class="cell">
