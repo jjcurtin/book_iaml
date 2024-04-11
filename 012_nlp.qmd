@@ -54,7 +54,7 @@ Post questions to the video-lectures channel in Slack
 - [data](homework/unit_12/alcohol_tweets.csv)
 - [rmd shell](homework/unit_12/hw_unit_12_nlp.Rmd)
 - [GloVE embeddings](homework/unit_12/glove_twitter.csv)
-- solution: [rmd](); [html]()
+- [solution]()
 
 
  Submit the application assignment [here](https://canvas.wisc.edu/courses/395546/assignments/2187686) and complete the [unit quiz](https://canvas.wisc.edu/courses/395546/quizzes/514056) by 8 pm on Wednesday, April 17th
@@ -170,11 +170,9 @@ str_extract(x, "[aeiou]")
 
 -----
 
-6 `str_match(x, pattern)` extracts parts of the match defined by parentheses
+6 `str_match(x, pattern)` extracts parts of the match defined by parentheses. In this case, the characters on either side of the vowel 
 ```{r}
 # x <- c("why", "video", "cross", "extra", "deal", "authority")
-
-# extract the characters on either side of the vowel
 str_match(x, "(.)[aeiou](.)")
 ```
 
@@ -277,9 +275,12 @@ It contains:
 
 Let's start by loading the dataset and adding an identifier for each review (i.e., **document**, `doc_num`)
 ```{r}
-data_trn <- read_csv(here::here(path_data, "imdb_trn.csv")) |> 
+data_trn <- read_csv(here::here(path_data, "imdb_trn.csv"), 
+                     show_col_types = FALSE) |>
   rowid_to_column(var = "doc_num") |> 
-  mutate(sentiment = factor(sentiment, levels = c("neg", "pos"))) |> 
+  mutate(sentiment = fct(sentiment, levels = c("neg", "pos"))) 
+
+data_trn  |>
   skim_some()
 ```
 
@@ -478,10 +479,7 @@ Here, we tokenize the IMDB training set.
 
 ```{r}
 tokens <- data_trn |> 
-  unnest_tokens(word, text,
-                token = "words",
-                to_lower = TRUE,
-                drop = FALSE) |> 
+  unnest_tokens(word, text, token = "words", to_lower = TRUE, drop = FALSE) |> 
   glimpse()
 ```
 \
@@ -535,8 +533,7 @@ tokens |>
     geom_col() +
     xlab("Words") +
     ylab("Raw Count") +
-    theme(axis.text.x=element_blank(),
-        axis.ticks.x=element_blank())
+    theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())
 ```
 
 -----
@@ -743,8 +740,8 @@ tokens <-
 data_trn_cln <-
   tokens |>  
   group_by(doc_num, sentiment) |> 
-  summarize(text = str_c(word, collapse = " ")) |>
-  ungroup()
+  summarize(text = str_c(word, collapse = " "),
+            .groups = "drop") 
 ```
 
 -----
@@ -1315,7 +1312,8 @@ You will want to explore the impact of your feature engineering either
 Lets start fresh with our training data
 
 ```{r}
-data_trn <- read_csv(here::here(path_data, "imdb_trn.csv")) |> 
+data_trn <- read_csv(here::here(path_data, "imdb_trn.csv"),
+                     show_col_types = FALSE) |> 
   rowid_to_column(var = "doc_num") |> 
   mutate(sentiment = factor(sentiment, levels = c("neg", "pos"))) |> 
   glimpse()
@@ -1379,7 +1377,7 @@ Recipe for Word Tokens.  NOTE:
 ```{r}
 rec_word <-  recipe(sentiment ~ text, data = data_trn) |>
   step_tokenize(text, 
-                engine = "tokenizers", token = "words") |>    # included for clarity
+                engine = "tokenizers", token = "words") |>    
   step_tokenfilter(text, max_tokens = tune::tune()) |>
   step_tfidf(text)  |> 
   step_normalize(all_predictors())
@@ -1389,7 +1387,6 @@ rec_word <-  recipe(sentiment ~ text, data = data_trn) |>
 
 Tuning hyperparameters for Word Tokens
 ```{r}
-
 fits_word <- cache_rds(
   expr = {
     logistic_reg(penalty = tune::tune(), 
@@ -1401,9 +1398,9 @@ fits_word <- cache_rds(
                 metrics = metric_set(accuracy))
 
 },
-rerun = rerun_setting,
-dir = "cache/012/",
-file = "fits_word")
+  rerun = rerun_setting,
+  dir = "cache/012/",
+  file = "fits_word")
 ```
 
 -----
