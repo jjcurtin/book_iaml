@@ -1618,19 +1618,27 @@ You can find pre-trained word embeddings on the web
 - [Word2Vec](https://code.google.com/archive/p/word2vec/)
 - [Fasttek](https://fasttext.cc/docs/en/english-vectors.html)
 
-I previously downloaded pre-trained GloVe embeddings
+Below, we download and open pre-trained GloVe embeddings
 
-- Using `fread()` because the file is big
 - I chose a smaller set of embeddings to ease computational cost
   - Wikipedia 2014 + Gigaword 5
-  - 6B tokens, 400K vocab, uncased, 100d
+  - 6B tokens, 400K vocab, uncased, 50d
 
 ```{r}
-# library(data.table)
-# requires R.utils to be installed to use fread with .gz file
-# glove_embeddings <- fread(here:here(path_data, "glove_6B_100d.csv.gz")) |>
-#   as_tibble() |> 
-#   glimpse()
+# temp <- tempfile()
+# options(timeout = max(300, getOption("timeout")))  # need more time to download big file
+# download.file("https://nlp.stanford.edu/data/glove.6B.zip", temp)
+# unzip(temp, files = "glove.6B.50d.txt")
+# glove_embeddings <- read_delim(here::here("glove.6B.50d.txt"),
+#                                delim = " ",
+#                                col_names = FALSE) 
+```
+
+```{r}
+#| include: false
+
+# unlink(temp) # remove downloaded zip 
+# unlink("glove.6B.50d.txt)
 ```
 
 -----
@@ -1694,7 +1702,7 @@ Display performance of best configuration for GloVe embedding
 rec_final <-
   recipe(sentiment ~ text, data = data_trn) |>
     step_tokenize(text, 
-                  engine = "tokenizers", token = "ngrams",   # included for clarity
+                  engine = "tokenizers", token = "ngrams",
                   options = list(n = 2, n_min = 1)) |>
     step_tokenfilter(text, max_tokens = select_best(fits_ngrams)$max_tokens) |>
     step_tfidf(text) |> 
@@ -1720,12 +1728,14 @@ fit_final <-
 
 -----
 
-Variable importance scores
+Variable importance scores 
 
    - set up predictor function and impute
    - these computations would take a while given the number of observations (25,000) and the number of features (10,000).  To speed this up, we use the native predict function for a glmnet object.  I also take a random sample of observations and only do 1 permutation per feature (that should be increased for real use)
 
-```{r u12-ex-31}
+```{r}
+#| eval: false
+
 # random sub-sample of training data
 set.seed(12345)
 feat_sample <- feat_trn |> 
@@ -1766,7 +1776,9 @@ imp_perm <- var_strings |>
 ```
 
 - Full pipe to plot top 30 in an informative display
-```{r u12-ex-32}
+```{r}
+#| eval: false
+
 imp_perm |>
   rename(variable = var_string) |> 
   mutate(variable = str_remove(variable, "tfidf_text_")) |>
@@ -1785,8 +1797,9 @@ imp_perm |>
 -----
 
 - Open and clean test to make features
-```{r u12-ex-33}
-data_test <- read_csv(file.path(path_data, "imdb_test.csv")) |> 
+```{r}
+data_test <- read_csv(here::here(path_data, "imdb_test.csv"),
+                      show_col_types = FALSE) |> 
   rowid_to_column(var = "doc_num") |> 
   mutate(sentiment = factor(sentiment, levels = c("neg", "pos"))) |> 
   glimpse()
@@ -1801,20 +1814,20 @@ data_test <- data_test |>
          text = str_replace_all(text, ":_", ": "),
          text = str_replace_all(text, "_{3,}", " "))
 
-feat_test <- rec_final |> 
-  make_features(data_trn, data_test)
+feat_test <- rec_final_prep |> 
+  bake(data_test)
 ```
 
 -----
 
 - Predict into test
 
-```{r u12-ex-34}
+```{r}
 accuracy_vec(feat_test$sentiment, predict(fit_final, feat_test)$.pred_class)
 ```
 
 - Confusion matrix
-```{r u12-ex-35}
+```{r}
 cm <- tibble(truth = feat_test$sentiment,
              estimate = predict(fit_final, feat_test)$.pred_class) |> 
   conf_mat(truth, estimate)
