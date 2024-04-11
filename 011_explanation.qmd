@@ -1359,54 +1359,85 @@ When pursuing purely explanatory goals with machine learning methods, we can:
 
 ## Discussion
 
-### Annoucements
-
-- Review conceptual exam
-- RMD files
+### Neural Net Winners
 
 
-### Questions
+### Ice Breaker
 
-#### ALE and PD plots
-- What is the difference between PD plot and ALE plot? And when should we use they for specific?
+Get into pairs or small groups. Think about one of the data sets we have worked with in class or your own! Create a research question you might ask using each of the following explanatory methods.
 
-- I am still confused about partial dependence plots and ale plots and when we want to use them. 
+1. Imputation
+2. Bayesian correlated t-test
+3. Shapley values
 
-- I am confused about the question in the unit 9 quiz. when you have moderate or stronger correlations among your features, ALE and M-plots both could be used to visualize the effects of your features on the outcome. Based on the web book, we learned that M-plot is sub-optimal, which means we better use ALE right? and M-plots are not recommended. 
 
-#### Prediction vs. explanation
-- I think it would be useful to talk about how to use these same models that we have been building for explanatory purposes rather than predictive ones. Is that when interpretability matters most? I feel like some of the reading on interpretability contradicted what we talked about earlier on in the semester about how in a predictive model, interpretability doesn't necessarily matter.
+### Question 5 from quiz
 
-- It seems that there is a trade-off regarding interpretability. How to make a good decision about the degree of the interpretability so that the system will be not manipulated when there is a misalignment/mismatch between the goals of the creator and the user? 
+Let’s say you want to build a model to predict which individuals will develop hypertension based on health data within patients' medical records (e.g. family history, medical chart notes, genetic testing results). Which of the following claims about your model could be investigated using a permutation test?   
 
-- If I understood correctly, interpretability/explainability is about the model predictions, while comprehensibility is about users' understanding of the explanations. Transparency is about the algorithms. These concepts are kind of confusing. It would be nice if you could help us distinguish them more conceptually. 
+a. Addition of genetic data to our model does not significantly improve upon the accuracy of models using only family history and medical chart notes
+b. Family history variables are more important for prediction of future hypertension than medical chart notes
+c. The predictors from patients’ medical records are related to their hypertension and your model is capturing this relationship to some degree
+d. Our model performs significantly better than leading diagnostic screening questionnaires for prediction of future hypertension   
 
-#### Permutation test
 
-- Mathematically, is there not a way to estimate what the accuracy would be even if there were not a relationship between predictors and outcome? Wouldn't the estimated accuracy simply be the proportion of observations in the dominant class? I guess I do not see why the permutation test is necessary, then.
+**What method would we use to investigate the other claims?**   
 
-- shuffling a feature's values removes the relationship between that feature and the outcome, and I think the prediction error of the model increases. 
 
-#### Bayesian estimation
+### Question 3 from quiz
 
-- In case of unit 9, K-fold is preferred, the question goes how to balance the choice between K-fold and bootstrap?
+Imagine you want to determine if an elastic net logistic regression model (that you tuned on penalty and mixture) is performing better than would be expected by chance. Which situations would require you to include the model selection process inside of your permutation test? Select all that apply.
 
-- What's are prior posterior probabilities?
 
-- HDI and ROPE.
+a. Model selection was performed via k-fold cross validation, model evaluation was performed in an independent test set
+*b. Model selection and evaluation was performed via bootstrapped resampling*
+c. Model selection and evaluation was performed via nested resampling
+d. You always need to include model selection processes inside of permutation tests
 
-- I'm still a little confused about HDI values. I understand that when HDI values are above the ROPE it tells us that our full model is meaningfully better than our compact model, but I don't understand what the HDI values themselves represent or how they are calculated.
+**Why not the other methods?**
 
-- If there’s no difference between our model’s performance and the performance of a similar model in a permuted dataset, (how) can we distinguish whether that’s because there’s no signal in our predictors or because our model failed to exploit that signal?
 
-- I am especially confused about Bayesian estimation for model comparisons. Does convergence mean that the best parameters for the model have been found, and why do we do this specifically with Bayesian estimation
+### Bayesian Model Comparisons
 
-#### Shapley values
+*Conceptually - could we go over posterior probabilities again - I was a bit confused on what this is and how that differ from other metrics that we use.*
+Posterior probabilities are a way for us to estimate the likelihood of a parameter being a certain value. For example, the probability that are model is performing within a certain range.    
+ 
+Whereas before we used resampling to obtain performance estimates of our model and stopped there. Now we can use these estimates as data to pass into `perf_mod()` an get a distribution of probabilities that the true performance estimate falls within a certain range.
 
-- I think I just need a deep dive into shapely values
 
-- What are shapley values and how do we interpret them?
+*What do HDI values represent?*
 
-- Revisiting Shapley values
+*Is the probability that full model is better than compact model deemed as 'p-value' in Bayesian way? What's the difference between using a ROPE to inspect on the result and using a p-value?*
 
-- Since Shapley values average across all possible coalitions, do they implicitly take into account interactions?
+
+### Shapley Values
+
+*I feel like I dont have a good grasp on Shapely values.What do they really mean and how are they interpreted*    
+
+Shapley values give us a measure of relative feature importance (i.e., which features are contributing most to a model's predictions compared to other features).      
+
+They are calculated by considering all the possible ways features can be ordered in a model. Then, for each possible ordering, the contribution of each feature is measured when an additional feature is added. Finally, the contribution of each feature is averaged across all possible orders. This is why it took so long to run in your homework assignment!     
+
+So, how do we know which features are most important? How might we report our findings about top features?
+
+*Can you talk more about Shapley values (SHAP), as well as local importance and global importance?*
+
+
+
+*What is a real-life example of some data where we might care about feature importance?*
+
+Lets look at an example from John's lab!
+
+
+*The difference between permutation feature importance and shapley values.*
+
+Permutation feature importance focuses on how shuffling a feature's values affects the model's overall performance (i.e., removing any association between the feature and outcome), while Shapley values focus on the marginal contribution of each feature to individual predictions.
+
+*When using L1 and L2 penalties, does it use feature importance to decide which features to drop out/down?*
+
+Lasso and Ridge penalties shrink the coefficients of less important features, but does so by adding a penalty to the loss function. This is different than calculating feature importance with permutation or Shapley methods. Remember penalties are for *reducing overfitting of a model*, and indices of feature importance are for *explaining the output of a model*. 
+
+
+### Plots and visualizations
+
+*Could we go over again why calculated differences in predictions for ALE plots makes them better suited for handling correlated features than M-plots?*
