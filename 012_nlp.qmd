@@ -24,9 +24,7 @@ NOTES: Please read the above chapters more with an eye toward concepts and issue
 rather than code.  I will demonstrate a minimum set of functions to accomplish
 the NLP modeling tasks for this unit.
 
-Also know that the entire @SMLTAR [book] is really mandatory reading.  I would also 
-strongly recommend this entire @TMR [book](https://www.tidytextmining.com/).  Both 
-will be important references at a minimum.
+Also know that the entire @SMLTAR [book] is really mandatory reading.  I would also strongly recommend this entire @TMR [book](https://www.tidytextmining.com/).  Both  will be important references at a minimum.
 
 Post questions to the readings channel in Slack
 
@@ -51,9 +49,9 @@ Post questions to the video-lectures channel in Slack
 
 ### Coding Assignment
 
-- [data](homework/unit_12/alcohol_tweets.csv)
-- [rmd shell](homework/unit_12/hw_unit_12_nlp.Rmd)
-- [GloVE embeddings](homework/unit_12/glove_twitter.csv)
+- [data](application_assignments/unit_12/alcohol_tweets.csv)
+- [qmd shell](https://raw.githubusercontent.com/jjcurtin/book_iaml/main/application_assignments/unit_12/hw_unit_12_nlp.qmd)
+- [GloVE embeddings for twitter](https://dionysus.psych.wisc.edu/iaml/glove_twitter.csv)
 - [solution]()
 
 
@@ -1618,19 +1616,27 @@ You can find pre-trained word embeddings on the web
 - [Word2Vec](https://code.google.com/archive/p/word2vec/)
 - [Fasttek](https://fasttext.cc/docs/en/english-vectors.html)
 
-I previously downloaded pre-trained GloVe embeddings
+Below, we download and open pre-trained GloVe embeddings
 
-- Using `fread()` because the file is big
 - I chose a smaller set of embeddings to ease computational cost
   - Wikipedia 2014 + Gigaword 5
-  - 6B tokens, 400K vocab, uncased, 100d
+  - 6B tokens, 400K vocab, uncased, 50d
 
 ```{r}
-# library(data.table)
-# requires R.utils to be installed to use fread with .gz file
-# glove_embeddings <- fread(here:here(path_data, "glove_6B_100d.csv.gz")) |>
-#   as_tibble() |> 
-#   glimpse()
+# temp <- tempfile()
+# options(timeout = max(300, getOption("timeout")))  # need more time to download big file
+# download.file("https://nlp.stanford.edu/data/glove.6B.zip", temp)
+# unzip(temp, files = "glove.6B.50d.txt")
+# glove_embeddings <- read_delim(here::here("glove.6B.50d.txt"),
+#                                delim = " ",
+#                                col_names = FALSE) 
+```
+
+```{r}
+#| include: false
+
+# unlink(temp) # remove downloaded zip 
+# unlink("glove.6B.50d.txt)
 ```
 
 -----
@@ -1694,7 +1700,7 @@ Display performance of best configuration for GloVe embedding
 rec_final <-
   recipe(sentiment ~ text, data = data_trn) |>
     step_tokenize(text, 
-                  engine = "tokenizers", token = "ngrams",   # included for clarity
+                  engine = "tokenizers", token = "ngrams",
                   options = list(n = 2, n_min = 1)) |>
     step_tokenfilter(text, max_tokens = select_best(fits_ngrams)$max_tokens) |>
     step_tfidf(text) |> 
@@ -1720,73 +1726,12 @@ fit_final <-
 
 -----
 
-Variable importance scores
-
-   - set up predictor function and impute
-   - these computations would take a while given the number of observations (25,000) and the number of features (10,000).  To speed this up, we use the native predict function for a glmnet object.  I also take a random sample of observations and only do 1 permutation per feature (that should be increased for real use)
-
-```{r u12-ex-31}
-# random sub-sample of training data
-set.seed(12345)
-feat_sample <- feat_trn |> 
-  slice_sample(prop = .05) # 5% of data (1250 observations rather than 25000)
-
-# x and y from features
-x <- feat_sample |> select(-sentiment)  # x features
-y <- feat_sample |> pull(sentiment) # outcome
-
-# Could have used this prediction function (commented out below) with the full parsnip object but that object is 500 MB and very slow to predict with.  Instead, we demonstrate pulling out the fit object from the full parsnip model and predicting using the native predict function for a glmnet model.  
-
-# predictor <- function(model, x){
-#     predict(model, x)$.pred_class # using predict.parsnip
-# }
-
-# predictor function using predict.glmnet
-predictor <- function(model, x){
-    predict(model, newx = as.matrix(x), type = "class", s = 0.2069138) |> 
-    factor(levels = c("neg", "pos"))
-}
-
-# name of variables to compute variable importance for
-var_strings <- names(x)
-
-imp_perm <- var_strings |> 
-  map(\(var_string) get_vip(
-                          # use only the glmnet fit rather that the full
-                          # parsnip model.  Its smaller
-                          model = fit_final$fit, 
-                          x = x, y = y,
-                          var_string = var_string,
-                          fun_pred = predictor, 
-                          # can use any `_vec` metric in yardstick
-                          fun_metric = yardstick::accuracy_vec,  
-                          # set n_reps higher (5, 20?) for real applications
-                          n_reps = 1)) |>   
-  list_rbind()
-```
-
-- Full pipe to plot top 30 in an informative display
-```{r u12-ex-32}
-imp_perm |>
-  rename(variable = var_string) |> 
-  mutate(variable = str_remove(variable, "tfidf_text_")) |>
-  arrange(metric_mean) |> 
-  mutate(variable = factor(variable),
-         variable = forcats::fct_inorder(variable)) |> 
-  slice_tail(n =30) |> 
-  ggplot(mapping = aes(x = variable, y = metric_mean)) +
-  geom_point(size = 2, color = "red") +
-  geom_segment(aes(x = variable, y = metric_mean, xend = variable), 
-               yend = 0, colour = "grey50")  +
-  ylab("Reduction in Accuracy") +
-  coord_flip()
-```
-
 -----
 
 - Open and clean test to make features
-```{r u12-ex-33}
-data_test <- read_csv(file.path(path_data, "imdb_test.csv")) |> 
+```{r}
+data_test <- read_csv(here::here(path_data, "imdb_test.csv"),
+                      show_col_types = FALSE) |> 
   rowid_to_column(var = "doc_num") |> 
   mutate(sentiment = factor(sentiment, levels = c("neg", "pos"))) |> 
   glimpse()
@@ -1801,23 +1746,132 @@ data_test <- data_test |>
          text = str_replace_all(text, ":_", ": "),
          text = str_replace_all(text, "_{3,}", " "))
 
-feat_test <- rec_final |> 
-  make_features(data_trn, data_test)
+feat_test <- rec_final_prep |> 
+  bake(data_test)
 ```
 
 -----
 
 - Predict into test
 
-```{r u12-ex-34}
+```{r}
 accuracy_vec(feat_test$sentiment, predict(fit_final, feat_test)$.pred_class)
 ```
 
 - Confusion matrix
-```{r u12-ex-35}
+```{r}
 cm <- tibble(truth = feat_test$sentiment,
              estimate = predict(fit_final, feat_test)$.pred_class) |> 
   conf_mat(truth, estimate)
 
 autoplot(cm, type = "heatmap")
+```
+
+-----
+
+And lets end by calculating Permutation feature importance scores in test set using DALEX
+
+```{r}
+library(DALEX, exclude= "explain")
+library(DALEXtra)
+```
+
+-----
+
+We are going to sample only a subset of the test set to keep the computational costs lower for this example.
+
+```{r}
+set.seed(12345)
+feat_subtest <- feat_test |> 
+  slice_sample(prop = .05) # 5% of data 
+```
+
+-----
+
+Now we can get a df for the features (without the outcome) and a separate vector for the outcome.  
+```{r}
+x <- feat_subtest |> select(-sentiment)
+```
+\
+\
+For outcome, we need to convert to 0/1 (if classification), and then pull the vector out of the dataframe
+
+```{r}
+y <- feat_subtest |> 
+  mutate(sentiment = if_else(sentiment == "pos", 1, 0)) |> 
+  pull(sentiment)
+```
+
+-----
+
+We also need a specific predictor function that will work with the DALEX package
+
+```{r}
+predict_wrapper <- function(model, newdata) {
+  predict(model, newdata, type = "prob") |> 
+    pull(.pred_yes)
+}
+```
+
+-----
+
+We will also need an `explainer` object based on our model and data
+
+```{r}
+explain_test <- explain_tidymodels(fit_final, # our model object 
+                                   data = x, # df with features without outcome
+                                   y = y, # outcome vector
+                                   # our custom predictor function
+                                   predict_function = predict_wrapper)
+```
+
+-----
+
+Finally, we need to define a custom function for our performance metric as well
+
+```{r}
+accuracy_wrapper <- function(observed, predicted) {
+  observed <- fct(if_else(observed == 1, "pos", "neg"),
+                  levels = c("pos", "neg"))
+  predicted <- fct(if_else(predicted > .5, "pos", "neg"), 
+                   levels  = c("pos", "neg"))
+  accuracy_vec(observed, predicted)
+}
+```
+\
+\
+We are now ready to calculate feature importance metrics
+
+-----
+
+Only doing 10 permutations to keep computational costs lower for this demonstration.  In real, life do more!
+```{r}
+#| eval: false
+
+set.seed(123456)
+imp_permute <- model_parts(explain_test, 
+                               type = "raw", 
+                               loss_function = accuracy_wrapper,
+                               B = 10) 
+```
+
+-----
+
+Full pipe to plot top 30 in an informative display
+```{r}
+#| eval: false
+
+imp_perm |>
+  rename(variable = var_string) |> 
+  mutate(variable = str_remove(variable, "tfidf_text_")) |>
+  arrange(metric_mean) |> 
+  mutate(variable = factor(variable),
+         variable = forcats::fct_inorder(variable)) |> 
+  slice_tail(n =30) |> 
+  ggplot(mapping = aes(x = variable, y = metric_mean)) +
+  geom_point(size = 2, color = "red") +
+  geom_segment(aes(x = variable, y = metric_mean, xend = variable), 
+               yend = 0, colour = "grey50")  +
+  ylab("Reduction in Accuracy") +
+  coord_flip()
 ```
