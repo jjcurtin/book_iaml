@@ -1362,11 +1362,32 @@ When pursuing purely explanatory goals with machine learning methods, we can:
 ### Neural Net Winners
 
 
+### Permutation Test (quiz question 5 was updated so everyone got a point!)
+Real quick though what is permutation?     
+
+1. It involves shuffling (permuting) the data many times. 
+2. After each permutation you refit the model and get a test-statistic (e.g., accuracy). 
+3. Essentially any relationship between features and the outcome are gone. So the permuted test-statistic is what we should expect to get if our features calculated no signal. 
+4. Then you would calculate the proportion of permutations where the test statistic is greater than or equal to your model performance estimate with the un-imputed data.
+5. If this is below .05 your interpretation would be to reject NULL (i.e., your model is performing better than a model with no signal)
+
+
+Example from ChatGPT of when a permutation test can come in hand:   
+
+Imagine you have two groups of people, and you want to see if there's a difference in their average heights. You measure everyone, and you find that, on average, Group A is taller than Group B. But you wonder: Is this difference just due to random chance, or is there something real going on?
+
+
+*It also doesn't have any assumption requirements for your data*   
+
+But...It is computationally expensive and there are often other more efficient methods for testing your model's performance. 
+
+
+
 ### Ice Breaker
 
 Get into pairs or small groups. Think about one of the data sets we have worked with in class or your own! Create a research question you might ask using each of the following explanatory methods.
 
-1. Imputation
+1. Permutation
 2. Bayesian correlated t-test
 3. Shapley values
 
@@ -1399,13 +1420,13 @@ d. You always need to include model selection processes inside of permutation te
 
 ### Bayesian Model Comparisons
 
-*Conceptually - could we go over posterior probabilities again - I was a bit confused on what this is and how that differ from other metrics that we use.*
+*Conceptually - could we go over posterior probabilities again - I was a bit confused on what this is and how that differ from other metrics that we use.*     
 Posterior probabilities are a way for us to estimate the likelihood of a parameter being a certain value. For example, the probability that are model is performing within a certain range (e.g., how probable various values are for the accuracy of each model).    
  
 Whereas before we used resampling to obtain performance estimates of our model and stopped there. Now we can use these estimates as data to pass into `perf_mod()` an get a distribution of probabilities that the true performance estimate falls within a certain range.
 
 
-*What do HDI values represent?*
+*What do HDI values represent?*     
 The range of parameter estimate values that include 95% of the credible values.   
 
 Lets look at an example figure.
