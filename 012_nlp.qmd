@@ -1726,72 +1726,6 @@ fit_final <-
 
 -----
 
-Variable importance scores 
-
-   - set up predictor function and impute
-   - these computations would take a while given the number of observations (25,000) and the number of features (10,000).  To speed this up, we use the native predict function for a glmnet object.  I also take a random sample of observations and only do 1 permutation per feature (that should be increased for real use)
-
-```{r}
-#| eval: false
-
-# random sub-sample of training data
-set.seed(12345)
-feat_sample <- feat_trn |> 
-  slice_sample(prop = .05) # 5% of data (1250 observations rather than 25000)
-
-# x and y from features
-x <- feat_sample |> select(-sentiment)  # x features
-y <- feat_sample |> pull(sentiment) # outcome
-
-# Could have used this prediction function (commented out below) with the full parsnip object but that object is 500 MB and very slow to predict with.  Instead, we demonstrate pulling out the fit object from the full parsnip model and predicting using the native predict function for a glmnet model.  
-
-# predictor <- function(model, x){
-#     predict(model, x)$.pred_class # using predict.parsnip
-# }
-
-# predictor function using predict.glmnet
-predictor <- function(model, x){
-    predict(model, newx = as.matrix(x), type = "class", s = 0.2069138) |> 
-    factor(levels = c("neg", "pos"))
-}
-
-# name of variables to compute variable importance for
-var_strings <- names(x)
-
-imp_perm <- var_strings |> 
-  map(\(var_string) get_vip(
-                          # use only the glmnet fit rather that the full
-                          # parsnip model.  Its smaller
-                          model = fit_final$fit, 
-                          x = x, y = y,
-                          var_string = var_string,
-                          fun_pred = predictor, 
-                          # can use any `_vec` metric in yardstick
-                          fun_metric = yardstick::accuracy_vec,  
-                          # set n_reps higher (5, 20?) for real applications
-                          n_reps = 1)) |>   
-  list_rbind()
-```
-
-- Full pipe to plot top 30 in an informative display
-```{r}
-#| eval: false
-
-imp_perm |>
-  rename(variable = var_string) |> 
-  mutate(variable = str_remove(variable, "tfidf_text_")) |>
-  arrange(metric_mean) |> 
-  mutate(variable = factor(variable),
-         variable = forcats::fct_inorder(variable)) |> 
-  slice_tail(n =30) |> 
-  ggplot(mapping = aes(x = variable, y = metric_mean)) +
-  geom_point(size = 2, color = "red") +
-  geom_segment(aes(x = variable, y = metric_mean, xend = variable), 
-               yend = 0, colour = "grey50")  +
-  ylab("Reduction in Accuracy") +
-  coord_flip()
-```
-
 -----
 
 - Open and clean test to make features
@@ -1831,4 +1765,113 @@ cm <- tibble(truth = feat_test$sentiment,
   conf_mat(truth, estimate)
 
 autoplot(cm, type = "heatmap")
+```
+
+-----
+
+And lets end by calculating Permutation feature importance scores in test set using DALEX
+
+```{r}
+library(DALEX, exclude= "explain")
+library(DALEXtra)
+```
+
+-----
+
+We are going to sample only a subset of the test set to keep the computational costs lower for this example.
+
+```{r}
+set.seed(12345)
+feat_subtest <- feat_test |> 
+  slice_sample(prop = .05) # 5% of data 
+```
+
+-----
+
+Now we can get a df for the features (without the outcome) and a separate vector for the outcome.  
+```{r}
+x <- feat_subtest |> select(-sentiment)
+```
+\
+\
+For outcome, we need to convert to 0/1 (if classification), and then pull the vector out of the dataframe
+
+```{r}
+y <- feat_subtest |> 
+  mutate(sentiment = if_else(sentiment == "pos", 1, 0)) |> 
+  pull(sentiment)
+```
+
+-----
+
+We also need a specific predictor function that will work with the DALEX package
+
+```{r}
+predict_wrapper <- function(model, newdata) {
+  predict(model, newdata, type = "prob") |> 
+    pull(.pred_yes)
+}
+```
+
+-----
+
+We will also need an `explainer` object based on our model and data
+
+```{r}
+explain_test <- explain_tidymodels(fit_final, # our model object 
+                                   data = x, # df with features without outcome
+                                   y = y, # outcome vector
+                                   # our custom predictor function
+                                   predict_function = predict_wrapper)
+```
+
+-----
+
+Finally, we need to define a custom function for our performance metric as well
+
+```{r}
+accuracy_wrapper <- function(observed, predicted) {
+  observed <- fct(if_else(observed == 1, "pos", "neg"),
+                  levels = c("pos", "neg"))
+  predicted <- fct(if_else(predicted > .5, "pos", "neg"), 
+                   levels  = c("pos", "neg"))
+  accuracy_vec(observed, predicted)
+}
+```
+\
+\
+We are now ready to calculate feature importance metrics
+
+-----
+
+Only doing 10 permutations to keep computational costs lower for this demonstration.  In real, life do more!
+```{r}
+#| eval: false
+
+set.seed(123456)
+imp_permute <- model_parts(explain_test, 
+                               type = "raw", 
+                               loss_function = accuracy_wrapper,
+                               B = 10) 
+```
+
+-----
+
+Full pipe to plot top 30 in an informative display
+```{r}
+#| eval: false
+
+imp_perm |>
+  rename(variable = var_string) |> 
+  mutate(variable = str_remove(variable, "tfidf_text_")) |>
+  arrange(metric_mean) |> 
+  mutate(variable = factor(variable),
+         variable = forcats::fct_inorder(variable)) |> 
+  slice_tail(n =30) |> 
+  ggplot(mapping = aes(x = variable, y = metric_mean)) +
+  geom_point(size = 2, color = "red") +
+  geom_segment(aes(x = variable, y = metric_mean, xend = variable), 
+               yend = 0, colour = "grey50")  +
+  ylab("Reduction in Accuracy") +
+  coord_flip()
 ```
