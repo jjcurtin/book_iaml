@@ -469,9 +469,9 @@ window.Quarto = {
 <section id="coding-assignment" class="level3" data-number="12.1.4">
 <h3 data-number="12.1.4" class="anchored" data-anchor-id="coding-assignment"><span class="header-section-number">12.1.4</span> Coding Assignment</h3>
 <ul>
-<li><a href="homework/unit_12/alcohol_tweets.csv">data</a></li>
-<li><a href="homework/unit_12/hw_unit_12_nlp.Rmd">rmd shell</a></li>
-<li><a href="homework/unit_12/glove_twitter.csv">GloVE embeddings</a></li>
+<li><a href="application_assignments/unit_12/alcohol_tweets.csv">data</a></li>
+<li><a href="https://raw.githubusercontent.com/jjcurtin/book_iaml/main/application_assignments/unit_12/hw_unit_12_nlp.qmd">qmd shell</a></li>
+<li><a href="https://dionysus.psych.wisc.edu/iaml/glove_twitter.csv">GloVE embeddings for twitter</a></li>
 <li><a href="">solution</a></li>
 </ul>
 <p>Submit the application assignment <a href="https://canvas.wisc.edu/courses/395546/assignments/2187686">here</a> and complete the <a href="https://canvas.wisc.edu/courses/395546/quizzes/514056">unit quiz</a> by 8 pm on Wednesday, April 17th</p>
@@ -3939,78 +3939,16 @@ Let’s switch gears away from document term matrices and BoW to word embeddings
 <span id="cb155-5"><a href="#cb155-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fit</span>(sentiment <span class="sc">~</span> ., <span class="at">data =</span> feat_trn)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <hr>
-<p>Variable importance scores</p>
-<ul>
-<li>set up predictor function and impute</li>
-<li>these computations would take a while given the number of observations (25,000) and the number of features (10,000). To speed this up, we use the native predict function for a glmnet object. I also take a random sample of observations and only do 1 permutation per feature (that should be increased for real use)</li>
-</ul>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb156"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb156-1"><a href="#cb156-1" aria-hidden="true" tabindex="-1"></a><span class="co"># random sub-sample of training data</span></span>
-<span id="cb156-2"><a href="#cb156-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
-<span id="cb156-3"><a href="#cb156-3" aria-hidden="true" tabindex="-1"></a>feat_sample <span class="ot">&lt;-</span> feat_trn <span class="sc">|&gt;</span> </span>
-<span id="cb156-4"><a href="#cb156-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_sample</span>(<span class="at">prop =</span> .<span class="dv">05</span>) <span class="co"># 5% of data (1250 observations rather than 25000)</span></span>
-<span id="cb156-5"><a href="#cb156-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb156-6"><a href="#cb156-6" aria-hidden="true" tabindex="-1"></a><span class="co"># x and y from features</span></span>
-<span id="cb156-7"><a href="#cb156-7" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> feat_sample <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span>sentiment)  <span class="co"># x features</span></span>
-<span id="cb156-8"><a href="#cb156-8" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> feat_sample <span class="sc">|&gt;</span> <span class="fu">pull</span>(sentiment) <span class="co"># outcome</span></span>
-<span id="cb156-9"><a href="#cb156-9" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb156-10"><a href="#cb156-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Could have used this prediction function (commented out below) with the full parsnip object but that object is 500 MB and very slow to predict with.  Instead, we demonstrate pulling out the fit object from the full parsnip model and predicting using the native predict function for a glmnet model.  </span></span>
-<span id="cb156-11"><a href="#cb156-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb156-12"><a href="#cb156-12" aria-hidden="true" tabindex="-1"></a><span class="co"># predictor &lt;- function(model, x){</span></span>
-<span id="cb156-13"><a href="#cb156-13" aria-hidden="true" tabindex="-1"></a><span class="co">#     predict(model, x)$.pred_class # using predict.parsnip</span></span>
-<span id="cb156-14"><a href="#cb156-14" aria-hidden="true" tabindex="-1"></a><span class="co"># }</span></span>
-<span id="cb156-15"><a href="#cb156-15" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb156-16"><a href="#cb156-16" aria-hidden="true" tabindex="-1"></a><span class="co"># predictor function using predict.glmnet</span></span>
-<span id="cb156-17"><a href="#cb156-17" aria-hidden="true" tabindex="-1"></a>predictor <span class="ot">&lt;-</span> <span class="cf">function</span>(model, x){</span>
-<span id="cb156-18"><a href="#cb156-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">predict</span>(model, <span class="at">newx =</span> <span class="fu">as.matrix</span>(x), <span class="at">type =</span> <span class="st">"class"</span>, <span class="at">s =</span> <span class="fl">0.2069138</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb156-19"><a href="#cb156-19" aria-hidden="true" tabindex="-1"></a>    <span class="fu">factor</span>(<span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"neg"</span>, <span class="st">"pos"</span>))</span>
-<span id="cb156-20"><a href="#cb156-20" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb156-21"><a href="#cb156-21" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb156-22"><a href="#cb156-22" aria-hidden="true" tabindex="-1"></a><span class="co"># name of variables to compute variable importance for</span></span>
-<span id="cb156-23"><a href="#cb156-23" aria-hidden="true" tabindex="-1"></a>var_strings <span class="ot">&lt;-</span> <span class="fu">names</span>(x)</span>
-<span id="cb156-24"><a href="#cb156-24" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb156-25"><a href="#cb156-25" aria-hidden="true" tabindex="-1"></a>imp_perm <span class="ot">&lt;-</span> var_strings <span class="sc">|&gt;</span> </span>
-<span id="cb156-26"><a href="#cb156-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(var_string) <span class="fu">get_vip</span>(</span>
-<span id="cb156-27"><a href="#cb156-27" aria-hidden="true" tabindex="-1"></a>                          <span class="co"># use only the glmnet fit rather that the full</span></span>
-<span id="cb156-28"><a href="#cb156-28" aria-hidden="true" tabindex="-1"></a>                          <span class="co"># parsnip model.  Its smaller</span></span>
-<span id="cb156-29"><a href="#cb156-29" aria-hidden="true" tabindex="-1"></a>                          <span class="at">model =</span> fit_final<span class="sc">$</span>fit, </span>
-<span id="cb156-30"><a href="#cb156-30" aria-hidden="true" tabindex="-1"></a>                          <span class="at">x =</span> x, <span class="at">y =</span> y,</span>
-<span id="cb156-31"><a href="#cb156-31" aria-hidden="true" tabindex="-1"></a>                          <span class="at">var_string =</span> var_string,</span>
-<span id="cb156-32"><a href="#cb156-32" aria-hidden="true" tabindex="-1"></a>                          <span class="at">fun_pred =</span> predictor, </span>
-<span id="cb156-33"><a href="#cb156-33" aria-hidden="true" tabindex="-1"></a>                          <span class="co"># can use any `_vec` metric in yardstick</span></span>
-<span id="cb156-34"><a href="#cb156-34" aria-hidden="true" tabindex="-1"></a>                          <span class="at">fun_metric =</span> yardstick<span class="sc">::</span>accuracy_vec,  </span>
-<span id="cb156-35"><a href="#cb156-35" aria-hidden="true" tabindex="-1"></a>                          <span class="co"># set n_reps higher (5, 20?) for real applications</span></span>
-<span id="cb156-36"><a href="#cb156-36" aria-hidden="true" tabindex="-1"></a>                          <span class="at">n_reps =</span> <span class="dv">1</span>)) <span class="sc">|&gt;</span>   </span>
-<span id="cb156-37"><a href="#cb156-37" aria-hidden="true" tabindex="-1"></a>  <span class="fu">list_rbind</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
-<ul>
-<li>Full pipe to plot top 30 in an informative display</li>
-</ul>
-<div class="cell">
-<div class="sourceCode cell-code" id="cb157"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb157-1"><a href="#cb157-1" aria-hidden="true" tabindex="-1"></a>imp_perm <span class="sc">|&gt;</span></span>
-<span id="cb157-2"><a href="#cb157-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">variable =</span> var_string) <span class="sc">|&gt;</span> </span>
-<span id="cb157-3"><a href="#cb157-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">variable =</span> <span class="fu">str_remove</span>(variable, <span class="st">"tfidf_text_"</span>)) <span class="sc">|&gt;</span></span>
-<span id="cb157-4"><a href="#cb157-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(metric_mean) <span class="sc">|&gt;</span> </span>
-<span id="cb157-5"><a href="#cb157-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">variable =</span> <span class="fu">factor</span>(variable),</span>
-<span id="cb157-6"><a href="#cb157-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">variable =</span> forcats<span class="sc">::</span><span class="fu">fct_inorder</span>(variable)) <span class="sc">|&gt;</span> </span>
-<span id="cb157-7"><a href="#cb157-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_tail</span>(<span class="at">n =</span><span class="dv">30</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb157-8"><a href="#cb157-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> variable, <span class="at">y =</span> metric_mean)) <span class="sc">+</span></span>
-<span id="cb157-9"><a href="#cb157-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>, <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
-<span id="cb157-10"><a href="#cb157-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x =</span> variable, <span class="at">y =</span> metric_mean, <span class="at">xend =</span> variable), </span>
-<span id="cb157-11"><a href="#cb157-11" aria-hidden="true" tabindex="-1"></a>               <span class="at">yend =</span> <span class="dv">0</span>, <span class="at">colour =</span> <span class="st">"grey50"</span>)  <span class="sc">+</span></span>
-<span id="cb157-12"><a href="#cb157-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Reduction in Accuracy"</span>) <span class="sc">+</span></span>
-<span id="cb157-13"><a href="#cb157-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</div>
 <hr>
 <ul>
 <li>Open and clean test to make features</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb158"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb158-1"><a href="#cb158-1" aria-hidden="true" tabindex="-1"></a>data_test <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(path_data, <span class="st">"imdb_test.csv"</span>),</span>
-<span id="cb158-2"><a href="#cb158-2" aria-hidden="true" tabindex="-1"></a>                      <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb158-3"><a href="#cb158-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowid_to_column</span>(<span class="at">var =</span> <span class="st">"doc_num"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb158-4"><a href="#cb158-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sentiment =</span> <span class="fu">factor</span>(sentiment, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"neg"</span>, <span class="st">"pos"</span>))) <span class="sc">|&gt;</span> </span>
-<span id="cb158-5"><a href="#cb158-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb156"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb156-1"><a href="#cb156-1" aria-hidden="true" tabindex="-1"></a>data_test <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(path_data, <span class="st">"imdb_test.csv"</span>),</span>
+<span id="cb156-2"><a href="#cb156-2" aria-hidden="true" tabindex="-1"></a>                      <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb156-3"><a href="#cb156-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowid_to_column</span>(<span class="at">var =</span> <span class="st">"doc_num"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb156-4"><a href="#cb156-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sentiment =</span> <span class="fu">factor</span>(sentiment, <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"neg"</span>, <span class="st">"pos"</span>))) <span class="sc">|&gt;</span> </span>
+<span id="cb156-5"><a href="#cb156-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 25,000
 Columns: 3
@@ -4018,18 +3956,18 @@ $ doc_num   &lt;int&gt; 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 1
 $ sentiment &lt;fct&gt; neg, neg, neg, neg, neg, neg, neg, neg, neg, neg, neg, neg, …
 $ text      &lt;chr&gt; "Once again Mr. Costner has dragged out a movie for far long…</code></pre>
 </div>
-<div class="sourceCode cell-code" id="cb160"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb160-1"><a href="#cb160-1" aria-hidden="true" tabindex="-1"></a>data_test <span class="ot">&lt;-</span> data_test <span class="sc">|&gt;</span> </span>
-<span id="cb160-2"><a href="#cb160-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">text =</span> <span class="fu">str_replace_all</span>(text, <span class="st">"&lt;br /&gt;&lt;br /&gt;"</span>, <span class="st">" "</span>),</span>
-<span id="cb160-3"><a href="#cb160-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">text =</span> <span class="fu">str_replace_all</span>(text, <span class="st">" _"</span>, <span class="st">" "</span>),</span>
-<span id="cb160-4"><a href="#cb160-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">text =</span> <span class="fu">str_replace_all</span>(text, <span class="st">" _"</span>, <span class="st">" "</span>),</span>
-<span id="cb160-5"><a href="#cb160-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">text =</span> <span class="fu">str_replace_all</span>(text, <span class="st">"^_"</span>, <span class="st">""</span>),</span>
-<span id="cb160-6"><a href="#cb160-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">text =</span> <span class="fu">str_replace_all</span>(text, <span class="st">"_</span><span class="sc">\\</span><span class="st">."</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">."</span>),</span>
-<span id="cb160-7"><a href="#cb160-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">text =</span> <span class="fu">str_replace_all</span>(text, <span class="st">"</span><span class="sc">\\</span><span class="st">(_"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">("</span>),</span>
-<span id="cb160-8"><a href="#cb160-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">text =</span> <span class="fu">str_replace_all</span>(text, <span class="st">":_"</span>, <span class="st">": "</span>),</span>
-<span id="cb160-9"><a href="#cb160-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">text =</span> <span class="fu">str_replace_all</span>(text, <span class="st">"_{3,}"</span>, <span class="st">" "</span>))</span>
-<span id="cb160-10"><a href="#cb160-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb160-11"><a href="#cb160-11" aria-hidden="true" tabindex="-1"></a>feat_test <span class="ot">&lt;-</span> rec_final_prep <span class="sc">|&gt;</span> </span>
-<span id="cb160-12"><a href="#cb160-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb158"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb158-1"><a href="#cb158-1" aria-hidden="true" tabindex="-1"></a>data_test <span class="ot">&lt;-</span> data_test <span class="sc">|&gt;</span> </span>
+<span id="cb158-2"><a href="#cb158-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">text =</span> <span class="fu">str_replace_all</span>(text, <span class="st">"&lt;br /&gt;&lt;br /&gt;"</span>, <span class="st">" "</span>),</span>
+<span id="cb158-3"><a href="#cb158-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">text =</span> <span class="fu">str_replace_all</span>(text, <span class="st">" _"</span>, <span class="st">" "</span>),</span>
+<span id="cb158-4"><a href="#cb158-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">text =</span> <span class="fu">str_replace_all</span>(text, <span class="st">" _"</span>, <span class="st">" "</span>),</span>
+<span id="cb158-5"><a href="#cb158-5" aria-hidden="true" tabindex="-1"></a>         <span class="at">text =</span> <span class="fu">str_replace_all</span>(text, <span class="st">"^_"</span>, <span class="st">""</span>),</span>
+<span id="cb158-6"><a href="#cb158-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">text =</span> <span class="fu">str_replace_all</span>(text, <span class="st">"_</span><span class="sc">\\</span><span class="st">."</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">."</span>),</span>
+<span id="cb158-7"><a href="#cb158-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">text =</span> <span class="fu">str_replace_all</span>(text, <span class="st">"</span><span class="sc">\\</span><span class="st">(_"</span>, <span class="st">"</span><span class="sc">\\</span><span class="st">("</span>),</span>
+<span id="cb158-8"><a href="#cb158-8" aria-hidden="true" tabindex="-1"></a>         <span class="at">text =</span> <span class="fu">str_replace_all</span>(text, <span class="st">":_"</span>, <span class="st">": "</span>),</span>
+<span id="cb158-9"><a href="#cb158-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">text =</span> <span class="fu">str_replace_all</span>(text, <span class="st">"_{3,}"</span>, <span class="st">" "</span>))</span>
+<span id="cb158-10"><a href="#cb158-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb158-11"><a href="#cb158-11" aria-hidden="true" tabindex="-1"></a>feat_test <span class="ot">&lt;-</span> rec_final_prep <span class="sc">|&gt;</span> </span>
+<span id="cb158-12"><a href="#cb158-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">bake</span>(data_test)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning in asMethod(object): sparse-&gt;dense coercion: allocating vector of size
 1.9 GiB</code></pre>
@@ -4040,7 +3978,7 @@ $ text      &lt;chr&gt; "Once again Mr. Costner has dragged out a movie for far 
 <li>Predict into test</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb162"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb162-1"><a href="#cb162-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy_vec</span>(feat_test<span class="sc">$</span>sentiment, <span class="fu">predict</span>(fit_final, feat_test)<span class="sc">$</span>.pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb160"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb160-1"><a href="#cb160-1" aria-hidden="true" tabindex="-1"></a><span class="fu">accuracy_vec</span>(feat_test<span class="sc">$</span>sentiment, <span class="fu">predict</span>(fit_final, feat_test)<span class="sc">$</span>.pred_class)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.89268</code></pre>
 </div>
@@ -4049,18 +3987,119 @@ $ text      &lt;chr&gt; "Once again Mr. Costner has dragged out a movie for far 
 <li>Confusion matrix</li>
 </ul>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb164"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb164-1"><a href="#cb164-1" aria-hidden="true" tabindex="-1"></a>cm <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">truth =</span> feat_test<span class="sc">$</span>sentiment,</span>
-<span id="cb164-2"><a href="#cb164-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">estimate =</span> <span class="fu">predict</span>(fit_final, feat_test)<span class="sc">$</span>.pred_class) <span class="sc">|&gt;</span> </span>
-<span id="cb164-3"><a href="#cb164-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">conf_mat</span>(truth, estimate)</span>
-<span id="cb164-4"><a href="#cb164-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb164-5"><a href="#cb164-5" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(cm, <span class="at">type =</span> <span class="st">"heatmap"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb162"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb162-1"><a href="#cb162-1" aria-hidden="true" tabindex="-1"></a>cm <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">truth =</span> feat_test<span class="sc">$</span>sentiment,</span>
+<span id="cb162-2"><a href="#cb162-2" aria-hidden="true" tabindex="-1"></a>             <span class="at">estimate =</span> <span class="fu">predict</span>(fit_final, feat_test)<span class="sc">$</span>.pred_class) <span class="sc">|&gt;</span> </span>
+<span id="cb162-3"><a href="#cb162-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">conf_mat</span>(truth, estimate)</span>
+<span id="cb162-4"><a href="#cb162-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb162-5"><a href="#cb162-5" aria-hidden="true" tabindex="-1"></a><span class="fu">autoplot</span>(cm, <span class="at">type =</span> <span class="st">"heatmap"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="012_nlp_files/figure-html/unnamed-chunk-95-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="012_nlp_files/figure-html/unnamed-chunk-93-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
+</div>
+<hr>
+<p>And lets end by calculating Permutation feature importance scores in test set using DALEX</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb163"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb163-1"><a href="#cb163-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DALEX, <span class="at">exclude=</span> <span class="st">"explain"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Welcome to DALEX (version: 2.4.3).
+Find examples and detailed introduction at: http://ema.drwhy.ai/</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb165"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb165-1"><a href="#cb165-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(DALEXtra)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>We are going to sample only a subset of the test set to keep the computational costs lower for this example.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb166"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb166-1"><a href="#cb166-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb166-2"><a href="#cb166-2" aria-hidden="true" tabindex="-1"></a>feat_subtest <span class="ot">&lt;-</span> feat_test <span class="sc">|&gt;</span> </span>
+<span id="cb166-3"><a href="#cb166-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_sample</span>(<span class="at">prop =</span> .<span class="dv">05</span>) <span class="co"># 5% of data </span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>Now we can get a df for the features (without the outcome) and a separate vector for the outcome.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb167"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb167-1"><a href="#cb167-1" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> feat_subtest <span class="sc">|&gt;</span> <span class="fu">select</span>(<span class="sc">-</span>sentiment)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><br>
+<br>
+For outcome, we need to convert to 0/1 (if classification), and then pull the vector out of the dataframe</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb168"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb168-1"><a href="#cb168-1" aria-hidden="true" tabindex="-1"></a>y <span class="ot">&lt;-</span> feat_subtest <span class="sc">|&gt;</span> </span>
+<span id="cb168-2"><a href="#cb168-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">sentiment =</span> <span class="fu">if_else</span>(sentiment <span class="sc">==</span> <span class="st">"pos"</span>, <span class="dv">1</span>, <span class="dv">0</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb168-3"><a href="#cb168-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(sentiment)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>We also need a specific predictor function that will work with the DALEX package</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb169"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb169-1"><a href="#cb169-1" aria-hidden="true" tabindex="-1"></a>predict_wrapper <span class="ot">&lt;-</span> <span class="cf">function</span>(model, newdata) {</span>
+<span id="cb169-2"><a href="#cb169-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">predict</span>(model, newdata, <span class="at">type =</span> <span class="st">"prob"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb169-3"><a href="#cb169-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pull</span>(.pred_yes)</span>
+<span id="cb169-4"><a href="#cb169-4" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>We will also need an <code>explainer</code> object based on our model and data</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb170"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb170-1"><a href="#cb170-1" aria-hidden="true" tabindex="-1"></a>explain_test <span class="ot">&lt;-</span> <span class="fu">explain_tidymodels</span>(fit_final, <span class="co"># our model object </span></span>
+<span id="cb170-2"><a href="#cb170-2" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">data =</span> x, <span class="co"># df with features without outcome</span></span>
+<span id="cb170-3"><a href="#cb170-3" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">y =</span> y, <span class="co"># outcome vector</span></span>
+<span id="cb170-4"><a href="#cb170-4" aria-hidden="true" tabindex="-1"></a>                                   <span class="co"># our custom predictor function</span></span>
+<span id="cb170-5"><a href="#cb170-5" aria-hidden="true" tabindex="-1"></a>                                   <span class="at">predict_function =</span> predict_wrapper)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Preparation of a new explainer is initiated
+  -&gt; model label       :  model_fit  (  default  )
+  -&gt; data              :  1250  rows  10000  cols 
+  -&gt; data              :  tibble converted into a data.frame 
+  -&gt; target variable   :  1250  values 
+  -&gt; predict function  :  predict_function 
+  -&gt; predicted values  :  No value for predict function target column. (  default  )
+  -&gt; model_info        :  package parsnip , ver. 1.1.0.9004 , task classification (  default  ) 
+  -&gt; predicted values  :  the predict_function returns an error when executed (  WARNING  ) 
+  -&gt; residual function :  residual_function 
+  -&gt; residuals         :  numerical, min =  0 , mean =  0 , max =  0  
+  A new explainer has been created!  </code></pre>
+</div>
+</div>
+<hr>
+<p>Finally, we need to define a custom function for our performance metric as well</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb172"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb172-1"><a href="#cb172-1" aria-hidden="true" tabindex="-1"></a>accuracy_wrapper <span class="ot">&lt;-</span> <span class="cf">function</span>(observed, predicted) {</span>
+<span id="cb172-2"><a href="#cb172-2" aria-hidden="true" tabindex="-1"></a>  observed <span class="ot">&lt;-</span> <span class="fu">fct</span>(<span class="fu">if_else</span>(observed <span class="sc">==</span> <span class="dv">1</span>, <span class="st">"pos"</span>, <span class="st">"neg"</span>),</span>
+<span id="cb172-3"><a href="#cb172-3" aria-hidden="true" tabindex="-1"></a>                  <span class="at">levels =</span> <span class="fu">c</span>(<span class="st">"pos"</span>, <span class="st">"neg"</span>))</span>
+<span id="cb172-4"><a href="#cb172-4" aria-hidden="true" tabindex="-1"></a>  predicted <span class="ot">&lt;-</span> <span class="fu">fct</span>(<span class="fu">if_else</span>(predicted <span class="sc">&gt;</span> .<span class="dv">5</span>, <span class="st">"pos"</span>, <span class="st">"neg"</span>), </span>
+<span id="cb172-5"><a href="#cb172-5" aria-hidden="true" tabindex="-1"></a>                   <span class="at">levels  =</span> <span class="fu">c</span>(<span class="st">"pos"</span>, <span class="st">"neg"</span>))</span>
+<span id="cb172-6"><a href="#cb172-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">accuracy_vec</span>(observed, predicted)</span>
+<span id="cb172-7"><a href="#cb172-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p><br>
+<br>
+We are now ready to calculate feature importance metrics</p>
+<hr>
+<p>Only doing 10 permutations to keep computational costs lower for this demonstration. In real, life do more!</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb173"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb173-1"><a href="#cb173-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123456</span>)</span>
+<span id="cb173-2"><a href="#cb173-2" aria-hidden="true" tabindex="-1"></a>imp_permute <span class="ot">&lt;-</span> <span class="fu">model_parts</span>(explain_test, </span>
+<span id="cb173-3"><a href="#cb173-3" aria-hidden="true" tabindex="-1"></a>                               <span class="at">type =</span> <span class="st">"raw"</span>, </span>
+<span id="cb173-4"><a href="#cb173-4" aria-hidden="true" tabindex="-1"></a>                               <span class="at">loss_function =</span> accuracy_wrapper,</span>
+<span id="cb173-5"><a href="#cb173-5" aria-hidden="true" tabindex="-1"></a>                               <span class="at">B =</span> <span class="dv">10</span>) </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p>Full pipe to plot top 30 in an informative display</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb174"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb174-1"><a href="#cb174-1" aria-hidden="true" tabindex="-1"></a>imp_perm <span class="sc">|&gt;</span></span>
+<span id="cb174-2"><a href="#cb174-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="at">variable =</span> var_string) <span class="sc">|&gt;</span> </span>
+<span id="cb174-3"><a href="#cb174-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">variable =</span> <span class="fu">str_remove</span>(variable, <span class="st">"tfidf_text_"</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb174-4"><a href="#cb174-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(metric_mean) <span class="sc">|&gt;</span> </span>
+<span id="cb174-5"><a href="#cb174-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">variable =</span> <span class="fu">factor</span>(variable),</span>
+<span id="cb174-6"><a href="#cb174-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">variable =</span> forcats<span class="sc">::</span><span class="fu">fct_inorder</span>(variable)) <span class="sc">|&gt;</span> </span>
+<span id="cb174-7"><a href="#cb174-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice_tail</span>(<span class="at">n =</span><span class="dv">30</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb174-8"><a href="#cb174-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="at">mapping =</span> <span class="fu">aes</span>(<span class="at">x =</span> variable, <span class="at">y =</span> metric_mean)) <span class="sc">+</span></span>
+<span id="cb174-9"><a href="#cb174-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>, <span class="at">color =</span> <span class="st">"red"</span>) <span class="sc">+</span></span>
+<span id="cb174-10"><a href="#cb174-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="fu">aes</span>(<span class="at">x =</span> variable, <span class="at">y =</span> metric_mean, <span class="at">xend =</span> variable), </span>
+<span id="cb174-11"><a href="#cb174-11" aria-hidden="true" tabindex="-1"></a>               <span class="at">yend =</span> <span class="dv">0</span>, <span class="at">colour =</span> <span class="st">"grey50"</span>)  <span class="sc">+</span></span>
+<span id="cb174-12"><a href="#cb174-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Reduction in Accuracy"</span>) <span class="sc">+</span></span>
+<span id="cb174-13"><a href="#cb174-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_flip</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 
