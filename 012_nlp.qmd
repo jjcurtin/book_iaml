@@ -1581,7 +1581,8 @@ fits_ngrams <- cache_rds(
 ------
 
 Confirm that the range of hyperparameters we considered was sufficient
-```{r1}
+
+```{r}
 autoplot(fits_ngrams)
 ```
 
@@ -1591,6 +1592,7 @@ Display performance of best configuration
 \
 \
 Our best model yet!
+
 ```{r}
 show_best(fits_ngrams)
 ```
@@ -1809,7 +1811,7 @@ We also need a specific predictor function that will work with the DALEX package
 ```{r}
 predict_wrapper <- function(model, newdata) {
   predict(model, newdata, type = "prob") |> 
-    pull(.pred_yes)
+    pull(.pred_pos)
 }
 ```
 
