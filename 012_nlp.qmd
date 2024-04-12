@@ -1848,32 +1848,39 @@ We are now ready to calculate feature importance metrics
 
 Only doing 10 permutations to keep computational costs lower for this demonstration.  In real, life do more!
 ```{r}
-#| eval: false
-
 set.seed(123456)
-imp_permute <- model_parts(explain_test, 
-                               type = "raw", 
-                               loss_function = accuracy_wrapper,
-                               B = 10) 
+imp_permute <- cache_rds(
+  expr = {model_parts(explain_test, 
+                      type = "raw", 
+                      loss_function = accuracy_wrapper,
+                      B = 10)
+  },
+  rerun = rerun_setting,
+  dir = "cache/012/",
+  file = "imp_permute"
+)
 ```
 
 -----
 
 Full pipe to plot top 30 in an informative display
-```{r}
-#| eval: false
 
-imp_perm |>
-  rename(variable = var_string) |> 
-  mutate(variable = str_remove(variable, "tfidf_text_")) |>
-  arrange(metric_mean) |> 
-  mutate(variable = factor(variable),
-         variable = forcats::fct_inorder(variable)) |> 
-  slice_tail(n =30) |> 
-  ggplot(mapping = aes(x = variable, y = metric_mean)) +
-  geom_point(size = 2, color = "red") +
-  geom_segment(aes(x = variable, y = metric_mean, xend = variable), 
-               yend = 0, colour = "grey50")  +
-  ylab("Reduction in Accuracy") +
-  coord_flip()
+```{r}
+#| fig-height: 4
+
+full_model <- imp_permute |>  
+    filter(variable == "_full_model_")
+  
+imp_permute |> 
+  filter(variable != "_full_model_",
+         variable != "_baseline_") |> 
+  mutate(variable = fct_reorder(variable, dropout_loss)) |> 
+  slice_tail(n = 30) |> 
+  ggplot(aes(dropout_loss, variable)) +
+  geom_vline(data = full_model, aes(xintercept = dropout_loss),
+             linewidth = 1.4, lty = 2, alpha = 0.7) +
+  geom_boxplot(fill = "#91CBD765", alpha = 0.4) +
+  theme(legend.position = "none") +
+  labs(x = "accuracy", 
+       y = NULL,  fill = NULL,  color = NULL)
 ```
