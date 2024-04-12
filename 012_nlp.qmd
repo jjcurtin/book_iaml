@@ -1846,14 +1846,17 @@ We are now ready to calculate feature importance metrics
 
 -----
 
-Only doing 10 permutations to keep computational costs lower for this demonstration.  In real, life do more!
+Only doing 1 permutation for each feature to keep computational costs lower for this demonstration.  In real, life do more!
+
 ```{r}
+#| label: permutations
+
 set.seed(123456)
 imp_permute <- cache_rds(
   expr = {model_parts(explain_test, 
                       type = "raw", 
                       loss_function = accuracy_wrapper,
-                      B = 10)
+                      B = 1)
   },
   rerun = rerun_setting,
   dir = "cache/012/",
