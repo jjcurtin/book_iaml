@@ -1866,7 +1866,25 @@ imp_permute <- cache_rds(
 
 -----
 
-Full pipe to plot top 30 in an informative display
+Plot top 30 in an informative display
+```{r}
+imp_permute |> 
+  filter(variable != "_full_model_",
+         variable != "_baseline_") |> 
+  mutate(variable = fct_reorder(variable, dropout_loss)) |> 
+  slice_head(n = 30) |> 
+  print()
+```
+
+```{r}
+imp_permute |> 
+  filter(variable != "_full_model_",
+         variable != "_baseline_") |> 
+  mutate(variable = fct_reorder(variable, dropout_loss, 
+                                .desc = TRUE)) |> 
+  slice_tail(n = 30) |> 
+  print()
+```
 
 ```{r}
 #| fig-height: 4
@@ -1878,12 +1896,12 @@ imp_permute |>
   filter(variable != "_full_model_",
          variable != "_baseline_") |> 
   mutate(variable = fct_reorder(variable, dropout_loss)) |> 
-  slice_tail(n = 30) |> 
+  arrange(desc(dropout_loss) |>
+  slice(n = 30) |> 
   ggplot(aes(dropout_loss, variable)) +
-  geom_vline(data = full_model, aes(xintercept = dropout_loss),
-             linewidth = 1.4, lty = 2, alpha = 0.7) +
-  geom_boxplot(fill = "#91CBD765", alpha = 0.4) +
-  theme(legend.position = "none") +
-  labs(x = "accuracy", 
-       y = NULL,  fill = NULL,  color = NULL)
+    geom_vline(data = full_model, aes(xintercept = dropout_loss),
+               linewidth = 1.4, lty = 2, alpha = 0.7) +
+    geom_boxplot(fill = "#91CBD765", alpha = 0.4) +
+    theme(legend.position = "none") +
+    labs(x = "accuracy", y = NULL)
 ```
