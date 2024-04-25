@@ -1,14 +1,11 @@
 ## Sets and iteration
 
 - train/val(dev)/test vs kfold/bootstrap with test vs nested cv
-
 - choosing sample sizes for train, val, test
-
 - Random vs non-random splits into train/val/test.  what needs to be true?  what is less important?
-
 - overfit val?  Use test more than once?  Do vs. don't and risks
 
-- Review 12 Takeaways
+- **Review 12 Takeaways**
 
 ## Error analysis
 
@@ -18,7 +15,8 @@
 - size of eyeball sample?
 - risk of using all dev as eyeball sample
 - error analysus for regression?
-- review 19 takeaways
+
+- **review 19 takeaways**
 
 ## bias/variance
 
@@ -36,14 +34,13 @@
 
 ## learning curves
 
-- review  figs
+- How and why
 - how to calculate with small samples?  issues with large samples?
+- review figs
 
 
+## pipeline vs end to end
 
-
-pipeline vs end to end
-
-what if no human level performance?
-how to publish ml in ss
+- when have we seen each?
+- costs and benefits vs. possible?
 
