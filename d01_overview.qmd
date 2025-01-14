@@ -1,0 +1,317 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+# IAML Unit 1: Discussion (Tuesday/Thursday)
+
+## Course Overview
+
+1. Introductions (preferred name, pronouns, program/department and year)
+
+--------------------------------------------------------------------------------
+
+2. Structure of course
+    - Same flow each week
+      - Week starts on Thursdays at 12:15 pm
+      - Assignments include:
+        - Pre-recorded lectures
+        - Web book material
+        - Readings (@ISL and other sources;  All free)
+        - Application assignment
+      - Asychronous discussion and questions on Slack
+      - Lab section on Tuesdays at 11:00 am - address previous week's code
+      - Quiz and application assignments due Wednesdays at 8 pm
+      
+      - Wrap-up discussion and conceptual questions on Thursdays at 11 am.  Not a lecture
+    - Self-paced (except for due dates and discussion)
+    - Quizzes used to encourage and assess reading.  Also to guide discussion.
+    - Workload similar to 610/710
+    - Office hours
+      - John - Thursdays, 1 – 2 pm
+      - Michelle - Wednesdays, 10 - 11 am 
+      - Kendra - Mondays, 2:30 - 3:30 pm 
+      - Personal appointments & Slack
+
+--------------------------------------------------------------------------------
+
+3. The web book
+    - Primary source for all course materials
+    - Organized by units (with syllabus at front)
+    - Links to pre-recorded lectures, readings, and quiz
+    - Provides primary source for code examples (all you need for this course)
+    - Lecture follows book
+
+--------------------------------------------------------------------------------
+
+4. Course as guided learning
+    - Concepts in lectures and readings
+    - Applications in web book and application assignment
+    - Discussion section is discussion/questions (not pre-planned lecture)
+    - Slack CAN be a good source for discussion and questions as well
+    - Grades are secondary (quizzes, application assignments, exams)
+
+--------------------------------------------------------------------------------
+
+5. Why these tools?
+    - `Quarto`
+      - Scientific publishing system (reproducible code, with output, presentations, papers)
+      - Tool for collaboration
+      - Interactive with static product (render to html or pdf)
+      - Application assignments, web book, and slides
+    - `tidyverse`?
+      - The tidyverse is an opinionated collection of R packages designed for data science. All packages share an underlying design philosophy, grammar, and data structures
+      - Unmatched for data wrangling, EDA, and data visualization
+    - `tidymodels`?
+      - Consistent interface to hundreds of statistical algorithms
+      - Under VERY active development 
+      - Well-supported and documented ([tidymodels.org](https://www.tidymodels.org/))
+      - Be careful with other web documentation (often out of date)
+
+--------------------------------------------------------------------------------    
+
+6. Why me?
+    - Primary tools in our research program
+    - Model for progression from 610/710
+    - Can do AND can collaborate with CS and expert data scientists
+
+--------------------------------------------------------------------------------
+
+7. Environment
+    - Safe and respectful
+    - VERY encouraging of questions, discussion, and tangents
+    - Have fun
+    - [Accomodations](https://jjcurtin.github.io/book_iaml/#accommodations-polices) and [Complaints](https://jjcurtin.github.io/book_iaml/#complaints)
+
+--------------------------------------------------------------------------------    
+
+8. ChatGPT
+    - Yay!  May develop into an amazing tool in your workflow
+    - Use as tool (like Stack Overflow) for applications (application assignments, application questions on exams)
+    - Check carefully - it can be wrong even when it looks right
+    - Do NOT use for conceptual questions (quizzes, conceptual exam questions).  This type of info needs to be in your head to be effective data scientist.
+    
+9. Academic Integrity
+    - Do not cheat!  Only you lose.
+    - No collaboration with classmates, peers, previous students on anything graded (including application assignments)
+    - All cheating reported to Department and Dean of Students.  If application assignment or quizzes, zero on all of them because I can't trust them.  If exam, zero on exam.
+    
+--------------------------------------------------------------------------------
+
+## Association vs. Prediction
+
+::: {.callout-important}
+# Question: What is the difference between association vs. prediction?
+:::
+
+::: {.fragment}
+Association quantifies the relationship between variables within a sample (predictors-outcome).  Prediction requires using an established model to predict (future?) outcomes for new ("out-of-sample, "held-out") participants.
+:::
+
+--------------------------------------------------------------------------------
+
+- Much research in psychology demonstrates association but calls it prediction!
+
+- Association (sometimes substantially) overestimates the predictive strength of our models
+  - Coefficients are derived to mimimize SSE (or maximize $R^2$)
+  - $R^2$ from GLM (using one sample) indexes how well on average any GLM that is fit to a sample will account for variance in that sample when specific coefficients are estimated in the same sample they are evaluated
+  - $R^2$ does NOT tell you how well a specific GLM (including its coefficients) will work with new data for **prediction**
+  - $R^2$ itself is positively biased even as estimate of how well a sample specific GLM will predict in that sample (vs. adjusted $R^2$ and other corrections)
+
+--------------------------------------------------------------------------------
+
+## Prediction vs. Explanation
+
+- [Examples of valuable prediction without explanation?]{.red}
+- [Can you have explanation without prediction?]{.red}
+- Prediction models can provide insight or tests of explanatory theories (e.g., do causes actually predict in new data; variable importance)
+
+- Goal of scientific psychology is to understand human behavior.  It involves both **explaining** behavior (i.e., identifying causes) and **predicting** (yet to be observed) behaviors.
+  - We overemphasize explanatory goals in this department, IMO
+
+- Machine learning is well positioned for prediction, but also for explanation
+
+--------------------------------------------------------------------------------
+
+## Basic framework and terminology for machine learning
+
+- [Supervised vs. unsupervised machine learning?]{.red}
+
+- [Supervised regression vs classification?]{.red}
+
+--------------------------------------------------------------------------------
+
+## Data Generating Process
+
+[What is a data generating process?]{.red}
+
+- $Y = f(X) + \epsilon$
+- both function and Xs are generally unknown
+- $\hat{Y} = \hat{f}(X)$
+
+
+[Why do we estimate the data generating process?]{.red}
+
+--------------------------------------------------------------------------------
+
+## Cross Validation
+
+- [What is it and why do we do it?]{.red}
+- [How are replication and cross-validation different?]{.red}
+
+--------------------------------------------------------------------------------
+
+Reducible vs. Irreducible error?
+
+- Our predictions will have error
+- You learned to estimate parameters in the GLM to minimize error in 610
+- But error remained non-zero (in your sample and more importantly with same model in new samples) unless you perfectly estimated the DGP
+- That error can be divided into two sources
+- **Irreducible error** comes from measurement error in X, Y and missing X because predictors (causes) not measured.
+   - Irreducible without collecting new predictors and/or with new measures
+   - It places a ceiling on the performance of the best model you can develop with your available data
+- **Reducible error** comes from mismatch between $\hat{f}(X)$ and the true $f(X)$.  
+   - We can reduce this without new data.  
+   - Just need better model ($\hat{f}(X)$).   
+   - You didn't consider this (much) in 610 because you were limited to one statistical algorithm (GLM) AND it didn't have hyperparameters.
+   - You did reduce error by coding predictors (feature engineering) differently (interactions $X1*X2$, polynomial terms $X^2$, power transformations of X)
+   This course will teach you methods to decrease reducible error (and validly estimate total error of that best model)
+
+--------------------------------------------------------------------------------
+
+[What are the **three general steps** by which we estimate and evaluate the data generating process with a sample of data?  Lets use all this vocabulary!]{.red}
+
+   - Candidate model configurations
+      - Statistical algorithms
+      - Hyperparameters
+      - Features (vs. predictors?), feature matrix, feature engineering, recipe (tidymodels specific)
+   - Model fitting (training), selection, and evaluation
+   - Resampling techniques
+      - cross validation techniques (k-fold)
+      - boostrapping for cross validation
+   - Training, validation, and test sets (terms vary in literature!)
+
+--------------------------------------------------------------------------------
+
+## Bias-variance tradeoff
+
+[What is underfitting, overfitting, bias, and variance?]{.red}
+
+Bias and variance are general concepts to understand during any estimation process
+
+  - Estimate mean, median, standard deviation
+  - Parameter estimates in GLM
+  - Estimate DGP - $\hat{Y} = \hat{f}(X)$
+
+--------------------------------------------------------------------------------
+
+Conceptual example of bias-variance: Darts from @Yarkoni2017
+  
+![](figs/unit1_dartboard.png){height=400px}
+
+--------------------------------------------------------------------------------
+
+Second Conceptual Example: Models (e.g. many scales made by Acme Co.) to measure my weight
+
+--------------------------------------------------------------------------------
+
+## Bias - A deeper dive
+
+Biased models are generally less complex models (i.e., underfit) than the data-generating process for your outcome
+
+- Biased models lead to errors in prediction because the model will systematically over- or under-predict  outcomes (scores or probabilities) for specific values of predictor(s) (bad for prediction goals!)
+
+- Parameter estimates from biased models may over or under-estimate the true effect of a predictor (bad for explanatory goals!) 
+
+--------------------------------------------------------------------------------
+
+::: {.callout-important}
+# Question: Are GLMs biased models?
+:::
+
+::: {,fragment}
+GLM parameter estimates are BLUE - best **linear** unbiased estimators. Parameter estimates from any sample are unbiased estimates of the linear model coefficients for population model but if DGP is not linear, this linear model will produce 
+:::
+
+--------------------------------------------------------------------------------
+
+Bias **seems** like a bad thing. 
+
+- Both bias (due to underfitting) and variance (due to overfitting) are sources of (reducible) prediction errors (and imprecise/inaccurate parameter estimates).  They are also often inversely related (i.e., the trade-off).  
+
+- A model configuration needs to be flexible enough to represent the true DGP.  
+  - Any more flexibility will lead to overfitting.   
+  - Any less flexibility will lead to underfitting.
+
+- Ideally, if your model configuration is perfectly matched to the DGP, it will have very low bias and very low variance (assuming sufficiently large N)
+
+- The world is complex.  In many instances, 
+
+  - We can't perfectly represent the DGP
+  - We trade off a little bias for big reduction in variance to produce the most accurate predictions (and stable parameter estimates across samples for explanatory goals)
+  - Or we trade off a little variance (slightly more flexible model) to get a big reduction in bias
+  - Either way, we get models that predict well and may be useful for explanatory goals
+
+--------------------------------------------------------------------------------
+
+## Variance - A deeper dive
+
+::: {.callout-important}
+# Question: Consider example of p = n - 1 in general linear model.  What happens in this situation?  How is this related to overfitting and model flexibility?
+:::
+
+::: {.fragment}
+The  model will perfectly fit the sample data even when there is no relationship between the predictors and the outcome.  e.g., Any two points can be fit perfectly with one predictor (line), any three points can be fit perfectly with two predictors (plane).  This model will NOT predict well in new data.  This model is overfit because n-1 predictors is too flexible for the linear model. You will fit the noise in the training data.
+:::
+
+--------------------------------------------------------------------------------
+
+Factors that increase overfitting
+
+- Small N
+- Complex models (e.g, many predictors, p relative to n, non-parametric models)
+- Weak effects of predictors (lots of noise available to overfit)
+- Correlated predictors (for some algorithms like the GLM)
+- Choosing between many model configurations (e.g. different predictors or predictor sets, transformations, types of statistical models) - lets return to this when we consider p-hacking
+
+--------------------------------------------------------------------------------
+
+You might have noticed that many of the above factors contribute to the standard error of a parameter estimate/model coefficient from the GLM
+
+- Small N
+- Big p
+- Small $R^2$ (weak effects)
+- Correlated predictors
+
+The standard error increases as model overfitting increases due to these factors
+
+--------------------------------------------------------------------------------
+
+::: {.callout-important}
+# Question: Explain the link between model variance/overfitting, standard errors, and sampling distributions?
+:::
+
+::: {.fragment}
+All parameter estimates have a sampling distribution.  This is the distribution of estimates that you would get if you repeatedly fit the same model to new samples.  When a model is overfit, that means that aspects of the model (its parameter estimates, its predictions) will vary greatly from sample to sample.  This is represented by a large standard error (the SD of the sampling distribution) for the model's parameter estimates.  It also means that the predictions you will make in new data will be very different depending on the sample that was used to estimate the parameters.
+:::
+
+--------------------------------------------------------------------------------
+
+::: {.callout-important}
+# Question: Describe problem of p-hacking with respect to overfitting?
+:::
+
+::: {.fragment}
+When you p-hack, you are overfitting the training set (your sample).  You try out many, many different model configurations and choose the one you like best rather than what works well in new data.  This model likely capitalizes on noise in your sample.  It won't fit well in another sample.  In other words, your conclusions are not linked to the true DGP and would be different if you used a different sample.  In a different vein, your significance test is wrong.  The SE does not reflect the model variance that resulted from testing many different configurations b/c your final model didn't "know" about the other models.  Statistically invalid conclusion!
+:::
+
+--------------------------------------------------------------------------------
+
+Parameter estimates from an overfit model are specific to the sample within which they were trained and are not true for other samples or the population as a whole
+
+- Parameter estimates from overfit models have big (TRUE) SE and so they may be VERY different in other samples
+  - Though if the  overfitting is due to fitting many models, it won't be reflected in the SE from any one model because each model doesn't know the other models exist!   p-hacking!!
+  
+- With traditional (one-sample) statistics, this can lead us to incorrect conclusions about the effect of predictors associated with these parameter estimates (bad for explanatory goals!).
+
+- If the parameter estimates are very different sample to sample (and different from the true population parameters), this means the model will predict poorly in new samples (bad for prediction goals!).  We fix this by using resampling to evaluate model performance.
