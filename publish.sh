@@ -13,7 +13,7 @@ if [ "$FORMAT" = "book" ]; then
   echo ""
   cp _quarto_book.yml _quarto.yml
   quarto publish gh-pages --no-browser 
-  git restore _quarto.yml
+  rm _quarto.yml
   rm -r _book
 fi
 
@@ -24,7 +24,9 @@ if [ "$FORMAT" = "slides" ];  then
   echo ""
   cp _quarto_slides.yml _quarto.yml
   quarto publish quarto-pub "$FILE" --no-browser
-  git restore _quarto.yml
+  rm _quarto.yml
+  rm -r *_files
+  rm *.html
 fi
  
 if [ "$FORMAT" = "slides_wide" ];  then
@@ -33,5 +35,7 @@ if [ "$FORMAT" = "slides_wide" ];  then
   echo ""
   cp _quarto_slides_wide.yml _quarto.yml
   quarto publish quarto-pub "$FILE" --no-browser
-  git restore _quarto.yml
+  rm _quarto.yml
+  rm -r *_files
+  rm *.html
 fi
