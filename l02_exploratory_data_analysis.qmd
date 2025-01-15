@@ -22,12 +22,6 @@ editor_options:
 
 --------------------------------------------------------------------------------
 
-### Application Assignment and Quiz
-
-
------
---------------------------------------------------------------------------------
-
 ## Overview of Exploratory Data Analysis
 
 ### Stages of Data Analysis and Model Development
@@ -45,7 +39,6 @@ These are the main stages of data analysis for machine learning and the data tha
 9. Final Model Evaluation: Evaluate final model configuration (test sets)
 10. Final Model Evaluation: Fit best model configuration to ALL data (training, validation, and test sets) if you plan to use it for applications.
 
------
 --------------------------------------------------------------------------------
 
 The earlier stages are highly iterative:
@@ -60,7 +53,6 @@ You will NOT iterate back to earlier stages after you select a final model confi
 - Any more than this is essentially equivalent to p-hacking in traditional analyses
 - Step 10 only happens if you plan to use the model in some application
 
------
 --------------------------------------------------------------------------------
 
 ## Best Practices and Other Recommendations
@@ -83,7 +75,6 @@ Exceptions include:
 
 See [chapter 7 - Data Import](https://r4ds.hadley.nz/data-import) in @RDS for more details and advanced techniques for importing data using `read_csv()`
 
------
 --------------------------------------------------------------------------------
 
 ### Classing Variables
@@ -99,11 +90,9 @@ Coarsely, there are four levels:
 
 We generally refer to nominal and ordinal variables as categorical and interval/ratio as quantitative or numeric 
 
------
 --------------------------------------------------------------------------------
 
 For **nominal** variables
-
 
 - We store (in csv files) these variables as character class with descriptive text labels for the levels
   - Easier to share/document
@@ -113,7 +102,6 @@ For **nominal** variables
   - For a dichotomous outcome variable, the positive/event level of dichotomous factor outcome should be first level of the factor
   - The order of levels may also matter for factor predictors (e.g., `step_dummy()` uses first level as reference).
 
------
 --------------------------------------------------------------------------------
 
 For **ordinal** variables: 
@@ -130,12 +118,10 @@ For **ordinal** variables:
   - Treat as an interval variable using `step_ordinalscore()`
 
 
-
 Similar EDA approaches are used with both nominal and ordinal variable
 
 Ordinal variables may show non-linear relations b/c they may not be evenly spaced.  In these instances, we can use feature engineering approaches that are also used for nominal variables
 
------
 --------------------------------------------------------------------------------
 
 For **interval and ratio** variables:
@@ -147,7 +133,6 @@ Similar EDA approaches are used with both interval and ratio variables
 
 Similar feature engineering approaches are used with both
 
------
 --------------------------------------------------------------------------------
 
 ### Data Dictionaries
@@ -165,7 +150,6 @@ Data dictionaries:
 
 We will see a variety of data dictionaries throughout the course.   Many are not great as you will learn.
 
------
 --------------------------------------------------------------------------------
 
 ### The Ames Housing Prices Dataset
@@ -185,7 +169,6 @@ variables (23 nominal, 23 ordinal, 14 discrete, and 20 continuous)
 - The challenge with this dataset is to build the best possible prediction model for the
 sale price of the homes.
 
------
 --------------------------------------------------------------------------------
 
 ### Packages and Conflicts
@@ -196,6 +179,7 @@ First, lets set up our environment with functions from important packages.  I st
   - This includes a function (`tidymodels_conflictRules()`) that sets conflict rules to allow us to attach `tidymodels` functions without conflicts with `tidyverse` functions.  
   - You can [review](https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true) that function to see what it does (search for that function name at the link)
 - Then we use that function
+
 ```{r conflict_policy}
 #| message: false
 options(conflicts.policy = "depends.ok")
@@ -203,7 +187,7 @@ devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R
 tidymodels_conflictRules()
 ```
 
------
+--------------------------------------------------------------------------------
 
 Next we load packages for functions that we will use regularly.  There are five things to note RE best practices
 
@@ -227,7 +211,7 @@ library(tidymodels) # <4>
 3. When loading `kableExtra` (which we use often), you will always need to exclude `groups_rows()` to prevent a conflict with `dplyr` package in the tidyverse
 4. Loading tidymodels will produce conflicts unless you source and call my function `tidymodels_conflictRules()` (see above)
 
------
+--------------------------------------------------------------------------------
 
 ### Source and Other Environment Settings
 We will also source (from github) two other libraries of functions that we use commonly for exploratory data analyses.  You should review these function scripts ([fun_eda.R](https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true); [fun_plots.R](https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true) to see the code for these functions. 
@@ -238,7 +222,6 @@ devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.
 devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
 ```
 
------
 --------------------------------------------------------------------------------
 
 Finally, we tune our environment a bit more by setting plot themes and print options that we prefer
@@ -252,7 +235,6 @@ And we set a relative path to our data.  This assumes you are using an RStudio p
 path_data <- "data"
 ```
 
------
 --------------------------------------------------------------------------------
 
 ### Read and Glimpse Dataframe
@@ -267,8 +249,6 @@ data_all <- read_csv(here::here(path_data, "ames_raw_class.csv"),   # <1>
 2.  We use `col_types = cols()` to let R guess the correct class for each column. This suppresses messages that aren't important at this point prior to EDA.
 3. It is good practice to always `glimpse()` data after you read it.
 
------
-
 --------------------------------------------------------------------------------
 
 Dataset Notes: 
@@ -282,7 +262,6 @@ Dataset Notes:
 
 - You will use different predictors in the next two application assignments
 
------
 --------------------------------------------------------------------------------
 
 Here we select the variables we will use for lecture
@@ -303,7 +282,6 @@ data_all <- data_all |>
 ```
 1. Notice that the dataset used non-standard variable names that include spaces. We need to use back-ticks around the variable names to allow us reference those variables. We will fix this during the cleaning process and you should never use spaces in variable names when setting up your own data!!! 
 
------
 --------------------------------------------------------------------------------
 
 ## Exploratory Data Analysis for Data Cleaning
@@ -314,7 +292,6 @@ EDA *could* be done using either `tidyverse` packages and functions or `tidymode
 
 - We will reserve the use of recipes for feature engineering only when we are building features for models that we will fit in our training sets and evaluation in our validation and test sets.  
 
------
 --------------------------------------------------------------------------------
 
 ### Data Leakage Issues
@@ -337,7 +314,6 @@ In particular, if we begin to use test data or information about test during mod
 - This is essentially the equivalent of p-hacking in traditional analyses
 - Our estimate of model performance will be too optimistic, which could have harmful real-world consequences.
 
------
 --------------------------------------------------------------------------------
 
 ### Tidy variable names
@@ -356,7 +332,6 @@ data_all <- data_all |>
 data_all |> names()
 ```
 
------
 --------------------------------------------------------------------------------
 
 ### Explore variable classes
@@ -369,7 +344,6 @@ At this point, we should class all of our variables as either numeric or factor
 
 Subsequent cleaning steps are clearer if we have this established/confirmed now
 
------
 --------------------------------------------------------------------------------
 
 We have a number of nominal or ordinal variables that are classed as character. 
@@ -383,7 +357,6 @@ We have one ordinal variable (`overall_qual`) that is classed as numeric (becaus
 data_all |> glimpse()
 ```
 
------
 --------------------------------------------------------------------------------
 
 We can the recode `overall_qual` first and set its levels
@@ -404,7 +377,6 @@ data_all <-  data_all |>
 2. We indicate the levels here.
 3. We use a mutate to re-class all character data to factors.  I prefer `factor()` to `forcats::fct()` because factor orders the levels alphabetically.  Be aware that this *could* change if your code is used in a region of the world where this sorting is different.  I still prefer this to the alternative (in `fct()`) that orders by the order the levels are found in your data.
 
------
 --------------------------------------------------------------------------------
 
 ### Skimming the data
@@ -423,7 +395,6 @@ data_all <-  data_all |>
 skim_some <- skim_with(numeric = sfl(mean = NULL, sd = NULL, p25 = NULL, p50 = NULL, p75 = NULL, hist = NULL))
 ```
 
------
 --------------------------------------------------------------------------------
 
 Here is what we get with our new `skim_some()` function
@@ -435,7 +406,6 @@ data_all |>
   skim_some()
 ```
 
------
 --------------------------------------------------------------------------------
 
 **Coding sidebar 1:**
@@ -445,7 +415,6 @@ data_all |>
   - `partial()` and `compose()` are two other function factories we will use at times
   - More details on function factories is available in [Advanced R](https://adv-r.hadley.nz/function-factories.html)
 
------
 --------------------------------------------------------------------------------
 
 **Coding sidebar 2:**
@@ -456,7 +425,6 @@ data_all |>
 - You should start to gather your favorite custom functions together in your own script(s).  
 - You can save your own scripts in a local file and load them into your workspace using `source()` or you can make your own github repo so you can begin to share your code with others!
 
------
 --------------------------------------------------------------------------------
 
 ### Missing Data - All variables
@@ -471,7 +439,6 @@ data_all |>
 ```
 1. `skim_some()` returns a dataframe so you can select only the subset of columns to focus its output on what you want.   Or just print it all!
 
------
 --------------------------------------------------------------------------------
 
 You likely should view the full observation for missing values
@@ -485,7 +452,6 @@ We will show you a few methods to do this in your rendered output
 
 Don't forget that you can also use `View()` interactively in R Studio
 
------
 --------------------------------------------------------------------------------
 
 **Option 1 (Simple)**:  Use print() with `options()`
@@ -498,7 +464,6 @@ data_all |> filter(is.na(garage_cars)) |>
 ```
 1. This sets print to print all rows and columns.  Note that we set these options at the start of the unit b.c. we like to see our full tibbles.  If we want only a subset of the first (or last) rows, we use `head()` or `tail()`
 
------
 --------------------------------------------------------------------------------
 
 Here are some more advanced options using `kbl()` for the df with many rows
@@ -523,7 +488,6 @@ print_kbl <- function(data, height = "500px") { # <1>
 1. Defaults to a output box of height = "500px".  Can set to other values if preferred.
 2. Might want to use `height = "100%"` if only printing a few rows. 
 
------
 --------------------------------------------------------------------------------
 
 Let's use this function to see its output
@@ -532,7 +496,6 @@ data_all |> filter(is.na(garage_qual)) |>
   print_kbl()
 ```
 
------
 --------------------------------------------------------------------------------
 
 **Coding sidebar:**
@@ -541,7 +504,6 @@ data_all |> filter(is.na(garage_qual)) |>
 - See [functions chapter](https://r4ds.hadley.nz/functions.html) in @RDS for help.
 - See [functionals chapter](https://adv-r.hadley.nz/functionals.html) in @AR. 
 
------
 --------------------------------------------------------------------------------
 
 **Option 3 (Most advanced)**: Line by line kable table. You can make this as complicated and customized as you like. We use kable (and kableExtra) for publication quality tables.  This is a simple example of options
@@ -553,7 +515,6 @@ data_all |> filter(is.na(garage_qual)) |>
   scroll_box(height = "500px", width = "100%")
 ```
 
------
 --------------------------------------------------------------------------------
 
 In this instance, if we consult our [data dictionary](data/ames_data_dictionary.pdf), we see that `NA` for `garage_qual` should be coded as "no garage".  We will correct this in our data set.  
@@ -573,7 +534,6 @@ data_all <- data_all |>
 
 We will leave the `NA` for `garage_cars` as `NA` because its not clear if that is truly missing or not, based on further EDA not shown here.
 
------
 --------------------------------------------------------------------------------
 
 We have one other issue with `garage_qual`.  It is an ordinal variable but we never reviewed the order of its levels.  The data dictionary indicates the levels are ordered (best to worst) as:
@@ -602,7 +562,6 @@ data_all$garage_qual |> levels() # <3>
 2. Pass that into `fct_relevel()`.  See `?fct_relevel` for other ways to adjust the levels of a factor.
 3. Confirm that the levels are now correct
 
------
 --------------------------------------------------------------------------------
 
 ### Explore Min/Max Response for Numeric Variables
@@ -626,7 +585,6 @@ data_all |>
 1. Select only numeric variables since min/max only apply to them
 2. Select relevant stats (min/max)
 
------
 --------------------------------------------------------------------------------
 
 ### Explore All Responses for Categorical Variables
@@ -650,7 +608,6 @@ data_all |>
 - We will see simpler uses later that will help you understand iteration with `purrr` functions
 - See the chapter on [iteration](https://r4ds.hadley.nz/iteration) in *R for Data Science (2e)* for more info on `map()` and `walk()`
 
------
 --------------------------------------------------------------------------------
 
 ### Tidy Responses for Categorical Variables
@@ -688,7 +645,6 @@ tidy_responses <- function(column){
 }
 ```
 
------
 --------------------------------------------------------------------------------
 
 Let's use the function
@@ -699,7 +655,6 @@ data_all <- data_all |>
 ```
 1. We use the tidy selection helper function to limit our mutate to only factors.  See [more details](https://tidyselect.r-lib.org/reference/language.html) on the tidy selection helpers like `all_of()` and `where()`
 
------
 --------------------------------------------------------------------------------
 
 Alas, these response labels were pretty poorly chosen so some didn't convert well.  And some are really hard to understand too.
@@ -712,7 +667,6 @@ data_all |>
   walk(\(column) print(levels(column)))
 ```
 
------
 --------------------------------------------------------------------------------
 
 Lets clean them up a bit more manually
@@ -738,7 +692,6 @@ data_all <- data_all |>
 
 The full dataset is now clean!
 
------
 --------------------------------------------------------------------------------
 
 ### Train/Validate/Test Splits
@@ -766,7 +719,6 @@ splits <- data_all |>
   initial_split(prop = 3/4, strata = "sale_price", breaks = 4)
 ```
 
------
 --------------------------------------------------------------------------------
 
 We then extract the training set from the splits and save it
@@ -780,7 +732,6 @@ splits |>
 ```
 1. `analysis()` pulls out the training set from our splits of `data_all`
 
------
 --------------------------------------------------------------------------------
 
 We will not need the validation set for modeling EDA
@@ -798,7 +749,6 @@ splits |>
 ```
 1. `assessment()` pulls out the validation set from our splits of `data_all`
 
------
 --------------------------------------------------------------------------------
 
 ## Exploratory Data Analysis for Modeling
@@ -811,7 +761,6 @@ We prefer to write separate scripts for Cleaning vs. Modeling EDA (but not displ
 - Cleaning EDA is done with full dataset but Modeling EDA is only done with a training set - NEVER use validation or test set
 - You will use two separate scripts for the application assignment for this unit
 
------
 --------------------------------------------------------------------------------
 
 Lets re-load (and glimpse) our training set to pretend we are at the start of a new script.
@@ -822,7 +771,6 @@ Lets re-load (and glimpse) our training set to pretend we are at the start of a 
   glimpse()
 ```
 
------
 --------------------------------------------------------------------------------
 
 We have some work to do (again)
@@ -847,7 +795,6 @@ We have some work to do (again)
 3. use `mutate()` with `factor()` to change numeric variable to factor.
 4. use `mutate()` with `fct_relevel()` to explicitly set levels of an ordinal factor.  Also notice the warning about the unknown level.  Always explore warnings!  In this instance, its fine.  There were only two observations with ex and neither ended up in the training split.   Still best to include this level to note it exists!
 
------
 --------------------------------------------------------------------------------
 
 **Coding sidebar**:  We will likely re-class the Ames dataset many times (for training, validation, test).  We could copy/paste these mutates each time but whenever you do something more than twice, I recommend writing a function.  We might write this one to re-class the ames variables
@@ -863,7 +810,6 @@ class_ames <- function(df){
 }
 ```
 
------
 --------------------------------------------------------------------------------
 
 Now we can use this function every time we read in one of the Ames datasets
@@ -879,7 +825,7 @@ data_trn <-
 ```
 1. Using our new function!
 
----
+--------------------------------------------------------------------------------
 
 There are 3 basic types of Modeling EDA you should always do
 
@@ -894,7 +840,6 @@ As a result of this exploration, we will:
 - Identify outliers and consider how to handle when model building
 - Consider how to handle imputation for missing data (if any)
 
------
 --------------------------------------------------------------------------------
 
 ### Overall Summary of Feature Matrix
@@ -916,7 +861,6 @@ skim_all <- skimr::skim_with(numeric = skimr::sfl(skew = skew_na,
                                                   hist = NULL))
 ```
 
------
 --------------------------------------------------------------------------------
 
 Careful review of this output provides a great orientation to our data
@@ -926,7 +870,6 @@ data_trn |>
   skim_all()
 ```
 
------
 --------------------------------------------------------------------------------
 
 ### Univariate Distributions
@@ -940,7 +883,6 @@ Exploration of univariate distributions are useful to
 
 We generally select different visualizations and summary statistics for categorical vs. numeric variables
 
------
 --------------------------------------------------------------------------------
 
 ### Barplots for Categorical Variables (Univariate)
@@ -964,7 +906,6 @@ plot_bar <- function(df, x){
 }
 ```
 
------
 --------------------------------------------------------------------------------
 
 **Coding sidebar**: When defining functions, generally put data as first argument so you can pipe in data using tidy pipelines
@@ -977,7 +918,6 @@ There are pros and cons to writing functions that accept variable names that are
 - For these plot functions, I use quoted variable names and then pipe those into `map()` to make multiple plots (see below)
 - see `?vignette("programming")` or info on [tidy evaluation](https://r4ds.hadley.nz/functions.html#indirection-and-tidy-evaluation) in @RDS for more details
 
------
 --------------------------------------------------------------------------------
 
 Bar plots reveal low frequency responses for nominal and ordinal variables
@@ -988,7 +928,6 @@ Bar plots reveal low frequency responses for nominal and ordinal variables
 data_trn |> plot_bar("bldg_type")
 ```
 
------
 --------------------------------------------------------------------------------
 
 Bar plots can display distributional shape for ordinal variables.  May suggest the 
@@ -1000,7 +939,6 @@ need for transformations if we later treat the ordinal variable as numeric
 data_trn |> plot_bar("overall_qual")
 ```
 
------
 --------------------------------------------------------------------------------
 
 **Coding sidebar**: 
@@ -1019,7 +957,6 @@ data_trn |>
 3. Use `map()` to iterative `plot_bar()` over every column.  (see [iteration](https://r4ds.hadley.nz/iteration.html) in @RDS)
 4. Use `plot_grid()` from `cowplot` package to display the list of plots in a grid
 
------
 --------------------------------------------------------------------------------
 
 ### Tables for Categorical Variables (Univariate)
@@ -1041,7 +978,6 @@ tab <- function(df, var, sort = FALSE) {
 } 
 ```
 
------
 --------------------------------------------------------------------------------
 
 Tables can be used to identify responses that have very low frequency and to think about the need to handle missing values
@@ -1053,7 +989,6 @@ Tables can be used to identify responses that have very low frequency and to thi
 data_trn |> tab(ms_zoning)
 ```
 
------
 --------------------------------------------------------------------------------
 
 - We could also view the table sorted if we prefer
@@ -1061,7 +996,6 @@ data_trn |> tab(ms_zoning)
 data_trn |> tab(ms_zoning, sort = TRUE)
 ```
 
------
 --------------------------------------------------------------------------------
 
 but could see all this detail with plot as well
@@ -1070,7 +1004,6 @@ but could see all this detail with plot as well
 data_trn |> plot_bar("ms_zoning")
 ```
 
------
 --------------------------------------------------------------------------------
 
 ### Histograms for Numeric Variables (Univariate)
@@ -1094,7 +1027,6 @@ plot_hist <- function(df, x, bins = 100){
 }
 ```
 
------
 --------------------------------------------------------------------------------
 
 Let's look at `sale_price`
@@ -1106,7 +1038,6 @@ Let's look at `sale_price`
 data_trn |> plot_hist("sale_price")
 ```
 
------
 --------------------------------------------------------------------------------
 
 ### Smoothed Frequency Polygons for Numeric Variables (Univariate) 
@@ -1127,7 +1058,6 @@ plot_freqpoly <- function(df, x, bins = 50){
 }
 ```
 
------
 --------------------------------------------------------------------------------
 
 - Bins may matter again
@@ -1136,7 +1066,6 @@ plot_freqpoly <- function(df, x, bins = 50){
 data_trn |> plot_freqpoly("sale_price")
 ```
 
------
 --------------------------------------------------------------------------------
 
 ### Simple Boxplots for Numeric Variables (Univariate) 
@@ -1164,7 +1093,6 @@ plot_boxplot <- function(df, x){
 }
 ```
 
------
 --------------------------------------------------------------------------------
 
 Here is the plot for `sale_price`
@@ -1172,7 +1100,6 @@ Here is the plot for `sale_price`
 data_trn |> plot_boxplot("sale_price")
 ```
 
------
 --------------------------------------------------------------------------------
 
 ### Combined Boxplot and Violin Plots for Numeric Variables (Univariate)
@@ -1204,7 +1131,6 @@ plot_box_violin <- function(df, x){
 }
 ```
 
------
 --------------------------------------------------------------------------------
 
 Here is the plot for `sale_price`
@@ -1215,7 +1141,6 @@ Here is the plot for `sale_price`
 data_trn |> plot_box_violin("sale_price")
 ```
 
------
 --------------------------------------------------------------------------------
 
 **Coding sidebar**: 
@@ -1231,7 +1156,6 @@ data_trn |>
 ```
 1. Now select numeric rather than factor but otherwise same as previous example
 
------
 --------------------------------------------------------------------------------
 
 ### Summary Statistics for Numeric Variables (Univariate)
@@ -1249,7 +1173,6 @@ data_trn |>
   filter(skim_type == "numeric")
 ```
 
------
 --------------------------------------------------------------------------------
 
 ### Bivariate Relationships with Outcome
@@ -1262,7 +1185,6 @@ Bivariate relationships with the outcome are useful to detect
 
 Again, we prefer visualizations but summary statistics are also available
 
------
 --------------------------------------------------------------------------------
 
 ### Scatterplots for Numeric Variables (Bivariate)
@@ -1289,7 +1211,6 @@ plot_scatter <- function(df, x, y){
 }
 ```
 
------
 --------------------------------------------------------------------------------
 
 Let's consider relationship between `gr_liv_area` and `sale_price`
@@ -1310,7 +1231,6 @@ If bivariate outliers are detected, you should return to cleaning mode to verify
 data_trn |> plot_scatter("gr_liv_area", "sale_price")
 ```
 
------
 --------------------------------------------------------------------------------
 
 Here is another example where the relationship might be non-linear
@@ -1319,7 +1239,6 @@ Here is another example where the relationship might be non-linear
 data_trn |> plot_scatter("year_built", "sale_price")
 ```
 
------
 --------------------------------------------------------------------------------
 
 A transformation of `sale_price` might help the relationship with $year\_built$ but might hurt `gr_liv_area`
@@ -1342,7 +1261,6 @@ data_trn |>
   plot_scatter("year_built", "sale_price")
 ```
 
------
 --------------------------------------------------------------------------------
 
 Can make scatterplots for ordinal variables as well
@@ -1355,7 +1273,6 @@ data_trn |>
   plot_scatter("overall_qual", "sale_price")
 ```
 
------
 --------------------------------------------------------------------------------
 
 **Coding sidebar**:  Use `jitter()` with x to help with overplotting
@@ -1366,7 +1283,6 @@ data_trn |>
   plot_scatter("overall_qual", "sale_price")
 ```
 
------
 --------------------------------------------------------------------------------
 
 ### Correlations & Correlation Plots for Numeric Variables (Bivariate)
@@ -1377,7 +1293,6 @@ Some statistical algorithms are sensitive to high correlations among features (m
 
 At best, highly correlated features add unnecessary flexibility and can lead to overfitting
 
------
 --------------------------------------------------------------------------------
 
 We can visualize correlations among predictors/features using `corrplot.mixed()` from `corrplot` package
@@ -1387,7 +1302,6 @@ We can visualize correlations among predictors/features using `corrplot.mixed()`
 - Can include nominal variables with > 2 levels if first transformed appropriately (e.g., dummy features, not demonstrated yet)
 - Works best with relatively small set of variables
 
------
 --------------------------------------------------------------------------------
 
 ```{r u2-modeling-27}
@@ -1400,7 +1314,6 @@ data_trn |>
 ```
 1. Note use of namespace (`corrplot::corrplot.mixed()`) to call this function from `corrplot` package
 
------
 --------------------------------------------------------------------------------
 
 ### Grouped Box + Violin Plots for Categorical and Numeric (Bivariate)
@@ -1428,7 +1341,6 @@ plot_grouped_box_violin <- function(df, x, y){
 }
 ```
 
------
 --------------------------------------------------------------------------------
 
 Here is the relationship between `overall_qual` and `sale_price`
@@ -1440,7 +1352,6 @@ Here is the relationship between `overall_qual` and `sale_price`
 data_trn |> plot_grouped_box_violin("overall_qual", "sale_price")
 ```
 
------
 --------------------------------------------------------------------------------
 
 Here is a grouped box + violin with a nominal variable
@@ -1451,8 +1362,6 @@ Here is a grouped box + violin with a nominal variable
 ```{r u2-modeling-30}
 data_trn |> plot_grouped_box_violin("bldg_type", "sale_price")
 ```
-
------
 
 --------------------------------------------------------------------------------
 
@@ -1492,7 +1401,6 @@ plot_categorical <- function(df, x, y, ordered = FALSE){
 }
 ```
 
------
 --------------------------------------------------------------------------------
 
 `sale_price` by `bldg_type`
@@ -1502,9 +1410,7 @@ data_trn |> plot_categorical("bldg_type", "sale_price") |>
   plot_grid(plotlist = _, ncol = 1)
 ```
 
------
 --------------------------------------------------------------------------------
-
 
 ### Stacked Barplots for Categorical (Bivariate)
 
@@ -1543,7 +1449,6 @@ plot_grouped_barplot_percent <- function(df, x, y){
 }
 ```
 
------
 --------------------------------------------------------------------------------
 
 For example, if we wanted to learn about how `bldg_type` varies by `lot_config`, see these plots
@@ -1556,7 +1461,6 @@ data_trn |> plot_grouped_barplot_count("lot_config", "bldg_type")
 data_trn |> plot_grouped_barplot_percent("lot_config", "bldg_type")
 ```
 
------
 --------------------------------------------------------------------------------
 
 May want to plot both ways
@@ -1569,7 +1473,6 @@ data_trn |> plot_grouped_barplot_percent("lot_config", "bldg_type")
 data_trn |> plot_grouped_barplot_percent("bldg_type", "lot_config")
 ```
 
------
 --------------------------------------------------------------------------------
 
 ### Tile Plot for Ordinal Categorical (Bivariate)
@@ -1587,14 +1490,12 @@ plot_tile <- function(df, x, y){
 }
 ```
 
------
 --------------------------------------------------------------------------------
 
 ```{r u2-modeling-38}
 data_trn |> plot_tile("overall_qual", "garage_qual")
 ```
 
------
 --------------------------------------------------------------------------------
 
 You might also consider a scatterplot with jitter in this instance
@@ -1605,7 +1506,6 @@ data_trn |>
   plot_scatter("overall_qual", "garage_qual")
 ```
 
------
 --------------------------------------------------------------------------------
 
 ### Two-way Tables for Categorical Variables (Bivariate)
@@ -1617,7 +1517,6 @@ For example, the relationship between `bldg_type` and `lot_config`
 data_trn |> tab2(bldg_type, lot_config)
 ```
 
------
 --------------------------------------------------------------------------------
 
 ## Working with Recipes
@@ -1634,7 +1533,6 @@ Recipes are used for feature engineering in `tidymodels` using the [`recipes`](h
 - Recipes use only information from the training set in all feature engineering
 - Consider example of standardizing `x1` for a feature in train vs. validation and test.  Must use mean and sd from TRAIN to standardize `x1` in train, validate, and test.  VERY IMPORTANT.
 
------
 --------------------------------------------------------------------------------
 
 We use recipes in a two step process - `prep()` and `bake()`
@@ -1648,7 +1546,6 @@ We use recipes in a two step process - `prep()` and `bake()`
   - We used our prepped recipe when we bake.
   - Whereas we only prep a recipe with training data, we can use a prepped recipe to bake features from any dataset (training, validation, or test).
 
------
 --------------------------------------------------------------------------------
 
 We will work with recipes extensively when model building starting in unit 3
@@ -1663,7 +1560,6 @@ Recipe syntax is very similar to generic `tidyverse` syntax (created by same gro
 - Less flexible/powerful but focused on our needs and easier to learn
 - You will eventually know both
 
------
 --------------------------------------------------------------------------------
 
 Recipes are used in Modeling scripts (which is a third type of script after cleaning and modeling EDA scripts)
@@ -1678,7 +1574,6 @@ Recipes are used in Modeling scripts (which is a third type of script after clea
 ```
 1. Remember our function for classing! 
 
------
 --------------------------------------------------------------------------------
 
 Recipes can be used to indicate the outcome and predictors that will be used in the model
@@ -1704,7 +1599,6 @@ rec
 summary(rec)
 ```
 
------
 --------------------------------------------------------------------------------
 
 ### Prepping and Baking a Recipe
@@ -1725,19 +1619,16 @@ rec_prep <- rec |> # <1>
 1. We start by prepping our raw/original recipe (`rec`)
 2. We use the `prep()` function on on the training data.  Recipes are ALWAYS prepped using training data.  This makes sure that are recipes will always only use information from the training set when making features for any subsequent dataset.  As part of the prepping process, `prep()` calculates and saves the features for the training data for later use
 
------
 --------------------------------------------------------------------------------
 
 Second, we bake the training data using this prepped recipe to get a feature matrix from it.  
-\
-\
+
 We set `new_data = NULL` because don't need features for new data.  Instead, we want features from the training data that were used to prep the recipe
 ```{r}
 feat_trn <- rec_prep |> 
   bake(new_data = NULL)
 ```
 
------
 --------------------------------------------------------------------------------
 
 Finally, we should generally at least glimpse and/or skim (and typically do some more EDA) on our features to make sure our recipe is doing what we expect.
@@ -1747,7 +1638,6 @@ Finally, we should generally at least glimpse and/or skim (and typically do some
 feat_trn |> glimpse()
 ```
 
------
 --------------------------------------------------------------------------------
 
 - skim
@@ -1756,7 +1646,6 @@ feat_trn |> glimpse()
 feat_trn |> skim_all()
 ```
 
------
 --------------------------------------------------------------------------------
 
 We can now use our features from training to train models, but that will take place in the next unit!
