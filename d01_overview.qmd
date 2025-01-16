@@ -12,41 +12,43 @@ editor_options:
 --------------------------------------------------------------------------------
 
 2. Structure of course
+    - Blended course!!
     - Same flow each week
-      - Week starts on Thursdays at 12:15 pm
+      - Week starts on Thursdays at 12:15 pm (end of Discussion meeting)
       - Assignments include:
         - Pre-recorded lectures
-        - Web book material
+        - Review of lecture slides (slide deck or book format)
         - Readings (@ISL and other sources;  All free)
         - Application assignment
       - Asynchronous discussion and questions on Slack
       - Lab section on Tuesdays at 11:00 am - address previous week's code
       - Quiz and application assignments due Wednesdays at 8 pm
-      
       - Wrap-up discussion and conceptual questions on Thursdays at 11 am.  Not a lecture
     - Self-paced (except for due dates and discussion)
     - Quizzes used to encourage and assess reading.  Also to guide discussion.
-    - Workload similar to 610/710
+    - Workload similar to 610
     - Office hours
       - John - Thursdays, 3 – 4 pm
-      - Zihan - Wednesdays, 10 - 11 am 
-      - Coco - Mondays, 2:30 - 3:30 pm 
+      - Zihan - Mondays, 1 -2 pm
+      - Coco - Wednesdays, 11 - 12 pm 
       - Personal appointments & Slack
 
 --------------------------------------------------------------------------------
 
-3. The web book
+3. The course website  
     - Primary source for all course materials
-    - Organized by units (with syllabus at front)
-    - Links to pre-recorded lectures, readings, and quiz
-    - Provides primary source for code examples (all you need for this course)
-    - Lecture follows book
-
+    - Organized by units (with syllabus and course materials at front)
+    - Links to pre-recorded lectures, readings, and quiz on course materials page
+    - Lecture slides provided in slide deck and book formats
+    - Live discussions will be recorded and shared (along with slide deck)
+    - Slides/book provides primary source for code examples (all you need for this course)
+    - Readings are also quite important!
+    
 --------------------------------------------------------------------------------
 
 4. Course as guided learning
     - Concepts in lectures and readings
-    - Applications in web book and application assignment
+    - Applications in slides and application assignment
     - Discussion section is discussion/questions (not pre-planned lecture)
     - Slack CAN be a good source for discussion and questions as well
     - Grades are secondary (quizzes, application assignments, exams)
@@ -69,7 +71,6 @@ editor_options:
       - Be careful with other web documentation (often out of date)
 
 --------------------------------------------------------------------------------    
-
 6. Why me?
     - Primary tools in our research program
     - Model for progression from 610/710
@@ -85,13 +86,25 @@ editor_options:
 
 --------------------------------------------------------------------------------    
 
-8. ChatGPT
+8. Exams, Application Assignments and Quizzes
+
+- Approximately weekly quizzes will be administered through Canvas and due each Wednesday at 8 pm (15% of grade)
+- Approximately weekly application assignments will be submitted via Canvas and due each Wednesday at 8 pm (25% of grade)
+
+- Midterm application/project exam due March 5th at 8 pm (15% of grade)
+- Midterm concepts exam in class on March 6th (15% of grade)
+- Final concepts exam during finals week on May 6th from 11 - 12:15 (15% of grade)
+- Final application exam due May 9th at 8 pm (15% of grade)
+
+
+9. ChatGPT and other LLMs
     - Yay!  May develop into an amazing tool in your workflow
     - Use as tool (like Stack Overflow) for applications (application assignments, application questions on exams)
+    - Integrated into RStudio with github student account
     - Check carefully - it can be wrong even when it looks right
     - Do NOT use for conceptual questions (quizzes, conceptual exam questions).  This type of info needs to be in your head to be effective data scientist.
     
-9. Academic Integrity
+10. Academic Integrity
     - Do not cheat!  Only you lose.
     - No collaboration with classmates, peers, previous students on anything graded (including application assignments)
     - All cheating reported to Department and Dean of Students.  If application assignment or quizzes, zero on all of them because I can't trust them.  If exam, zero on exam.
@@ -104,7 +117,7 @@ editor_options:
 # Question: What is the difference between association vs. prediction?
 :::
 
-::: {.fragment}
+::: {.fragment .uwred}
 Association quantifies the relationship between variables within a sample (predictors-outcome).  Prediction requires using an established model to predict (future?) outcomes for new ("out-of-sample, "held-out") participants.
 :::
 
@@ -229,7 +242,7 @@ Biased models are generally less complex models (i.e., underfit) than the data-g
 # Question: Are GLMs biased models?
 :::
 
-::: {,fragment}
+::: {.fragment .uwred}
 GLM parameter estimates are BLUE - best **linear** unbiased estimators. Parameter estimates from any sample are unbiased estimates of the linear model coefficients for population model but if DGP is not linear, this linear model will produce 
 :::
 
@@ -260,7 +273,7 @@ Bias **seems** like a bad thing.
 # Question: Consider example of p = n - 1 in general linear model.  What happens in this situation?  How is this related to overfitting and model flexibility?
 :::
 
-::: {.fragment}
+::: {.fragment .uwred}
 The  model will perfectly fit the sample data even when there is no relationship between the predictors and the outcome.  e.g., Any two points can be fit perfectly with one predictor (line), any three points can be fit perfectly with two predictors (plane).  This model will NOT predict well in new data.  This model is overfit because n-1 predictors is too flexible for the linear model. You will fit the noise in the training data.
 :::
 
@@ -291,7 +304,7 @@ The standard error increases as model overfitting increases due to these factors
 # Question: Explain the link between model variance/overfitting, standard errors, and sampling distributions?
 :::
 
-::: {.fragment}
+::: {.fragment .uwred}
 All parameter estimates have a sampling distribution.  This is the distribution of estimates that you would get if you repeatedly fit the same model to new samples.  When a model is overfit, that means that aspects of the model (its parameter estimates, its predictions) will vary greatly from sample to sample.  This is represented by a large standard error (the SD of the sampling distribution) for the model's parameter estimates.  It also means that the predictions you will make in new data will be very different depending on the sample that was used to estimate the parameters.
 :::
 
@@ -301,8 +314,9 @@ All parameter estimates have a sampling distribution.  This is the distribution 
 # Question: Describe problem of p-hacking with respect to overfitting?
 :::
 
-::: {.fragment}
-When you p-hack, you are overfitting the training set (your sample).  You try out many, many different model configurations and choose the one you like best rather than what works well in new data.  This model likely capitalizes on noise in your sample.  It won't fit well in another sample.  In other words, your conclusions are not linked to the true DGP and would be different if you used a different sample.  In a different vein, your significance test is wrong.  The SE does not reflect the model variance that resulted from testing many different configurations b/c your final model didn't "know" about the other models.  Statistically invalid conclusion!
+::: {.fragment .uwred}
+When you p-hack, you are overfitting the training set (your sample).  You try out many, many different model configurations and choose the one you like best rather than what works well in new data.  This model likely capitalizes on noise in your sample.  It won't fit well in another sample.  
+In other words, your conclusions are not linked to the true DGP and would be different if you used a different sample.  In a different vein, your significance test is wrong.  The SE does not reflect the model variance that resulted from testing many different configurations b/c your final model didn't "know" about the other models.  Statistically invalid conclusion!
 :::
 
 --------------------------------------------------------------------------------
