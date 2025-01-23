@@ -133,54 +133,74 @@ Association quantifies the relationship between variables within a sample (predi
 
 --------------------------------------------------------------------------------
 
-- Much research in psychology demonstrates association but calls it prediction!
+Much research in psychology demonstrates association but calls it prediction!
 
-- Association (sometimes substantially) overestimates the predictive strength of our models
-  - Coefficients are derived to mimimize SSE (or maximize $R^2$)
-  - $R^2$ from GLM (using one sample) indexes how well on average any GLM that is fit to a sample will account for variance in that sample when specific coefficients are estimated in the same sample they are evaluated
-  - $R^2$ does NOT tell you how well a specific GLM (including its coefficients) will work with new data for **prediction**
-  - $R^2$ itself is positively biased even as estimate of how well a sample specific GLM will predict in that sample (vs. adjusted $R^2$ and other corrections)
+Association (sometimes substantially) overestimates the predictive strength of our models
+
+- Coefficients are derived to mimimize SSE (or maximize $R^2$)
+- $R^2$ from GLM (using one sample) indexes how well on average any GLM that is fit to a sample will account for variance in that sample when specific coefficients are estimated in the same sample they are evaluated
+- $R^2$ does NOT tell you how well a specific GLM (including its coefficients) will work with new data for **prediction**
+- $R^2$ itself is positively biased even as estimate of how well a sample specific GLM will predict in that sample (vs. adjusted $R^2$ and other corrections)
+
+--------------------------------------------------------------------------------
+
+Prediction requires:
+
+- Model trained/fit on data that does NOT include the outcome to be predicted (model already exists)
+- May also predictors to be measured before outcome 
+
+- Consider how to make a lapse prediction for a new person when implementing prediction model
+
 
 --------------------------------------------------------------------------------
 
 ## Prediction vs. Explanation
 
-- [Examples of valuable prediction without explanation?]{.red}
-- [Can you have explanation without prediction?]{.red}
+Goal of scientific psychology is to understand human behavior.  It involves both **explaining** behavior (i.e., identifying causes) and **predicting** (yet to be observed) behaviors.
+
+- We overemphasize explanatory goals in this department, IMO
+  
+[Examples of valuable prediction without explanation?]{.uwred}
+
+- Who, when, under what conditions, what can change outcome?
+- Focus typically on applications/interventions but that is often goal of explanatory models too!
 - Prediction models can provide insight or tests of explanatory theories (e.g., do causes actually predict in new data; variable importance)
+  
+[Can you have explanation without prediction?]{.red}
 
-- Goal of scientific psychology is to understand human behavior.  It involves both **explaining** behavior (i.e., identifying causes) and **predicting** (yet to be observed) behaviors.
-  - We overemphasize explanatory goals in this department, IMO
-
-- Machine learning is well positioned for prediction, but also for explanation
-
+- If we can't predict something precisely, do we really understand it?
+- If there is a lot we don't understand (lots of prediction error), our understanding may be limited/wrong
+  
 --------------------------------------------------------------------------------
 
 ## Basic framework and terminology for machine learning
 
-- [Supervised vs. unsupervised machine learning?]{.red}
+[Supervised vs. unsupervised machine learning?]{.uwred}
 
-- [Supervised regression vs classification?]{.red}
+
+[Supervised regression vs classification?]{.uwred}
 
 --------------------------------------------------------------------------------
 
 ## Data Generating Process
 
-[What is a data generating process?]{.red}
+[What is a data generating process?]{.uwred}
 
 - $Y = f(X) + \epsilon$
 - both function and Xs are generally unknown
 - $\hat{Y} = \hat{f}(X)$
 
 
-[Why do we estimate the data generating process?]{.red}
+[Why do we estimate the data generating process?]{.uwred}
 
 --------------------------------------------------------------------------------
 
 ## Cross Validation
 
-- [What is it and why do we do it?]{.red}
-- [How are replication and cross-validation different?]{.red}
+[What is it and why do we do it?]{.uwred}
+
+
+[How are replication and cross-validation different?]{.uwred}
 
 --------------------------------------------------------------------------------
 
@@ -202,7 +222,7 @@ Reducible vs. Irreducible error?
 
 --------------------------------------------------------------------------------
 
-[What are the **three general steps** by which we estimate and evaluate the data generating process with a sample of data?  Lets use all this vocabulary!]{.red}
+[What are the **three general steps** by which we estimate and evaluate the data generating process with a sample of data?  Lets use all this vocabulary!]{.uwred}
 
    - Candidate model configurations
       - Statistical algorithms
@@ -218,7 +238,7 @@ Reducible vs. Irreducible error?
 
 ## Bias-variance tradeoff
 
-[What is underfitting, overfitting, bias, and variance?]{.red}
+[What is underfitting, overfitting, bias, and variance?]{.uwred}
 
 Bias and variance are general concepts to understand during any estimation process
 
@@ -234,7 +254,12 @@ Conceptual example of bias-variance: Darts from @Yarkoni2017
 
 --------------------------------------------------------------------------------
 
-Second Conceptual Example: Models (e.g. many scales made by Acme Co.) to measure my weight
+Second Conceptual Example: Models to measure/estimate weight 
+
+- Acme Co. has a blueprint for making a scale
+- Make lots of scales (models) from that blueprint
+- Each scale/model is a little different (due to manufacturing differences) - variance
+- All scales tend to overestimate weight a bit (design error) - bias
 
 --------------------------------------------------------------------------------
 
@@ -260,29 +285,22 @@ However, if DGP is not linear (i.e., that assumption is violated), the linear mo
 
 --------------------------------------------------------------------------------
 
-Bias **seems** like a bad thing. 
+Bias seems like a bad thing (and it is but its not the only source of reducible error) 
 
-- Both bias (due to underfitting) and variance (due to overfitting) are sources of (reducible) prediction errors (and imprecise/inaccurate parameter estimates).  They are also often inversely related (i.e., the trade-off).  
-
-- A model configuration needs to be flexible enough to represent the true DGP.  
-  - Any more flexibility will lead to overfitting.   
-  - Any less flexibility will lead to underfitting.
-
-- Ideally, if your model configuration is perfectly matched to the DGP, it will have very low bias and very low variance (assuming sufficiently large N)
+- Both **bias** (due to underfitting) and **variance** (due to overfitting) are sources of (reducible) prediction errors (and imprecise/inaccurate parameter estimates).  They are also often inversely related (i.e., the trade-off).  
 
 - The world is complex.  In many instances, 
-
   - We can't perfectly represent the DGP
   - We trade off a little bias for big reduction in variance to produce the most accurate predictions (and stable parameter estimates across samples for explanatory goals)
   - Or we trade off a little variance (slightly more flexible model) to get a big reduction in bias
   - Either way, we get models that predict well and may be useful for explanatory goals
-
+  
 --------------------------------------------------------------------------------
 
 ## Variance - A deeper dive
 
 ::: {.callout-important}
-# Question: Consider example of p = n - 1 in general linear model.  What happens in this situation?  How is this related to overfitting and model flexibility?
+# Question: Consider example  p = n in general linear model.  What happens in this situation?  How is this related to overfitting and model flexibility?
 :::
 
 ::: {.fragment .uwred}
@@ -317,7 +335,11 @@ The standard error increases as model overfitting increases due to these factors
 :::
 
 ::: {.fragment .uwred}
-All parameter estimates have a sampling distribution.  This is the distribution of estimates that you would get if you repeatedly fit the same model to new samples.  When a model is overfit, that means that aspects of the model (its parameter estimates, its predictions) will vary greatly from sample to sample.  This is represented by a large standard error (the SD of the sampling distribution) for the model's parameter estimates.  It also means that the predictions you will make in new data will be very different depending on the sample that was used to estimate the parameters.
+All parameter estimates have a sampling distribution.  This is the distribution of estimates that you would get if you repeatedly fit the same model to new samples.  
+
+When a model is overfit, that means that aspects of the model (its parameter estimates, its predictions) will vary greatly from sample to sample.  This is represented by a large standard error (the SD of the sampling distribution) for the model's parameter estimates.  
+
+It also means that the predictions you will make in new data will be very different depending on the sample that was used to estimate the parameters.
 :::
 
 --------------------------------------------------------------------------------
@@ -328,7 +350,11 @@ All parameter estimates have a sampling distribution.  This is the distribution 
 
 ::: {.fragment .uwred}
 When you p-hack, you are overfitting the training set (your sample).  You try out many, many different model configurations and choose the one you like best rather than what works well in new data.  This model likely capitalizes on noise in your sample.  It won't fit well in another sample.  
-In other words, your conclusions are not linked to the true DGP and would be different if you used a different sample.  In a different vein, your significance test is wrong.  The SE does not reflect the model variance that resulted from testing many different configurations b/c your final model didn't "know" about the other models.  Statistically invalid conclusion!
+
+
+In other words, your conclusions are not linked to the true DGP and would be different if you used a different sample.  
+
+In a different vein, your significance test is wrong.  The SE does not reflect the model variance that resulted from testing many different configurations b/c your final model didn't "know" about the other models.  Statistically invalid conclusion!
 :::
 
 --------------------------------------------------------------------------------
