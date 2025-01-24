@@ -185,7 +185,7 @@ First, lets set up our environment with functions from important packages.  I st
   - You can [review](https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true) that function to see what it does (search for that function name at the link)
 - Then we use that function
 
-```{r conflict_policy}
+```{r}
 #| message: false
 options(conflicts.policy = "depends.ok")
 devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
@@ -202,7 +202,7 @@ Next we load packages for functions that we will use regularly.  There are five 
 4. If a package has a function that conflicts with our primary packages and we don't plan to use that function, we load the package but exclude the function.  If we really needed it, we can call it with its namespace as per option 3 above.
 5. Pay attention to conflicts that were allowed to make sure you understand and accept them. (I left the package messages and warnings in the book this time to see them. I will hide them to avoid cluttering book in later units but you should always review them.)
 
-```{r u2-overview-1}
+```{r}
 #| message: false
 #| warning: false
 library(janitor, include.only = "clean_names") # <1>
@@ -245,7 +245,7 @@ path_data <- "data"
 ### Read and Glimpse Dataframe
 Lets read in the data and glimpse the subset of observations we will work with in Units 2-3 and the first two application assignments.  
 
-```{r u2-overview-2}
+```{r}
 data_all <- read_csv(here::here(path_data, "ames_raw_class.csv"),   # <1>
                      col_types = cols()) |> # <2> 
   glimpse() # <3>
@@ -271,7 +271,7 @@ Dataset Notes:
 
 Here we select the variables we will use for lecture
 
-```{r  u2-overview-3}
+```{r}
 data_all <- data_all |> 
   select(SalePrice,
          `Gr Liv Area`, 
@@ -330,7 +330,7 @@ Use snake case for variable names
 - See more details about tidy names for objects (e.g., variables, dfs, functions) per [Tidy Style Guide](https://style.tidyverse.org/syntax.html#object-names)
 
 
-```{r u2-clean-1}
+```{r}
 data_all <- data_all |> 
   clean_names("snake")
 
@@ -358,7 +358,7 @@ We have one ordinal variable (`overall_qual`) that is classed as numeric (becaus
 - `read_csv()` thought was numeric by the levels are coded using numbers
 - The data dictionary indicates that valid values range from 1 - 10.
 
-```{r u2-clean-2}
+```{r}
 data_all |> glimpse()
 ```
 
@@ -369,7 +369,7 @@ We can the recode `overall_qual` first and set its levels
 We can recode all the character variables to factor in one step.  Most are nominal.  We will handle the order for `garage_qual` later.
 
 
-```{r u2-clean-3}
+```{r}
 oq_levels <- 1:10 # <1>
 
 data_all <-  data_all |> 
@@ -394,7 +394,7 @@ data_all <-  data_all |>
 - We can get many of the summary stats for cleaning in one call 
 - We have a custom skim defined in the `fun_eda.R` function library that we use regularly.  Here is the code but you can use the function directly if you sourced `fun_eda.R` (as we did above)
 
-```{r u2-clean-4}
+```{r}
 #| eval: false
 
 skim_some <- skim_with(numeric = sfl(mean = NULL, sd = NULL, p25 = NULL, p50 = NULL, p75 = NULL, hist = NULL))
@@ -406,7 +406,7 @@ Here is what we get with our new `skim_some()` function
 
 - We will refer to this again for each characteristic we want to review for instructional purposes 
 - We can already see that we can use `skim_some()` to confirm that we only have numeric and factor classes
-```{r u2-clean-5}
+```{r}
 data_all |> 
   skim_some()
 ```
@@ -437,7 +437,7 @@ data_all |>
 `skim_some()` provides us with missing data counts and complete data proportions for each variable
 
 
-```{r u2-clean-6}
+```{r}
 data_all |> 
   skim_some() |> 
   select(skim_variable, n_missing, complete_rate) # <1>
@@ -461,7 +461,7 @@ Don't forget that you can also use `View()` interactively in R Studio
 
 **Option 1 (Simple)**:  Use print() with `options()`
 
-```{r u2-clean-7}
+```{r}
 options(tibble.width = Inf, tibble.print_max = Inf) # <1>
 
 data_all |> filter(is.na(garage_cars)) |> 
@@ -479,7 +479,7 @@ Here are some more advanced options using `kbl()` for the df with many rows
 
 **Option 2 (more advanced)**: Use a function for kables that we created.  Code is displayed here but the function is available to you if you source fun_eda.R from Github
 
-```{r u2-clean-9, eval = FALSE}
+```{r}
 #| eval: false
 
 # Might want to use height = "100%" if only printing a few rows
@@ -513,7 +513,7 @@ data_all |> filter(is.na(garage_qual)) |>
 
 **Option 3 (Most advanced)**: Line by line kable table. You can make this as complicated and customized as you like. We use kable (and kableExtra) for publication quality tables.  This is a simple example of options
 
-```{r u2-clean-8}
+```{r}
 data_all |> filter(is.na(garage_qual)) |> 
   kbl(align = "r") |> 
   kable_styling(bootstrap_options = c("striped", "condensed")) |> 
@@ -528,7 +528,7 @@ This is a pretty poor choice on the part of the researchers who created the data
 
 Anyway, let's correct all the `NA` for `garage_qual` to "no_garage" using `mutate()` 
 
-```{r u2-clean-10}
+```{r}
 data_all <- data_all |> 
   mutate(garage_qual = fct_expand(garage_qual, "no_garage"), # <1>
          garage_qual = replace_na(garage_qual, "no_garage")) # <2>
@@ -580,7 +580,7 @@ We should explore mins and maxes for all numeric variables to detect out of vali
   - p0 = min
   - p100 = max
 
-```{r u2-clean-11}
+```{r}
 data_all |>
   mutate(overall_qual = as.numeric(overall_qual)) |> 
   skim_some() |> 
@@ -598,7 +598,7 @@ We should explore all unique responses for nominal variables
 
 Might also do this for ordinal variables that are coded with labels vs. numbers.  
 
-```{r u2-clean-13}
+```{r}
 data_all |> 
   select(where(is.factor)) |>
   walk(\(column) print(levels(column)))
@@ -630,7 +630,7 @@ Here is an easy way to convert responses for character variables to snake case u
 
 - This uses regular expressions (regex), which will will learn about in a later unit on text processing.
 - You could expand this cleaning function if you encounter other issues that need to be cleaned in the factor levels.
-```{r u2-clean-14}
+```{r}
 #| eval: false
 
 tidy_responses <- function(column){
@@ -654,7 +654,7 @@ tidy_responses <- function(column){
 
 Let's use the function
 
-```{r u2-clean-15}
+```{r}
 data_all <- data_all |> 
   mutate(across(where(is.factor), tidy_responses)) # <1>
 ```
@@ -666,7 +666,7 @@ Alas, these response labels were pretty poorly chosen so some didn't convert wel
 
 - Avoid this problem and choose good response labels from the start for your own data
 - Here, we show you what we got from using `tidy_responses()`
-```{r u2-clean-16}
+```{r}
 data_all |> 
   select(where(is.factor)) |>
   walk(\(column) print(levels(column)))
@@ -718,18 +718,23 @@ The final task we typically do as part of the data preparation process is to spl
 - **IMPORTANT**: Set a seed so that you can reproduce these splits if you later do more cleaning
 
 
-```{r u2-clean-18}
+```{r}
 set.seed(20110522)
 splits <- data_all |> 
   initial_split(prop = 3/4, strata = "sale_price", breaks = 4)
 ```
+
+::: {.callout-important}
+# Coding Note
+`initial_split()` is used to create two resamples of your data.  This was used here because we already had a test set held out (outside of the code presented).  We use `analysis()` and `assessment()` to extract these two resamples.   We will later use `initial_validation_split()` to create 3 resamples: training, validation, and test.  We will extract those three resamples using `training()`, `validation()`, and testing()`
+:::
 
 --------------------------------------------------------------------------------
 
 We then extract the training set from the splits and save it
 
 - Training sets are used for "analysis"- hence the name of the function
-```{r u2-clean-19}
+```{r}
 splits |> 
   analysis() |> # <1> 
   glimpse() |> 
@@ -746,7 +751,7 @@ We will not need the validation set for modeling EDA
 - Save it in this clean form for easy use when you need it
 - We use the validation set to "assess" models that we have fit in training sets - hence the name of the function
 
-```{r u2-clean-20}
+```{r}
 splits |> 
   assessment() |> # <1> 
   glimpse() |> 
@@ -897,7 +902,7 @@ The primary visualization for categorical variables is the bar plot
 - We use it for both nominal and ordinal variables
 - Define and customize it within a function for repeated use.  
 - We share this and all the remaining plots used in this unit in `fun_plot.R`. Source it to use them without having to re-code each time
-```{r u2-modeling-1}
+```{r}
 #| eval: false
 
 plot_bar <- function(df, x){
@@ -929,7 +934,7 @@ Bar plots reveal low frequency responses for nominal and ordinal variables
 
 - See `bldg_type`
 
-```{r u2-modeling-2}
+```{r}
 data_trn |> plot_bar("bldg_type")
 ```
 
@@ -940,7 +945,7 @@ need for transformations if we later treat the ordinal variable as numeric
 
 - See `overall_qual`.  Though it is not very skewed.
 
-```{r u2-modeling-3}
+```{r}
 data_trn |> plot_bar("overall_qual")
 ```
 
@@ -950,7 +955,7 @@ data_trn |> plot_bar("overall_qual")
 
 We can make all of our plots iteratively using `map()` from the `purrr package.
 
-```{r u2-modeling-4}
+```{r}
 data_trn |> 
   select(where(is.factor)) |> # <1> 
   names() |> # <2> 
@@ -990,7 +995,7 @@ Tables can be used to identify responses that have very low frequency and to thi
 - See `ms_zoning`
 - May want to collapse low frequency (or low percentage) categories to reduce the number of features needed to represent the predictor
 
-```{r u2-modeling-5}
+```{r}
 data_trn |> tab(ms_zoning)
 ```
 
@@ -1005,7 +1010,7 @@ data_trn |> tab(ms_zoning, sort = TRUE)
 
 but could see all this detail with plot as well
 
-```{r u2-modeling-6}
+```{r}
 data_trn |> plot_bar("ms_zoning")
 ```
 
@@ -1020,7 +1025,7 @@ Let's define a histogram function (included in `fun_plots.r`)
 - Bin size should be explored a bit to find best representation
 - Somewhat dependent on n (my default here is based on this training set)
 - This is one of the limitations of histograms
-```{r u2-modeling-8}
+```{r}
 #| eval: false
 
 plot_hist <- function(df, x, bins = 100){
@@ -1039,7 +1044,7 @@ Let's look at `sale_price`
 - It is positively skewed
 - May suggest units (dollars) are not interval in nature (makes sense)
 - Could cause problems for some algorithms (e.g., lm) when features are normal
-```{r u2-modeling-9}
+```{r}
 data_trn |> plot_hist("sale_price")
 ```
 
@@ -1051,7 +1056,7 @@ Frequency polygons are also commonly used
 
 - Define a frequency polygon function and use it (included in `fun_plots.r`)
 
-```{r u2-modeling-10}
+```{r}
 #| eval: false
 
 plot_freqpoly <- function(df, x, bins = 50){
@@ -1067,7 +1072,7 @@ plot_freqpoly <- function(df, x, bins = 50){
 
 - Bins may matter again
 
-```{r u2-modeling-11}
+```{r}
 data_trn |> plot_freqpoly("sale_price")
 ```
 
@@ -1083,7 +1088,7 @@ Boxplots display
 - Outliers outside of 1.5 * IQR
 
 Define a boxplot function and use it (included in `fun_plots.r`)
-```{r u2-modeling-12}
+```{r}
 #| eval: false
 
 plot_boxplot <- function(df, x){
@@ -1101,7 +1106,7 @@ plot_boxplot <- function(df, x){
 --------------------------------------------------------------------------------
 
 Here is the plot for `sale_price`
-```{r u2-modeling-13}
+```{r}
 data_trn |> plot_boxplot("sale_price")
 ```
 
@@ -1119,7 +1124,7 @@ The combination of a boxplot and violin plot is particularly useful
 
 Define a combined plot (included in `fun_plots.r`)
 
-```{r u2-modeling-14}
+```{r}
 #| eval: false
 
 plot_box_violin <- function(df, x){
@@ -1142,7 +1147,7 @@ Here is the plot for `sale_price`
 
 - In this instance, the skew is NOT due to only a few outliers
 
-```{r u2-modeling-15}
+```{r}
 data_trn |> plot_box_violin("sale_price")
 ```
 
@@ -1152,7 +1157,7 @@ data_trn |> plot_box_violin("sale_price")
 
 - You can make figures for all numeric variables at once using `select()` and `map()` as before
 
-```{r u2-modeling-16}
+```{r}
 data_trn |> 
   select(where(is.numeric)) |> # <1> 
   names() |> 
@@ -1202,7 +1207,7 @@ Define a scatterplot function (included in `fun_plots.r`)
 - add a simple line
 - add a LOWESS line (Locally Weighted Scatterplot Smoothing)
 - These lines are useful for considering shape of relationship
-```{r u2-modeling-18}
+```{r}
 #| eval: false
 
 plot_scatter <- function(df, x, y){
@@ -1232,7 +1237,7 @@ If bivariate outliers are detected, you should return to cleaning mode to verify
   - Fix in full dataset
   - Use same train/test split after fixing
   
-```{r u2-modeling-19}
+```{r}
 data_trn |> plot_scatter("gr_liv_area", "sale_price")
 ```
 
@@ -1240,7 +1245,7 @@ data_trn |> plot_scatter("gr_liv_area", "sale_price")
 
 Here is another example where the relationship might be non-linear
 
-```{r u2-modeling-21}
+```{r}
 data_trn |> plot_scatter("year_built", "sale_price")
 ```
 
@@ -1255,7 +1260,7 @@ This might require some more EDA but here is a start
 - Quick and temporary Log (base e) of `sale_price`
 - This doesn't seem promising by itself
 
-```{r u2-modeling-22}
+```{r}
   
 data_trn |> 
   mutate(sale_price = log(sale_price)) |> 
@@ -1272,7 +1277,7 @@ Can make scatterplots for ordinal variables as well
 
 - But other (perhaps better) options also exist for this combination of variable classes.
 - Use `as.numeric()` to allow for lm and LOWESS lines on otherwise categorical variable
-```{r u2-modeling-23}
+```{r}
 data_trn |> 
   mutate(overall_qual = as.numeric(overall_qual)) |> 
   plot_scatter("overall_qual", "sale_price")
@@ -1282,7 +1287,7 @@ data_trn |>
 
 **Coding sidebar**:  Use `jitter()` with x to help with overplotting
 
-```{r u2-modeling-24}
+```{r}
 data_trn |> 
   mutate(overall_qual = jitter(as.numeric(overall_qual))) |> 
   plot_scatter("overall_qual", "sale_price")
@@ -1309,7 +1314,7 @@ We can visualize correlations among predictors/features using `corrplot.mixed()`
 
 --------------------------------------------------------------------------------
 
-```{r u2-modeling-27}
+```{r}
 data_trn |> 
   mutate(overall_qual = as.numeric(overall_qual),
          garage_qual = as.numeric(garage_qual)) |> 
@@ -1330,7 +1335,7 @@ A grouped version of the combined box and violin plot is our preferred visualiza
 - @RDS also describes use of grouped frequency polygons for this combination of variable classes
 
 
-```{r u2-modeling-28}
+```{r}
 #| eval: false
 
 plot_grouped_box_violin <- function(df, x, y){
@@ -1353,7 +1358,7 @@ Here is the relationship between `overall_qual` and `sale_price`
 - Tend to prefer this over the scatterplot (with `as.numeric()`) for ordinal variables
 - Increasing spread of `sale_price` at higher levels of `overall_qual` is clearer in this plot
 
-```{r u2-modeling-29}
+```{r}
 data_trn |> plot_grouped_box_violin("overall_qual", "sale_price")
 ```
 
@@ -1364,7 +1369,7 @@ Here is a grouped box + violin with a nominal variable
 - More variation and skew in `sale_price` for one family homes (additional features, moderators?)
 - Position of townhouse (interior vs. exterior) seems to matter (don't collapse?)
 
-```{r u2-modeling-30}
+```{r}
 data_trn |> plot_grouped_box_violin("bldg_type", "sale_price")
 ```
 
@@ -1376,7 +1381,7 @@ We like this combined plot enough when doing EDA to provide a specific function 
 
 It is our go to for understanding the potential effect of a categorical predictor
 
-```{r  u2-modeling-31}
+```{r}
 #| eval: false
 
 plot_categorical <- function(df, x, y, ordered = FALSE){
@@ -1427,7 +1432,7 @@ Stacked Barplots:
   - Depends on your question
 - Often, you will place the outcome on the x-axis and the feature is coded by fill
 
-```{r u2-modeling-32}
+```{r}
 #| eval: false
 
 plot_grouped_barplot_count <- function(df, x, y){
@@ -1458,11 +1463,11 @@ plot_grouped_barplot_percent <- function(df, x, y){
 
 For example, if we wanted to learn about how `bldg_type` varies by `lot_config`, see these plots
 
-```{r u2-modeling-33}
+```{r}
 data_trn |> plot_grouped_barplot_count("lot_config", "bldg_type")
 ```
 
-```{r u2-modeling-34}
+```{r}
 data_trn |> plot_grouped_barplot_percent("lot_config", "bldg_type")
 ```
 
@@ -1470,11 +1475,11 @@ data_trn |> plot_grouped_barplot_percent("lot_config", "bldg_type")
 
 May want to plot both ways
 
-```{r u2-modeling-35}
+```{r}
 data_trn |> plot_grouped_barplot_percent("lot_config", "bldg_type")
 ```
 
-```{r u2-modeling-36}
+```{r}
 data_trn |> plot_grouped_barplot_percent("bldg_type", "lot_config")
 ```
 
@@ -1484,7 +1489,7 @@ data_trn |> plot_grouped_barplot_percent("bldg_type", "lot_config")
 
 Tile plots may be useful if both categorical variables are ordinal 
 
-```{r u2-modeling-37}
+```{r}
 #| eval: false
   
 plot_tile <- function(df, x, y){
@@ -1497,14 +1502,14 @@ plot_tile <- function(df, x, y){
 
 --------------------------------------------------------------------------------
 
-```{r u2-modeling-38}
+```{r}
 data_trn |> plot_tile("overall_qual", "garage_qual")
 ```
 
 --------------------------------------------------------------------------------
 
 You might also consider a scatterplot with jitter in this instance
-```{r u2-modeling-39}
+```{r}
 data_trn |> 
   mutate(overall_qual = jitter(as.numeric(overall_qual)),
          garage_qual = as.numeric(garage_qual)) |> 
@@ -1518,7 +1523,7 @@ data_trn |>
 Two-way tables are sometimes a useful summary statistic for two categorical variables.  We can use a 2-variable form of the tab function, `tab2()`, from my function scripts for this
 
 For example, the relationship between `bldg_type` and `lot_config`
-```{r u2-modeling-40}
+```{r}
 data_trn |> tab2(bldg_type, lot_config)
 ```
 
@@ -1571,7 +1576,7 @@ Recipes are used in Modeling scripts (which is a third type of script after clea
 
 - Lets reload training again to pretend we are starting a new script
 
-```{r u2-recipes-1}
+```{r}
  data_trn <- read_csv(file.path(path_data, "ames_clean_class_trn.csv"), 
                       col_types = cols()) |> 
   class_ames() |> # <1> 
@@ -1596,7 +1601,7 @@ Recipes can be used to indicate the outcome and predictors that will be used in 
   - All predictors are combined with `+`
   - Interactions are specified by a later explicit feature engineering step
   
-```{r u2-recipes-2}
+```{r}
 rec <- recipe(sale_price ~ ., data = data_trn)
 
 rec

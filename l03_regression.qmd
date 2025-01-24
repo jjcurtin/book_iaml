@@ -25,7 +25,7 @@ editor_options:
   - Scaling predictors
   - Extensions to categorical variables
 
------
+--------------------------------------------------------------------------------
 
 Our goal in this unit is to build a machine learning regression model that can accurately (we hope) predict the `sale_price` for future sales of houses (in Iowa? more generally?)
 
@@ -33,27 +33,28 @@ To begin this project we need to:
 
 - Set up conflicts policies
 - We will hide this in future units
-```{r u3-conflict_policy}
+```{r}
 options(conflicts.policy = "depends.ok")
 devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
 tidymodels_conflictRules()
 ```
 
------
+--------------------------------------------------------------------------------
 
-- Load the packages we will need.  I am shifting here to only loading `tidymodels` and `tidyverse` because the other functions we need are only called occasionally (so we will call them by namespace to see how that "feels".)
-```{r u3-packages}
+- Load the packages we will need.  I am only loading `tidymodels` and `tidyverse` because the other functions we need are only called occasionally (so we will call them by namespace.)
+```{r}
 #| message: false
 #| warning: false
 library(tidyverse) # for general data wrangling
 library(tidymodels) # for modeling
 ```
 
------
+--------------------------------------------------------------------------------
 
 - source additional class functions libraries
 - We will hide this in future units
-```{r u3-source}
+- You might consider copying (some) of these functions to your own function library rather than using mine
+```{r}
 devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
 devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
 ```
@@ -70,7 +71,7 @@ options(tibble.width = Inf)
 path_data <- "./data"
 ``` 
 
------
+--------------------------------------------------------------------------------
 
 - Set up function to class ames data (copied with one improvement from last unit)
 ```{r}
@@ -85,11 +86,11 @@ class_ames <- function(df){
 ```
 1. Warnings should be considered errors until investigated.  Once investigated, they can be ignored.  To explicitly ignore, use `suppressWarnings()`
 
------
+--------------------------------------------------------------------------------
 
 - Open the cleaned training set
 
-```{r u3-overview-1}
+```{r}
 data_trn <- 
   read_csv(here::here(path_data, "ames_clean_class_trn.csv"), 
            col_types = cols()) |>  
@@ -101,7 +102,7 @@ data_trn <-
 
 - Open the cleaned validation set
 
-```{r u3-overview-2}
+```{r}
 data_val <- read_csv(here::here(path_data, "ames_clean_class_val.csv"),
                      col_types = cols()) |> 
   class_ames() |> 
@@ -114,7 +115,7 @@ data_val <- read_csv(here::here(path_data, "ames_clean_class_val.csv"),
 
 We will also make a dataframe to track validation error across the models we fit
 
-```{r u3-overview-3}
+```{r}
 error_val <- tibble(model = character(), rmse_val = numeric()) |> 
   glimpse()
 ```
@@ -156,39 +157,36 @@ Remember that we:
 
 You will work with all of my predictors and all the predictors you used for your EDA when you do the application assignment for this unit
 
+--------------------------------------------------------------------------------
 -----
 
 Pause for a moment to answer this question: 
 
-::: {.callout-important collapse="false"}
-### Question: Why do we need independent validation data to select the best model configuration?  In other words, why cant we just fit and evaluate all of the models in our one training set?
-```{html}
-#| echo: true
-#| code-fold: true
-#| code-summary: "Show Answer"
-These models will all overfit the dataset within which they are fit to some degree.   
-In other words, they will predict both systematic variance (the DGP) and some noise in 
-the training set.  However, they will differ in how much they overfit the training set.   
-As the models get more flexible they will have the potential to overfit to a greater degree.
-Models with a larger number of features (e.g., more predictors, features based on interactions
-as well as raw predictors) will overfit to a greater degree.  All other things equal, the
-non-parametric KNN will also be more flexible than the general linear model so it may 
-overfit to a greater degree as well if the true DGP is linear on the features.  
-Therefore, just because a model fits the training set well does not mean it will work 
-well in new data because the noise will be different in every new dataset.  
-This overfitting will be removed from our performance estimate if we calculate it 
-with new data (the validation set).
-```
+::: {.callout-important}
+# Question 
+Why do we need independent validation data to select the best model configuration?  In other words, why cant we just fit and evaluate all of the models in our one training set?
 :::
------
+
+::: {.fragment .uwred}
+These models will all overfit the dataset within which they are fit to some degree.   
+
+In other words, they will predict both systematic variance (the DGP) and some noise in the training set.  However, they will differ in how much they overfit the training set.   
+
+As the models get more flexible they will have the potential to overfit to a greater degree.Models with a larger number of features (e.g., more predictors, features based on interactions as well as raw predictors) will overfit to a greater degree.  All other things equal, the non-parametric KNN will also be more flexible than the general linear model so it may overfit to a greater degree as well if the true DGP is linear on the features.  
+
+Therefore, just because a model fits the training set well does not mean it will work well in new data because the noise will be different in every new dataset. This overfitting will be removed from our performance estimate if we calculate it with new data (the validation set).
+:::
+
+
+--------------------------------------------------------------------------------
 
 Let's take a quick look at the available raw predictors in the training set
 
-```{r u3-overview-4}
+```{r}
 data_trn |> skim_all()
 ```
 
------
+--------------------------------------------------------------------------------
 
 Remember from our modeling EDA that we have some issues to address as part of our feature engineering:
 
@@ -202,7 +200,7 @@ All of this will be accomplished with a recipe
 
 But first, let's discuss/review our first statistical algorithm
 
------
+--------------------------------------------------------------------------------
 
 ## The Simple (General) Linear Model (LM)
 
@@ -221,7 +219,7 @@ The (general) linear model is a parametric model.  We need to estimate two param
 
 You already know how to do this using `lm()` in base R.  However, we will use the `tidymodels` modeling approach.
 
------
+--------------------------------------------------------------------------------
 
 We use `tidymodels` because:
 
@@ -233,7 +231,7 @@ We use `tidymodels` because:
 - It is under active development and support
 - You can see documentation for all of the packages at the [tidymodels website](https://www.tidymodels.org/).  It is worth a quick review now to get a sense of what is available
 
------
+--------------------------------------------------------------------------------
 
 To fit a model with a specific configuration, we need to: 
 
@@ -246,7 +244,7 @@ To fit a model with a specific configuration, we need to:
 
 These steps are accomplished with functions from the [recipes](https://recipes.tidymodels.org/) and [parsnip](https://parsnip.tidymodels.org/reference/index.html) packages.
 
------
+--------------------------------------------------------------------------------
 
 We will start with a simple model configuration
 
@@ -254,14 +252,14 @@ We will start with a simple model configuration
 - One feature (raw `gr_liv_area`)
 - Fit in training data
 
------
+--------------------------------------------------------------------------------
 
 Set up a VERY SIMPLE feature engineering recipe
 
 - Include outcome on the left size of `~`
 - Include raw predictors (not yet features) on the right side of `~`.  
 - Indicate the training data
-```{r u3-simple-1}
+```{r}
 rec <- 
   recipe(sale_price ~ gr_liv_area, data = data_trn) 
 ```
@@ -271,19 +269,19 @@ rec <-
   - `rec`
   - `summary(rec)`
   
------
+--------------------------------------------------------------------------------
 
 We can then prep the recipe and bake the data to make our feature matrix from the training dataset
 
 - Again, remember we always prep a recipe with training data but use the prepped recipe to bake any data
 - In this instance we will prep with `data_trn` and then bake `data_trn` so that we have features from our training set to train/fit the model.
 
-```{r u3-simple-3}
+```{r}
 rec_prep <- rec |> 
   prep(training = data_trn)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - And now  we can bake the training data to make a feature matrix
 - Training features were already saved in the prepped recipe so we set `new_data = NULL`
@@ -293,7 +291,7 @@ feat_trn <- rec_prep |>
   bake(new_data = NULL)
 ```
 
------
+--------------------------------------------------------------------------------
 
 You should always review the feature matrix to make sure it looks as you expect
 
@@ -306,7 +304,7 @@ You should always review the feature matrix to make sure it looks as you expect
 feat_trn |> skim_all()
 ```
 
------
+--------------------------------------------------------------------------------
 
 Now let's consider the statistical algorithm
 
@@ -319,7 +317,7 @@ Now let's consider the statistical algorithm
   - `tidymodels` calls this setting the engine
   - e.g., `lm`, `kknn`, `glm`, `glmnet`
 
------
+--------------------------------------------------------------------------------
 
 You can see the available engines (and modes: regression vs. classification) for the broad classes of algorithms
 
@@ -333,7 +331,7 @@ show_engines("rand_forest")
 show_engines("mlp")
 ```
 
------
+--------------------------------------------------------------------------------
 
 You can load even more engines from the `discrim` package.  We will use some of these later too.  You need to load the package to use these engines.
 
@@ -345,19 +343,19 @@ show_engines("discrim_regularized")
 show_engines("naive_Bayes")
 ```
 
------
+--------------------------------------------------------------------------------
 
 You can also better understand how the engine will be called using `translate()`
 
 Not useful here but will be with more complicated algorithms
 
-```{r u3-simple-4a}
+```{r}
 linear_reg() |> 
   set_engine("lm") |> 
   translate()
 ```
 
------
+--------------------------------------------------------------------------------
 
 Let's combine our feature matrix with an algorithm to fit a model in our training set using only raw `gr_liv_area` as a feature
 
@@ -370,7 +368,7 @@ Note the specification of
   - will be useful when we have **many** features in the matrix
 - We use the the feature matrix (rather than raw data) from the training set to fit the model.
 
-```{r u3-simple-5}
+```{r}
 fit_lm_1 <- 
   linear_reg() |> # <1> 
   set_engine("lm") |> # <2> 
@@ -380,43 +378,43 @@ fit_lm_1 <-
 2. engine
 3. use of `.` for all features and use of feature matrix from training set
 
------
+--------------------------------------------------------------------------------
 
 We can get the parameter estimates, standard errors, and statistical tests for each $\beta$ = 0 for this model using `tidy()` from the `broom` package (loaded as part of the `tidyverse`)
 
-```{r u3-simple-6}
+```{r}
 fit_lm_1 |>  tidy()
 ```
 
------
+--------------------------------------------------------------------------------
 
 There are a variety of ways to pull out the estimates for each feature (and intercept)
 
 Option 1: Pull all estimates from the tidy object
-```{r u3-simple-7}
+```{r}
 fit_lm_1 |> 
   tidy() |> 
   pull(estimate)
 ```
 
------
+--------------------------------------------------------------------------------
 
 Option 2: Extract a single estimate using $ and row number.  Be careful that order of features won't change!  This assumes the feature coefficient for the relevant feature is **always** the second coefficient.
-```{r u3-simple-8}
+```{r}
 tidy(fit_lm_1)$estimate[[2]]
 ```
 
------
+--------------------------------------------------------------------------------
 
 Option 3: Filter tidy df to the relevant row (using term ==) and pull the estimate. Safer!
-```{r u3-simple-9}
+```{r}
 fit_lm_1 |> 
   tidy() |> 
   filter(term == "gr_liv_area") |> 
   pull(estimate)
 ```
 
------
+--------------------------------------------------------------------------------
 
 Option 4: Write a function if we plan to do this a lot.  We include this function in the `fun_ml.R` script in our repo.   Better still (safe and code efficient)!
 ```{r}
@@ -436,10 +434,10 @@ get_estimate(fit_lm_1, "gr_liv_area")
 get_estimate(fit_lm_1, "(Intercept)")
 ```
 
------
+--------------------------------------------------------------------------------
 
 Regardless of the method, we now have a simple parametric model for `sale_price`
-```{r  u3-simple-11}
+```{r}
 #| include: false
 
 b0 <- round(get_estimate(fit_lm_1, "(Intercept)"), 1)
@@ -448,7 +446,7 @@ b1 <- round(get_estimate(fit_lm_1, "gr_liv_area"), 1)
 
 $\hat{sale\_price} = `r b0` + `r b1` * gr\_liv\_area$
 
------
+--------------------------------------------------------------------------------
 
 We can get the predicted values for `sale_price` (i.e., $\hat{sale\_price}$) in our validation set using `predict()`
 
@@ -457,12 +455,12 @@ However, we first need to make a feature matrix for our validation set
 - We use the same recipe that we previously prepped with training data (`data_trn`)
 - But now we **bake** new data that were not used to train the recipe - the validation data, `data_val`
 
-```{r  u3-simple-12}
+```{r}
 feat_val <- rec_prep |> 
   bake(new_data = data_val)
 ```
 
------
+--------------------------------------------------------------------------------
 
 As always, we should skim these new features
 
@@ -474,23 +472,23 @@ As always, we should skim these new features
 feat_val |> skim_all()
 ```
 
------
+--------------------------------------------------------------------------------
 
 Now we can get predictions using our model with validation features
 
 `predict()` returns a dataframe with one column named `.pred` and one row for every observation in dataframe (e.g., validation feature set)
 
-```{r u3-simple-13}
+```{r}
 predict(fit_lm_1, feat_val)
 ```
 
------
+--------------------------------------------------------------------------------
 
 We can visualize how well this model performs in the validation set by plotting predicted `sale_price` ($\hat{sale\_price}$) vs. `sale_price` (**ground truth** in machine learning terminology) for these data
 
 We might do this a lot so let's write a function.  We have also included this function in `fun_ml.R`
 
-```{r u3-simple-14}
+```{r}
 #| eval: false
 
 plot_truth <- function(truth, estimate) {
@@ -502,9 +500,9 @@ plot_truth <- function(truth, estimate) {
 }
 ```
 
------
+--------------------------------------------------------------------------------
 
-```{r u3-simple-15}
+```{r}
 plot_truth(truth = feat_val$sale_price, 
            estimate = predict(fit_lm_1, feat_val)$.pred)
 ```
@@ -517,7 +515,7 @@ Perfect performance would have all the points right on the dotted line (same val
 - Perhaps not that bad here b/c both `sale_price` and `gr_liv_area` were positively skewed
 - We will need consider this eventually
 
------
+--------------------------------------------------------------------------------
 
 We can quantify model performance by selecting a performance metric
 
@@ -530,17 +528,17 @@ Root mean square error (RMSE) is a common performance metric for regression mode
 - RMSE simply divides SSE by N (to get mean squared error; MSE) and then takes the square root to return the metric to the original units for the outcome variable
 - It is easy to calculate using `rmse_vec()` from the `yardstick` package
 
-```{r u3-simple-16}
+```{r}
 rmse_vec(truth = feat_val$sale_price, 
          estimate = predict(fit_lm_1, feat_val)$.pred)
 ```
 
------
+--------------------------------------------------------------------------------
 
 Let's record how well this model performed in validation so we can compare it to subsequent models
 
 
-```{r u3-simple-17}
+```{r}
 error_val <- bind_rows(error_val, 
                        tibble(model = "simple linear model", 
                               rmse_val = rmse_vec(truth = feat_val$sale_price, 
@@ -551,13 +549,13 @@ error_val
 
 NOTE: I will continue to bind RMSE to this dataframe for newer models but plan to hide this code chuck to avoid distractions.  You can reuse this code repeatedly to track your own models if you like.  (Perhaps we should write a function??)
 
------
+--------------------------------------------------------------------------------
 
 For explanatory purposes, we might want to visualize the relationship between a feature and the outcome (in addition to examining the parameter estimates and the associated statistical tests)
 
 - Here is a plot of $\hat{sale\_price}$ by `gr_liv_area` superimposed over a scatterplot of the raw data from the validation set
 
-```{r u3-simple-18}
+```{r}
 feat_val |> 
   ggplot(aes(x = gr_liv_area)) +
     geom_point(aes(y = sale_price), color = "gray") +
@@ -569,7 +567,7 @@ feat_val |>
 - As expected, there is a moderately strong positive relationship between `gr_liv_area` and `sale_price`.  
 - We can also again see the heteroscadasticity in the errors that might be corrected by a power transformation of `sale_price` (or `gr_liv_area`)  
 
------
+--------------------------------------------------------------------------------
 
 ## Extension of LM to Multiple Predictors
 
@@ -577,7 +575,7 @@ We can improve model performance by moving from simple linear model to a linear 
 
 We have many other numeric variables available to use, even in this pared down version of the dataset.
 
-```{r u3-simple-19}
+```{r}
 data_trn |>  names()
 ```
 
@@ -589,7 +587,7 @@ Again, we need:
 - Training (and eventually validation) feature matrices
 - An algorithm to fit in training feature matrix
 
------
+--------------------------------------------------------------------------------
 
 With the addition of new predictors, we now have a feature engineering task
 
@@ -603,11 +601,11 @@ A simple solution is to do median imputation - substitute the median of the non-
   - see other options in [Step Functions - Imputation](https://recipes.tidymodels.org/reference/index.html) section on `tidymodels` website
 - There is only one missing value so it likely doesn't matter much anyway
 
------
+--------------------------------------------------------------------------------
 
 Let's add this to our recipe. All of the defaults are appropriate but you should see `?step_impute_median()` to review them
 
-```{r u3-simple-21}
+```{r}
 rec <- 
   recipe(sale_price ~ gr_liv_area + lot_area + year_built + garage_cars, # <1>
          data = data_trn) |> 
@@ -615,18 +613,18 @@ rec <-
 ```
 1. Notice we now list four predictors for our recipe using `+` between them
 
------
+--------------------------------------------------------------------------------
 
 Now we need to 
 
 - First prep recipe
-```{r u3-simple-22}
+```{r}
 rec_prep <- rec |> 
   prep(data_trn)  # <1>
 ```
 1. I am going to stop using `training =` at this point.  Remember, we prep recipes with training data.
 
------
+--------------------------------------------------------------------------------
 
 - Next, bake the training data with prepped recipe to get training features
 
@@ -636,7 +634,7 @@ feat_trn <- rec_prep |>
 ```
 1. I am going to stop using `new_data = ` but remember, we use NULL if we want the previously saved training features.  If instead, we want features for new data, we provide that dataset.
 
------
+--------------------------------------------------------------------------------
 
 - And take a quick look at the features
   - Sample size is correct
@@ -648,7 +646,7 @@ feat_trn <- rec_prep |>
 feat_trn |> skim_all()
 ```
 
------
+--------------------------------------------------------------------------------
 
 - And finally, bake the validation data with the same prepped recipe to get validation features
 ```{r}
@@ -657,7 +655,7 @@ feat_val <- rec_prep |>
 ```
 1. Notice that here we are now baking `data_val`
 
------
+--------------------------------------------------------------------------------
 
 - And take a quick look 
   - Correct sample size (N = 490)
@@ -669,10 +667,10 @@ feat_val <- rec_prep |>
 feat_val |> skim_all()
 ```
 
------ 
+-------------------------------------------------------------------------------- 
 
 Now let's combine our algorithm and training features to fit this model configuration with 4 features
-```{r u3-simple-23}
+```{r}
 fit_lm_4 <- 
   linear_reg() |> 
   set_engine("lm") |> 
@@ -680,18 +678,18 @@ fit_lm_4 <-
 ```
 1. the `.` is a bit more useful now
 
------
+--------------------------------------------------------------------------------
 
 This yields these parameter estimates (which as we know from 610/710 were selected to minimize SSE in the training set):
 
-```{r u3-simple-24}
+```{r}
 fit_lm_4 |> tidy()
 ```
 
------
+--------------------------------------------------------------------------------
 
 Here is our parametric model
-```{r  u3-simple-25}
+```{r}
 #| include: false
 b0 <- round(get_estimate(fit_lm_4, "(Intercept)"), 1)
 b1 <- round(get_estimate(fit_lm_4, "gr_liv_area"), 1)
@@ -703,7 +701,7 @@ b4 <- round(get_estimate(fit_lm_4, "garage_cars"), 1)
 - $\hat{sale\_price} = `r b0` + `r  b1` * gr\_liv\_area + `r  b2` * lot\_area + `r  b3` * year\_built + `r  b4` * garage\_cars$
 
 Compared with our previous simple regression model:
-```{r  u3-simple-26}
+```{r}
 #| include: false
 b0 <- round(get_estimate(fit_lm_1, "(Intercept)"), 1)
 b1 <- round(get_estimate(fit_lm_1, "gr_liv_area"), 1)
@@ -711,46 +709,39 @@ b1 <- round(get_estimate(fit_lm_1, "gr_liv_area"), 1)
 
 - $\hat{sale\_price} = `r b0` + `r b1` * gr\_liv\_area$
 
------
+--------------------------------------------------------------------------------
 
 Of course, these four features are correlated both with `sale_price` but also with each other
 
 Let's look at correlations in the training set.  
 
-```{r u3-simple-27}
+```{r}
 feat_trn |> 
   cor() |> 
   corrplot::corrplot.mixed()
 ```
 
------
+--------------------------------------------------------------------------------
 
-::: {.callout-important collapse="false"}
-### Question: What are the implications of the correlations among many of these predictors?
-```{html}
-#| echo: true
-#| code-fold: true
-#| code-summary: "Show Answer"
-The multiple regression model coefficients represent unique effects, controlling for 
-all other variables in the model.  You can see how the unique effect of `gr_liv_area` 
-is smaller than its overall effect from the simple regression.   This also means 
-that the overall predictive strength of the model will not be a sum of the effects 
-of each predictor considered in isolation - it will likely be less.  Also, if the 
-correlations are high, problems with multicollinearity will emerge.  This will yield 
-large standard errors which means that the models will start to have more variance when 
-fit in different training datasets!  We will soon learn about other regularized 
-versions of the GLM that do not have these issues with correlated predictors.
-```
+::: {.callout-important}
+# Question
+What are the implications of the correlations among many of these predictors?
 :::
 
------
+::: {.fragment .uwred}
+The multiple regression model coefficients represent unique effects, controlling for all other variables in the model.  You can see how the unique effect of `gr_liv_area` is smaller than its overall effect from the simple regression.   This also means that the overall predictive strength of the model will not be a sum of the effects of each predictor considered in isolation - it will likely be less.  
+
+Also, if the correlations are high, problems with multicollinearity will emerge.  This will yield large standard errors which means that the models will start to have more variance when fit in different training datasets!  We will soon learn about other regularized versions of the GLM that do not have these issues with correlated predictors.
+:::
+
+--------------------------------------------------------------------------------
 
 How well does this more complex model perform in validation?   Let's compare the previous and current visualizations of $sale\_price$ vs. $\hat{sale\_price}$
 
 - Looks like the errors are smaller (closer to the diagonal line that would represent prefect prediction)
 - Clear signs of non-linearity are now present as well.  Time for more Modeling EDA!!
 
-```{r u3-simple-28}
+```{r}
 plot_1 <- plot_truth(truth = feat_val$sale_price, 
                      estimate = predict(fit_lm_1, feat_val)$.pred)
 
@@ -761,28 +752,31 @@ cowplot::plot_grid(plot_1, plot_4,
           labels = list("1 feature", "4 features"), hjust = -1.5)
 ```
 
-**Coding sidebar**: Notice the use of `plot_grid()` from the `cowplot` package to make side by side plots.   This also required returning the individual plots as objects (just assign to a object name, e.g., plot_1)
+::: {.callout-tip}
+# Coding sidebar
+Notice the use of `plot_grid()` from the `cowplot` package to make side by side plots.   This also required returning the individual plots as objects (just assign to a object name, e.g., plot_1)
+:::
 
------
+--------------------------------------------------------------------------------
 
 Let's compare model performance for the two models using RMSE in the validation set
 
 - The one feature simple linear model
-```{r u3-simple-29}
+```{r}
 rmse_vec(feat_val$sale_price, 
          predict(fit_lm_1, feat_val)$.pred)
 ```
 
 - The four feature linear model.  A clear improvement!
-```{r u3-simple-30}
+```{r}
 rmse_vec(feat_val$sale_price, 
          predict(fit_lm_4, feat_val)$.pred)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - Let's bind the new performance metric to our results table
-```{r u3-simple-31}
+```{r}
 #| echo: false
 
 error_val <- 
@@ -794,7 +788,7 @@ error_val <-
 error_val
 ```
 
------ 
+-------------------------------------------------------------------------------- 
 
 Given the non-linearity suggested by the truth vs. estimate plots, we might wonder if we could improve the fit if we transformed our features to be closer to normal
 
@@ -802,12 +796,12 @@ Given the non-linearity suggested by the truth vs. estimate plots, we might wond
 
 - We will apply `step_YeoJohnson()`, which is similar to a Box-Cox transformation but can be more broadly applied because the scores don't need to be strictly positive
 
------
+--------------------------------------------------------------------------------
 
 Let's do it all again, now with transformed features!
 
 - Define the feature engineering recipe
-```{r u3-simple-33}
+```{r}
 rec <- 
   recipe(sale_price ~ gr_liv_area + lot_area + year_built + garage_cars, 
          data = data_trn) |> 
@@ -815,7 +809,7 @@ rec <-
   step_YeoJohnson(lot_area, gr_liv_area, year_built, garage_cars)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - Prep the recipe with training set
 ```{r}
@@ -833,7 +827,7 @@ feat_trn <- rec_prep |>
 feat_trn |> skim_all()
 ```
 
------
+--------------------------------------------------------------------------------
 
 - Use same prepped recipe to bake the validation set into features
 
@@ -845,7 +839,7 @@ feat_val <- rec_prep |>
 feat_val |> skim_all()
 ```
 
------
+--------------------------------------------------------------------------------
 
 - Fit model
 ```{r}
@@ -855,7 +849,7 @@ fit_lm_4yj <-
   fit(sale_price ~ ., data = feat_trn)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - View truth vs. estimate plot
 ```{r}
@@ -863,7 +857,7 @@ plot_truth(truth = feat_val$sale_price,
            estimate = predict(fit_lm_4yj, feat_val)$.pred)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - and look at the error
 ```{r}
@@ -880,14 +874,14 @@ error_val
 
 - That didn't help at all.   Error still high and still non-linearity in plot.
 
------
+--------------------------------------------------------------------------------
 
 We may need to consider 
 
 - a transformation of `sale_price` (We will leave that to you for the application assignment if you are daring!)
 - or a different algorithm that can handle non-linear relationships better
 
------
+--------------------------------------------------------------------------------
 
 ## Extension to Categorical Predictors
 
@@ -903,7 +897,7 @@ Many important predictors in our models may be categorical (nominal and some ord
   - We can treat them like nominal categorical predictors
 - See article on [Categorical Predictors](https://recipes.tidymodels.org/articles/Dummies.html) on the `tidymodels` website for more details
 
------
+--------------------------------------------------------------------------------
 
 ### Dummy Coding
 
@@ -934,7 +928,7 @@ data_dummy <- data_trn |>
 3. We could have left this line out and float would have stayed as a level named float
 4. Remove original `ms_zoning` predictor
 
------
+--------------------------------------------------------------------------------
 
 Take a look at the new predictor
 ```{r}
@@ -943,22 +937,18 @@ data_dummy |>
   table() 
 ```
 
------
+--------------------------------------------------------------------------------
 
-::: {.callout-important collapse="false"}
-### Question: Why can't we simply recode each level with a different consecutive value (e.g., commercial = 1, floating =2 , residential = 3)?
-```{html}
-#| echo: true
-#| code-fold: true
-#| code-summary: "Show Answer"
-There is no meaningful way to order the numbers that we assign to the levels of 
-this unordered categorical predictor.  The shape and strength of the relationship
-between it and sale_price will completely change based on arbitrary ordering of 
-the levels.
-```
+::: {.callout-important}
+# Question
+Why can't we simply recode each level with a different consecutive value (e.g., commercial = 1, floating =2 , residential = 3)?
 :::
 
------
+::: {.fragment .uwred}
+There is no meaningful way to order the numbers that we assign to the levels of  this unordered categorical predictor. The shape and strength of the relationship between it and sale_price will completely change based on arbitrary ordering of the levels.
+:::
+
+--------------------------------------------------------------------------------
 
 Imagine fitting a straight line to predict `sale_price` from `ms_zoning3` using these three different ways to arbitrarily assign numbers to levels.
 ```{r}
@@ -988,7 +978,7 @@ data_dummy |>
     geom_bar(stat="summary", fun = "mean")
 ```
 
------
+--------------------------------------------------------------------------------
 
 Dummy coding resolves this issue.
 
@@ -997,7 +987,7 @@ Dummy coding resolves this issue.
 - The full set of m-1 features represents the overall effect of the categorical predictor variable.
 - We assign values of 0 or 1 to each observation on each feature in a meaningful pattern (see below)
 
------
+--------------------------------------------------------------------------------
 
 For example, with our three-level predictor: `ms_zoning3`
 
@@ -1016,7 +1006,7 @@ tibble(ms_zoning3 = c("commercial", "residential", "floating"),
   print()
 ```
 
------ 
+-------------------------------------------------------------------------------- 
 
 With this coding:
 
@@ -1025,7 +1015,7 @@ With this coding:
 - Because we are focused on prediction, the choice of reference level is mostly arbitrary.  For explanatory goals, you might consider which level is best suited to be the reference.
 - There is much deeper coverage of dummy and other contrast coding in 610/710
 
------
+--------------------------------------------------------------------------------
 
 We can add these two features manually to the data frame and view a handful of observations to make this coding scheme more concrete  
 
@@ -1042,7 +1032,7 @@ data_dummy |>
   print()
 ```
 
------ 
+-------------------------------------------------------------------------------- 
 
 If we now fit a model where we predict `sale_price` from these two dummy coded features, each feature would represent the contrast of the mean `sale_price` for the level coded 1 vs. the mean `sale_price` for the level that is coded 0 for all features (i.e., commercial)
 
@@ -1050,7 +1040,7 @@ If we now fit a model where we predict `sale_price` from these two dummy coded f
 - d2 is the contrast of mean `sale_price` for floating vs. commercial
 - The combined effect of these two features represents the overall effect of `ms_zoning3` on `sale_price`
 
------
+--------------------------------------------------------------------------------
 
 Lets do this quickly in base R using `lm()` as you have done previously in 610.
 ```{r}
@@ -1063,7 +1053,7 @@ m |> summary()
 
 - The mean sale price of floating villages is `r round((m$coefficients["d2"]))` dollars higher than commercial properties. 
 
------
+--------------------------------------------------------------------------------
 
 To understand this conceptually, it is easiest to visualize the linear model that would predict `sale_price` with these two dichotomous features.
 
@@ -1089,9 +1079,10 @@ plot_3d <- d |>
 plot_3d$plane3d(lm(sale_price ~ d1 + d2, data = d))
 ```
 
------
+--------------------------------------------------------------------------------
 
-**Statistical sidebar**:
+::: {.callout-tip}
+# Statistical sidebar
 
 - Any full rank (# levels - 1) set of features regardless of coding system predicts exactly the same (e.g., dummy, helmert, contrast coding)
 - Preference among coding systems is simply to get single df contrasts of theoretical importance (i.e., for explanation rather than prediction)
@@ -1100,18 +1091,19 @@ plot_3d$plane3d(lm(sale_price ~ d1 + d2, data = d))
   - For these algorithms, you will sometimes see modified version of dummy coding called [one-hot coding](https://machinelearningmastery.com/why-one-hot-encode-data-in-machine-learning/).  
   - This approach uses one additional dummy coded feature for the final category.  
   - We won't spend time on this but you should be familiar with the term b/c it is often confused with dummy coding.
-  
----
+::: 
 
-**Coding Sidebar**
+::: {.callout-tip}
+# Coding Sidebar
 
 When creating dummy coded features from factors that have levels with infrequent observations, you may occasionally end up with novel levels in your validation or test sets that were not present in your training set.  
 
 - This will cause you issues.  
 - These issues are mostly resolved if you make sure to explicitly list all possible levels for a factor when classing that factor in the training data, even if the level doesn't exist in the training data.   
 - We provide more detail on this issue in an [appendix](https://jjcurtin.github.io/book_iaml/app_dummy_coding.html).
+:::
 
------
+--------------------------------------------------------------------------------
 
 ###  Nominal Predictors
 
@@ -1119,12 +1111,12 @@ Now that we understand how to use dummy coding to feature engineer nominal predi
 
 We can discuss if any look promising.
 
------
+--------------------------------------------------------------------------------
 
 Lets return first to `ms_zoning`
 
 
-```{r u3-categorical-2}
+```{r}
 #| out-height: 3in
 
 data_trn |> 
@@ -1148,11 +1140,11 @@ Data dictionary entry: Identifies the general zoning classification of the sale.
 - res_med:	Residential Medium Density
 - res_low:	Residential Low Density
 
------
+--------------------------------------------------------------------------------
 
 `lot_config`
 
-```{r u3-categorical-3}
+```{r}
 #| out-height: 3in
 
 data_trn |> 
@@ -1175,18 +1167,17 @@ Data dictionary entry: Lot configuration
 - fr2:	Frontage on 2 sides of property
 - fr3:	Frontage on 3 sides of property
 
------
+--------------------------------------------------------------------------------
 
 `bldg_type`
 
-```{r u3-categorical-4}
+```{r}
 #| out-height: 3in
 
 data_trn |> 
   plot_categorical("bldg_type", "sale_price") |> 
   cowplot::plot_grid(plotlist = _, ncol = 2)
 ```
-
 
 We see that:
 
@@ -1203,7 +1194,7 @@ Data dictionary entry: Type of dwelling
 - town_end:	Townhouse End Unit
 - town_inside:	Townhouse Inside Unit
 
------
+--------------------------------------------------------------------------------
 
 Let's do some feature engineering with `ms_zoning`.  We can now do this formally in a recipe so that it can be used in our modeling workflow.
 
@@ -1225,7 +1216,7 @@ data_val <- data_val |>
 
 [Note:  Ideally, you would go back to cleaning EDA and add this level to the full dataset and then re-split into training, validation and test.  This is a sloppy shortcut!]
 
------
+--------------------------------------------------------------------------------
 
 With that fixed, let's proceed:
 
@@ -1233,7 +1224,7 @@ With that fixed, let's proceed:
 - We will convert to dummy features using `step_dummy()`.  The first level of the factor will be set to the reference level when we call `step_dummy()`. 
 - `step_dummy()` is a poor choice for function name.  It actually uses whatever contrast coding we have set up in R.  However, the default is are dummy coded contrasts (R calls this treatment contrasts). See `?contrasts` and `options("contrasts")` for more info.
   
-```{r u3-categorical-5}
+```{r}
 rec <- 
   recipe(sale_price ~ gr_liv_area + lot_area + year_built + garage_cars + ms_zoning, 
          data = data_trn) |> 
@@ -1245,9 +1236,10 @@ rec <-
   step_dummy(ms_zoning)
 ```
 
------
+--------------------------------------------------------------------------------
 
-**Coding Sidebar**
+::: {.callout-tip}
+# Coding Sidebar
 
 You should also read more about some other `step_()` functions that you might use for categorical predictors:
 - `step_other()` to combine all low frequency categories into a single "other" category.
@@ -1257,15 +1249,16 @@ You should also read more about some other `step_()` functions that you might us
 See the [Step Functions - Dummy Variables and Encoding section](https://recipes.tidymodels.org/reference/index.html) on the `tidymodels` website for additional useful functions.
 
 We have also described these in the section on factor steps in Appendix 1
+:::
 
------
+--------------------------------------------------------------------------------
 
 Let's see if the addition of `ms_zoning` helped
 
 - Notice the addition of the dummy coded features to the feature matrix
 - Notice the removal of the factor `ms_zoning`
 
-```{r u3-categorical-6}
+```{r}
 rec_prep <- rec |> 
   prep(data_trn)
 
@@ -1276,7 +1269,7 @@ feat_val <- rec_prep |>
   bake(data_val)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - skim
 
@@ -1286,7 +1279,7 @@ feat_trn |> skim_all()
 feat_val |> skim_all()
 ```
 
------
+--------------------------------------------------------------------------------
 
 - Now lets fit a model with these features
 
@@ -1297,7 +1290,7 @@ fit_lm_6 <-
   fit(sale_price ~ ., data = feat_trn)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - plot it
 
@@ -1308,7 +1301,7 @@ plot_truth(truth = feat_val$sale_price,
            estimate = predict(fit_lm_6, feat_val)$.pred)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - And evaluate it
 
@@ -1326,25 +1319,20 @@ error_val
 
 - Removing Yeo Johnson transformation but adding dummy coded `ms_zoning` may have helped a little
 
------
+--------------------------------------------------------------------------------
 
-::: {.callout-important collapse="false"}
-### Question: Will the addition of new predictors/features to a model always reduce RMSE in train?  in validation?
-```{html}
-#| echo: true
-#| code-fold: true
-#| code-summary: "Show Answer"
-As you know, the estimation procedure in linear models is OLS.  Parameter estimates
-are derived to minimize the SSE in the data set in which they are derived.  For this
-reason, adding a predictor will never increase RMSE in the training set and it will
-usually lower it even when it is not part of the DGP.   However, this is not true in
-validation.  A predictor will only meaningfully lower RMSE in validation if it is
-part of the DGP.  Also, a bad predictor could even increase RMSE in validation due to
-overfitting.
-```
+::: {.callout-important}
+# Question
+Will the addition of new predictors/features to a model always reduce RMSE in train?  in validation?
 :::
 
------
+::: {.fragment .uwred}
+As you know, the estimation procedure in linear models is OLS.  Parameter estimates are derived to minimize the SSE in the data set in which they are derived.  For this reason, adding a predictor will never increase RMSE in the training set and it will usually lower it even when it is not part of the DGP.   
+
+However, this is not true in validation.  A predictor will only meaningfully lower RMSE in validation if it is part of the DGP.  Also, a bad predictor could even increase RMSE in validation due tooverfitting.
+:::
+
+--------------------------------------------------------------------------------
 
 ### Ordinal Predictors
 
@@ -1353,11 +1341,11 @@ We have two paths to pursue for ordinal predictors
 - We can treat them like nominal predictors (e.g., dummy code)
 - We can treat them like numeric predictors (either raw or with an added transformation if needed)
 
------
+--------------------------------------------------------------------------------
 
 Let's consider `overall_qual`
 
-```{r u3-categorical-7}
+```{r}
 #| out-height: 3in
 
 data_trn |> 
@@ -1373,7 +1361,7 @@ Observations:
 - Numeric will take one feature vs. many (9?) features for dummy codes.  
 - Dummy codes are more flexible but we may not need this flexibility (and unnecessary flexibility increases overfitting)
 
------
+--------------------------------------------------------------------------------
 
 Let's add `overall_qual` to our model as numeric
 
@@ -1383,11 +1371,11 @@ Remember that this predictor was ordinal so we paid special attention to the ord
 data_trn |> pull(overall_qual) |> levels()
 ```
 
------
+--------------------------------------------------------------------------------
 
 To convert `overall_qual` to numeric (with levels in the specified order), we can use another simple mutate inside our recipe.
 
-```{r u3-categorical-8}
+```{r}
 rec <- 
   recipe(sale_price ~  ~ gr_liv_area + lot_area + year_built + garage_cars + 
            ms_zoning + overall_qual, data = data_trn) |> 
@@ -1400,11 +1388,12 @@ rec <-
   step_dummy(ms_zoning)
 ```
 
-**Coding Sidebar**
-
+::: {.callout-tip}
+# Coding Sidebar
 There is a step function called `step_ordinalscore()` but it requires that the factor is classed as an ordered factor.  It is also more complicated than needed in our opinion.  Just use `as.numeric()`
+:::
 
------
+--------------------------------------------------------------------------------
 
 Let's evaluate this model
 
@@ -1421,7 +1410,7 @@ feat_val <- rec_prep |>
   bake(data_val)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - Fitting model
 
@@ -1432,7 +1421,7 @@ fit_lm_7 <-
   fit(sale_price ~ ., data = feat_trn)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - Plotting results
 
@@ -1441,7 +1430,7 @@ plot_truth(truth = feat_val$sale_price,
                                  estimate = predict(fit_lm_7, feat_val)$.pred)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - Quantifying held out error
 
@@ -1459,7 +1448,7 @@ error_val
 
 - That helped!
 
------
+--------------------------------------------------------------------------------
 
 ## Extensions to Interactive Models and Non-linear Models
 
@@ -1473,14 +1462,14 @@ There may be interactive effects among our predictors
 - Nothing to fear, tidymodels makes it easy to feature engineer interactions
 - [BUT - as we will learn, we generally think that if you expect lots of interactions, the linear model may not be the best model to use]
 
------
+--------------------------------------------------------------------------------
 
 For example, it may be that the relationship between `year_built` and `sale_price` depends on `overall_qual`.
 
 - Old houses are expensive if they are in good condition 
 - but old houses are very cheap if they are in poor condition
 
------
+--------------------------------------------------------------------------------
 
 In the `tidymodels` framework
 
@@ -1489,7 +1478,7 @@ In the `tidymodels` framework
 - We still use an R formula like interface to specify the interaction term features that will be created
 - see [more details](https://recipes.tidymodels.org/reference/step_interact.html) on the `tidymodels` website
 
-```{r u3-interactions-1}
+```{r}
 rec <- 
   recipe(sale_price ~  ~ gr_liv_area + lot_area + year_built + garage_cars + 
            ms_zoning + overall_qual, data = data_trn) |> 
@@ -1503,11 +1492,11 @@ rec <-
   step_interact(~ overall_qual:year_built)
 ```
 
------
+--------------------------------------------------------------------------------
 
 Let's prep, bake, fit, and evaluate! 
 
-```{r u3-interactions-2}
+```{r}
 rec_prep <- rec |> 
   prep(data_trn)
 
@@ -1518,7 +1507,7 @@ feat_val <- rec_prep |>
   bake(data_val)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - Note the new interaction term (we just skim `feat_trn` here)
 - Named using "_x_" to specify the interaction
@@ -1527,7 +1516,7 @@ feat_val <- rec_prep |>
 feat_trn |> skim_all()
 ```
 
------
+--------------------------------------------------------------------------------
 
 - fit model
 
@@ -1539,7 +1528,7 @@ fit_lm_8 <-
       data = feat_trn)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - plot
 
@@ -1548,7 +1537,7 @@ plot_truth(truth = feat_val$sale_price,
            estimate = predict(fit_lm_8, feat_val)$.pred)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - calculate held out error
 
@@ -1567,7 +1556,7 @@ error_val
 
 - That helped!
 
------
+--------------------------------------------------------------------------------
 
 You can also feature engineer interactions with nominal (and ordinal predictors treated as nominal) predictors
 
@@ -1576,7 +1565,7 @@ You can also feature engineer interactions with nominal (and ordinal predictors 
 - Use `starts_with()` or `matches()` to make it easy if there are many features associated with a categorical predictor
 - Can use "~ .^2" to include all two way interactions (be careful if you have dummy coded features!)
 
------
+--------------------------------------------------------------------------------
 
 Let's code an interaction between `ms_zoning` & `year_built`.  
 
@@ -1584,7 +1573,7 @@ Let's code an interaction between `ms_zoning` & `year_built`.
 - Old commercial spaces are never cool
 - Maybe this is why the main effect of `ms_zoning` wasn't useful
 
-```{r u3-interactions-6}
+```{r}
 rec <- 
   recipe(sale_price ~  ~ gr_liv_area + lot_area + year_built + garage_cars + 
            ms_zoning + overall_qual, data = data_trn) |> 
@@ -1599,11 +1588,11 @@ rec <-
   step_interact(~ starts_with("ms_zoning_"):year_built)  
 ```
 
------
+--------------------------------------------------------------------------------
 
 - prep, bake
 
-```{r u3-interactions-8}
+```{r}
 #| warning: false
 rec_prep <- rec |> 
   prep(data_trn)
@@ -1615,7 +1604,7 @@ feat_val <- rec_prep |>
   bake(data_val)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - Yup, we have two new interaction features as expected
 
@@ -1623,7 +1612,7 @@ feat_val <- rec_prep |>
 feat_trn |> skim_all()
 ```
 
------
+--------------------------------------------------------------------------------
 
 - Fit model
 
@@ -1634,7 +1623,7 @@ fit_lm_10 <-
   fit(sale_price ~ ., data = feat_trn)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - Plot
 
@@ -1643,7 +1632,7 @@ plot_truth(truth = feat_val$sale_price,
            estimate = predict(fit_lm_10, feat_val)$.pred)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - Quantify held out error
 
@@ -1663,7 +1652,7 @@ error_val
   - You have substantive interest in them (explanatory question)
   - If you want all interactions, use a statistical algorithm that supports those relationships without feature engineering (e.g., KNN, random forest and other decision trees)
   
------
+--------------------------------------------------------------------------------
 
 ### Non-linear Models
  
@@ -1679,7 +1668,7 @@ We may also want to model non-linear effects of our predictors
 
 - We will continue to explore these options throughout the course
 
------
+--------------------------------------------------------------------------------
 
 ## KNN Regression
 
@@ -1695,7 +1684,7 @@ K Nearest Neighbor
   - May not need to model interactions
   - Still need to handle missing data, outliers, and categorical predictors
 
------
+--------------------------------------------------------------------------------
 
 K Nearest Neighbor
 
@@ -1705,7 +1694,7 @@ K Nearest Neighbor
 - Prediction for any new observation is based on $k$ most similar observations from the dataset
   - $k$ provides direct control  over the bias-variance trade-off for this algorithm
   
------
+--------------------------------------------------------------------------------
 
 To better understand KNN let's simulate training data for three different DGPs (linear - y, polynomial - y2, and step - y3)
 
@@ -1722,7 +1711,7 @@ data_trn_demo <- tibble(x = runif(150, 1, 100),
                y3_dgp = if_else(x < 40, rnorm(150, 25, 0),  rnorm(150, 75, 0)))
 ```
 
------
+--------------------------------------------------------------------------------
 
 Let's start with a simple example where the DGP for Y is linear on one predictor (X)
 
@@ -1735,8 +1724,9 @@ This figure displays:
  - Red lines to represent three new observations (X = 10, 50, 90) we want to make predictions for via a standard KNN
 
 
-```{r u3-knn-2}
+```{r}
 #| echo: false
+
 data_trn_demo |> 
   ggplot(aes(x = x, y = y)) +
     geom_line(aes(x = x, y = y_dgp, color = "blue"), linewidth = 1.5) +
@@ -1751,22 +1741,20 @@ data_trn_demo |>
                        guide = "legend")
 ```
 
------
+--------------------------------------------------------------------------------
 
-::: {.callout-important collapse="false"}
-### Question: What would 5-NN predictions look like for each of these three new values of X in the figure above?
-```{html}
-#| echo: true
-#| code-fold: true
-#| code-summary: "Show Answer"
-For x = 10, find the five observations that have X values closest to 10.  Average the 
-Y values for those 5 observations and that is your predicted Y associated with 
-that new value of X.  Repeat to make predictions for Y for any other value of X,
-e.g., 50, 90, or any other value
-```
+::: {.callout-important}
+# Question
+What would 5-NN predictions look like for each of these three new values of X in the figure above?
 :::
 
------
+::: {.fragment .uwred}
+For x = 10, find the five observations that have X values closest to 10.  Average the Y values for those 5 observations and that is your predicted Y associated with that new value of X.  
+
+Repeat to make predictions for Y for any other value of X,e.g., 50, 90, or any other value
+:::
+
+--------------------------------------------------------------------------------
 
 KNN can easily accommodate non-linear relationships between numeric predictors and outcomes without any feature engineering for predictors
 
@@ -1774,8 +1762,9 @@ In fact, it can flexibly handle **any** shape of relationship
 
 DGP: $y2 = rnorm(150, x^4 / 800000, 8)$
 
-```{r u3-knn-3}
+```{r}
 #| echo: false
+
 data_trn_demo |> 
   ggplot(aes(x = x, y = y2)) +
     geom_line(aes(x = x, y = y2_dgp, color = "blue"), size = 1.5) +
@@ -1790,11 +1779,11 @@ data_trn_demo |>
                        guide = "legend")
 ```
 
------
+--------------------------------------------------------------------------------
 
 DGP: $y3 = if\_else(x < 40, rnorm(150, 25, 10),  rnorm(150, 75, 10))$
 
-```{r u3-knn-4}
+```{r}
 #| echo: false
 
 data_trn_demo |> 
@@ -1811,7 +1800,7 @@ data_trn_demo |>
                        guide = "legend")
 ```
 
------
+--------------------------------------------------------------------------------
 
 ## The Hyperparameter k in KNN
 
@@ -1826,23 +1815,23 @@ KNN is our first example of a statistical algorithm that includes a **hyperparam
   - [$kknn()$](https://cran.r-project.org/web/packages/kknn/kknn.pdf) weights observations (neighbors) based on distance.  
   - An option exists for unweighted as well but not likely used much (default is optimal weighting, use it!).
   
------
+--------------------------------------------------------------------------------
 
 Using the polynomial DGP above, let's look at a 5-NN yields
 
 - Note the new category of algorithm, new engine, and the need to set a mode (because KNN can be used for regression and classification)
 - We can look in the package documentation to better understand what is being done (`?kknn::train.kknn`).
-```{r u3-knn-5}
+```{r}
 nearest_neighbor() |>   
   set_engine("kknn") |>   
   set_mode("regression") |> 
   translate()
 ```
 
------
+--------------------------------------------------------------------------------
 
 - Set up simple feature engineering recipe and get training features (nothing happening but let's follow normal routine anyway)
-```{r u3-knn-7}
+```{r}
 rec <- 
   recipe(y2 ~ x, data = data_trn_demo)
 
@@ -1853,10 +1842,10 @@ feat_trn_demo <- rec_prep |>
   bake(NULL)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - Fit 5NN
-```{r u3-knn-8}
+```{r}
 fit_5nn_demo <- 
   nearest_neighbor() |>   
   set_engine("kknn") |>   
@@ -1864,10 +1853,10 @@ fit_5nn_demo <-
   fit(y2 ~ ., data = feat_trn_demo)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - Get features for a validation set (a new sample using same polynomial DGP)
-```{r u3-knn-9}
+```{r}
 #| echo: false
 
 data_val_demo <- tibble(x = runif(200, 1, 100),
@@ -1884,7 +1873,7 @@ feat_val_demo <- rec_prep |>
   bake(data_val_demo)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - Display 5NN predictions in validation 
 
@@ -1892,7 +1881,7 @@ feat_val_demo <- rec_prep |>
   - KNN displays some (but minimal) evidence of overfitting
   - Simple linear model does not perform well (clear/high bias)
 
-```{r u3-knn-10}
+```{r}
 #| echo: false
 
 feat_val_demo |> 
@@ -1909,40 +1898,33 @@ feat_val_demo |>
                        guide = "legend")
 ```
 
------
+--------------------------------------------------------------------------------
 
 Let's pause and consider our conceptual understanding of the impact of $k$ on the bias-variance trade-off
 
-::: {.callout-important collapse="false"}
-### Question: How will the size of k influence model performance (e.g., bias, overfitting/variance)?
-```{html}
-#| echo: true
-#| code-fold: true
-#| code-summary: "Show Answer"
-Smaller values of k will tend to increase overfitting (and therefore variance 
-across training samples) but decrease bias.  Larger values of k will tend to decrease
-overfitting but increase bias.  We need to find the Goldilocks "sweet spot"
-```
+::: {.callout-important}
+# Question
+How will the size of k influence model performance (e.g., bias, overfitting/variance)?
 :::
 
------
-
-::: {.callout-important collapse="false"}
-### Question: How will k = 1 perform in training and validation sets?
-```{html}
-#| echo: true
-#| code-fold: true
-#| code-summary: "Show Answer"
-k = 1 will perfectly fit the training set.  Therefore it is very dependent on the training 
-set (high variance).  It will fit both the DGP and the noise in the training set.  
-Clearly it will likely not do as well in validation (it will be overfit to training).  
-k needs to be larger if there is more noise (to average over more cases).  k needs 
-to be smaller if the relationships are complex. (More on choosing k by resampling in 
-unit 5.
-```
+::: {.fragment .uwred}
+Smaller values of k will tend to increase overfitting (and therefore variance across training samples) but decrease bias.  Larger values of k will tend to decrease overfitting but increase bias.  We need to find the Goldilocks "sweet spot"
 :::
 
------
+--------------------------------------------------------------------------------
+
+::: {.callout-important}
+# Question
+How will k = 1 perform in training and validation sets?
+:::
+
+::: {.fragment .uwred}
+k = 1 will perfectly fit the training set.  Therefore it is very dependent on the training set (high variance).  It will fit both the DGP and the noise in the training set.  Clearly it will likely not do as well in validation (it will be overfit to training).  
+
+k needs to be larger if there is more noise (to average over more cases).  k needs to be smaller if the relationships are complex. (More on choosing k by resampling in unit 5.
+:::
+
+--------------------------------------------------------------------------------
 
 `k = 1`
 
@@ -1950,7 +1932,7 @@ unit 5.
 
 - Recipe and features have not changed
 
-```{r u3-knn-12}
+```{r}
 fit_1nn_demo <- 
   nearest_neighbor(neighbors = 1) |>  # <1> 
   set_engine("kknn") |>   
@@ -1959,11 +1941,11 @@ fit_1nn_demo <-
 ```
 1. Set k with `neighbors = `
 
------
+--------------------------------------------------------------------------------
 
 Visualize prediction models in Train and Validation
 
-```{r u3-knn-14}
+```{r}
 #| echo: false
 #| out-height: 5in
 
@@ -2000,27 +1982,27 @@ cowplot::plot_grid(plot_train, plot_val,
                    ncol = 2, nrow = 1, hjust = -1)
 ```
 
------
+--------------------------------------------------------------------------------
 
 Calculate RMSE in validation for two KNN models
 
 `k = 1`
-```{r u3-knn-15}
+```{r}
 rmse_vec(feat_val_demo$y2, 
          predict(fit_1nn_demo, feat_val_demo)$.pred)
 ```
 
 `k = 5`
-```{r u3-knn-16}
+```{r}
 rmse_vec(feat_val_demo$y2, 
          predict(fit_5nn_demo, feat_val_demo)$.pred)
 ```
 
------
+--------------------------------------------------------------------------------
 
 What if we go the other way and increase $k$ to 75
 
-```{r u3-knn-17}
+```{r}
 fit_75nn_demo <- 
   nearest_neighbor(neighbors = 75) |>   
   set_engine("kknn") |>   
@@ -2028,11 +2010,11 @@ fit_75nn_demo <-
   fit(y2 ~ ., data = feat_trn_demo)
 ```
 
------
+--------------------------------------------------------------------------------
 
 Visualize prediction models in Train and Validation
 
-```{r u3-knn-19}
+```{r}
 #| echo: false
 #| out-height: 5in
 
@@ -2073,31 +2055,31 @@ cowplot::plot_grid(plot_train, plot_val,
                    ncol = 2, nrow = 1, hjust = -1)
 ```
 
------
+--------------------------------------------------------------------------------
 
 Calculate RMSE in validation for three KNN models
 
 **This is the bias-variance trade-off in action**
 
 - `k = 1`  - high variance
-```{r u3-knn-20}
+```{r}
 rmse_vec(feat_val_demo$y2, 
          predict(fit_1nn_demo, feat_val_demo)$.pred)
 ```
 
 - `k = 5`  - just right (well better at least)
-```{r u3-knn-21}
+```{r}
 rmse_vec(feat_val_demo$y2, 
          predict(fit_5nn_demo, feat_val_demo)$.pred)
 ```
 
 - `k = 75` - high bias
-```{r u3-knn-22}
+```{r}
 rmse_vec(feat_val_demo$y2, 
          predict(fit_75nn_demo, feat_val_demo)$.pred)
 ```
 
------
+--------------------------------------------------------------------------------
 
 ## Distance and Scaling in KNN
 
@@ -2117,7 +2099,7 @@ To make a prediction for some new observation, we need to identify the observati
 
   - Euclidean is most commonly used in KNN
 
------
+--------------------------------------------------------------------------------
 
 Euclidean distance between any two points is an n-dimensional extension of the Pythagorean formula (which applies explicitly with 2 features/2 dimensional space).  
 
@@ -2127,7 +2109,7 @@ $C = \sqrt{A^2 + B^2}$
 
 ...where C is the distance between two points
 
------
+--------------------------------------------------------------------------------
 
 The Euclidean distance between 2 points (p and q) in two dimensions (2 predictors, x1 = A, x2 = B)
 
@@ -2139,8 +2121,9 @@ $Distance = \sqrt{(2 - 1)^2 + (5 - 2)^2}$
 
 $Distance = 3.2$
 
-```{r u3-knn-23}
+```{r}
 #| echo: false
+
 distance2 <- tibble(x1 = c(1, 2), x2 = c(2, 5), 
                    x1h = c(1, 2), x2h = c(2, 2),
                    x1v = c(2, 2), x2v = c(2, 5))
@@ -2160,7 +2143,7 @@ distance2 |>
     scale_y_continuous(limits = c(0,6), breaks = 0:6)
 ```
 
------
+--------------------------------------------------------------------------------
 
 One dimensional (one feature) is simply the subtraction of scores on that feature (x1) between p and q
 
@@ -2170,7 +2153,9 @@ $Distance = \sqrt{(2 - 1)^2}$
 
 $Distance = 1$
 
-```{r u3-knn-24, echo = FALSE}
+```{r}
+#| echo: false
+
 distance1 <- tibble(x1 = c(1, 2), x2 = c(1, 1))
 
 distance1 |> 
@@ -2188,7 +2173,7 @@ N-dimensional generalization for n features:
 
 $Distance = \sqrt{(q1 - p1)^2 + (q2 - p2)^2 + ... + (qn - pn)^2}$
 
------
+--------------------------------------------------------------------------------
 
 Manhattan distance is also referred to as city block distance
 
@@ -2200,7 +2185,9 @@ For two features/dimensions
 
 $Distance = |A + B|$
 
-```{r u3-knn-25, echo = FALSE}
+```{r}
+#| echo: false
+
 distance2 |> 
   ggplot(aes(x = x1, y = x2)) +
     geom_point(color = c("red", "blue"), size = 3) +
@@ -2214,7 +2201,7 @@ distance2 |>
     scale_y_continuous(limits = c(0,6), breaks = 0:6)
 ```
 
------
+--------------------------------------------------------------------------------
 
 `kknn()` uses Minkowski distance (see [Wikipedia](https://en.wikipedia.org/wiki/Minkowski_distance) or [less mathematical description](https://www.mikulskibartosz.name/minkowski-distance-explained/))
 
@@ -2224,7 +2211,7 @@ distance2 |>
 - **The default p in kknn() = 2 (Euclidean distance)**  
 - This default (like all defaults) can be changed when you define the algorithm using `nearest_neighbor()`
 
------
+--------------------------------------------------------------------------------
 
 ### Scaling X
 
@@ -2233,7 +2220,7 @@ Distance is dependent on scales of all the features.  We need to put all feature
 - Scale all features to SD = 1 (using `step_scale(all_numeric_predictors())`)
 - Range correct [0, 1] all features (using `step_range(all_numeric_predictors())`)
 
------
+--------------------------------------------------------------------------------
 
 ### Categorical Predictors
 
@@ -2242,7 +2229,7 @@ KNN requires numeric features (for distance calculation).
 - For categorical predictors, you will need to use dummy coding or other feature engineering that results in numeric features. 
 - e.g., `step_dummy(all_nominal_predictors())`
 
------
+--------------------------------------------------------------------------------
 
 ## KNN with Ames Housing Prices
 
@@ -2252,7 +2239,7 @@ Let's use KNN with Ames
 - Use the default `k = 5` algorithm
 - Set SD = 1 for all features
 
-```{r u3-knn-26}
+```{r}
 rec <- 
   recipe(sale_price ~ gr_liv_area + lot_area + year_built + garage_cars + overall_qual, 
          data = data_trn) |> 
@@ -2262,7 +2249,7 @@ rec <-
 ```
 1.  Remember to take advantage of these selectors for easier code! See `?has_role` for more details
 
------
+--------------------------------------------------------------------------------
 
 - prep, bake
 
@@ -2277,25 +2264,25 @@ feat_val <- rec_prep |>
   bake(data_val)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - Skim training features.  Note all SD = 1
 ```{r}
 feat_trn |> skim_all()
 ```
 
------
+--------------------------------------------------------------------------------
 
 - Skim validation features.  Note SD.  [Why not exactly 1?]{.red}
 ```{r}
 feat_val |> skim_all()
 ```
 
------
+--------------------------------------------------------------------------------
 
 - Fit 5NN
 
-```{r u3-knn-27}
+```{r}
 fit_5nn_5num <- 
   nearest_neighbor() |>   
   set_engine("kknn") |>   
@@ -2303,9 +2290,9 @@ fit_5nn_5num <-
   fit(sale_price ~ ., data = feat_trn)
 ```
 
------
+--------------------------------------------------------------------------------
 
-```{r u3-knn-28}
+```{r}
 error_val <- bind_rows(error_val, 
                         tibble(model = "5 numeric predictor 5nn", 
                                rmse_val = rmse_vec(feat_val$sale_price, 
@@ -2316,26 +2303,26 @@ error_val
 
 - Not bad!
 
------
+--------------------------------------------------------------------------------
 
 KNN also mostly solved the linearity problem
 
 - We might be able to improve the linear models with better transformations of X and Y
 - However, this wasn't needed for KNN!
 
-```{r u3-knn-29}
+```{r}
 plot_truth(truth = feat_val$sale_price, 
            estimate = predict(fit_5nn_5num, feat_val)$.pred)
 
 ```
 
------
+--------------------------------------------------------------------------------
 
 But 5NN may be overfit. `k = 5` is pretty low
 
 Again with `k = 20`
 
-```{r u3-knn-30}
+```{r}
 fit_20nn_5num <- 
   nearest_neighbor(neighbors = 20) |>   
   set_engine("kknn") |>   
@@ -2343,9 +2330,9 @@ fit_20nn_5num <-
   fit(sale_price ~ ., data = feat_trn)
 ```
 
------
+--------------------------------------------------------------------------------
 
-```{r u3-knn-31}
+```{r}
 #| echo: false
 
 error_val <- error_val |> 
@@ -2359,12 +2346,12 @@ error_val
 
 - That helped some
 
------ 
+-------------------------------------------------------------------------------- 
 
 One  more time with `k = 50` to see where we are in the bias-variance function
 
 
-```{r u3-knn-32}
+```{r}
 fit_50nn_5num <- 
   nearest_neighbor(neighbors = 50) |>   
   set_engine("kknn") |>   
@@ -2372,9 +2359,9 @@ fit_50nn_5num <-
   fit(sale_price ~ ., data = feat_trn)
 ```
 
------
+--------------------------------------------------------------------------------
 
-```{r u3-knn-33}
+```{r}
 #| echo: false
 
 error_val <- error_val |> 
@@ -2390,7 +2377,7 @@ error_val
 - Too high, now we have bias......
 - We will learn a more rigorous method for selecting the optimal value for $k$ (i.e., **tuning** this hyperparameter) in unit 5
 
------
+--------------------------------------------------------------------------------
 
 To better understand bias-variance trade-off, let's look at error across these three values of $k$ in train and validation for Ames
 
@@ -2399,7 +2386,7 @@ Training
 - Remember that training error would be 0 for `k = 1`
 - Training error is increasing as $k$ increases b/c it KNN is overfitting less (so its not fitting the noise in train as well)
 
-```{r u3-knn-34}
+```{r}
 rmse_vec(feat_trn$sale_price, 
          predict(fit_5nn_5num, feat_trn)$.pred)
 rmse_vec(feat_trn$sale_price, 
@@ -2408,7 +2395,7 @@ rmse_vec(feat_trn$sale_price,
          predict(fit_50nn_5num, feat_trn)$.pred)
 ```
 
------
+--------------------------------------------------------------------------------
 
 Validation
 
@@ -2417,7 +2404,7 @@ Validation
 - But this is compensated by big decreases in overfitting variance
 - The trade-off is good for `k = 20` relative to 5 and 1
 - At some point, as $k$ increases the increase in bias outweighed the decrease in variance and validation error increased too.
-```{r u3-knn-35}
+```{r}
 rmse_vec(feat_val$sale_price, 
          predict(fit_5nn_5num, feat_val)$.pred)
 rmse_vec(feat_val$sale_price, 
@@ -2426,13 +2413,13 @@ rmse_vec(feat_val$sale_price,
          predict(fit_50nn_5num, feat_val)$.pred)
 ```
 
------
+--------------------------------------------------------------------------------
 
 Let's do one final example and add one of our nominal variables into the model: `ms_zoning`
 
 - Need to collapse levels and then dummy
 
-```{r u3-knn-36}
+```{r}
 rec <- 
   recipe(sale_price ~ gr_liv_area + lot_area + year_built + garage_cars + 
            overall_qual + ms_zoning, data = data_trn) |> 
@@ -2446,7 +2433,7 @@ rec <-
   step_scale(all_numeric_predictors())
 ```
 
------
+--------------------------------------------------------------------------------
 
 - prep, bake
 
@@ -2461,10 +2448,10 @@ feat_val <- rec_prep |>
   bake(data_val)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - Fit 
-```{r u3-knn-37}
+```{r}
 fit_20nn_5num_mszone <- 
   nearest_neighbor(neighbors = 20) |>   
   set_engine("kknn") |>   
@@ -2472,11 +2459,11 @@ fit_20nn_5num_mszone <-
   fit(sale_price ~ ., data = feat_trn)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - evaluate
 
-```{r u3-knn-38}
+```{r}
 #| echo: false
 
 error_val <- error_val |> 
@@ -2493,15 +2480,12 @@ error_val
 - KNN automatically accommodates interactions.  Why?
 - This model is a bit more complex and might benefit further from higher $k$
 
------
+--------------------------------------------------------------------------------
 
 As a teaser, here is another performance metric for this model - $R^2$.   Not too shabby!  Remember, there is certainly some irreducible error in `sale_price` that will put a ceiling on $R^2$ and a floor on RMSE
-```{r u3-knn-39}
+```{r}
 rsq_vec(feat_val$sale_price, 
         predict(fit_20nn_5num_mszone, feat_val)$.pred)
 ```
 
 Overall, we now have a model that predicts housing prices with about 30K of RMSE and accounting for 84% of the variance.  I am sure you can improve on this!
-
------
-
