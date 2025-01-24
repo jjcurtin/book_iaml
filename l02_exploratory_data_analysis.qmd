@@ -413,22 +413,26 @@ data_all |>
 
 --------------------------------------------------------------------------------
 
-**Coding sidebar 1:**
+::: {.callout-tip}
+# Coding sidebar 1
 
 - Write functions whenever you will repeat code often. You can now reuse `skim_some()`
 - `skim_with()` is an example of a function factory - a function that is used to create a new function
   - `partial()` and `compose()` are two other function factories we will use at times
   - More details on function factories is available in [Advanced R](https://adv-r.hadley.nz/function-factories.html)
+  
+:::
 
---------------------------------------------------------------------------------
-
-**Coding sidebar 2:**
+::: {.callout-tip}
+# Coding sidebar 2
   
 - Gather useful functions together in a script that you can reuse.
 - All of the reusable functions in this and later units are available to you in one of my [public github repositories](https://github.com/jjcurtin/lab_support). 
 - You can load these functions into your workspace directly from github using `devtools::source_url()`. For example: `devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_modeling.R?raw=true")`
 - You should start to gather your favorite custom functions together in your own script(s).  
 - You can save your own scripts in a local file and load them into your workspace using `source()` or you can make your own github repo so you can begin to share your code with others!
+
+:::
 
 --------------------------------------------------------------------------------
 
@@ -503,11 +507,14 @@ data_all |> filter(is.na(garage_qual)) |>
 
 --------------------------------------------------------------------------------
 
-**Coding sidebar:**
+::: {.callout-tip}
+# Coding sidebar
 
 - In the above example, we created a function (`print_kbl()`) from scratch (rather than using a function factory)
 - See [functions chapter](https://r4ds.hadley.nz/functions.html) in @RDS for help.
 - See [functionals chapter](https://adv-r.hadley.nz/functionals.html) in @AR. 
+
+:::
 
 --------------------------------------------------------------------------------
 
@@ -605,13 +612,16 @@ data_all |>
 ```
 
 
-**Coding sidebar**: 
+::: {.callout-tip}
+# Coding sidebar
 
 - On the previous page, we demonstrated the use of an anonymous function (`\(column) print(levels(column))`), which is a function we use once that we don't bother to assign a name (since we won't reuse it).  We often use anonymous functions when using the functions from the `purrr` package (e.g., `map()`, `walk()`) 
 - We use `walk()` from the `purrr` package to apply our anonymous function to all columns of the data frame at once
 - Just copy this code for now
 - We will see simpler uses later that will help you understand iteration with `purrr` functions
 - See the chapter on [iteration](https://r4ds.hadley.nz/iteration) in *R for Data Science (2e)* for more info on `map()` and `walk()`
+
+:::
 
 --------------------------------------------------------------------------------
 
@@ -724,9 +734,11 @@ splits <- data_all |>
   initial_split(prop = 3/4, strata = "sale_price", breaks = 4)
 ```
 
-::: {.callout-important}
+::: {.callout-tip}
 # Coding Note
-`initial_split()` is used to create two resamples of your data.  This was used here because we already had a test set held out (outside of the code presented).  We use `analysis()` and `assessment()` to extract these two resamples.   We will later use `initial_validation_split()` to create 3 resamples: training, validation, and test.  We will extract those three resamples using `training()`, `validation()`, and testing()`
+`initial_split()` is used to create two resamples of your data.  This was used here because we already had a test set held out (outside of the code presented).  We use `analysis()` and `assessment()` to extract these two resamples.   
+
+We will later use `initial_validation_split()` to create 3 resamples: training, validation, and test.  We will extract those three resamples using `training()`, `validation()`, and testing()`
 :::
 
 --------------------------------------------------------------------------------
@@ -807,7 +819,10 @@ We have some work to do (again)
 
 --------------------------------------------------------------------------------
 
-**Coding sidebar**:  We will likely re-class the Ames dataset many times (for training, validation, test).  We could copy/paste these mutates each time but whenever you do something more than twice, I recommend writing a function.  We might write this one to re-class the ames variables
+::: {.callout-tip}
+# Coding sidebar
+We will likely re-class the Ames dataset many times (for training, validation, test).  We could copy/paste these mutates each time but whenever you do something more than twice, I recommend writing a function.  We might write this one to re-class the ames variables
+:::
 
 ```{r}
 class_ames <- function(df){
@@ -918,7 +933,9 @@ plot_bar <- function(df, x){
 
 --------------------------------------------------------------------------------
 
-**Coding sidebar**: When defining functions, generally put data as first argument so you can pipe in data using tidy pipelines
+::: {.callout-tip}
+# Coding sidebar
+When defining functions, generally put data as first argument so you can pipe in data using tidy pipelines
 
 There are pros and cons to writing functions that accept variable names that are quoted vs. unquoted
 
@@ -927,6 +944,8 @@ There are pros and cons to writing functions that accept variable names that are
 - embracing {{}} is used for unquoted arguments
 - For these plot functions, I use quoted variable names and then pipe those into `map()` to make multiple plots (see below)
 - see `?vignette("programming")` or info on [tidy evaluation](https://r4ds.hadley.nz/functions.html#indirection-and-tidy-evaluation) in @RDS for more details
+
+:::
 
 --------------------------------------------------------------------------------
 
@@ -951,7 +970,8 @@ data_trn |> plot_bar("overall_qual")
 
 --------------------------------------------------------------------------------
 
-**Coding sidebar**: 
+::: {.callout-tip}
+# Coding sidebar
 
 We can make all of our plots iteratively using `map()` from the `purrr package.
 
@@ -966,6 +986,8 @@ data_trn |>
 2. Get their names as strings (that is why we use quoted variables in these plot functions
 3. Use `map()` to iterative `plot_bar()` over every column.  (see [iteration](https://r4ds.hadley.nz/iteration.html) in @RDS)
 4. Use `plot_grid()` from `cowplot` package to display the list of plots in a grid
+
+:::
 
 --------------------------------------------------------------------------------
 
@@ -1153,7 +1175,8 @@ data_trn |> plot_box_violin("sale_price")
 
 --------------------------------------------------------------------------------
 
-**Coding sidebar**: 
+::: {.callout-tip}
+# Coding sidebar
 
 - You can make figures for all numeric variables at once using `select()` and `map()` as before
 
@@ -1165,6 +1188,8 @@ data_trn |>
   plot_grid(plotlist = _, ncol = 2)
 ```
 1. Now select numeric rather than factor but otherwise same as previous example
+
+:::
 
 --------------------------------------------------------------------------------
 
@@ -1285,13 +1310,17 @@ data_trn |>
 
 --------------------------------------------------------------------------------
 
-**Coding sidebar**:  Use `jitter()` with x to help with overplotting
+::: {.callout-tip}
+# Coding sidebar
+Use `jitter()` with x to help with overplotting
 
 ```{r}
 data_trn |> 
   mutate(overall_qual = jitter(as.numeric(overall_qual))) |> 
   plot_scatter("overall_qual", "sale_price")
 ```
+
+:::
 
 --------------------------------------------------------------------------------
 
