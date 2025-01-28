@@ -1,0 +1,276 @@
+---
+title: "Orienting to Quarto for IAML"
+author: "TA Lab Key"
+date: "`r lubridate::today()`"
+format: 
+  html: 
+    embed-resources: true
+    toc: true 
+    toc_depth: 4
+editor_options: 
+  chunk_output_type: console
+---   
+
+This script demos some best practices to apply across all application assignments and exams. These practices are well-documented in John's data wrangling in the tidy verse book -->  https://jjcurtin.github.io/book_dwvt/(https://jjcurtin.github.io/book_dwvt/)
+
+### Projects and paths
+
+Most application assignments will require you to read in csv files. To avoid problems with paths and working directories, we encourage you all to work from an IAML R Project and use relative paths.   
+
+Lets do this now!
+
+#### Create a new project
+
+Go to `File` --> `New Project` --> `New Directory` --> `New Project`   
+
+Now navigate to where you want the project directory to live and name your directory to whatever you want (e.g., `iaml`, `iaml_2024`, `psych_752`).    
+
+If you open up your file explorer you should now see that folder with the project in it.    
+
+Lets switch over to our project now! Go to `File` --> `Open Project`  (reopen `unit_01_lab.qmd`) 
+
+Check your working directory now matches where your project lives. 
+```{r}
+getwd() # check working directory
+```
+
+From this location now we can use relative paths with the `here::here()` function.
+
+#### Create directories
+
+Now we are going to create a nested directory structure for working with our application assignments.    
+
+Make Homework directory
+```{r}
+dir.create(here::here("homework")) # this creates a folder called "homework" in you ML class folder
+```
+
+Make unit subfolders
+```{r}
+sprintf("%02d", 1:12) |> 
+  purrr::map(\(unit) dir.create(here::here(stringr::str_c("homework/unit_", unit))))
+# Here is an anonymous function mapped to the series of units which is piped to `purrr:map()`
+```
+
+Lets set a path to unit_01 for us to use for the rest of today
+```{r}
+path_homework <- "homework/unit_01"
+```
+
+Now if we want to save out or read anything in we can use `here::here(path_homework, "name_of_file")`
+
+For example, lets move this qmd script to the `unit_01` folder     
+Set path of current location of script - can get this by right clicking on file and copy over to new location
+```{r}
+path_qmd <- "C:/Users/Patron/work/ta/teach_iaml/2025/application_assignments/unit_01/unit_01_lab.qmd"
+
+file.copy(from = path_qmd,
+          to   = path_homework)
+
+# remove old file - note you will be prompted to close deleted file and then reopen file from new direction
+#file.remove(path_qmd)
+```
+
+
+### Setup  
+
+At the beginning of every script you will want to do some basic setup. Below we suggest some basic best practices, however, feel free to modify your setup for what works best for your workflow. If you do modify your setup be sure to keep these best practices in mind!
+
+
+#### Handling conflicts
+
+Function conflicts occur when you load multiple packages using `library()` and these packages contain functions that share identical names. The function in the package loaded last will mask the identically named previous function.    
+
+This can cause errors if you are wanting the function from the first package and don't use the namespace. Even worse it might not generate an error and give you inaccurate results without you realizing it!    
+
+In this course we suggest using the following workflow for handling conflicts.  
+
+We use this code block to basically say:   
+1. Masking base R functions is okay    
+2. Use the function `tidymodels_conflictRules()` sourced from John's machine learning function script to address conflicts between `tidyverse` and `tidymodels` packages.    
+
+```{r conflict_policy}
+# mask base R functions
+options(conflicts.policy = "depends.ok")
+# conflict policy created by John
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+# conflict policy function created by Tidy- people
+tidymodels_conflictRules()
+```
+
+Lets look at this function to see exactly what it is doing. 
+```{r}
+tidymodels_conflictRules
+```
+
+Other best practices to prevent conflicts is to load full packages sparingly.    
+
+For example, we will be doing our modeling in the tidyverse so we will want to load `tidyverse` and `tidymodels` for every assignment. We also already handle conflicts between these two packages before loading them.   
+```{r}
+library(tidyverse) 
+library(tidymodels) 
+```
+
+We will also usually want to source our full function scripts.    
+Below we source John's `fun_eda` script but you are encouraged to modify these functions as you see places for improvement and save them in your own function script. If you choose to do this and have the script locally on your computer (i.e., in your new project folder) you can load your functions using `source("my_fun_script.R)` <-- Note that function scripts are an R file not a qmd file.
+``` {r}
+# Useful functions for EDA
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+```
+
+For functions from packages outside the tidyverse you are encouraged to use these in two ways.   
+
+1. If you are only going to use the function a couple times, using its namespace before the function. For example when we use the `here()` function from the `here` package we use it as `here::here()`.
+
+2. If you are going to be using a function several times in a script (as may be the case when doing EDA) you should load the function at the top of your script.    
+
+For example, I like using the `tabyl()` function from the `janitor` package when doing EDA so I would probably load this as I did below.
+```{r}
+library(janitor, include.only = "tabyl")
+```
+
+
+## Debug Suggestions
+
+Throughout this semester and beyond, you'll see tons of error messages when you code. Here's some good examples of errors you'll encounter. Let's go through each one together and see what typical steps we do when our codes don't work!
+
+We'll use the `ames` data as an example.
+```{r}
+ames <- ames |> select(Sale_Price, Sale_Condition, Longitude, Latitude)
+```
+
+
+**Example 1**
+```{r}
+ames |> mutate(new_col = Sale_price * 2)
+
+## FIX
+```
+
+**Example 2**
+```{r}
+ames |> mutate(new_col = c(1, 2))
+
+## FIX
+```
+
+**Example 3**
+```{r}
+bind_rows(ames, data.frame(Sale_Price = c("200000", "220000")))
+
+
+```
+
+**Example 4**
+```{r}
+ames |> summarise(mean = mean(Sale_Condition))
+```
+
+**Example 5**
+```{r}
+ames |> group_by(c("Sale_Price", "Longitude"))
+
+```
+
+**Example 6**
+```{r}
+ames |> mutate(new_col = as.numeric("Sale_Condition"))
+```
+
+**Example 7**
+```{r}
+ames |> mutate(new_col = if_else(Sale_Price > 0, "TRUE", 0))
+```
+
+**Example 8**
+```{r}
+left_join(ames, data.frame(id = 1:nrow(ames)), by = "id")
+```
+
+
+### Reproducible Example (Reprex)
+
+If problems do come up during your coding (and they will!) it will be easier for us to help you if you bring us a reproducible example. Also in making the reprex you will often likely figure out the problem on your own! It will be helpful to know how to do this in the future if you ever want to post your problem online as well.
+
+Best Practices for generating a Reprex:
+1. The reprex should run completely on its own with just copy/paste
+2. it should NOT require anyone to source other scripts
+3. It should (almost) never require the person to load data.
+4. Remove all extra lines of code from the reprex 
+5. Include only necessary packages.
+
+# Example code that produces an error
+```{r}
+data %>%
+  mutate(log_month = log(month))
+```
+
+# Install Reprex package
+```{r}
+install.packages("reprex")
+```
+
+# Sampling your data for the reprex
+```{r}
+# create a small data set (be sure to include packages)
+library(dplyr)
+set.seed(12345) # to make data reproducible if that matters
+d <- tibble (x = rnorm(24), 
+             y = rep(c("group_1", "group_2"), 12), 
+             z = factor(rep(c("1", "2", "3"), 8))) %>% 
+  glimpse()
+
+# or use an existing dataset from online and get a smaller sample of the data for your reprex
+library(modeldata)
+ames_1 <- ames %>% 
+  select(Sale_Price, Lot_Config, Lot_Frontage) %>% 
+  slice_sample(n = 50) %>% 
+  glimpse()
+
+# or use your current data (only if your data is not private and can be shared)
+dput(data[1:4, ]) # first four rows of your data set
+# the console output is what you share in your reprex
+```
+
+Final Reprex:
+```{r}
+# Copy this code, type reprex() in your console, copy the output from the viewer as your reprex
+library(dplyr)
+
+data = structure(list(ozone = c(41L, 36L, 12L, 18L), solar_r = c(190L, 
+118L, 149L, 313L), wind = c(7.4, 8, 12.6, 11.5), temp = c(67L, 
+72L, 74L, 62L), month = structure(c(5L, 5L, 5L, 5L), levels = c("Jan", 
+"Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", 
+"Nov", "Dec"), class = "factor"), day = 1:4), row.names = c(NA, 
+4L), class = "data.frame")
+
+data %>%
+  mutate(log_month = log(month))
+```
+
+- 1. Copying the code in the chunk created for portable and reproducible example.
+- 2. (After librarying) Run `reprex()` in the console.
+- 3. (Now the reprex result should be all set in the clipboard) Paste to slack and send to John and the TAs (or other collaborators in the future)!
+
+
+Another way to run `reprex` inline:
+```{r}
+library(reprex)
+reprex({
+  # Copy this code, type reprex() in your console, copy the output from the viewer as your reprex
+  library(dplyr)
+  
+  data = structure(list(ozone = c(41L, 36L, 12L, 18L), solar_r = c(190L, 
+  118L, 149L, 313L), wind = c(7.4, 8, 12.6, 11.5), temp = c(67L, 
+  72L, 74L, 62L), month = structure(c(5L, 5L, 5L, 5L), levels = c("Jan", 
+  "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", 
+  "Nov", "Dec"), class = "factor"), day = 1:4), row.names = c(NA, 
+  4L), class = "data.frame")
+  
+  data %>%
+    mutate(log_month = log(month))
+}, venue = "slack") # You can also set the "venue" where you'll share the code to with this parameter
+```
+
+
+
