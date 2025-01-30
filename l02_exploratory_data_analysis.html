@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.4.550">
+<meta name="generator" content="quarto-1.4.551">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -343,16 +343,16 @@ window.Quarto = {
 <h3 data-number="2.2.1" class="anchored" data-anchor-id="stages-of-data-analysis-and-model-development"><span class="header-section-number">2.2.1</span> Stages of Data Analysis and Model Development</h3>
 <p>These are the main stages of data analysis for machine learning and the data that are used</p>
 <ol type="1">
-<li>EDA: Cleaning (full dataset)</li>
-<li>EDA: Split data into training, validation and test set(s)</li>
-<li>EDA: Modeling (training sets)</li>
-<li>Model Building: Feature engineering (training sets)</li>
-<li>Model Building: Fit many models configurations (training set)</li>
-<li>Model Building: Evaluate many models configurations (validation sets)</li>
-<li>Final Model Evaluation: Select final/best model configuration (validation sets)</li>
-<li>Final Model Evaluation: Fit best model configuration (use both training and validation sets)</li>
-<li>Final Model Evaluation: Evaluate final model configuration (test sets)</li>
-<li>Final Model Evaluation: Fit best model configuration to ALL data (training, validation, and test sets) if you plan to use it for applications.</li>
+<li><p>EDA: Cleaning (full dataset)</p></li>
+<li><p>EDA: Split data into training, validation and test set(s)</p></li>
+<li><p>EDA: Modeling (training sets)</p></li>
+<li><p>Model Development: Feature engineering (training sets)</p></li>
+<li><p>Model Development: Fit many models configurations (training set)</p></li>
+<li><p>Model Development: Calculate performance metric for many models configurations (validation sets)</p></li>
+<li><p>Model Development: Select final/best model configuration based on performance metric (validation sets)</p></li>
+<li><p>Final Model Evaluation: Fit best model configuration (use both training and validation sets)</p></li>
+<li><p>Final Model Evaluation: Evaluate final model configuration using performance metric (test sets)</p></li>
+<li><p>Implementation: Fit best model configuration to ALL data (training, validation, and test sets) if you plan to use it for applications.</p></li>
 </ol>
 <hr>
 <p>The earlier stages are highly iterative:</p>
@@ -360,12 +360,12 @@ window.Quarto = {
 <li>You may iterate some through EDA stages 1-3 if you find further errors to clean in stage 3 [<strong>But make sure you resplit into the same sets</strong>]</li>
 <li>You will iterate many times though stages 3-6 as you learn more about your data both through EDA for modeling and evaluating actual models in validation</li>
 </ul>
-<p>You will NOT iterate back to earlier stages after you select a final model configuration</p>
+<p>You will NOT iterate back to earlier stages after you select a final model configuration in Stage 7</p>
 <ul>
 <li>Stages 7 - 10 are performed ONLY ONCE</li>
 <li>Only one model configuration is selected and re-fit and only that model is brought into test for evaluation</li>
 <li>Any more than this is essentially equivalent to p-hacking in traditional analyses</li>
-<li>Step 10 only happens if you plan to use the model in some application</li>
+<li>Step 10 only happens if you plan to implement the model in some application</li>
 </ul>
 <hr>
 </section>
@@ -460,9 +460,9 @@ window.Quarto = {
 </ul>
 <p>Data dictionaries:</p>
 <ul>
-<li>help you keep track of your variables and their characteristics (e.g., valid ranges, valid responses)</li>
-<li>can be used by you to check your data during EDA</li>
-<li>can be provided to others when you share your data (data are not generally useful to others without a data dictionary)</li>
+<li>Help you keep track of your variables and their characteristics (e.g., valid ranges, valid responses)</li>
+<li>Can be used by you to check your data during EDA</li>
+<li>Can be provided to others when you share your data (data are not generally useful to others without a data dictionary)</li>
 </ul>
 <p>We will see a variety of data dictionaries throughout the course. Many are not great as you will learn.</p>
 <hr>
@@ -4266,10 +4266,10 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, town_inside, town_end, dup
 <hr>
 <p>We will not need the validation set for modeling EDA</p>
 <ul>
-<li>It should NOT be used for anything other than evaluating models to select the best model configuration</li>
+<li>It should NOT be used for anything other than calculating performance metrics for our many model configurations to select the best model configuration</li>
 <li>We do NOT do Modeling EDA or Model Fitting with the validation set</li>
 <li>Save it in this clean form for easy use when you need it</li>
-<li>We use the validation set to “assess” models that we have fit in training sets - hence the name of the function</li>
+<li>We use the validation set to “assess” (calculate performance metrics for selection) models that we have fit in training sets - hence the name of the function</li>
 </ul>
 <div class="cell">
 <details open="" class="code-fold">
@@ -4819,7 +4819,7 @@ Coding sidebar
 </div>
 </div>
 <div class="callout-body-container callout-body">
-<p>We can make all of our plots iteratively using <code>map()</code> from the `purrr package.</p>
+<p>We can make all of our plots iteratively using <code>map()</code> from the <code>purrr</code> package.</p>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
@@ -6321,6 +6321,24 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
     // clear code selection
     e.clearSelection();
   });
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp("https:\/\/github\.io\/jjcurtin\/book_iaml");
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
   function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
     const config = {
       allowHTML: true,
@@ -6355,7 +6373,11 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
       try { href = new URL(href).hash; } catch {}
       const id = href.replace(/^#\/?/, "");
       const note = window.document.getElementById(id);
-      return note.innerHTML;
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
     });
   }
   const xrefs = window.document.querySelectorAll('a.quarto-xref');

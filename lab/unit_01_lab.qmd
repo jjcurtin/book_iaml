@@ -31,7 +31,7 @@ Lets switch over to our project now! Go to `File` --> `Open Project`  (reopen `u
 
 Check your working directory now matches where your project lives. 
 ```{r}
-getwd() # check working directory
+getwd() # check your own working directory
 ```
 
 From this location now we can use relative paths with the `here::here()` function.
@@ -62,6 +62,7 @@ Now if we want to save out or read anything in we can use `here::here(path_homew
 For example, lets move this qmd script to the `unit_01` folder     
 Set path of current location of script - can get this by right clicking on file and copy over to new location
 ```{r}
+# Make sure to change this as your own directory for the `.rmd` file
 path_qmd <- "C:/Users/Patron/work/ta/teach_iaml/2025/application_assignments/unit_01/unit_01_lab.qmd"
 
 file.copy(from = path_qmd,
@@ -132,60 +133,121 @@ library(janitor, include.only = "tabyl")
 
 ## Debug Suggestions
 
+Generally, we recommend you to try fixing the bugs:
+- Step 1: Read through the error message.
+  - See if the bug is a typo/missing file/wrong path/variable name doesn't exist becuase of reloading the environment/...
+  - Or you could fix it logically yourself
+- Step 2: Search online
+  - Copy the error information to search, directly Google it
+  - Search in the online forums, Stackoverflow, Github, etc.
+  - Try coding AI assistants but be very careful for the responses, and keep in mind that we're recommend *tidy* style coding
+- Step 3: Reach out with reproducible examples
+  - We're using `reprex` for PSYCH752 and it's also suggested for *tidy* ecosystem
+  - More details below
+
+### Debug-along
+
 Throughout this semester and beyond, you'll see tons of error messages when you code. Here's some good examples of errors you'll encounter. Let's go through each one together and see what typical steps we do when our codes don't work!
+
+*Tip*: an easy way to see how a function works is to `?function_name` in the console to see its documentation.
+
 
 We'll use the `ames` data as an example.
 ```{r}
 ames <- ames |> select(Sale_Price, Sale_Condition, Longitude, Latitude)
 ```
 
-
 **Example 1**
 ```{r}
+# Case sensitivity of R
 ames |> mutate(new_col = Sale_price * 2)
 
-## FIX
+## FIX: R is case sensitive (Upper case P)
+ames |> mutate(new_col = Sale_Price * 2)
+# This is part of the reason why we do snake_case for the variable names in the data cleaning
 ```
 
 **Example 2**
 ```{r}
-ames |> mutate(new_col = c(1, 2))
+# Size compatibility
+ames |> mutate(new_col = c(1:2))
 
-## FIX
+## FIX: mutated column should have same length as the target dataframe 
+ames |> mutate(new_col = c(1:nrow(ames))) # Just an example; what's filled depends on the goal of the step
 ```
 
 **Example 3**
 ```{r}
+# Data type sensitivity
 bind_rows(ames, data.frame(Sale_Price = c("200000", "220000")))
 
-
+# FIX: unquote as numeric
+bind_rows(ames, data.frame(Sale_Price = c(200000, 220000))) |> tail()
 ```
 
 **Example 4**
 ```{r}
-ames |> summarise(mean = mean(Sale_Condition))
+# Data type requirement for certain functions
+ames |> summarise(mean = mean(Sale_Condition)) 
+# FIX: 
+# (1) Make sure averaging is the correct operation for the variable
+# (2) `as.numeric()` 
 ```
 
 **Example 5**
 ```{r}
-ames |> group_by(c("Sale_Price", "Longitude"))
+# Usage of `group_by`
+ames |> group_by(c("Sale_Condition", "Longitude"))
 
+# FIX: each variable as the grouping-by criteria takes an individual parameter
+ames |> group_by(Sale_Condition, Longitude)
+# Well, this is no a very good example for `group_by` though
+# Usually applied to factor/character (nominal) variables with several groups
 ```
 
 **Example 6**
 ```{r}
+# Column reference and type change
+# Warning and coerced value change
 ames |> mutate(new_col = as.numeric("Sale_Condition"))
+# FIX
+# have a look on the df
+ames |> mutate(new_col = as.numeric("Sale_Condition")) |> glimpse()
+# Firstly this function doesn't work on the column, so we should unquote
+ames |> mutate(new_col = as.numeric(Sale_Condition))
+# Besides, make sure that we want this column as numeric
+ames |> mutate(new_col = as.numeric(Sale_Condition)) |> glimpse()
+# It's actually better be treated as a factor
+ames |> mutate(new_col = as.factor(Sale_Condition)) |> pull(new_col) |> table()
 ```
 
 **Example 7**
 ```{r}
+# Type compatibility in `if_else`
 ames |> mutate(new_col = if_else(Sale_Price > 0, "TRUE", 0))
+# FIX
+ames |> mutate(new_col = if_else(Sale_Price > 0, 1, 0)) |> glimpse()
+# or
+ames |> mutate(new_col = if_else(Sale_Price > 0, "TRUE", "FALSE")) |> glimpse()
 ```
 
 **Example 8**
 ```{r}
-left_join(ames, data.frame(id = 1:nrow(ames)), by = "id")
+# Joining dataframe
+tmp <- data.frame(id = 1:nrow(ames)) |> 
+  mutate(new_col = (1:nrow(ames) * 2))
+left_join(ames, tmp, by = "id")
+# FIX: adding a column to ames df
+ames <- ames |> 
+  mutate(id = 1:nrow(ames))
+left_join(ames, tmp, by = "id") |> view()
+
+# Note: the fix sol here only solves the problem in a coding logic
+# This might not be the solution to a real world problem. 
+# The definition of an `id` column should be careful to match the information
 ```
+
+More information about joining dataframes, type `?function_name` in the console.
 
 
 ### Reproducible Example (Reprex)
@@ -228,8 +290,9 @@ ames_1 <- ames %>%
   glimpse()
 
 # or use your current data (only if your data is not private and can be shared)
-dput(data[1:4, ]) # first four rows of your data set
+dput(ames_1[1:4, ]) # first four rows of your data set
 # the console output is what you share in your reprex
+# Put it in the below chunk for `data`
 ```
 
 Final Reprex:
@@ -237,21 +300,21 @@ Final Reprex:
 # Copy this code, type reprex() in your console, copy the output from the viewer as your reprex
 library(dplyr)
 
-data = structure(list(ozone = c(41L, 36L, 12L, 18L), solar_r = c(190L, 
-118L, 149L, 313L), wind = c(7.4, 8, 12.6, 11.5), temp = c(67L, 
-72L, 74L, 62L), month = structure(c(5L, 5L, 5L, 5L), levels = c("Jan", 
-"Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", 
-"Nov", "Dec"), class = "factor"), day = 1:4), row.names = c(NA, 
-4L), class = "data.frame")
+data = structure(list(Sale_Price = c(146000L, 755000L, 115000L, 160000L),
+                      Lot_Config = structure(c(5L, 1L, 5L, 1L), 
+                                             levels = c("Corner", "CulDSac", "FR2", "FR3", "Inside"),
+                                             class = "factor"), 
+                      Lot_Frontage = c(24, 104, 100, 87)), 
+                 row.names = c(NA, -4L), 
+                 class = c("tbl_df", "tbl", "data.frame"))
 
 data %>%
-  mutate(log_month = log(month))
+  mutate(log_lot_config = log(Lot_Config))
 ```
 
 - 1. Copying the code in the chunk created for portable and reproducible example.
 - 2. (After librarying) Run `reprex()` in the console.
 - 3. (Now the reprex result should be all set in the clipboard) Paste to slack and send to John and the TAs (or other collaborators in the future)!
-
 
 Another way to run `reprex` inline:
 ```{r}
@@ -260,17 +323,16 @@ reprex({
   # Copy this code, type reprex() in your console, copy the output from the viewer as your reprex
   library(dplyr)
   
-  data = structure(list(ozone = c(41L, 36L, 12L, 18L), solar_r = c(190L, 
-  118L, 149L, 313L), wind = c(7.4, 8, 12.6, 11.5), temp = c(67L, 
-  72L, 74L, 62L), month = structure(c(5L, 5L, 5L, 5L), levels = c("Jan", 
-  "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", 
-  "Nov", "Dec"), class = "factor"), day = 1:4), row.names = c(NA, 
-  4L), class = "data.frame")
-  
-  data %>%
-    mutate(log_month = log(month))
+  data = structure(list(Sale_Price = c(146000L, 755000L, 115000L, 160000L),
+                      Lot_Config = structure(c(5L, 1L, 5L, 1L), 
+                                             levels = c("Corner", "CulDSac", "FR2", "FR3", "Inside"),
+                                             class = "factor"), 
+                      Lot_Frontage = c(24, 104, 100, 87)), 
+                 row.names = c(NA, -4L), 
+                 class = c("tbl_df", "tbl", "data.frame"))
+
+  data |> 
+    mutate(log_lot_config = log(Lot_Config))
 }, venue = "slack") # You can also set the "venue" where you'll share the code to with this parameter
 ```
-
-
 
