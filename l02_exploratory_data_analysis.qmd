@@ -36,13 +36,15 @@ These are the main stages of data analysis for machine learning and the data tha
 1. EDA: Cleaning (full dataset)
 2. EDA: Split data into training, validation and test set(s)
 3. EDA: Modeling (training sets)
-4. Model Building: Feature engineering (training sets)
-5. Model Building: Fit many models configurations (training set)
-6. Model Building: Evaluate many models configurations (validation sets)
-7. Final Model Evaluation: Select final/best model configuration (validation sets)
+
+4. Model Development: Feature engineering (training sets)
+5. Model Development: Fit many models configurations (training set)
+6. Model Development: Calculate performance metric for many models configurations (validation sets)
+
+7. Model Development: Select final/best model configuration based on performance metric (validation sets)
 8. Final Model Evaluation: Fit best model configuration (use both training and validation sets)
-9. Final Model Evaluation: Evaluate final model configuration (test sets)
-10. Final Model Evaluation: Fit best model configuration to ALL data (training, validation, and test sets) if you plan to use it for applications.
+9. Final Model Evaluation: Evaluate final model configuration using performance metric (test sets)
+10. Implementation: Fit best model configuration to ALL data (training, validation, and test sets) if you plan to use it for applications.
 
 --------------------------------------------------------------------------------
 
@@ -51,12 +53,12 @@ The earlier stages are highly iterative:
 - You may iterate some through EDA stages 1-3 if you find further errors to clean in stage 3 [**But make sure you resplit into the same sets**]
 - You will iterate many times though stages 3-6 as you learn more about your data both through EDA for modeling and evaluating actual models in validation
 
-You will NOT iterate back to earlier stages after you select a final model configuration
+You will NOT iterate back to earlier stages after you select a final model configuration in Stage 7
 
 - Stages 7 - 10 are performed ONLY ONCE
 - Only one model configuration is selected and re-fit and only that model is brought into test for evaluation
 - Any more than this is essentially equivalent to p-hacking in traditional analyses
-- Step 10 only happens if you plan to use the model in some application
+- Step 10 only happens if you plan to implement the model in some application
 
 --------------------------------------------------------------------------------
 
@@ -149,9 +151,9 @@ You should always make a data dictionary for use with your data files.
 
 Data dictionaries:
 
-- help you keep track of your variables and their characteristics (e.g., valid ranges, valid responses)
-- can be used by you to check your data during EDA
-- can be provided to others when you share your data (data are not generally useful to others without a data dictionary)
+- Help you keep track of your variables and their characteristics (e.g., valid ranges, valid responses)
+- Can be used by you to check your data during EDA
+- Can be provided to others when you share your data (data are not generally useful to others without a data dictionary)
 
 We will see a variety of data dictionaries throughout the course.   Many are not great as you will learn.
 
@@ -758,10 +760,10 @@ splits |>
 
 We will not need the validation set for modeling EDA
 
-- It should NOT be used for anything other than evaluating models to select the best model configuration
+- It should NOT be used for anything other than calculating performance metrics for our many model configurations to select the best model configuration
 - We do NOT do Modeling EDA or Model Fitting with the validation set
 - Save it in this clean form for easy use when you need it
-- We use the validation set to "assess" models that we have fit in training sets - hence the name of the function
+- We use the validation set to "assess" (calculate performance metrics for selection) models that we have fit in training sets - hence the name of the function
 
 ```{r}
 splits |> 
@@ -973,7 +975,7 @@ data_trn |> plot_bar("overall_qual")
 ::: {.callout-tip}
 # Coding sidebar
 
-We can make all of our plots iteratively using `map()` from the `purrr package.
+We can make all of our plots iteratively using `map()` from the `purrr` package.
 
 ```{r}
 data_trn |> 
