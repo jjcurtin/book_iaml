@@ -8,12 +8,13 @@ editor_options:
 ## Housekeeping
 
 - Unit 2 solutions
-- Course evals for extra credit (to quiz score)!
+  - Review in lab
+  - Format of lab open for influence
+- Course feedback for extra credit (to quiz score) starting on next quiz!
 - Unit 3 homework
   - test set predictions
   - free lunch!
-- Questions to all three of us
-- An attempt at a reprex is generally expected now for code help
+- An attempt at a reprex is generally expected now for code help.  Very important to learn!!!
 
 --------------------------------------------------------------------------------
 
@@ -22,13 +23,20 @@ editor_options:
 - Quiz review
 
 - Student Questions
-  - great questions!
-  - write them down as you read and watch lectures
-  - not all questions will fit (slack as an alternative for follow-up)
+  - Great questions!
+  - Write them down as you read and watch lectures
+  - Use them to guide what topics we discuss
+  - Bring them up during this discussion as we cover relevant topics
+  - Not all questions will fit (Slack as an alternative for follow-up)
   
 --------------------------------------------------------------------------------  
   
-## Possible topics
+## More central topics
+
+0. Data are very different in 752 vs. 610/710.  
+    - More real world
+    - Messy
+    - Often higher dimensionality (more predictors)
 
 1. Review
     - Goal is to develop model that closely approximates DGP
@@ -36,52 +44,70 @@ editor_options:
     - Bias, overfitting/variance for any estimate (model and performance of model)
     - candidate model configurations
     - fit, select, evaluate
-    - training, validation, test
+    - training, validation, test (held-in; held-out)
 
+\
 
 2. Review: 2.2.1 Stages of Data Analysis and Model Development
+
+\
 
 3. Best practices (discuss quickly)
     - csv for data sharing, viewing, git (though be careful with data in github or other public repo!)
     - variable values saved as text when nominal and ordinal (self-documenting)
     - Create data dictionary - Documentation is critical!!
     - snake_case for variables and self-documenting names (systematic names too)
+    - write function for classing data (done often)
+
+\
 
 4. Review: 2.3.1 Data Leakage Issues
     - Review section in webbook
     - Cleaning EDA is done with full dataset (but univariate).  Very limited (variable names, values, find errors)
     - Modeling EDA is only done with a training set (or even "eyeball" sample) - NEVER use validate or test set
-    - Never estimate anything with full data set (e.g., missing values, standardize, etc)
-    - Use recipes, prep (all estimation) with held in data than bake the appropriate set
+    - Never estimate anything with full data set (e.g., missing values, standardize, etc) if you plan to evaluate the model
+    - Use recipes, prep (all estimation) with held-in data then bake held-in (already in object) and the appropriate held-out set
     - Put test aside
-    - You work with validation but never explore with validation (will still catch leakage with test but will be mislead to be overly optimistic and spoil test)
-    
-5. Functions sidenote - fun_modeling.R on [github](https://github.com/jjcurtin/lab_support)
+    - You work with validation (for selecting best configuration) but never explore with validation (will still catch leakage with test but will be mislead to be overly optimistic and spoil test)
 
-6. Review: 2.4.2 Prepping and Baking a Recipe
+\
+
+5. Review: 2.4.2 Prepping and Baking a Recipe
      - Review section in web book
-     - prep always with held in data, bake with held in & out data.
+     - Prep always with held in data, bake both held in (data alread in object) & held-out
+     - Converts from matrix (df) of predictors to feature matrix
+     - Feature engineering (transformations, combinations of predictors, interactions, imputation, dimensionality reduction)
+
+\
+
+6. Functions sidenote - fun_modeling.R on [github](https://github.com/jjcurtin/lab_support)
+    - look at the functions.  Don't use them blackbox
+    - make your own function script 
+
+\
 
 7. EDA for modeling
-
-    - limitless, just scratched the surface
-    - Differs some based on dimenstionality of dataset
+    - Limitless, just scratched the surface
+    - Differs some based on dimensionality of dataset
+    - Differs based on measurement of X and Y
+    - Very important (and under-appreciated part) of science!
     - Learning about DGP
-      - understand univariate distributions, frequencies
-      - bivariate relationships
-      - interactions (3 or more variables)
-      - patterns in data
+      - Understand univariate distributions, frequencies
+      - Bivariate relationships
+      - Interactions (3 or more variables)
+      - Patterns in data
 
 
-8.  Extra topics, time permitting
+##  Extra topics, time permitting
 
-8.1. Missing data
-  
+8. Missing data
     - Exclude vs. Impute in training data.  Outcomes?
     - How to impute
-    - Missing in validate or test (can't exclude?). Exclude cases with missing outcomes.
+    - Missing predictors in validate or test (can't exclude?). Exclude cases with missing outcomes.
 
-8.2. Outliers
+\
+
+9. Outliers
     - Drop or fix errors!
     - Goal is always to estimate DGP
     - Exclude
@@ -89,45 +115,50 @@ editor_options:
     - Bring to fence
     - Don't exclude/change outcome in validate/test
 
-8.3. Issues with high dimensionality
+\
 
+10. Issues with high dimensionality
     - Hard to do predictor level EDA
     - Common choices (normality transformations)
-    - observed vs. predicted plots
+    - Observed vs. predicted plots
     - Methods for automated variable selection (glmnet)
-    
-8.4. Distributional Shape
+   
+\
 
+11. Distributional Shape
     - Measurement issues (interval scale)
     - Implications for relationships with other variables
     - Solutions?
-  
-8.5. Linearity vs. More Complex Relationships
 
+\
+
+12. Linearity vs. More Complex Relationships
     - Transformations
     - Choice of statistical algorithm
     - Do you need a linear model?
 
-8.6. Interactions
+\
 
+13. Interactions
     - Domain expertise
     - Visual options for interactions
-    - But what do do with high dimensional data?
+    - But what do you with high dimensional data?
     - Explanatory vs. prediction goals (algorithms that accommodate interactions)
 
-8.7. How to handle all of these decisions in the machine learning framework
+\
 
+14. How to handle all of these decisions in the machine learning framework
     - Goal is to develop a model that most closely approximates the DGP
     - How does validation and test help this?
     - Preregistration?
       - Pre-reg for performance metric, resampling method   
       - Use of resampling for other decisions
       - Use of resampling to find correct model to test explanatory goals
-  
-  
-8.8. Model Assumptions
 
+\
+
+15. Model Assumptions
     - Why do we make assumptions?
       - Inference
-      - Flexibility wrt DGP
- 
+      - Not needed for prediction (but?)
+    - Flexibility wrt DGP
