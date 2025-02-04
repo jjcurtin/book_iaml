@@ -23,6 +23,8 @@ options(tibble.width = Inf, tibble.print_max = Inf)
 theme_set(theme_classic()) 
 
 data <- modeldata::ames |> janitor::clean_names() |> select(1:20, sale_price)
+
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
 ```
 
 ## Housekeeping
@@ -65,17 +67,16 @@ data |>
 
 -   **what is the deal with these Quarto files? They seem just like R markdown, but slightly different, with buttons to "render" instead of "knit"**
 
-> quarto: next generation of rmd; can be used to write a book, publish slides -> more comprehensive
-> can use another language in quarto
-> rmd a narrow publishing system
+> Both Quarto and R Markdown are markdown files that can be used for publishing. Quarto is the next generation of Rmd. It can be used to write a book, publish slides and so on. You can also use another coding langauge such as Python in quarto files.
 
 -   **The other major difference that I have noticed is that Github Copilot in R does not work with Quarto files! I have messed around with it trying to fix it and it just does not make predictions when I am in a Quarto file. It works fine in a markdown file. Why do we use these Quarto things and do we have to use it? Can I do homework in R markdown with the same result? Is there a way to fix it so it will work with copilot?**
 
 -   **Finally, and related to this Quarto stuff, I still do not really understand the whole "projects" framework. I have followed the instructions and set up a project as instructed, but I do not really understand why we do it.**
 
-> good path management
+> Using R projects is good for path management so that when you are collaborating with people and would like to share your files, they can run the codes without specifying their own paths. 
 
-> clean workspace when switching between projects
+> Another advantage of using R project is that you get clean workspace when switching between projects.
+
 
 ### Customized Functions
 
@@ -124,12 +125,14 @@ new_plot_hist <- function(df, x, bins = 100){
 
 source my own custimzed function from local files
 ```{r}
-source("functions_752.R")
+# source("functions_752.R")
 ```
 
 ### Data Wranggling
 
 -   **How to use walk() and apply functions to all of a dataset instead of line by line**
+
+-   **At least in the application assignment, I was having a difficult time using the map() function. The solution may have been simple as I can parse what its supposed to do but I don't think Ive seen an example of it being used in the slides? (unless I missed it)**
 
 We typically don't use `map()` or `walk()` if we want to modify selected columns of the original dataframe. Instead, we use `mutate()` combined with `across()` to achieve it. Below is an example where we want all numeric columns to double.
 ```{r}
@@ -159,8 +162,6 @@ data |>
   walk(\(name) ggsave(paste0("plot_", name, ".png"), plot_hist(data, name)))
 ```
 
--   **At least in the application assignment, I was having a difficult time using the map() function. The solution may have been simple as I can parse what its supposed to do but I don't think Ive seen an example of it being used in the slides? (unless I missed it)**
-
 -   **If we could go over the set.seed() function a little more in detail? I googled it and just wanted to see if we could review it in layman's terms.**
 
 ```{r}
@@ -183,15 +184,11 @@ runif(30)
 
 -   **How can a specific missing value be assigned a particular value?**
 
-> We can handle missingness by removing that specific observation. This method is usually not recommended as we will lose quality data if we have values in other columns. It'll also introduce bias to our analysis if missingness is associated with factors influencing our desired outcome.
+> We can handle missingness by removing that specific observation in the *held-in data*. This method is usually not recommended as we will lose quality data if we have values in other columns. It'll also introduce bias to our analysis if missingness is associated with factors influencing our desired outcome. *YOU CANNOT DROP MISSING VALUES IN HELD OUT DATA.* There, you will have to impute (with imputation method and values determined from training data.)
 
 > One other approach to handle missing values is to impute missing values with our best guess (e.g., mean). We can do this imputation when building our recipes. Importantly, our imputation value should be based on information in the training data only to avoid data leakage.
 
-
-
-JJC: It is OK to consider dropping missing value observations from training set rather than imputing. You can compare that approach to imputation by considering these different model configurations and comparing with held out data.   You can NOT drop missing values in held out data.  You have to be able to make predictions for all held out cases.   There, you will have to impute (with imputation method and values determined from training data.)
-
-It is generally easier to just impute in training too. rather than drop cases
+> NOTE: You can compare different methods to handle missingness by considering it as a model configuration.
 
 
 ```{r}
@@ -215,9 +212,7 @@ It is generally easier to just impute in training too. rather than drop cases
 
 > If the variable is nominal (qualitative categories, no inherent order), we can do dummy coding, contrast coding, etc.
 
-> If the variable is ordinal (inherent order but not equidistant spacing), we can either do dummy coding, contrast coding, etc, or treat them as ordered levels.
-
-JJC, correct as above with added that for ordinal, you can choose between dummy versus step_ordinal (assigning ordered numbers) by treating these as different model configurations and comparing them using held-out (validation) data.
+> If the variable is ordinal (inherent order but not equidistant spacing), we can either do dummy coding, contrast coding, etc, or treat them as ordered levels. You can choose between dummy versus step_ordinal (assigning ordered numbers) by treating these as different model configurations and comparing them using held-out (validation) data.
 
 -   **Maybe fct_reorder? I used it in the application assignment but I low key don't really remember what it is.**
 
@@ -256,11 +251,22 @@ likert$likert |> as.numeric()
 ```{r}
 splits <- data |> 
   initial_split(prop = 3/4, strata = "sale_price", breaks = 4)
+
+splits |> analysis()
+splits |> assessment()
 ```
 
-JJC: with splits set up this way, you can extract train and test using `analysis()` and `assessment()`
+With splits set up this way, you can extract train and test using `analysis()` and `assessment()`.
+
 We will later use `initial_validation_split()` to create 3 resamples: training, validation, and test. We will extract those three resamples using `training()`, `validation()`, and `testing()`
 
+```{r}
+splits2 <- initial_validation_split(data) 
+
+splits2 |> training()
+splits2 |> validation()
+splits2 |> testing()
+```
 
 ### modeling EDA
 
@@ -274,7 +280,6 @@ We will later use `initial_validation_split()` to create 3 resamples: training, 
 
 -   **How can we reorder the levels of a categorical variable in bar plots or other plots with the categorical variable on the x-axis?**
 
-JJC:  dont forget about `fct_relevel()`.  That is probably the more appropriate way to do this versus setting up new factor
 ```{r}
 # original plot
 plot_bar(data, "utilities")
@@ -282,7 +287,7 @@ plot_bar(data, "utilities")
 # change the order of categories
 utility_levels <- c("NoSeWa", "NoSewr", "AllPub")
 plot_bar(
-  data |> mutate(utilities = factor(utilities, levels = utility_levels)),
+  data |> mutate(utilities = fct_relevel(utilities, utility_levels)),
   "utilities"
 )
 ```
@@ -309,9 +314,8 @@ data |>
 
 -   **Prepping and Baking a Recipe are little bit complicated. I think more hands-on practice with this function will be needed in the lab session.**
 
-> We use `prep()` on the training data and "bake" it to training and validation data.
-
-JJC: use always `prep()` with training/held-in data.   bake features for training using prepped recipe with `new_data = NULL`.  Bake features for held-out (val, test), by passing that dataset into `new_data`
-
+> We use `prep()` on the training/held-in data. We bake features for training using prepped recipe with `new_data = NULL`, and bake features for held-out (validation, test) by passing that dataset into `new_data`.
 
 -   **I was a bit confused in terms of the assignment/work flow--were we supposed to do the transformations during modeling EDA or does that come at a later stage? (i think I got caught up on the word 'modeling' being in the title)**
+
+> We do transformation when building recipes by using the step functions. 
