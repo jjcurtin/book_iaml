@@ -1,0 +1,266 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+# IAML Unit 4: Discussion
+
+
+## Anouncements
+
+- Quiz performance - 95%
+- Please meet with TA or me if you can't generate predictions from your models
+- Room 121 again in two weeks
+- And the winner is.....
+
+--------------------------------------------------------------------------------
+
+```{r}
+read_csv(here::here(path_data, "lunch_004.csv")) |> 
+  print_kbl()
+```
+
+--------------------------------------------------------------------------------
+
+## Probability, odds, and log-odds
+
+- DGP on probability
+- what is irreducible error for classification?
+- DGP on X1 - draw it with varying degrees of error  
+
+--------------------------------------------------------------------------------
+
+- DGP and error on two features
+
+
+![](figs/unit4_two_class_decision_boundry.png){height=4in}
+--------------------------------------------------------------------------------
+
+- Probability vs. odds vs. log-odds
+- How to interpret parameter estimates (effects of X)
+
+--------------------------------------------------------------------------------
+
+## Comparisons across algorithms
+
+Logistic regression models DGP condition probabilities using logistic function
+
+- Get parameter estimates for effects of X 
+- Makes strong assumptions shape of DGP - linear on log-odds(Y)
+- Yields linear decision boundary
+- Better for binary outcomes but can do more than two levels
+- Needs numeric features but can dummy code categorical variables (as with lm)
+- Problems when classes are fully separable (or even mostly separable)
+
+--------------------------------------------------------------------------------
+
+LDA uses Bayes theorem to estimate condition probability
+
+- LDA models the distributions of the Xs separately for each class
+- Then uses Bayes theorem to estimate $Pr(Y = k | X)$ for each k and assigns the  observation to the class with the highest probability
+
+$Pr(Y = k|X) = \frac{\pi_k * f_k(X)}{\sum_{l = 1}^{K} f_l(X)}$
+
+where
+
+- $\pi_k$ is the prior probability that an observation comes from class k (estimated from frequencies of k in training)
+- $f_k(X)$ is the density function of X for an observation from class k
+  -  $f_k(X)$ is large if there is a high probability that an observation in class k has that set of values for X and small if that probability is low
+  - $f_k(X)$ is difficult to estimate unless we make some simplifying assumptions
+  - X is multivariate normal
+  - Common covariance matrix ($\sum$) across K classesj
+  - With these assumptions, we can estimate $\pi_k$, $\mu_k$, and $\sigma^2$ from the training set and calculate $Pr(Y = k|X)$ for each k
+  
+--------------------------------------------------------------------------------
+
+- Parametric model but parameters not useful for interpretation of effects of X
+- Linear decision boundary  
+- Assumptions about multivariate normal X and common $\sum$
+- Dummy features may not work well given assumption?
+- May require smaller sample sizes to fit than logistic regression if assumptions met
+- Can natively handle more than two level for outcome  
+  
+-------------------------------------------------------------------------------- 
+  
+QDA relaxes one restrictive assumption of LDA
+  
+- Still required multivariate normal X
+- **But it allows each class to have its own $\sum$**
+- This makes it:
+  - More flexible
+  - Able to model non-linear decision boundaries including 2-way intearctions (see formula for discriminant in @ISL)
+  - how handle interactions by relaxing common $\sum$? 
+  - But requires substantial increase in parameter estimation (more potential to overfit)
+- Still problems with dummy features
+- Can natively handle more than 2 levels of outcome like LDA
+- Compare to LDA and Logisitic Regression on bias-variance trade off?
+
+RDA may be better than both LDA and QDA?  More on idea of blending after elastic net
+
+--------------------------------------------------------------------------------
+
+KNN works similar to regression
+
+- But now looks at percentage of observations for each class among nearest neighbours to estimate conditional probabilities
+- Doesn't make assumptions about Xs or $\sum$ for LDA and/or QDA
+- Doesn't not limited to linear decision boundaries like logistic and LDA
+- Very flexible - low bias but high variance?
+- K can be adjusted to impact bias-variance trade-off
+- KNN can handle more than two level outcomes natively
+
+--------------------------------------------------------------------------------
+
+## Categorical predictors
+
+- All algorithms so far require numeric features
+- Ordinal can be made numeric sometimes by just substituting ordered vector (i.e. 1, 2, 3, etc)
+- Nominal needs something more
+- Our go to method is Dummy features
+  - What is big problem with dummy features?
+  - Collapsing levels?
+  - Also issue of binary scores for LDA/QDA
+  
+- Target encoding example
+  - Country of origin for car example (but maybe think of many countries?)
+  - Why not data leakage?
+  - Problems with step_mutate()
+  - Can manually do it with our current resampling
+  - See [embed package](https://embed.tidymodels.org/)
+ 
+--------------------------------------------------------------------------------
+
+## Interactions in LDA and QDA
+
+- Simulate multivariate normal distribution for X (`x1` and `x2`) using MASS package
+- Separately for trn and val
+- NOTE: I first did this with uniform distributions on X and the models fit more poorly.  Why?
+```{r}
+set.seed(5433)
+means <- c(0, 0)
+sigma <- diag(2) * 100
+data_trn <- MASS::mvrnorm(n = 300, mu = means, Sigma = sigma) |>  
+    magrittr::set_colnames(str_c("x", 1:length(means))) |>  
+    as_tibble()
+
+data_val <- MASS::mvrnorm(n = 3000, mu = means, Sigma = sigma) |>  
+    magrittr::set_colnames(str_c("x", 1:length(means))) |>  
+    as_tibble()
+```
+
+--------------------------------------------------------------------------------
+
+- Write function for interactive DGP based on `x1` and `x2`
+- Will map this over rows of d
+- Can specify any values for b
+- b[4] will be interaction parameter estimate
+```{r}
+b <- c(0, 0, 0, .5)
+
+calc_p <- function(x, b){
+   exp(b[1] + b[2]*x$x1 + b[3]*x$x2 + b[4]*x$x1*x$x2) /
+     (1 + exp(b[1] + b[2]*x$x1 + b[3]*x$x2 + b[4]*x$x1*x$x2))
+}
+```
+
+--------------------------------------------------------------------------------
+
+- Add p and then observed classes to trn and val 
+
+```{r}
+data_trn <- data_trn |> 
+  mutate(p = calc_p(data_trn, b)) |> 
+  mutate(y = rbinom(nrow(data_trn), 1, p),
+         y = factor(y, levels = 0:1, labels = c("neg", "pos")))
+
+head(data_trn, 10)
+
+data_val <- data_val |> 
+  mutate(p = calc_p(data_val, b)) |> 
+  mutate(y = rbinom(nrow(data_val), 1, p),
+         y = factor(y, levels = 0:1, labels = c("neg", "pos")))
+```
+
+--------------------------------------------------------------------------------
+
+- Lets look at what an interactive DGP looks like for two features and a binary outcome
+- Parameter estimates set up a "cross-over" interaction
+```{r}
+data_val |> 
+  ggplot(mapping = aes(x = x1, y = x2, color = y)) +
+    geom_point(size = 2, alpha = .5)
+```
+
+--------------------------------------------------------------------------------
+
+- Fit models in trn 
+```{r}
+fit_lda <- 
+  discrim_linear() |> 
+  set_engine("MASS") |> 
+  fit(y ~ x1 + x2, data = data_trn)
+
+fit_lda_int <- 
+  discrim_linear() |> 
+  set_engine("MASS") |> 
+  fit(y ~ x1 + x2 + x1*x2, data = data_trn)
+
+fit_qda <- 
+  discrim_regularized(frac_common_cov = 0, frac_identity = 0) |> 
+  set_engine("klaR") |> 
+  fit(y ~ x1 + x2, data = data_trn)
+
+fit_qda_int <- 
+  discrim_regularized(frac_common_cov = 0, frac_identity = 0) |> 
+  set_engine("klaR") |> 
+  fit(y ~ x1 + x2 + x1*x2, data = data_trn)
+```
+
+--------------------------------------------------------------------------------
+
+- Additive LDA model decision boundary and performance in val
+```{r}
+data_val |> 
+  plot_decision_boundary(fit_lda, x_names = c("x1", "x2"), y_name = "y",
+                         n_points = 400)
+```
+
+--------------------------------------------------------------------------------
+
+-  Interactive LDA model decision boundary and performance in val
+```{r}
+data_val |> 
+  plot_decision_boundary(fit_lda_int, x_names = c("x1", "x2"), y_name = "y",
+                         n_points = 400) 
+```
+
+--------------------------------------------------------------------------------
+
+- Additive QDA model decision boundary
+```{r}
+data_val |> 
+  plot_decision_boundary(fit_qda, x_names = c("x1", "x2"), y_name = "y",
+                         n_points = 400)
+```
+
+- Interactive QDA model decision boundary
+
+--------------------------------------------------------------------------------
+
+```{r}
+data_val |> 
+  plot_decision_boundary(fit_qda_int, x_names = c("x1", "x2"), y_name = "y",
+                         n_points = 400) 
+```
+ 
+- Costs for QDA vs. LDA intearctive in this example and more generally with more features?
+- What if you were using RDA, which can model the full range of models between linear and quadratic?
+
+
+
+
+--------------------------------------------------------------------------------
+
+PCA
+
+- https://setosa.io/ev/principal-component-analysis/:w
+- https://www.cs.cmu.edu/~elaw/papers/pca.pdf
