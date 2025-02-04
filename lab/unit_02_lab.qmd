@@ -65,9 +65,17 @@ data |>
 
 -   **what is the deal with these Quarto files? They seem just like R markdown, but slightly different, with buttons to "render" instead of "knit"**
 
+> quarto: next generation of rmd; can be used to write a book, publish slides -> more comprehensive
+> can use another language in quarto
+> rmd a narrow publishing system
+
 -   **The other major difference that I have noticed is that Github Copilot in R does not work with Quarto files! I have messed around with it trying to fix it and it just does not make predictions when I am in a Quarto file. It works fine in a markdown file. Why do we use these Quarto things and do we have to use it? Can I do homework in R markdown with the same result? Is there a way to fix it so it will work with copilot?**
 
 -   **Finally, and related to this Quarto stuff, I still do not really understand the whole "projects" framework. I have followed the instructions and set up a project as instructed, but I do not really understand why we do it.**
+
+> good path management
+
+> clean workspace when switching between projects
 
 ### Customized Functions
 
@@ -179,6 +187,13 @@ runif(30)
 
 > One other approach to handle missing values is to impute missing values with our best guess (e.g., mean). We can do this imputation when building our recipes. Importantly, our imputation value should be based on information in the training data only to avoid data leakage.
 
+
+
+JJC: It is OK to consider dropping missing value observations from training set rather than imputing. You can compare that approach to imputation by considering these different model configurations and comparing with held out data.   You can NOT drop missing values in held out data.  You have to be able to make predictions for all held out cases.   There, you will have to impute (with imputation method and values determined from training data.)
+
+It is generally easier to just impute in training too. rather than drop cases
+
+
 ```{r}
 # imputation based on the variable
 ?step_impute_mean
@@ -201,6 +216,8 @@ runif(30)
 > If the variable is nominal (qualitative categories, no inherent order), we can do dummy coding, contrast coding, etc.
 
 > If the variable is ordinal (inherent order but not equidistant spacing), we can either do dummy coding, contrast coding, etc, or treat them as ordered levels.
+
+JJC, correct as above with added that for ordinal, you can choose between dummy versus step_ordinal (assigning ordered numbers) by treating these as different model configurations and comparing them using held-out (validation) data.
 
 -   **Maybe fct_reorder? I used it in the application assignment but I low key don't really remember what it is.**
 
@@ -241,6 +258,10 @@ splits <- data |>
   initial_split(prop = 3/4, strata = "sale_price", breaks = 4)
 ```
 
+JJC: with splits set up this way, you can extract train and test using `analysis()` and `assessment()`
+We will later use `initial_validation_split()` to create 3 resamples: training, validation, and test. We will extract those three resamples using `training()`, `validation()`, and `testing()`
+
+
 ### modeling EDA
 
 -   **How to define which variable may have relationship with DV? Is there any requirements/techniques for that?**
@@ -253,6 +274,7 @@ splits <- data |>
 
 -   **How can we reorder the levels of a categorical variable in bar plots or other plots with the categorical variable on the x-axis?**
 
+JJC:  dont forget about `fct_relevel()`.  That is probably the more appropriate way to do this versus setting up new factor
 ```{r}
 # original plot
 plot_bar(data, "utilities")
@@ -288,5 +310,8 @@ data |>
 -   **Prepping and Baking a Recipe are little bit complicated. I think more hands-on practice with this function will be needed in the lab session.**
 
 > We use `prep()` on the training data and "bake" it to training and validation data.
+
+JJC: use always `prep()` with training/held-in data.   bake features for training using prepped recipe with `new_data = NULL`.  Bake features for held-out (val, test), by passing that dataset into `new_data`
+
 
 -   **I was a bit confused in terms of the assignment/work flow--were we supposed to do the transformations during modeling EDA or does that come at a later stage? (i think I got caught up on the word 'modeling' being in the title)**
