@@ -7,26 +7,14 @@ editor_options:
 
 ## Announcements
 
-- Room change for two days
-  - Thursday, 2/15
-  - Thursday, 2/29
-  - Room 121
-  - If we like it......
-
 - Feedback - THANKS!
   - consistent feedback will be implemented (as best I can!)
-  - captions
-  - vocabulary and concepts - new appendix
-  - use of web "book" - better thought of as lecture slides
+  - vocabulary and concepts - developing appendix
   - you can clone book_iaml.   Render to slides with your notes, render to pdf
-  - Use of questions for dicussion
-    - Didn't work to read directly
+  - Tuning lab and discussion 
     - Rank order based on frequency and importance
     - Put some in slack
     - Can't do all.  Ask in slack, ask in office hours or after discussion/lab
-
-- Reprex
-  - We need you to try to make reprex for help on application assignments
   
 - Homework is basically same for unit 4
   - New dataset - titanic
@@ -38,23 +26,54 @@ editor_options:
 -----
 
 ```{r}
-read_csv(here::here(path_data, "lunch_003.csv")) |> 
+library(tidyverse)
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/print_kbl.R?raw=true",
+                     sha1 = "021a7f7cddc1f0ffcd0613e57b94c81246b84f7b")
+read_csv(here::here("./application_assignments/competitions/2025_unit_03.csv")) |>
+  mutate(rmse_test = round(rmse_test)) |> 
   print_kbl()
 ```
 
 -----
 
-## Sources of error
+## Bias and Variance of estimates
 
-- What are two broad sources of error?
-- What are two broad sources of reducible error.  Describe what they are and factors that affect them?
-- Why do we need independent validation data to select the best model configuration? 
-- Why do we need test data if we used validation data to select among many model configurations
-- What is RMSE?  Connect it to metric you already know?  How is it being used in lm (two ways)?; in knn (one way)?
-- How does bias and variance manifest when you look at your performance metric (RMSE) in training and validation sets?
-- Will the addition of new features to a (lm?) model always reduce RMSE in train? in validation?  Connect to concepts of bias and variance
+Bias and variances- general
+
+- property of any estimate
+- for now, we will focus on model (and its $\hat{Y}$)
+- Describe each
+- Scale example for single measurement
+
+Bias bias and variance - glm vs knn
+
+Bias and variance - k in knn?
+
+Impact of correlated features>
+
+- in GLM
+- in KNN
+
+## Held-in and held-out data
+
+Connect to training, validation, and test sets
+
+Held in and held out data 
+
+- fit models vs calculate performance metric
+
+Why need held-out
+
+- Example: Selecting best k - train vs validation data
 
 -----
+
+## Performance metrics
+
+- SSE, MSE, RMSE, MAE, R2
+- How else are SSE class of metrics used in glm?
+
+--------------------------------------------------------------------------------
 
 ## KNN 
 
@@ -73,6 +92,7 @@ read_csv(here::here(path_data, "lunch_003.csv")) |>
 - Fit models for lm and knn with and without interaction
 - Took some shortcuts (no recipe, predict back into train)
 ```{r}
+library(tidymodels)
 n <- 200
 set.seed(5433)
 
@@ -170,18 +190,40 @@ d |>
 
 -----
 
+## GLM assumptions
+
+:::{.callout-important}
+# What are GLM assumptions and what happens if violated
+:::
+
+::: {.fragment .uwred}
+- Measurement error
+
+- Independent
+
+- Normal
+
+- Constant
+
+- Linear
+
+:::
+
+
 ## Normalizing transformations - Yeo Johnson
   - when needed for lm?
   - when needed for knn?
 
 -----
 
-## Dummy coding
+## Categorical coding
 
-- Why do we do it?
+- Why do we do it? (Not need for every  algorithm!)
 - Describe the values assigned to the dummy coded features
 - Why these values? In other words, how can you interpret the effect of a dummy coded feature?
+- "Dummy variable trap"
 - How is it different from one-hot coding.  When to use or not use one-hot coding? 
+- Target encoding
 
 -----
 
@@ -233,6 +275,18 @@ d |>
   - back to raw predictions
 
 -----
+
+## Sources of error
+
+- What are two broad sources of error?
+- What are two broad sources of reducible error.  Describe what they are and factors that affect them?
+- Why do we need independent validation data to select the best model configuration? 
+- Why do we need test data if we used validation data to select among many model configurations
+- What is RMSE?  Connect it to metric you already know?  How is it being used in lm (two ways)?; in knn (one way)?
+- How does bias and variance manifest when you look at your performance metric (RMSE) in training and validation sets?
+- Will the addition of new features to a (lm?) model always reduce RMSE in train? in validation?  Connect to concepts of bias and variance
+
+--------------------------------------------------------------------------------
 
 ## "In GLM, why correlation/collinearity among predictors will cause larger variance? Is it because of overfitting?"
 
