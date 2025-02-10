@@ -68,62 +68,58 @@ feat_test <- rec_prep |>
 feat_test |> skim_all()
 ```
 
-We solve this problem but just making sure this level was listed when we created the factor in training (e.g., use this mutate earlier when classing `x` in `data_trn`: `mutate(x = factor(x, levels = c("a", "b", "c", "foo")))`.  
-
-Or we can add the level after the fact, when we discover the problem (as below).
+We handle this problem of potential new levels in held-out data by inserting `step_novel()` prior to `step_dummy()` in our recipe.
+This assigns all potential novel (unseen in training) levels to a new category called `new` by default
 
 ```{r}
-data_trn1 <- data_trn |> 
-  mutate(x = factor(x, levels = c("a", "b", "c", "foo")))
+rec_novel <- recipe(y ~ x, data = data_trn) |>  
+  step_novel(x) |> 
+  step_dummy(x)
 ```
 
-Now prep recipe with this updated training set that includes `foo` level
+When we now prep this recipe using training data that does not contain `foo` (our novel level we will find in test), everything is fine
 ```{r}
-rec_prep1 <- rec |> 
-  prep(data_trn1)
+rec_novel_prep <- rec_novel |> 
+  prep(data_trn)
 ```
 
-Features for training as before
-
-- We now have a feature for this new level
-- It is set to 0 for all observations (because there are no observations with a value of `foo` in training set)
+When we bake features for training data, we see what `step_novel()` did.  It added a new level and therefore a new feature to code the contrast of that level with the reference level.  However, given that this new level was not present in our training data, all observations are assigned a zero for this new feature.
 ```{r}
-feat_trn1 <- rec_prep1 |> 
+feat_trn_novel <- rec_novel_prep |> 
   bake(NULL)
 
-feat_trn1 |> skim_all()
+feat_trn_novel |> bind_cols(data_trn |> select(x)) |> print()
 ```
 
-Now there is no problem when we find this value for an observation in the test set.
+But now when we bake the test data, this new feature is set to 1 for observations associated with this new level `foo`
 ```{r}
-feat_test1 <- rec_prep1 |> 
+feat_test_novel <- rec_novel_prep |> 
   bake(data_test)
 
-feat_test1 |> skim_all()
+feat_test_novel |> bind_cols(data_test |> select(x)) |> print()
 ```
 
-All is good.  BUT, there are still some complexities when we fit this model in train and predict into test.  In training, the `x_foo` feature is a constant (all 0) so this will present some issues for some statistical algorithms.  Lets see what happens when we fit a linear model and use it to  predict into test.
-
+All looks normal when we fit this model to our training features
 ```{r}
-fit1 <-
+fit_novel <-
   linear_reg() %>% 
   set_engine("lm") %>% 
-  fit(y ~ ., data = feat_trn1)
+  fit(y ~ ., data = feat_trn_novel)
 ```
 
-If we look at the parameter estimates, we see that the algorithm was unable to estimate a parameter for `x_foo` because it was a constant in train
+However, if we look at the parameter estimates, we see that the algorithm was unable to estimate a parameter for `x_foo` because it was a constant in train.  Of course, this makes sense because there were no observations of `foo` in training so the model coouldnt learn how that new level differed from the reference level.
 
 ```{r}
-fit1 %>% tidy()
+fit_novel %>% tidy()
 ```
 
-This will generate a warning (*"prediction from a rank-deficient fit has doubtful cases"*) when you use this model to make predictions for values it didnt see in the training set.
+
+This model will now generate a warning (*"prediction from a rank-deficient fit has doubtful cases"*) when you use this model to make predictions for values it didnt see in the training set.
 
 - The consequence is that the model will predict a `y` value associated with the reference level (coded 0 for all  other dummy features) for all `foo` observations.  This is probably the best we can do for these new (previously unseen) values for x.
-- also note that the column name for predictions, which is usually called `.pred`, is now called `.pred_res`.  You will need to accomodate this in your code as well.  Just rename it.
 ```{r}
-predict(fit1, feat_test1) |>  
-  bind_cols(feat_test1)
+predict(fit_novel, feat_test_novel) |>  
+  bind_cols(feat_test_novel)
 ```
 
-This is our preferred solution when new/previously unseen values exist in held out data.  A comparable solution is offered as a recipe step.  See `step_novel()`
+You do not need to use `step_novel()` always.  Just put it into a recipe if you find that there are novel levels in your held-out data (and re-prep the recipe after you add that step of course~)
