@@ -131,4 +131,80 @@ I do wanna answer all the questions for you guys. Check out the above code if th
 - Some further skills of feature engineering and suggestions about appropriate time to engineer based on characteristics of features and research conditions would be helpful.
     - Uh, this depends. But generally speaking, it does take a long time to clean data and handcraft it for new features generated based on the generic ones. And if your data is dynamic like in industrial settings, it would be even more flexible.
     
+## Questions/Supplements from the lab discussion
+
+### Three-way interaction (See lm key rep_3)
+
+- Why we don't use 3-way interaction in recipe steps?
+    - Actually we could add them in, but the `step_interact` will only include the 3-way term but not all the relevant 2-way terms
+    - If we would like to consider a 3-way interaction from a canonical LM view, we may also consider the 2-way terms
+    
+### How do we choose between YeoJohnson/Power and Log for transformation
+
+- First, we usually don't apply YeoJohnson to the outcome variable, because it wouldn't return us a specific value, so we cannot convert the predict outcome back for comparison
+
+- Second, (for positive values) log is compressing a variable, and power (with an exponent/power number>1) is enlarging a variable or (with an exponent/power number<1) is compressing a variable (also pay attention to the range of the variable, whether it is crossing 1)
+    - Depends on the value of the exponent the power transformation plays different role. Only when the power number is less than 1 it is doing more similar job as log transformation. How much we want to compress the value? The Box-Cox method could help determine the optimal value for power transformation. Will we prefer log than power? It will be relevant with the actual shape of the relationship curve. Sometimes (maybe in biology or other field), the relationship has some theoretical explanation/hypothesis, so researcher could be more intended to use a transformation accordingly. But for social sciences, the relationship is more possibly complex and hard to determine. So, the application of transformation will more depends on the real data you have.
+    -  For the sake of explanation, log transformation will be easier most of the time, be cause we can interpret in terms of relative magnitude. For example, if income increases from \$10,000 to \$20,000, the log transformation shows a change of log(20,000) - log(10,000) = 0.69, which can be interpreted as approximately a 69% relative increase, whereas a power transformation like x^0.5 (square root) would change from √10,000 = 100 to √20,000 ≈ 141, which lacks a straightforward percentage interpretation.
+
+- For some data ranging from a very small number to a very large number, across sacles (especially ^10 scales), log transformation could help boil down the range of the values to a shared similar scale (e.g. 10, 10^3, 10^6 to 1, 3, 6).
+
+    
+```{r}
+# Load required library
+library(ggplot2)
+library(tidyverse)
+
+# Generate a range of values
+x_vals <- seq(0, 3, length.out = 20)  
+
+# Apply transformations
+df <- data.frame(
+  x = x_vals,
+  x_ori = x_vals,
+  log_x = ifelse(x_vals > 0, log(x_vals), sign(x_vals) * log(abs(x_vals) + 1)),  # Handle negatives
+  sqrt_x = ifelse(x_vals >= 0, sqrt(x_vals), NaN),  # x^(1/2)
+  square_x = x_vals^2, # x^2
+  reciprocal_x = ifelse(x_vals != 0, 1 / x_vals, NaN)  # x^(-1)
+)
+
+# Convert to long format for plotting
+df_long <- df |> 
+  pivot_longer(-x, names_to = "transformation", values_to = "value")
+
+# Plot transformations
+ggplot(df_long, aes(x = x, y = value, color = transformation)) +
+  geom_line(size = 0.5) +
+  theme_minimal() +
+  labs(title = "Log and Power Transformations",
+       x = "Original Values (x)", 
+       y = "Transformed Values",
+       color = "Transformation") +
+  theme(legend.position = "bottom") 
+
+```
+
+### When to transform the predictor and when to transform the outcome
+
+When the skewed relationship is only seen in the EDA for a single feature, it will be preferred to transform the feature. But if the relationship seems to be skewed for all the independent-dependent plot or even after the transformation of the feature there is still skew, a transformation toward the outcome variable might worth consideration.
+
+### Some `step_`s
+
+The usage of the recipe varies across people, so I'm sorry for the unclear walking through of the steps. In case it's needed, here added some explanation of the steps appear in the key but not used too much in the scripts from you guys.
+
+- `step_other`: automatically collapse some levels of a predictor by the algorithm, and we could set a threshold to define the collapsing.
+
+- `step_nzv`: remove variables that are highly sparse and unbalanced (having little variance across rows or little diversity - which means it's 'almost the same' for all the items)
+
+- `step_mutate_at`: specifying columns/features to apply a function
+
+### Interaction (mis-usage in the original key!) in KNN
+
+Because KNN naturally captures non-linear relationships, it's not contributive to add interaction terms in a KNN based recipe. So, we can still add them in the recipe, but it will barely benefit the results.
+
+### Regularization/Penalty
+
+It's a technique control overfitting. And we will step deeper in future units.
+
+
     
