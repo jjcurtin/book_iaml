@@ -12,35 +12,27 @@ editor_options:
 - And the winner is.....
 
 --------------------------------------------------------------------------------
-
 ```{r}
-read_csv(here::here(path_data, "lunch_004.csv")) |> 
+library(tidyverse)
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/print_kbl.R?raw=true",
+                     sha1 = "021a7f7cddc1f0ffcd0613e57b94c81246b84f7b")
+read_csv(here::here("./application_assignments/competitions/2025_unit_04.csv"),
+         show_col_types = FALSE) |>
+  mutate(acc_test = round(acc_test, 3)) |> 
   print_kbl()
 ```
 
 --------------------------------------------------------------------------------
 
+Kaggle Competitions
+
+- [Titanic](https://www.kaggle.com/competitions/titanic/overview)
+- [Ames](https://www.kaggle.com/competitions/i2ml-ames/overview)
+- [Other competitions](https://www.kaggle.com/competitions?sortOption=numTeams)
+
+--------------------------------------------------------------------------------
+
 Quiz review!
-
---------------------------------------------------------------------------------
-
-## Probability, odds, and log-odds
-
-- DGP on probability
-- what is irreducible error for classification?
-- DGP on X1 - draw it with varying degrees of error  
-
---------------------------------------------------------------------------------
-
-- DGP and error on two features
-
-
-![](figs/unit4_two_class_decision_boundry.png){height=4in}
-
---------------------------------------------------------------------------------
-
-- Probability vs. odds vs. log-odds
-- How to interpret parameter estimates (effects of X)
 
 --------------------------------------------------------------------------------
 
@@ -49,9 +41,10 @@ Quiz review!
 Logistic regression models DGP condition probabilities using logistic function
 
 - Get parameter estimates for effects of X 
-- Makes strong assumptions shape of DGP - linear on log-odds(Y)
+- Makes strong assumptions about shape of DGP - linear on log-odds(Y)
 - Yields linear decision boundary
-- Better for binary outcomes but can do more than two levels
+- Better for binary outcomes but can do more than two levels (with some effort)
+  - (**Briefly describe: multiple one vs other classes models approach**)
 - Needs numeric features but can dummy code categorical variables (as with lm)
 - Problems when classes are fully separable (or even mostly separable)
 
@@ -79,7 +72,7 @@ where
 - Parametric model but parameters not useful for interpretation of effects of X
 - Linear decision boundary  
 - Assumptions about multivariate normal X and common $\sum$
-- Dummy features may not work well given assumption?
+- Dummy features may not work well given assumption about normally distributed?
 - May require smaller sample sizes to fit than logistic regression if assumptions met
 - Can natively handle more than two level for outcome  
   
@@ -91,12 +84,12 @@ QDA relaxes one restrictive assumption of LDA
 - **But it allows each class to have its own $\sum$**
 - This makes it:
   - More flexible
-  - Able to model non-linear decision boundaries including 2-way intearctions (see formula for discriminant in @ISL)
-  - how handle interactions by relaxing common $\sum$? 
+  - Able to model non-linear decision boundaries including 2-way interactions (see formula for discriminant in @ISL)
+  - How handle interactions by relaxing common $\sum$? 
   - But requires substantial increase in parameter estimation (more potential to overfit)
-- Still problems with dummy features
+- Still problems with dummy features (not normal; product terms?)
 - Can natively handle more than 2 levels of outcome like LDA
-- Compare to LDA and Logisitic Regression on bias-variance trade off?
+- Compare to LDA and Logistic Regression on bias-variance trade off?
 
 RDA may be better than both LDA and QDA?  More on idea of blending after elastic net
 
@@ -104,32 +97,44 @@ RDA may be better than both LDA and QDA?  More on idea of blending after elastic
 
 KNN works similar to regression
 
-- But now looks at percentage of observations for each class among nearest neighbours to estimate conditional probabilities
+- But now looks at percentage of observations for each class among nearest neighbors to estimate conditional probabilities
 - Doesn't make assumptions about Xs or $\sum$ for LDA and/or QDA
-- Doesn't not limited to linear decision boundaries like logistic and LDA
+- Not limited to linear decision boundaries like logistic and LDA
 - Very flexible - low bias but high variance?
 - K can be adjusted to impact bias-variance trade-off
 - KNN can handle more than two level outcomes natively
+- KNN can be computationally cost with big N (and many X)
+  - Can down-sample training data to reduce this problem
 
 --------------------------------------------------------------------------------
 
-## Categorical predictors
+Summary
 
-- All algorithms so far require numeric features
-- Ordinal can be made numeric sometimes by just substituting ordered vector (i.e. 1, 2, 3, etc)
-- Nominal needs something more
-- Our go to method is dummy features
-  - What is big problem with dummy features?
-  - Collapsing levels?
-  - Also issue of binary scores for LDA/QDA
+- Both logistic and LDA are linear functions of X and therefore produce linear decision boundaries
+
+- LDA makes additional assumptions about X (multivariate normal and common $\sum$) beyond logistic regression.  Relative performance is based on the quality of this assumption
+
+- QDA relaxes the LDA assumption about common $\sum$ (and RDA can relax it partially)
+  - This also allows for nonlinear decision boundaries including 2-way interactions among features
+  - QDA is therefore more flexible, which means possibly less bias but more potential for overfitting
+
+- Both QDA and LDA assume multivariate normal X so *may* not accommodate categorical predictors very well.  Logistic and KNN do accommodate categorical predictors
+
+- KNN is non-parametric and therefore the most flexible
+  - Can also handle interactions and non-linear effects natively (with feature engineering)
+  - Increased overfitting, decreased bias?
+  - Not very interpretable.  But LDA/QDA, although parametric, aren't as interpretable as logistic regression
+
+- Logistic regression fails when classes are perfectly separated (but does that ever happen?) and is less stable when classes are well separated
+
+- LDA, KNN, and QDA naturally accommodate more than two classes  
+  - Logistic requires additional tweak
   
-- Target encoding example
-  - Country of origin for car example (but maybe think of many countries?)
-  - Why not data leakage?
-  - Problems with step_mutate()
-  - Can manually do it with our current resampling
-  - See [embed package](https://embed.tidymodels.org/)
- 
+- Sample size issues
+  - Logistic regression requires relatively large sample sizes.  
+  - LDA may perform better than logistic regression with smaller sample sizes if assumptions are met (**QDA?**)
+  - KNN can be computationally very costly with large sample sizes (and large number of X) but could always downsample training set.
+
 --------------------------------------------------------------------------------
 
 ## Interactions in LDA and QDA
@@ -138,6 +143,8 @@ KNN works similar to regression
 - Separately for trn and val
 - NOTE: I first did this with uniform distributions on X and the models fit more poorly.  Why?
 ```{r}
+library(tidymodels)
+library(discrim, exclude = "smoothness")
 set.seed(5433)
 means <- c(0, 0)
 sigma <- diag(2) * 100
@@ -149,7 +156,7 @@ data_val <- MASS::mvrnorm(n = 3000, mu = means, Sigma = sigma) |>
     magrittr::set_colnames(str_c("x", 1:length(means))) |>  
     as_tibble()
 ```
-
+ 
 --------------------------------------------------------------------------------
 
 - Write function for interactive DGP based on `x1` and `x2`
@@ -221,6 +228,37 @@ fit_qda_int <-
 --------------------------------------------------------------------------------
 
 - Additive LDA model decision boundary and performance in val
+
+```{r}
+#| include: false
+
+plot_decision_boundary <- function(data, model, x_names, y_name, n_points = 100) {
+  
+  preds <- crossing(X1 = seq(min(data[[x_names[1]]]), 
+                                 max(data[[x_names[1]]]), 
+                                 length = n_points),
+                   X2 = seq(min(data[[x_names[2]]]), 
+                                 max(data[[x_names[2]]]), 
+                                 length = n_points))
+  names(preds) <- x_names
+  preds[[y_name]] <- predict(model, preds)$.pred_class
+  preds[[y_name]] <- as.numeric(preds[[y_name]])-1
+  
+  ggplot(data = data, 
+         aes(x = .data[[x_names[1]]], 
+             y = .data[[x_names[2]]], 
+             color = .data[[y_name]])) +
+    geom_point(size = 2, alpha = .5) +
+    geom_contour(data = preds, 
+                 aes(x = .data[[x_names[1]]], 
+                     y = .data[[x_names[2]]], 
+                     z = .data[[y_name]]), 
+                 color = "black", breaks = .5, linewidth = 2) +
+    labs(x = x_names[1], y = x_names[2], color = y_name) 
+}
+```
+
+
 ```{r}
 data_val |> 
   plot_decision_boundary(fit_lda, x_names = c("x1", "x2"), y_name = "y",
@@ -257,6 +295,69 @@ data_val |>
  
 - Costs for QDA vs. LDA interactive in this example and more generally with more features?
 - What if you were using RDA, which can model the full range of models between linear and quadratic?
+
+--------------------------------------------------------------------------------
+
+## Categorical predictors
+
+- All algorithms so far require numeric features
+- Ordinal can be made numeric sometimes by just substituting ordered vector (i.e. 1, 2, 3, etc)
+- Nominal needs something more
+- Our go to method is dummy features
+  - What is big problem with dummy features?
+  - Collapsing levels?
+  - Difference between dummy coding and one-hot encoding
+  - What is "dummy variable trap?" with one-hot
+  - Issue of binary scores for LDA/QDA
+  
+- Target encoding example
+  - Country of origin for car example (but maybe think of many countries?)
+  - Why not data leakage?
+  - Problems with step_mutate()
+  - Can manually do it with our current resampling
+  - See `step_lencode_*()` in [embed package](https://embed.tidymodels.org/)
+  
+--------------------------------------------------------------------------------
+
+## DGP and Errors
+
+- DGP on probability
+- what is irreducible error for classification?
+- DGP on X1 - draw it with varying degrees of error  
+
+--------------------------------------------------------------------------------
+
+- DGP and error on two features
+
+![](figs/unit4_two_class_decision_boundry.png){height=4in}
+
+--------------------------------------------------------------------------------
+
+## Bayes Classifier
+ 
+The previous figure below displays simulated data for a classification problem for K = 2 classes as a function of `X1` and `X2`
+
+The Bayes classifier assigns each observation its most likely class given its conditional probabilities for the values for `X1` and `X2`
+
+- $Pr(Y = k | X = x_0) for\:k = 1:K$
+- For K = 2, this means assigning to the class with Pr > .50
+- This decision boundary for the two class problem is displayed in the figure
+
+--------------------------------------------------------------------------------
+
+The Bayes classifier provides the minimum error rate for test data
+
+- Error rate for any $x_0$ will be $1 - max (Pr( Y = k | X = x_0))$
+- Overall error rate will be the average of this across all possible X
+- This is the irreducible error for classification problems
+- This is a theoretical model b/c (except for simulated data), we don't know the conditional probabilities based on X
+- Many classification models try to estimate these conditionals
+
+
+--------------------------------------------------------------------------------
+
+- Probability vs. odds vs. log-odds
+- How to interpret parameter estimates (effects of X)
 
 --------------------------------------------------------------------------------
 
