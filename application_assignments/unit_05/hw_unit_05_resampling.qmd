@@ -1,0 +1,323 @@
+---
+title: "Homework Unit 5: Resampling"
+author: "Your name here"
+date: "`r lubridate::today()`"
+format: 
+  html: 
+    embed-resources: true
+    toc: true 
+    toc_depth: 4
+editor_options: 
+  chunk_output_type: console
+---   
+
+## Introduction
+
+To begin, download the following from the course web book (Unit 5):
+
+- `hw_unit_05_resampling.qmd` (notebook for this assignment)
+
+- `smoking_ema.csv` (data for this assignment)
+
+- `data_dictionary.csv` (a data dictionary for the `smoking_ema.csv` dataset)
+
+The data for this week's assignment contains self-report ecological momentary assessment (EMA) data from a cigarette smoking cessation attempt study. These are real (de-identified) data from our laboratory! We've tried to structure the assignment so that you don't really need to understand the data, but looking quickly at the data dictionary may be helpful. Briefly, the outcome variable is `cigs` (whether a cigarette has been smoked since previous report). The `cigs` variable comes from the report *following* the report from which all other data come. In other words, all predictor variables come from time 1, and the outcome variable (`cigs`) comes from time 2. Predictor variables include things like current craving, several measures of affect, the intensity of any stressful events, and the random treatment assignment (active "nrt" treatment, or "placebo").     
+
+The data are already cleaned, and you don't need to do any modeling EDA. Of course you **normally** would do modeling EDA before fitting any models, but we're trying to keep the assignment from getting too long!      
+
+In this assignment, you will practice selecting among model configurations using resampling methods. This includes training models with 2 different feature sets (specified in your recipe) and tuning hyperparameters (`k` in KNN). As you'll see when you load the data file, there are a lot of observations! This fact combined with the more complex resampling procedures you'll be using in this assignment means that **fitting models may take a little longer**. We've kept the active coding component of the assignment to a reasonable length, but the run time may be a little longer, so please try to plan for this!    
+
+Let's get started!
+
+----- 
+
+## Setup
+
+### Handle conflicts
+```{r}
+
+```
+
+### Load required packages 
+```{r}
+
+```
+
+### Source function scripts (John's or your own)
+```{r}
+
+```
+
+### Specify other global settings
+If you are going to use `cache_rds(), you might include `rerun_setting <- FALSE` in this chunk
+```{r}
+
+```
+
+### Paths
+```{r}
+path_data <- 
+```
+
+### Read in data
+
+Read in the `smoking_ema.csv` data file   
+Use `here` and a relative path for your data.  Make sure your iaml project is open.
+```{r}
+data <- 
+```
+
+## Part 1: Selecting among model configurations with k-fold cross-validation
+
+In this portion of the assignment, you will be using k-fold cross-validation to select among two different model configurations (Feature set 1 and Feature set 2). These model configurations will differ only on feature set (no hyperparameter tuning yet!). They will also both use LM logistic regression as the statistical algorithm. At this point, you will ignore the fact that there are repeated observations, grouped by subid until we tell you to address that.
+
+### Split data
+
+Split your data into 10 folds (`k = 10`; `repeats = 1`) stratifying on the outcome (`cigs`)
+```{r}
+set.seed(01131997)
+splits_kfold <- 
+```
+
+### Feature Set 1
+
+Build a recipe with the following specifications: 
+
+- Use `cigs` as the outcome variable regressed on `craving`.  
+- Set up the outcome as a factor with the positive class ("yes") as the second level.
+- Use craving as a predictor by simply transforming this ordinal variable to numeric based on the order of its scores.
+
+```{r}
+rec_kfold_1 <- 
+```
+
+Fit the model with k-fold cross-validation. Use logistic regression as your statistical algorithm, `rec_kfold_1` as your recipe, and `accuracy` as your metric.
+```{r}
+fits_kfold_1 <- 
+```
+
+Examine performance estimates. Use the `collect_metrics()` function to make a table of the held-out performance estimates from the 10 folds
+```{r}
+metrics_kfold_1 <- 
+```
+
+Plot a histogram of the performance estimates
+```{r}
+
+```
+
+Print the average performance over folds with the `summarize = TRUE` argument.
+```{r}
+
+```
+
+### Feature Set 2
+
+Build a second recipe with the following specifications:   
+
+- Use `cigs` as the outcome variable regressed on all variables.  
+- Set up the outcome as a factor with the positive class ("yes") as the second level.
+- Set up other variables as factors where needed.
+- Apply dummy coding.
+- Create an interaction between `stressful_event` and `lag`.
+- Remove the `subid` variable with `step_rm()`
+
+```{r}
+rec_kfold_2 <- 
+```
+
+Fit the model with k-fold cross-validation. Use logistic regression as your statistical algorithm, `rec_kfold_2` as your recipe, and `accuracy` as your metric.
+```{r}
+fits_kfold_2 <- 
+```
+
+Examine performance estimates. Use the `collect_metrics()` function to make a table of the held-out performance estimates.
+```{r}
+metrics_kfold_2 <- 
+```
+
+Plot a histogram of the performance estimates.
+```{r}
+
+```
+
+Print the average performance over folds with the `summarize = TRUE` argument.
+```{r}
+
+```
+
+### Select the best model configuration
+
+Look back at your two average performance estimates (one from each feature set). Which model configuration would you select? Why? Type your response between the asterisks below.     
+
+*Type your response here*
+
+
+
+## Part 2: Tuning hyperparameters with bootstrap resampling
+
+Now we'll use bootstrapping to tune a hyperparameter (`k`) in KNN models. This means that you'll consider multiple values of `k` in a more principled way. You will now be training many more model configurations (differing by feature set and hyperparameter value). You will pass in several hyperparameters for each of the feature set configurations we defined above. You will then use your resampled performance estimates to select the best model configuration (the combination of feature set and hyperparameter value that produces the best performance estimate).
+
+### Split data
+
+Split your data using bootstrap. Stratify on `cigs` and use 100 bootstraps. Don't forget to set a seed!
+```{r}
+set.seed()
+splits_boot <- 
+```
+
+### Set up hyperparameter grid
+
+Create a tibble with all values of the hyperparameter (`k`) you will consider. Include at least 25 values of `k` - you decide which values!
+```{r}
+hyper_grid <- 
+```
+
+### Feature Set 1
+
+Build a recipe with the following specifications: 
+
+- Use `cigs` as the outcome variable regressed on `craving`.  
+- Set up the outcome as a factor with the positive class ("yes") as the second level.
+- Use the same numeric transformation of craving as before
+
+
+
+```{r}
+rec_boot_1 <- 
+```
+
+Tune the model with bootstrapping for cross-validation. Use KNN classification as your statistical algorithm, `rec_boot_1` as your recipe, `hyper_grid` as your tuning grid, and `accuracy` as your metric.
+```{r}
+tune_boot_1 <- 
+```
+
+Examine performance estimates across the OOB held-out sets. Print the average performance for each configuration with the `collect_metrics()` function and the `summarize = TRUE` argument. Remember that you will now see one estimate per hyperparameter value, averaged across bootstraps.
+```{r }
+
+```
+
+Plot the average performance by hyperparameter value. You can use `plot_hyperparameters()` from `fun_ml.R` or your own code.
+```{r}
+
+```
+
+Have you considered a wide enough range of `k` values? How do you know? Type your response between the asterisks. If you didn't use a wide enough range, try again with a wider range
+
+*Type your response here*
+
+
+Print the performance of your best model configuration with the `show_best()` function.
+```{r}
+
+```
+
+### Feature Set 2
+
+Build a second recipe with the following specifications:   
+
+- Use `cigs` as the outcome variable regressed on all variables.  
+- Set up the outcome as a factor with the positive class ("yes") as the second level.
+- Set up other variables as factors where needed.
+- Apply dummy coding.
+- Create an interaction between `stressful_event` and `lag`.
+- Remove the `subid` variable with `step_rm()`
+- **Take appropriate scaling steps for features to be able to fit KNN requirements.**
+
+```{r}
+rec_boot_2 <- 
+```
+
+Tune the model with bootstrapping for cross-validation. Use KNN classification as your statistical algorithm, `rec_boot_2` as your recipe, `hyper_grid` as your tuning grid, and `accuracy` as your metric.
+```{r}
+tune_boot_2 <- 
+```
+
+Examine performance estimates. Print the average performance for each configuration with the `collect_metrics()` function and the `summarize = TRUE` argument. Remember that you will now see one estimate per hyperparameter value, averaged across bootstraps.
+```{r}
+
+```
+
+Plot the average performance by hyperparameter value. You can use `plot_hyperparameters()` from `fun_ml.R` or your own code.
+```{r}
+
+```
+
+Have you considered a wide enough range of k values? How do you know? Type your response between the asterisks. If you didn't use a wide enough range, try again with a wider range
+
+*Type your response here*
+
+Print the performance of your best model configuration with the `show_best()` function.
+```{r}
+
+```
+
+## Part 3: Selecting among model configurations with grouped k-fold cross-validation
+
+Thus far, you've ignored the `subid` variable. However, what that variable reveals is that the many observations within the `smoking_ema.csv` dataset are grouped within 125 unique participants (i.e., repeated observations). In the final part of this assignment, you will use grouped k-fold cross-validation to match the data structure. 
+
+### Split data
+
+Split your data into 10 folds (`k = 10`; `repeats = 1`) using the `group_vfold_cv()` function. Use the grouping argument (`group = "subid"`). For this example, do **not** stratify on `cigs`. Again, don't forget to set a seed!
+
+```{r}
+set.seed()
+splits_group_kfold <- 
+```
+
+### Feature Set 1
+
+Fit the first set of models with grouped k-fold cross-validation. Use logistic regression as your statistical algorithm, `rec_kfold_1` as your recipe (doesn't need to change from above!), and `accuracy` as your metric.
+```{r}
+fits_group_kfold_1 <- 
+```
+
+Examine performance estimates. Use the `collect_metrics()` function to make a table of the held-out performance estimates.
+```{r}
+metrics_group_kfold_1 <- 
+```
+
+Plot a histogram of the performance estimates
+```{r}
+
+```
+
+Print the average performance over folds with the `summarize = TRUE` argument.
+```{r}
+
+```
+
+### Feature Set 2
+
+Fit the second model with grouped k-fold cross-validation. Use logistic regression as your statistical algorithm, `rec_kfold_2` as your recipe (doesn't need to change from above!), and `accuracy` as your metric.
+```{r}
+fits_group_kfold_2 <- 
+```
+
+Examine performance estimates. Use the `collect_metrics()` function to make a table of the held-out performance estimates.
+```{r}
+metrics_group_kfold_2 <- 
+```
+
+Plot a histogram of the performance estimates
+```{r}
+
+```
+
+Print the average performance over folds with the `summarize = TRUE` argument.
+```{r}
+
+```
+
+### Selecting the best model configuration
+
+Look back at your two average performance estimates for each model configurations (feature set 1 and 2) from grouped k-fold cross-validation. Which model configuration would you select? Why? Type your response between the asterisks.
+
+*Type your response here*
+
+
+## Save & render 
+
+Save this .qmd file with your last name at the end (e.g., `hw_unit_5_resampling_wyant`). Make sure you changed "Your name here" at the top of the file to be your own name. Render the file to .html, and upload the html file to Canvas. 
+
+**Way to go!!**
