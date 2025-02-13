@@ -1,0 +1,1448 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+::: {.content-visible unless-format="revealjs"}
+# Resampling Methods for Model Selection and Evaluation
+:::
+::: {.content-visible when-format="revealjs"}
+# IAML Unit 5: Resampling Methods for Model Selection and Evaluation
+:::
+
+
+## Learning Objectives
+
+- Bias vs. variance wrt model performance estimates
+  - How is this different from bias vs. variable of model itself
+- Methods for computationally intense calculations
+  - Parallel processing
+  - Cache
+- Types of resampling
+  - Validation set approach
+  - Leave One Out CV
+  - K-Fold and Repeated K-Fold
+  - Grouped K-Fold
+  - Bootstrap resampling
+- Use of resampling for tuning hyperparameters  
+- Combining these resampling approaches with a Test set
+  - Used for simultaneous model selection and evaluation
+  - Single independent test set
+  - Advanced topic: Nested resampling
+
+-----
+
+## Some Technical Details for Costly Computations
+
+Before we dive into resampling, we need to introduce two coding techniques that can save us a lot of time when implementing resampling methods
+
+- Parallel processing
+- Caching time-consuming computations
+
+-----
+
+### Parallel Processing
+
+When using resampling, we often end up fitting many, many model configurations
+
+- This can be the same model configuration in many different training sets
+- Or many different model configurations in many different training sets (even more computationally demanding)
+
+Critically
+
+- The fitting process for each of these configurations is independent for the others
+- The order that the configurations are fit doesn't matter either
+- When these two criteria are met, the processes can be run in parallel with an often big time savings
+
+-----
+
+To do this in R, we need to set up a parallel processing backend
+
+- Lots of [options and details](https://tune.tidymodels.org/articles/extras/optimizations.html) depending on the code you intend to run in parallel to do it really well
+- We can discuss some of these issues/details and other solutions (i.e., High Throughput Computing at CHTC)
+- Some options are OS specific
+- Provide more details [elsewhere](https://jjcurtin.github.io/book_dwvt/parallel_processing.html)
+
+-----
+
+TLDR - copy the following code chunk into your scripts after you load your other libraries (e.g., tidyverse and tidymodels)
+```{r}
+#| eval: false
+cl <- parallel::makePSOCKcluster(parallel::detectCores(logical = FALSE))
+doParallel::registerDoParallel(cl)
+```
+
+-----
+
+### Using Cache
+
+Even with parallel processing, resampling procedures can STILL take a lot of time, particularly on notebook computers that don't have a lot of cores available
+
+In these instances, you may also want to consider caching the result
+
+- When you cache some set of calculations, you are essentially saving the results of the calculations
+- If you need to run the script again, you simply load the saved calculations again from disk, rather than re-calculating them (its much quicker to just read them from a file)
+
+But...
+
+- You need to redo the calculations if you change anything in your script that could affect them
+- This is called "invalidating the cache"
+- You need to be very careful to reuse the cache when you can but also to invalidate it when the calculations have changed
+
+-----
+
+In other notes, we describe [three options](https://jjcurtin.github.io/book_dwvt/cache.html) to cache calculations that are available in R.  
+
+- You should read more about those options if you plan to use one
+- Our preferred solution is to use `xfun::cache_rds()` 
+- Read the help for this function (`?xfun::cache_rds`) if you plan to use it 
+- Cache is complicated and can lead to errors.   
+- But cache can also save you a lot of time during development!
+
+-----
+
+Start by loading only that function for the `xfun` package.  You can add this line of code after your other libraries (e.g., tidyverse, tidymodels)
+
+```{r}
+#| eval: false
+library(xfun, include.only = "cache_rds")
+```
+
+-----
+
+To use the function
+
+- You will pass the code for the calculations you want to cache as the first argument (`expr`) to the function inside a set of curly brackets `{}`
+- You need to list the path (`dir =`) and filename (`file =`) for the rds file that will save the cached calculations.  
+  - The `/` at the end of the path is needed.  
+  - You should use a meaningful (and distinct) filename.
+- Provide `rerun = FALSE` as a third argument.  
+  - You can set this to true temporarily if you need to invalidate the cache to redo the calculations
+  - We like to set it up as an environment variable (see `rerun_setting` below)
+  - Keep it as FALSE during development
+  - Set it to TRUE at the end of our development so that we make sure we didn't make any cache invalidation errors
+- You may also provide a list of globals to `hash =`.  See more details at previous link
+```{r}
+#| eval: false
+
+cache_rds(
+  expr = {
+ },
+ dir = "cache/",
+ file = "filename", 
+ rerun = rerun_setting 
+)
+```
+
+We will demonstrate the use of this function throughout the book.  BUT you do not need to use it if you find it confusing.
+
+-----
+
+## Introduction to Resampling
+
+We will use resampling for two goals:
+
+- To **select** among model configurations based on relative performance estimates of these configurations in new data
+- To **evaluate** the performance of our best/final model configuration in new data
+
+For both of these goals we are using new data to **estimate performance** of model configuration(s)
+
+-----
+
+There are two kinds of problems that can emerge from using a sub-optimal resampling approach
+
+- We can get a **biased estimate** of model performance (i.e., we can systematically under or over-estimate its performance)
+- We can get an **imprecise estimate** of model performance (i.e., high variance in our model performance metric if it was repeatedly calculated in different samples of held-out data)
+
+-----
+
+Essentially, this is the bias and variance problem again, but now not with respect to the model's actual performance but instead with **our estimate of how the model will perform**
+
+This is a very important distinction to keep in mind or you will be confused as we discuss bias and variance into the future.  We have:
+
+- bias and variance of model performance (i.e., the predictions the model makes)
+- bias and variance of our estimate of how well the model will perform in new data
+- different factors affect each
+
+-----
+
+```{r}
+#| include: false
+
+# set up environment.  Now hidden from view
+
+options(conflicts.policy = "depends.ok")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+tidymodels_conflictRules()
+
+library(tidyverse) # for general data wrangling
+library(tidymodels) # for modeling
+library(xfun, include.only = "cache_rds")
+
+cl <- parallel::makePSOCKcluster(parallel::detectCores(logical = FALSE))
+doParallel::registerDoParallel(cl)
+
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+
+theme_set(theme_classic())
+options(tibble.width = Inf)
+path_data <- "./data"
+
+rerun_setting <- FALSE 
+``` 
+
+Let's get a dataset for this unit.  We will use the [heart disease dataset](https://archive.ics.uci.edu/ml/datasets/Heart+Disease) from the UCI Machine Learning Repository.  We will focus on the Cleveland data subset, whose variable are defined in this [data dictionary](data/cleveland_variables.pdf)
+
+These data are less well prepared
+
+- No variable/column names exist
+- NA is coded with `?`
+- Use `rename()` to add tidy variable names
+
+```{r}
+data_all <- read_csv(here::here(path_data, "cleveland.csv"), 
+                     col_names = FALSE, # <1> 
+                     na = "?") |> # <2> 
+  rename(age = X1,
+         sex = X2,
+         cp = X3,
+         rest_bp = X4,
+         chol = X5,
+         fbs = X6,
+         rest_ecg = X7,
+         max_hr = X8,
+         exer_ang = X9,
+         exer_st_depress = X10,
+         exer_st_slope = X11,
+         ca = X12,
+         thal = X13,
+         disease = X14)
+```
+1. Indicating that column names are NOT on the first row.  First row begins with data
+2. Specifying a non-standard value for NA
+
+-----
+
+Code categorical variables as factors with meaningful text labels (and no spaces)
+
+```{r}
+data_all <- data_all |> 
+  mutate(disease = factor(disease, levels = 0:4, 
+                          labels = c("no", "yes", "yes", "yes", "yes")),
+         sex = factor(sex,  levels = c(0, 1), labels = c("female", "male")),
+         fbs = factor(fbs, levels = c(0, 1), labels = c("no", "yes")),
+         exer_ang = factor(exer_ang, levels = c(0, 1), labels = c("no", "yes")),
+         exer_st_slope = factor(exer_st_slope, levels = 1:3, 
+                                labels = c("upslope", "flat", "downslope")),
+         cp = factor(cp, levels = 1:4, 
+                     labels = c("typ_ang", "atyp_ang", "non_anginal", "non_anginal")),
+         rest_ecg = factor(rest_ecg, levels = 0:2, 
+                           labels = c("normal", "abnormal1", "abnormal2")),
+         rest_ecg = fct_collapse(rest_ecg, 
+                                abnormal = c("abnormal1", "abnormal2")),
+         thal = factor(thal, levels = c(3, 6, 7), 
+                       labels = c("normal", "fixeddefect", "reversabledefect"))) |> 
+  glimpse()
+```
+
+-----
+
+We won't do EDA in this unit but lets at least do a quick skim to inform ourselves
+
+- 303 cases
+- a dichotomous outcome, disease (yes or no for heart disease)
+- 7 other categorical predictors
+- 6 numeric predictors
+- 2 missing values for `thal`, which is categorical
+- 4 missing values for ca, which is numeric
+
+```{r}
+data_all |> skim_all()
+```
+
+-----
+
+We will be fitting a logistic regression with all of the predictors for the first half of this unit
+
+Lets set up a recipe for feature engineering with this statistical algorithm
+
+- Impute missing data for all numeric predictors using median imputation 
+- Impute missing data for all nominal predictors using the modal value
+- Dummy code all nominal predictors
+```{r}
+rec_lr <- recipe(disease ~ ., data = data_all) |> 
+  step_impute_median(all_numeric_predictors()) |> 
+  step_impute_mode(all_nominal_predictors()) |>   
+  step_dummy(all_nominal_predictors()) 
+```
+
+-----
+
+The order of steps in a recipe matter
+
+While your project’s needs may vary, here is a suggested order of potential steps that should work for most problems [according to tidy models folks](https://recipes.tidymodels.org/articles/Ordering.html):
+
+- [Convert character to factor]  (we do this outside our recipe as part of cleaning)
+- Impute
+- Individual transformations for skewness and other issues
+- Discretize (if needed and if you have no other choice)
+- Create dummy variables
+- Create interactions
+- Normalization steps (center, scale, range, etc)
+- Multivariate transformation (e.g. PCA, spatial sign, etc)
+
+-----
+
+## The single validation (test) set approach
+
+To date, you have essentially learned how to do the single validation set approach (although we haven't called it that)
+
+With this approach, we would take our full n = 303 and:
+
+- Split into one training set and one held-out set
+- Fit a model in our training set
+- Use this trained model to predict scores in held-out set
+- Calculate a performance metric (e.g., accuracy, rmse) based on predicted and observed scores in the held-out set
+
+-----
+
+If our goal was to evaluate the expected performance of a single model configuration in new data
+
+  - We called this held-out set a test set
+  - We would report this performance metric from the held-out test set as our estimate of the performance of our model in new data
+
+-----
+
+If our goal was to select the best model configuration among many candidate configurations
+
+- We called this held-out set a validation set
+- We would use this performance metric from the held-out validation set to select the best model configuration
+
+-----
+
+We call this the single validation set approach but that single held-out set can be either a validation or test set depending on our goals
+
+If you need to BOTH select a best model configuration AND evaluate that best model configuration, you would need both a validation and a test set.
+
+-----
+
+We have been doing the single validation set approach all along but we will provide one more example now (with a 50/50 split) to transition the code we are using to a more general workflow that will accommodate our more complicated resampling approaches
+
+In the first half of this unit, we will focus on assessing the performance of a single model configuration
+
+  - Logistic regression algorithm
+  - No hyperparameters
+  - Features based on all available predictors
+  
+We will call the held-out set a test set and use it to evaluate the expected future performance of this single configuration
+
+-----
+
+Previously:
+
+- We would fit the model configuration in training and then made predictions for observations in the held-out test set in separate steps
+- We did this in separate steps so you could better understand the process
+- I will show you that first again as a baseline
+  
+Then:
+
+- We will now do these tasks in one step using $validation\_split()$
+- I will show you this combined approach second
+- This latter approach will be an example for how we code this for our more complicated resampling approaches
+
+-----
+
+- Let's do a 50/50 split, stratified on our outcome, disease
+
+```{r}
+set.seed(19690127)
+
+splits <- data_all |> 
+  initial_split(prop = 0.5, strata = "disease")
+
+data_trn <- analysis(splits)
+data_trn |>  nrow()
+
+data_test <- assessment(splits)
+data_test |> nrow()
+```
+
+-----
+
+- Make features for train and test (skim them on your own time!)
+```{r}
+rec_prep <- rec_lr |> 
+  prep(data_trn)
+
+feat_trn <- rec_prep |> 
+  bake(NULL)
+
+feat_test <- rec_prep |> 
+  bake(data_test)
+```
+
+-----
+
+- Fit model in train
+
+```{r}
+fit_lr <-
+  logistic_reg() |> 
+  set_engine("glm") |> 
+  fit(disease ~ ., data = feat_trn)
+```
+
+-----
+
+- Evaluate model in test 
+
+```{r}
+accuracy_vec(feat_test$disease, predict(fit_lr, feat_test, type = "class")$.pred_class)
+```
+
+-----
+
+Now lets do this in a new and more efficient workflow
+
+- We still start by setting up a splits object
+- Note use of `validation_split()` rather than `initial_split()`
+- We will use a variety of functions at this step depending on how we decide to handle resampling
+```{r}
+set.seed(19690127)
+splits_validate <- data_all |> 
+  validation_split(prop = 0.5, strata = "disease")
+```
+
+-----
+
+Now we can fit our model configuration in our training set(s) and calculate performance metric(s) in the held-out sets using `fit_resamples()`
+
+-  You can and should [read more](https://tune.tidymodels.org/reference/fit_resamples.html) about this function
+- Takes algorithm (broad category, engine, and mode if needed), recipe, and splits as inputs
+- Specify the (set of) metrics we want to use to estimate for our model configuration
+- Don't need to explicitly create feature matrices for held-in and held-out sets.
+  - But also don't see these feature matrices
+  - May still want to create and skim them as a check?
+
+```{r}
+fits_lr <-
+  logistic_reg() |> 
+  set_engine("glm") |> 
+  fit_resamples(preprocessor = rec_lr, resamples = splits_validate, 
+                 metrics = metric_set(accuracy))
+```
+
+-----
+
+The object (we will call it `fits_`) that is returned in NOT a model using our model figuration (what we got using `fit()`, which we called `fit_`)
+
+Instead, it contains the performance metrics for the configuration, estimated by 
+
+- Fitting the model configuration in the held in set(s) and then
+- Predicting into the held-out sets  
+
+-----
+
+We pull these performance estimates out of the fits object using `collect_metrics()`
+
+- There is one performance estimate
+- It is for our model configurations performance in test set
+- It is an estimate of how well our model configuration will work with new data
+- It matches what we got previously when doing this manually
+
+```{r}
+fits_lr |> 
+  collect_metrics(summarize = FALSE)
+```
+
+-----
+
+::: {.callout-important}
+# Question: 
+How many participants were used to fit the model that we used to estimate the performance of our model configuration? 
+:::
+
+::: {.fragment .uwred}
+The model configuration was fit in the training set. The training set had N = 151 participants.
+:::
+
+
+::: {.fragment}
+:::: {.callout-important}
+# Question 
+If we planned to implement this model (i.e., really use it in practice to predict heart disease in new patients) is this the best model we can develop or can we improve it?
+::::
+
+:::: {.fragment .uwred}
+This model was trained with N = 151 but we have 303 participants.  If we trained the same model configuration with all of our data, that model would be expected to performance better than the N-151 model.  
+::::
+:::
+
+-----
+
+::: {.callout-important}
+# Question
+Why will the N = 303 model always be better (or at worst equivalent) to the model trained with N = 151.
+:::
+
+::: {.fragment .uwred}
+Increasing the sample size used to fit our model configuration will decrease model variance but not change model bias. This will produce overall lower 
+error.
+
+This might not be true if the additional data were not similar quality to our training data but we know our validation/test set is similar because we did a
+random resample.
+:::
+
+::: {.fragment}
+:::: {.callout-important}
+# Question
+So why did we not just fit this model configuration using N = 303 to start?
+::::
+
+:::: {.fragment .uwred}
+Because then we would not have had any new data left to get an estimate of its performance in new data!
+::::
+:::
+
+-----
+
+If you plan to actually use your model in the real world for prediction, you should always re-fit the best configuration using all available data!
+
+
+::: {.callout-important}
+# Question
+But what does this mean about our estimate of the performance of this final model (fit with all available data) data when we get that estimate using a model that as fit with a smaller sample size (the sample size in our training set)?
+:::
+
+::: {.fragment .uwred}
+Our estimate will likely be biased.  It will underestimate the true expected  peformance of our final model.  We can think of it as a lower bound on that expected performance.  The amount of bias will be a function of the difference between the  sample size of the training set and the size the of full dataset.   If we want less biased estimates, we want to allocate as much data as possible to the training set 
+when estimating the performance of our final model configuration (but this will come  with other costs!)
+:::
+
+::: {.fragment}
+:::: {.callout-important}
+# Question
+Contrast the costs/benefits of a 50/50 vs. 80/20 split for train and test
+::::
+
+:::: {.fragment .uwred}
+Using a training set with 80% of the sample will yield a less biased (under) estimate of the final (using all data) model performance than a training set with 50% of the sample.  
+
+However, using a test set of 20% of the data will produce a more variable (less precise) estimate of performance than the 50% test set.  
+
+This  is another bias-variance trade off but now instead of talking about model performance, we are seeing that we have to trade off bias and variance in our estimate of the model performance too!
+::::
+:::
+
+
+This recognition of a bias-variance trade-off in our performance estimates is what motivates the more complicated resampling approaches we will now consider.
+
+-----
+
+In our example, we plan to use this model for future predictions, so now lets fit it a final time using the full dataset
+
+- We do this manually
+- NOTE: tidymodels has routines to do all of this including fitting final models (read more about "workflows")
+- We do not use them in the course because they hide steps that are important for conceptual understanding
+- We do not use them in our lab because we break apart all of these steps to train models using high throughput computing
+
+-----
+
+Make a feature matrix for the full dataset
+
+We are now using the full data set as our new training set so we prep and bake with the full dataset
+```{r}
+rec_prep <- rec_lr |> 
+  prep(data_all)
+
+feat_all <- rec_prep |> 
+  bake(NULL)
+```
+
+-----
+
+And then fit your model configuration
+
+```{r}
+fit_lr <-
+  logistic_reg() |> 
+  set_engine("glm") |> 
+  fit(disease ~ ., data = feat_all)
+```
+
+-----
+
+```{r}
+fit_lr |> tidy()
+```
+
+If we need to predict disease in the future, this is the model we would use (with these parameter estimates)
+
+Our estimate of its future accuracy is based on our previous assessment using the **held-in** training set to fit the model configuration and the **held-out** test set to estimate its performance
+
+This estimate should be considered a lower bound on its expected performance
+
+-----
+
+## Leave One Out Cross Validation
+
+Let's turn to a new resampling technique and start with some questions to motivate it
+
+
+::: {.callout-important}
+# Question
+How could you use this single validation set approach to get the least biased estimate of model performance with your n = 303 dataset that would still allow you to estimate its performance in a held out test set?
+:::
+
+::: {.fragment .uwred}
+Put all but one case into the training set (i.e., leave only one case out in the test set).  In our example, you would fit a model with n = 302  this model will have essentially equivalent overfitting as n = 303 so it will not yield much bias when we use it to estimate the performance of the n = 303 model.
+:::
+
+-----
+
+::: {.callout-important}
+# Question
+What will be the biggest problem with this approach?
+:::
+
+::: {.fragment .uwred}
+You will estimate performance with only n = 1 in the test set.  This means there will be high variance in your performance estimate.
+:::
+
+-----
+
+::: {.callout-important}
+# Question
+How might you reduce this problem?
+:::
+
+::: {.fragment .uwred}
+Repeat this split between training and test n times so that there are n different sets of n = 1 test sets.  Then average the performance across all n of these test sets to get a more stable estimate of performance. Averaging is a good way to reduce the variance of any estimate.  
+
+This is leave one out cross-validation!
+:::
+
+-----
+
+Comparisons across LOOCV and single validation set approaches
+
+- The performance estimate from LOOCV has less bias than the single validation set method (because the models that are used to estimate performance were fit with close to the full n of the final model that will be fit to all the data)
+
+- LOOCV uses all observations in the held-out set at some point.   This may yield less variance than single 20% or 50% validation set?
+
+but...
+
+- LOOCV can be computationally expensive (need to fit and evaluate the same model configuration n times).  
+- This is a real problem when you are also working with a high number of model configurations (i.e., number fits = n * number of model configurations).
+
+-----
+
+LOOCV eventually uses all the data in the held-out set across the 'n' held-out sets.  
+
+- Averaging also helps reduce variance in the performance metric.
+- However, averaging reduces variance to a greater degree when the performance measures being averaged are less related/more independent.
+- The n fitted models are very similar in LOOCV b/c they are each fit on almost the same data (each with n-1 observations)
+
+K-fold cross validation (next method) improves the variance of the average performance metric by averaging across more independent (less overlapping) training sets
+
+- For this reason, it is superior and (always?) preferred over LOOCV 
+- We are not demonstrating LOOCV b/c we strongly prefer other methods (k-fold)
+- Still important to understand it conceptually and its strengths/weaknesses
+- If you wanted to use this resampling approach, simply substitute `loo_cv()` for `vfold_cv()` in the next example
+
+-----
+
+## K-fold Cross Validation
+
+K-fold cross validation
+
+1.  Divide the observations into K equal size independent "folds" (each observation appears in only one fold)
+2.  Hold out 1 of these folds (1/Kth of the dataset) to use as a held-out set
+3.  Fit a model in the remaining K-1 folds
+4.  Repeat until each of the folds has been held out once
+5.  Performance estimate is the average performance across the K held-out folds
+
+Common values of K are 5 and 10
+
+Note that K is sometimes referred to as V in some fields/literatures (Don't blame me!)
+
+-----
+
+Visualization of K-fold
+
+![](figs/unit5_kfold.png){height=5in}
+
+-----
+
+Let's demonstrate the code for K-fold Cross-validation
+
+- First, we split into 10 folds (default)
+  - repeats = 1 (default; more on this in a bit)
+  - stratify on `disease`
+
+```{r}
+splits_kfold <- data_all |> 
+  vfold_cv(v = 10, repeats = 1, strata = "disease")
+
+splits_kfold
+```
+
+-----
+
+- Fit model configuration in first 9 folds, evaluate in 10th fold.  Repeat 9 more times for each additional held-out fold
+  - Use `fit_resamples()` as before 
+  - Still no need to continue to remake features for held-in and held-out sets.  Just provide `splits` and `rec`
+  - Set performance metrics with `metric_set()`
+
+```{r}
+fits_lr_kfold <- 
+  logistic_reg() |> 
+  set_engine("glm") |> 
+  fit_resamples(preprocessor = rec_lr, 
+                resamples = splits_kfold, 
+                metrics = metric_set(accuracy))
+```
+
+-----
+
+- Then, we review performance estimates in held out folds using `collect_metrics()`
+
+  - Can see performance in all folds using `summarize = FALSE`
+  - The performance estimates are not all the same.  This is what we mean when we talk about the variance in our performance estimates.  You couldn't see it before with only one held-out set but now that we have 10, it becomes more concrete.  Ideally this variance is as low as possible. 
+```{r}
+metrics_kfold <- collect_metrics(fits_lr_kfold, summarize = FALSE)
+
+metrics_kfold |> print_kbl()
+```
+
+-----
+
+- Could plot this as a histogram to visualize this variance (i.e., the sampling distribution of performance estimates)
+- Would be better if we had more folds (see repeats in a bit)
+```{r}
+metrics_kfold |> plot_hist(".estimate")
+``` 
+
+-----
+
+- Can see the average performance over folds along with its standard error using `summarize = TRUE`
+- This average will have lower variance (which is estimated by the standard error.  Still not zero!)
+```{r}
+collect_metrics(fits_lr_kfold, summarize = TRUE)
+```
+
+-----
+
+  As a last step, we still fit the final model as before using the full dataset
+
+  - We already have the feature matrix for the full dataset (`feat_all`) from earlier
+  - Otherwise, remake it
+```{r}
+fit_lr <-
+  logistic_reg() |> 
+  set_engine("glm") |> 
+  fit(disease ~ ., data = feat_all)
+```
+
+-----
+
+```{r}
+fit_lr |> tidy()
+```
+
+If we need to predict disease in the future, this is the fitted model we would use (with these parameter estimates)
+
+Our estimate of its future accuracy is `r collect_metrics(fits_lr_kfold, summarize = TRUE)$mean` with a standard error of `r collect_metrics(fits_lr_kfold, summarize = TRUE)$std_err`
+
+-----
+
+Comparisons between K-fold vs. LOOCV and Single Validation set
+
+For Bias:
+
+- K-fold typically has less bias than the single validation set method
+  - E.g. 10-fold fits models with 9/10th of the data vs. 50% or 80%, etc
+
+- K Fold has somewhat more bias than LOOCV because LOOCV uses n - 1 observations for fitting models
+
+-----
+
+For Variance:
+
+- K-fold has less variance than LOOCV
+  - Like LOOCV, it uses all observations in test at some point
+  - The averaged models are more independent b/c models are fitted on less overlapping training sets
+  
+- K-fold has less variance than single validation set b/c it uses all data as test at some point (vs. a subset of held-out test data)
+
+- K-fold is less computationally expensive than LOOCV (though more expensive than single validation set)
+
+- K-fold is generally preferred over both of these other approaches
+
+-----
+
+K-fold is less computationally intensive BUT still can be costly.  Particularly when you are getting performance estimates for multiple model configurations (more on that when we learn how to tune hyperparameters)
+
+So you may want to start caching the `fits_` object so you don't have to recalculate it.  
+
+-----
+
+Here is a demonstration
+
+- First we set up an environment variable that we can flip between true/false to invalidate all our cached calculations
+- Put this near the top of your code with other environment settings so its easy to find
+```{r}
+#| eval: false
+
+rerun_setting <- TRUE 
+```
+
+-----
+
+- Now use the `cache_rds()` function
+- Put the resampling code inside of `{}`
+- Cached file will be saved in `cached/` folder with filename `fits_lr_kfold_HASH`
+- If you change any code in the function, it will invalidate the cache and re-run the code
+- However, it will not invalidate the cache if you change objects or data that affect this function but are outside it, e.g., 
+  - Fix errors in data
+  - Update `rec_lr`
+  - Update `splits_kfold`
+  - Be VERY careful!
+- You can manually invalidate just the cache for just this code chunk by setting `rerun = TRUE` temporarily or  you can change `rerun_setting <- TRUE` at the top of your script to do fresh calculations for all of your cached code chunks
+- You can set `rerun_settings <- TRUE` when you are done with your development to make sure everything is accurate (review output carefully for any changes!)
+
+```{r fits_lr_kfold}
+fits_lr_kfold <- cache_rds(
+  expr = {
+    logistic_reg() |> 
+    set_engine("glm") |> 
+    fit_resamples(preprocessor = rec_lr, 
+                  resamples = splits_kfold, 
+                  metrics = metric_set(accuracy))
+  }, 
+  dir = "cache/005/",
+  file = "fits_lr_kfold",
+  rerun = rerun_setting)
+```
+
+-----
+
+## Repeated K-fold Cross Validation
+
+You can repeat the K-fold procedure multiple times with new splits for a different mix of K folds each time
+
+Two benefits:
+
+- More stable performance estimate (because averaged over more folds: repeats * K)
+- Many more estimates of performance to characterize (SE; plot) of your performance estimate
+
+But it is computationally expensive (depending on number of repeats)
+
+-----
+
+An example of Repeated K-fold Cross-validation
+
+- Splits with repeats = 10 (will do 10 different splits of 10-fold)
+```{r}
+set.seed(19690127)
+splits_kfold10x <- data_all |> 
+  vfold_cv(v = 10, repeats = 10, strata = "disease")
+
+splits_kfold10x
+```
+
+-----
+
+- Everything else is the same!
+```{r fits_lr_kfold10x}
+fits_lr_kfold10x <- cache_rds(
+  expr = {
+    logistic_reg() |> 
+      set_engine("glm") |> 
+      fit_resamples(preprocessor = rec_lr, 
+                    resamples = splits_kfold10x, 
+                    metrics = metric_set(accuracy))
+  }, 
+  dir = "cache/005/",
+  file = "fits_lr_kfold10x",
+  rerun = rerun_setting)
+```
+
+-----
+
+- Individual estimates across 100 held-out folds
+```{r}
+metrics_kfold10x <- collect_metrics(fits_lr_kfold10x, summarize = FALSE)
+
+metrics_kfold10x |> print_kbl()
+```
+
+-----
+
+- Histogram of those 100 individual estimates
+```{r}
+metrics_kfold10x |> plot_hist(".estimate", bins = 10)
+```
+
+-----
+
+Average performance estimated (and its SE) across the 100 held-out folds
+```{r}
+collect_metrics(fits_lr_kfold10x, summarize = TRUE)
+```
+
+-----
+
+- You should also refit a final model in the full data at the end as before
+- We wont demonstrate that here
+
+-----
+
+Comparisons between repeated K-fold and K-fold
+
+Repeated K-fold: 
+
+- Has same bias as K-fold (still fitting models with K-1 folds)
+- Has all the benefits of single K-fold
+- Has even more stable estimate of performance (mean over more folds/repeats)
+- Provides more info about distribution for the performance estimate
+- **But** is more computationally expensive
+
+Repeated K-fold is preferred over K-fold to the degree possible based on computational limitations (parallel, N, p, statistical algorithm, # of model configurations)
+
+-----
+
+## Grouped K-fold
+
+We have to be particularly careful with resampling methods when we have repeated observations for the same participant (or unit of analysis more generally)
+
+- We can often predict an individual's own data better using some of their own data.  
+- If our model will not ever encounter that individual again, this will optimistically bias our estimate of our models performance with new/future observations.  
+- We can remove that bias by making sure that all observations from an individual are grouped together so that they always either held-in or held-out but never split across both.  
+- Easy to do a grouped K-fold by making splits using [`group_vfold_cv()`](https://rsample.tidymodels.org/reference/group_vfold_cv.html) and then proceeding as before with all other analyses/code
+  - set the `group` argument to the name of the variable that codes for subid or unit of analysis that is repeated.
+
+-----
+
+## Bootstrap Resampling
+
+A bootstrap sample is a random sample taken with replacement (i.e., same observations can be sampled multiple times within one bootstrap sample)
+
+If you bootstrap a new sample of size n from a dataset with sample size n, approximately 63.2% of the original observations end up in the bootstrap sample
+
+The remaining 36.8% of the observations are often called the "out of bag" (OOB) samples
+
+-----
+
+Bootstrap Resampling
+
+- Creates B bootstrap samples of size n = n from the original dataset
+- For any specific bootstrap (b)
+  - Model(s) are fit to the bootstrap sample
+  - Model performance is evaluated in the associated out of bag (held-out) samples
+- This is repeated B times such that you have B assessments of model performance
+
+-----
+
+An example of Bootstrap resampling
+
+- Again, all that changes is how you form the splits/resamples
+- You will use [$bootstraps()$](https://rsample.tidymodels.org/reference/bootstraps.html) to form the splits
+- Here are 100 bootstraps stratified on `disease`
+```{r}
+set.seed(19690127)
+splits_boot <- data_all |> 
+  bootstraps(times = 100, strata = "disease") 
+
+splits_boot
+```
+
+-----
+
+- Everything else is the same!
+```{r fits_lr_boot}
+fits_lr_boot <- cache_rds(
+  expr = {
+    logistic_reg() |> 
+      set_engine("glm") |> 
+      fit_resamples(preprocessor = rec_lr, 
+                    resamples = splits_boot, 
+                    metrics = metric_set(accuracy))
+
+  },
+  dir = "cache/005/",
+  file = "fits_lr_boot", 
+  rerun = rerun_setting)
+```
+
+-----
+
+- 100 individual performance estimates from the 100 OOB sets
+```{r}
+metrics_boot <- collect_metrics(fits_lr_boot, summarize = FALSE)
+
+metrics_boot |> print_kbl()
+```
+
+-----
+
+- Histogram of those 100 performance estimates
+```{r}
+metrics_boot |> plot_hist(".estimate", bins = 10)
+```
+
+-----
+
+- Average performance over those 100 estimates
+```{r}
+collect_metrics(fits_lr_boot, summarize = TRUE)
+```
+
+- You should also refit a final model in the full data at the end as before to get final single fitted model for later use
+
+-----
+
+Relevant comparisons, strengths/weaknesses for bootstrap for resampling
+
+-  The bootstrap resampling performance estimate will have higher bias than K-fold using typical K values (bias equivalent to about K = 2)
+- Although training sets have full n, they only include about 63% unique observations.  These models under perform training sets with 80 - 90% unique observations
+- With smaller training set sizes, this bias is considered too high by some (Kuhn)
+ 
+-----
+
+- The bootstrap resampling performance estimate will have less variance than K-fold
+- Compare SE of accuracy for 100 resamples using k-fold with repeats: `r collect_metrics(fits_lr_kfold10x, summarize = TRUE)$std_err` vs. bootstrap: `r collect_metrics(fits_lr_boot, summarize = TRUE)$std_err`
+- With 1000 bootstraps (and test sets with ~ 37% of n) can get a very precise estimate of held-out error
+
+-----
+
+- Can also represent the variance of our held-out error (like repeated K-fold)
+
+- Used primarily for selecting among model configurations when you don't care about bias and just want a precise selection metric
+- Useful in explanation scenarios where you just need the "best" model
+- "Inner loop" of nested cross validation (more on this later)
+
+-----
+
+## Using Resampling to Select Best Model Configurations 
+
+In all of the previous examples, we have used various resampling methods only to evaluate the performance of a single model configuration in new data.  In these instances, we were treating the held-out sets as test sets.
+
+Resampling is also used to get held out performance estimates to select best model configurations.  
+
+**Best** means the model configuration that performs the best in new data and therefore is closest to the true DGP for the data
+
+-----
+
+For example, we might want to select among model configurations in an explanatory scenario to have a principled approach to determine the model configuration that best matches the true DGP (and would be best to test your hypotheses).  e.g., 
+
+- Selecting covariates to include
+- Deciding on X transformations
+- Outlier identification approach
+- Statistical algorithm
+
+-----
+
+We can simply get performance estimates for each configuration using one of the previously described resampling methods
+
+- We would call the held-out data (the single set, the folds, the OOB samples) a validation set
+- We select the model configuration with the best mean (or median?) across our resampled validation sets on the relevant performance metric.
+
+-----
+
+One additional common scenario where you will do model selection across many model configurations is when "tuning" (i.e., selecting) the best values for hyperparameters for a statistical algorithm (e.g., k in KNN).  
+
+-----
+
+`tidymodels` makes this easy and it follows a very similar workflow as earlier with a few changes
+
+- We will need to indicate which hyperparameters we plan to tune in the statistical algorithm
+- We need (or can) select values to consider for that hyperparameter (or we can let the `tune` package functions decide in some cases)
+- We will now use [`tune_grid()`](https://tune.tidymodels.org/reference/tune_grid.html) rather `fit_resamples()` to fit and evaluate the models configurations that differ with respect to their hyperparameters
+- This IS computationally costly.  Now fitting and estimating performance for multiple configurations across multipe held-in/held-out sets
+
+-----
+
+Lets use bootstrap resampling to select the best K for KNN applied to our heart disease dataset
+
+We can use the same splits are established as before (`splits_boot`)
+
+We need a slightly different recipe for KNN vs. logistic regression
+
+- We have to scale (lets range correct) the features 
+- No need to do this to the dummy features.  They are already range corrected
+
+```{r}
+rec_knn <- recipe(disease ~ ., data = data_all) |> 
+  step_impute_median(all_numeric_predictors()) |> 
+  step_impute_mode(all_nominal_predictors()) |>   
+  step_range(all_numeric()) |> 
+  step_dummy(all_nominal_predictors())
+```
+
+-----
+
+The fitting process is what is different
+
+- We set up a tibble with values of the hyperparameters to consider
+- We indicate which hyperparameters need to be tuned
+  
+```{r}
+hyper_grid <- expand.grid(neighbors = seq(1, 150, by = 3))
+hyper_grid
+```
+  
+-----  
+
+- When model configurations differ by features or statistical algorithms, we have to use `fit_resamples()` multiple times to estimate performance of those different configurations
+- Held out performance estimates for model configurations that differ by hyperparameter values are obtained in one step using `tune_grid()` 
+- We need to set `grid =` 
+```{r fits_knn_boot}
+fits_knn_boot <- cache_rds(
+  expr = {
+    nearest_neighbor(neighbors = tune()) |> 
+      set_engine("kknn") |> 
+      set_mode("classification") |>
+      tune_grid(preprocessor = rec_knn, 
+                resamples = splits_boot, 
+                grid = hyper_grid,
+                metrics = metric_set(accuracy))
+
+  },
+  dir = "cache/005/",
+  file = "fits_knn_boot",
+  rerun = rerun_setting)
+```
+
+-----
+
+Reviewing performance of model configurations is similar to before but now with multiple configurations
+
+- We can see the average performance over folds along with its standard error using `summarize = TRUE`
+- We *could* see the performance of each configuration in EACH fold too, but there are lots of them (use `summarize = FALSE`)
+```{r}
+collect_metrics(fits_knn_boot, summarize = TRUE)
+```
+
+-----
+
+-  We can plot average performance by the values of the hyperparameter
+```{r}
+collect_metrics(fits_knn_boot, summarize = TRUE) |> 
+  ggplot(aes(x = neighbors, y = mean)) +
+    geom_line()
+```
+
+K (neighbors) is affecting the bias-variance trade-off.  As K increases, model bias increases but model variance decreases.  In most instances, model variance decreases faster than model bias increases.  Therefore performance should increase and then peak at a good point along the bias-variance trade-off.  Beyond this optimal value, performance should decrease again.  You want to select a hyperparameter value that is associated with peak (or near peak) performance.
+
+-----
+
+The simplest way to select among model configurations (e.g., hyperparameters) is to choose the model configuration with the best performance
+
+```{r}
+show_best(fits_knn_boot, n = 10)
+
+select_best(fits_knn_boot)
+```
+
+-----
+
+The next most common is to choose the simplest (least flexible) model that has performance within one SE of the best performing configuration.
+
+- Use `select_by_one_std_err()`
+- Sort performance results from least to most flexible (e.g., `desc(neighbors)`)
+```{r}
+select_by_one_std_err(fits_knn_boot, 
+                      desc(neighbors))
+```
+
+-----
+
+- We should also refit a final model with the "best" hyperparameter using the full data as before
+
+
+```{r}
+rec_prep <- rec_knn |>   
+  prep(data_all)
+
+feat_all <- rec_prep |> 
+  bake(NULL)
+```
+
+-----
+
+- We can use the `select_*()` from above to use this best hyperparameter in our specification of the algorithm
+
+- Note that we now fit using all the data and switch to `fit()` rather than `tune_grid()`
+
+```{r}
+fit_knn_best <-
+  nearest_neighbor(neighbors = select_best(fits_knn_boot)$neighbors) |> 
+  set_engine("kknn") |> 
+  set_mode("classification") |>
+  fit(disease ~ ., data = feat_all)
+```
+
+-----
+
+- However, we can't use the previous bootstrap resampling to evaluate this final/best model because we already used it to select this the best configuration
+- We need new, held-out data to evaluate it (a new test set!)
+
+-----
+
+## Resampling for Both Model Selection and Evaluation
+
+Resampling methods can be used to get model performance estimates to **select** the best model configuration and/or **evaluate** that best model
+
+- So far we have done EITHER selection OR evaluation but not both together
+
+- The concepts to both select the best configuration and evaluation it are similar but it requires different (slightly more complicated) resampling than what we have done so far
+
+-----
+
+- If you use your held-out resamples to select the best model among a number of model configurations then the same held-out resamples cannot also be used to evaluate the performance of that same best model
+
+- If it is, the performance metric will have **optimization bias**.  To the degree that there is any noise (i.e., variance) in the measurement of performance, selecting the best model configuration will capitalize on this noise.
+
+- You need to use one set of held out resamples (validation sets) to select the best model.  Then you need a DIFFERENT set of held out resamples (test sets) to evaluate that best model.   
+
+-----
+
+There are two strategies for this: 
+
+- Strategy 1: 
+    - First, hold out a test set for final/best model evaluation (using `initial_split()`).  
+    - Then use one of the above resampling methods (single validation set approach, k-fold, or bootstrap) to select the best model configuration.  
+    - Bootstrap is likely best option b/c it is typically more precise (though biased)
+  
+- Strategy 2: Nested resampling.  More on this in a moment
+
+-----
+
+Other Observations about Common Practices: 
+
+- Simple resampling methods with the full sample (and no held-out test set) to both select AND evaluate are still common
+- Failure by some (even Kuhn) to appreciate the degree of optimization bias
+- Particular problem in Psychology because of small n (high variance in our performance metric)?
+- Can be fine if you just want to find the best model configuration but don't need to evaluate its performance rigorously (i.e., you don't really care that much about validity of your performance estimate of your final  model and are fine with it being a bit optimistic)
+
+-----
+
+### Bootstrap with Test Set
+
+- First we divide our data into training and test using `inital_split()`
+
+- Next, we use bootstrap resampling with the training set to split training into many held-in and held-out sets.  We use these held-out (OOB) sets as validation sets to select the best model configuration based on mean/median performance across those sets.  
+  
+- After we select the best model configuration using bootstrap resampling of the training set
+  - We refit that model configuration in the FULL training set
+  - And we use that model to predict into the test set to evaluate it
+
+- Of course, in the end, if you plan to use the model, you will refit this final model configuration to the FULL dataset but the performance estimate for that model will come from test set on th previous step (there are no more data to estimate new performance)
+
+-----
+  
+- Use `initial_split()` for first train/test split
+
+```{r}
+set.seed(123456)
+splits_test <- data_all |> 
+  initial_split(prop = 2/3, strata = "disease")
+
+data_trn <- splits_test |> 
+  analysis()
+
+data_test <- splits_test |> 
+  assessment()
+```
+
+-----
+
+- Use training set for model selection via resampling (in this case bootstrap)
+- No need for another seed
+
+```{r}
+splits_boot_trn <- data_trn |> 
+  bootstraps(times = 100, strata = "disease") 
+```
+
+- Use the same grid of hyperparameters we set up earlier (`hyper_grid`)
+
+-----
+
+- Fit model configurations that vary by K in all 100 bootstrap samples
+- Make predictions and calculate accuracy for these fitted models in 100 OOB (validation) sets
+
+```{r}
+fits_knn_boot_trn <- cache_rds(
+  expr = {
+    nearest_neighbor(neighbors = tune()) |> 
+      set_engine("kknn") |> 
+      set_mode("classification") |>
+      tune_grid(preprocessor = rec_knn, 
+                resamples = splits_boot_trn, 
+                grid = hyper_grid, 
+                metrics = metric_set(accuracy))
+  },
+  dir = "cache/005/",
+  file = "fits_knn_boot_trn",
+  rerun = rerun_setting)
+```
+
+-----
+
+- Select the best model configuration (best k)
+  - K = 97 is the best model configuration determined by bootstrap resampling 
+
+  - BUT this is NOT the correct estimate of its performance in new data
+
+  - We compared 50 model configurations (values of k).  This performance estimate may have some optimization bias (though 50 model configurations is really not THAT many)
+
+
+```{r}
+show_best(fits_knn_boot_trn, n = 10)
+```
+
+-----
+
+- show exact means
+```{r}
+show_best(fits_knn_boot_trn, n = 10)$mean
+```
+
+- select best
+```{r}
+select_best(fits_knn_boot_trn)
+```
+
+-----
+
+- Fit the k = 97 model configuration in the full training set
+
+```{r}
+rec_prep <- rec_knn |> 
+  prep(data_trn)
+
+feat_trn <- rec_prep |> 
+  bake(NULL)
+
+feat_test <- rec_prep |> 
+  bake(data_test)
+
+fit_knn_best <-
+  nearest_neighbor(neighbors = select_best(fits_knn_boot_trn)$neighbors) |> 
+  set_engine("kknn") |> 
+  set_mode("classification") |>
+  fit(disease ~ ., data = feat_trn)
+```
+
+-----
+
+- Use that fitted model to predict into test set
+
+```{r}
+accuracy_vec(feat_test$disease, predict(fit_knn_best, feat_test)$.pred_class)
+```
+
+-----
+
+Our best estimate of how accurate a model with k = `r select_best(fits_knn_boot_trn)$neighbors` would be in new data is `r accuracy_vec(feat_test$disease, predict(fit_knn_best, feat_test)$.pred_class)`.   
+
+- However, it was only fit with n = 203 (the training set).  
+- If we truly want the best model, we should now train once again with all of our data.  
+- This model would likely perform even better b/c it has > n.  
+- However, we have no more new data to evaluate it!
+- There is no perfect performance estimate!
+
+## Nested Resampling
+
+And now the final, mind-blowing extension!!!!!
+
+The bootstrap resampling + test set approach to simultaneously select and evaluate models is commonly used
+
+However, it suffers from the same problems as the single train, valdition, test set approach when it comes to evaluating the performance of the final best model
+  
+- It only uses a single small held out test set.  In this case, 1/3 of the total sample size.
+  - This will yield a high variance/imprecise estimate of model performance
+ 
+- It also yields a biased estimate of model performance
+  - The model we evaluated in test was fit to only the training data which was only 2/3 of total sample size
+  - Yet our true final model is trained with the full dataset
+  - We are likely underestimating its true performance
+
+-----
+
+Nested resampling offers an improvement with respect to these two issues
+
+Nested resampling involves two loops
+
+  - The inner loop is used for model selection
+  - The outer loop is used for model evaluation
+
+Nested resampling is VERY CONFUSING at first (like the first year you use it!)
+
+Nested resampling isn't fully supported by tidymodels as of yet.  You  have to do some coding to iterate over the outer loop
+
+Application of nested resampling is outside the scope of this course but you should understand it conceptually.  For further reading on the implementation of this method, see [an example](https://www.tidymodels.org/learn/work/nested-resampling/) provided by the tidymodels folks.
+
+-----
+
+A 'simple' example using bootstrap for inner loop and 10-fold CV for outer loop
+
+- Divide the full sample into 10 folds
+- Iterate through those 10 folds as follows (this is the outer loop)
+  - Hold out fold 1
+  - Use folds 2-10 to do the inner loop bootstrap
+      - Bootstrap these folds B times
+      - Fit models in B bootstrap samples
+      - Calculate *selection performance metrics* in B out-of-bag samples
+      - Average the B bootstrapped *selection performance metrics* for each model configuration
+      - Select the best model configuration using this average bootstrapped *selection performance metric*
+  - Use best model configuration from folds 2-10 to make predictions for the held-out fold 1 to get the first (of ten) *evaluation performance metrics*
+  - Repeat for held out fold 2 - 10
+- Average the 10 *evaluation performance metrics.*   This is the expected performance of a best model configuration (selected by B bootstraps) in new data.  [You still don't know what configuration you should use because you have 10 'best' model configurations]
+- Do B bootstraps with the full sample to select the best model configuration
+- Fit this best model configuration to the full data
+
+-----
+
+Nested resampling evaluates a fitting and selection process not a specific model configuration!
+
+- You therefore need to select a final model configuration using same resampling with full data
+
+- You then need to fit that new model configuration to the full data
+
+- That was the last two steps on the previous page
+
+-----
+
+::: {.callout-important}
+# Question
+Why bootstrap on inner loop and k-fold on outer loop?
+:::
+
+::: {.fragment .uwred}
+The inner loop is used for selecting models.  Bootstrap yields low variance performance estimates (but they are biased).  We want low variance to select best model configuration.  K-fold is a good method for less biased performance estimates.  We want less bias in our final evaluation of our best model.  You can do repeated K-fold in the outer loop to both reduce its variance and give you a sense of the
+performance sampling distribution. BUT VERY COMPUTATIONALLY INTENSIVE
+:::
+
+-----
+
+## Data Exploration with Advanced Resampling Methods 
+Final words on resampling:
+
+- Iterative methods (K-fold, bootstrap) are superior to single validation set approach wrt bias-variance trade-off in performance measurement
+
+- K-Fold resampling should be used if you looking for a performance estimate of a single model configuration
+
+- Bootstrap resampling should be used if you are looking only to choose among model configurations but don't need an independent assessment of that final model
+
+- Bootstrap resampling + Test set or Nested Resampling should be used when you plan to both select among model configurations AND evaluate the best model
+
+
+In scenarios where you will not have one test set but will eventually use all the data as test ast some point (i.e., k-fold for evaluation of a single model configuration or Nested CV)
+
+- Think carefully about how you do EDA
+- Resampling reduces overfitting in the model selection process 
+- Can use eyeball sample (10-20% of full data) with little impact on final performance measure 
