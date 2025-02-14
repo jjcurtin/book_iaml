@@ -12,3 +12,29 @@ In short, PCA
 
 
 This example is based loosely on tutorial and demonstration data developed by [Lindsay Smith](https://www.iro.umontreal.ca/~pift6080/H09/documents/papers/pca_tutorial.pdf)
+
+
+
+Let's start with a toy dataset for two variables, `x1` and `x2` and a sample size of 10.  We will work in two dimensions to make the example easier to visualize but the generalization to n dimensions (where n = number of variables) is not difficult.
+
+```{r}
+library(tidyverse)
+d <- tibble(x1 = c(2.5, 0.5, 2.2, 1.9, 3.1, 2.3, 2.0, 1.0, 1.5, 1.1),
+            x2 = c(2.4, 0.7, 2.9, 2.2, 3.0, 2.7, 1.6, 1.1, 1.6, 0.9))
+d |> print()
+```
+
+Here is a scatterplot of the data.   I've added the x and y axes of the coordinate system to make those explicit since the PCA will be rotating this coordinate system to achieve its goals.
+
+```{r}
+theme_set(theme_classic() + theme(axis.line=element_blank()))
+d |> ggplot(aes(x = x1, y = x2)) +
+  geom_point() +
+  geom_hline(yintercept = 0, color = "blue") +
+  geom_vline(xintercept = 0, color = "blue") +
+  xlim(-1,4) +
+  ylim(-1,4) 
+```
+
+
+
