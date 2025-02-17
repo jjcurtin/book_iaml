@@ -9,9 +9,19 @@ editor_options:
 
 ### General Information
 
-To start, the introductory sections about PCA in [Wikipedia](https://en.wikipedia.org/wiki/Principal_component_analysis) provide a nice orientation and summary of the technique.
+To start, the introductory sections about PCA from [Wikipedia](https://en.wikipedia.org/wiki/Principal_component_analysis) provide a nice orientation and summary of the technique.
 
-In short, PCA 
+In short, PCA linearly transforms our data (our `x`s to be precise) onto a new coordinate system such that the directions/axes (principal components) capturing the largest variation in the data can be easily identified.
+
+A set of up to `p` principal components can be derived from `p` raw variables (e.g. predictors) such that the first principal component is a linear combination of the `p` raw variables that accounts for the most variance across those variables.   The 2nd prinicipal component is a similar linear combination of the raw variables that is orthogonal (uncorrleated) with the first component and accounts for the largest proportionn of remaining variance among the raw variables.  PCA continues to derive additional components that are each orthogonal to the previous components and account for successively less variance.
+
+These new components represent a new coordinate system within which to represent score on our observations.   This new system is a rotation of the original coordinate system that consists of orthogonal axes (e.g., x, y, z) defined by our raw variables.
+
+We can use PCA to
+
+- Understand the structure of our data
+- Transform our raw (correlated) variables into a set of uncorrelated features
+- Most importantly, retain a large portion of the the variance from the `p` original variables with << `p` principal components.  This last benefit may allow us to fit lower variance prediction models (due to less overfitting) without increasing model bias by much.
 
 ### Applications in machine learning
 
@@ -20,15 +30,11 @@ When we discuss PCA in the machine learning world, we consider it an example of 
 - It is applied to the raw predictors (the `x`s, ignoring `y`).  
 - We use it to reduce the dimensionality of our features to minimize overfitting that can contribute to model variance.
 
-
 ## A Two Dimensional Example
 
 This example is based loosely on a tutorial and demonstration data developed by [Lindsay Smith](https://www.iro.umontreal.ca/~pift6080/H09/documents/papers/pca_tutorial.pdf)
 
-
-### The original variables
-
-Let's start with a toy dataset for two variables, `x1` and `x2` and a sample size of 10.  We will work in two dimensions to make the example easier to visualize but the generalization to n dimensions (where n = number of variables) is not difficult.
+Let's start with a toy dataset for two variables (e.g., predictors), `x1` and `x2` and a sample size of 10.  We will work in two dimensions to make the example easier to visualize but the generalization to p dimensions (where p = number of variables) is not difficult.
 
 ```{r}
 library(tidyverse)
@@ -39,7 +45,7 @@ d |> print()
 
 --------------------------------------------------------------------------------
 
-Here is a scatterplot of the dataset.   I've also added a green dot (that is not part of the dataset) at the mean of `x1` and `x2`.  This will be the point of rotation for the dataset as we attempt to find a new coordinate system (not defined by `x1` and `x2`), where the data's variance is maximized across the axes (the principal components) and the observations are uncorrelated. 
+Here is a scatterplot of the dataset.  I've also added a green dot (that is not part of the dataset) at the mean of `x1` and `x2`.  This will be the point of rotation for the dataset as we attempt to find a new coordinate system (not defined by `x1` and `x2`), where the dataset's variance is maximized across the new axes (the principal components) and the observations are uncorrelated in this new coordinate system.
 
 ```{r}
 theme_set(theme_classic())
@@ -50,13 +56,11 @@ d |> ggplot(aes(x = x1, y = x2)) +
   xlim(-1,4) +
   ylim(-1,4) +
   coord_fixed()
-
-
 ```
 
 --------------------------------------------------------------------------------
 
-The first step in the process is to center both `x1` and `x2` such that their means are zero.  This moves the green point to the origin.  This will make it easier to rotate the data around that point (the definitions of the new principal components will be defined as a linear combination of the orignal variables but there is not offset/intercept in those transformation formulas).  
+The first step in the process is to center both `x1` and `x2` such that their means are zero.  This moves the green point to the origin.  This will make it easier to rotate the data around that point (the definitions of the new principal components will be defined as a linear combination of the original variables but there is not offset/intercept in those transformation formulas).  
 
 I've left the green point at the mean of `x1c` and `x2c` for this plot to reinforce the impact of centering.  I will remove it from later figures.  I have also drawn the true axes in blue to make the original coordinate system defined by `x1` and `x2` salient.  PCA will rotate this coordinate system to achieve its goals.
 
@@ -64,15 +68,18 @@ I've left the green point at the mean of `x1c` and `x2c` for this plot to reinfo
 d <- d |> 
   mutate(x1c = x1 - mean(x1), x2c = x2 - mean(x2))
 
-d |> ggplot(aes(x = x1c, y = x2c)) +
-  geom_point() +
-  geom_hline(yintercept = 0, color = "blue") +
-  geom_vline(xintercept = 0, color = "blue") +
+plot <- d |> 
+  ggplot(aes(x = x1c, y = x2c)) +
+    geom_point() +
+    geom_hline(yintercept = 0, color = "blue") +
+    geom_vline(xintercept = 0, color = "blue") +
+    xlim(-2.5, 2.5) +
+    ylim(-2.5, 2.5) +
+    coord_fixed()
+
+plot + 
   geom_point(data = tibble(x1c=mean(d$x1c), x2c = mean(d$x2c)), 
-             size = 2, color = "green") +
-  xlim(-2.5, 2.5) +
-  ylim(-2.5, 2.5) +
-  coord_fixed()
+               size = 2, color = "green")
 ```
 
 NOTE: It is sometimes useful to also scale the original variables (i.e.,, set their standard deviations = 1).  
@@ -84,19 +91,10 @@ NOTE: It is sometimes useful to also scale the original variables (i.e.,, set th
 
 --------------------------------------------------------------------------------
 
-Our goal now is to find the axes of the new coordinate system.   The first axis (the first principal component) is the axis that ....
+Our goal now is to find the axes of the new coordinate system.   The first axis (the first principal component) will be situated such it maximizes the variance in the data across its span.  Imagine fittinng all possible lines through the green dot and choosing the line that moves along the widest spread of the data.  That line (displayed in green below) will be the first axis of the new coordinate system and projections of the points onto that axis will represent the scores for each observation on our first principal component defined by this axis.
 
 ```{r}
 #| include: false
-
-# base plot to draw on
-plot <- d |> ggplot(aes(x = x1c, y = x2c)) +
-  geom_point() +
-  geom_hline(yintercept = 0, color = "blue") +
-  geom_vline(xintercept = 0, color = "blue") +
-  xlim(-2.5, 2.5) +
-  ylim(-2.5, 2.5) +
-  coord_fixed() 
 
 ei <- d |> 
   select(x1c, x2c) |>
@@ -111,11 +109,11 @@ plot +
 
 --------------------------------------------------------------------------------
 
-This first principal component is similar to the regression line but not identical.
+This axis associated with the first principal component is similar to a regression line but not identical.
 
-- The red regression line was fit to minimize the sum of the squared errors when predicting the outcome (in this instance when regressing `x2c` on `x1c`).  These errors are the vertical distances from the red line to the points.
+- The red regression line (below) was fit to minimize the sum of the squared errors when predicting the outcome (in this instance when regressing `x2c` on `x1c`) from a predictor (in this instance, `x1c`.  These errors are the vertical distances from the red line to the points.
 
-- In contrast, the green line that maximized variance across the PC1 dimension minimized the squared perpendicular distances between the green line and the points.  These distances go up and to the left and down and to the right from the green line to the points rather than vertical.
+- In contrast, the green line maximized variance across that PC1 dimension.  As a result, it also minimized deviations around the line.  However, thsee deviations are the squared perpendicular distances between the green line and the points.  These distances go up and to the left and down and to the right from the green line to the points rather than vertical.   They are not the same line!
 
 ```{r}
 #| include: false
@@ -131,19 +129,19 @@ plot +
               color = "red")
 ```
 
-
 --------------------------------------------------------------------------------
 
-To find the next principal component, we need to find the line that is perpendicular to the first component and in the direction that accounts for the largest proportion of the remaining variance in the dataset. 
+To find the next principal component, we need to find a new axis that is perpendicular to the first component and in the direction that accounts for the largest proportion of the remaining variance in the dataset. 
 
-In our example with only two variables, there is only one direction remaining that is perpendicular/orthogonal with PC1 because we are in two dimensional space given only two original variables.
+In our example with only two variables, there is only one direction remaining that is perpendicular/orthogonal with `PC1` because we are in two dimensional space given only two original variables.
 
-However, if we were in a higher dimensional space with n > 2 variables, this next component could follow the direction of maximal remaining variance in a direction orthogonal to PC1.  Subsequent components up to the nth component given n variables would each be orthogonal to all previous components and in the direction of maximal variance.
+However, if we were in a higher dimensional space with p > 2 variables, this next component could follow the direction of maximal remaining variance in a direction orthogonal to `PC1`.  Subsequent components up to the pth component given p variables would each be orthogonal to all previous components and in the direction of maximal variance.
 
 We have added this second second component to our 2 dimensional example below.
 
 ```{r}
 #| include: false
+
 plot +
   geom_abline(slope = ei$vectors[2,1]/ei$vectors[1,1], 
               intercept = 0, color = "green") +
@@ -154,12 +152,13 @@ plot +
 
 --------------------------------------------------------------------------------
 
-These two components define a new coordinate system within which to measure/score our observations.  The new axes of this system are the PCs.  This new coordinate system is a rotation of our original system that was previously defined in axes based on x1 and x2.  
+These two components define a new coordinate system within which to measure/score our observations.  The new axes of this system are the PCs.  This new coordinate system is a rotation of our original system that was previously defined in axes based on `x1` and `x2`.  
 
-Here is a figure displaying the data in this new coordinate system.
+Here is a figure displaying the data in this new coordinate system. Notice the group of four points to the left (three vertical and one further to the left).  Those same points were previously in the top right quadrant of the coordinate system defined by `x1c` and `x2c`.
 
-- The data show the highest variance over PC1 (the x axis) and the next highest variance over PC2 (the y axis) 
-- When the observations are scored/defined on these PCs, PC1 and PC2 are now new features we can use to describe the data and they are uncorrelated 
+- Scores on each of the two components are obtained by projecting the observations onto the associated axis for that component.
+- The data show the highest variance over `PC1` (the x axis) and the next highest variance over `PC2` (the y axis) 
+- When the observations are scored/defined on these PCs, `PC1` and `PC2` are now new, uncorrelated features we can use to describe the data.
 
 ```{r}
 #| include: false
@@ -175,10 +174,15 @@ pca$x |> ggplot(aes(x = PC1, y = PC2)) +
   coord_fixed() 
 ```
 
+## PCA using Eigenvectors and Eigenvalues
 
-eigen vectors and values
+We can derive the new coordinate system that maximizes the variance on `PC1`, and then `PC2`, etc by doing an eigen decomposition of the covariance matrix (or correlation matrix if the x's are to be scaled).  When applied to a p x p covariance matrix, this yields `p` pairs of [eigen vectors and eigen values](https://en.wikipedia.org/wiki/Eigenvalues_and_eigenvectors).  Complete explanation of this process is beyond the scope of this tutorial but the interested reader can consult [Linear Algebra and its Applications by Gilbert Strang](https://rksmvv.ac.in/wp-content/uploads/2021/04/Gilbert_Strang_Linear_Algebra_and_Its_Applicatio_230928_225121.pdf).
 
+In short, the eigen vectors represent the new axes for the principal components and the eigen values indicate the variances of the principal components.  
 
+-------------------------------------------------------------------------------
+
+Here is an eigen decomposition of the covariance for our toy data
 ```{r}
 ei <- d |> 
   select(x1c, x2c) |>
@@ -186,20 +190,34 @@ ei <- d |>
   eigen(symmetric = TRUE)
 ```
 
-the eigenvectors
+- **Eigenvectors**.  These are unit vectors that point in the direction of the axes of the new coordinate system.  
 ```{r}
 ei$vectors
 ```
 
-the eigenvalues
+This figure plots these two vectors on our original coordinate system defined by `x1c` and `x2c`.  Note that these vectors map on the new axes we demonstrated earlier.
+
+```{r}
+plot +
+  annotate("segment", x = 0, y = 0, xend = ei$vectors[1,1], yend = ei$vectors[2,1], 
+              color = "green") + 
+  annotate("segment", x = 0, y = 0, xend = ei$vectors[1,2], yend = ei$vectors[2,2], 
+              color = "green")
+```
+
+--------------------------------------------------------------------------------
+
+- **Eigenvalues**. These are the variances associated with the principal components
 ```{r}
 ei$values
 ```
 
-The variances of the original variables.  
+The eigen decomposition parses the complete variance in the original variables such that `PC1` has the most variance, `PC2`, the secondmost, etc.  The full set of the PCs will contain all the variance of the original variables.
+
+In our example:
 
 - Variance was originally split across `x1` and `x2`.  
-- PC1 now contains most of the variance in the dataset (see above)
+- `PC1` now contains most of the variance in the dataset (see eigenvalues above)
 ```{r}
 var(d$x1)
 var(d$x2)
@@ -211,16 +229,23 @@ ei$values[1] + ei$values[2]
 var(d$x1) + var(d$x2)
 ```
 
+## Stable Compuation of Princippal Components
 
-More numerically stable to get PCs using singular vector decomposition (`svd()` in R).   `prcomp()` uses svd and also directly calculates the PCs.  `step_pca()` 
+It is more numerically stable to get the principal components using singular vector decomposition (`svd()` in R) than eigen decomposition.  
+
+In base R, `prcomp()` uses svd and also directly calculates the PCs.
+
+- See [help](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/prcomp)
+- We pass in our raw variables.
+- By default, the raw variables are centered by not scaled.
 
 ```{r}
 pca <- prcomp(d |> select(x1, x2))
 ```
 
-------------
+--------------------------------------------------------------------------------
 
-Note that direction of PC is arbitrary (PCs are opposite direction from the solution using `eigen()`)
+We can get the vectors associated with the new coordinate system from `$rotation`  Note that direction of the PCs is arbitrary (e.g., PCs are opposite direction from the solution using `eigen()` with these data)
 
 ```{r}
 ei$vectors
@@ -228,30 +253,50 @@ ei$vectors
 pca$rotation
 ```
 
+--------------------------------------------------------------------------------
 
-PC1 and PC2 
+`$sdev` returns the square root of the eigenvalues.  This represents the standard deviations of the PCs
 
-- Contain all the variance from x1 and x12
+```{r}
+pca$sdev
+
+# square for variances
+pca$sdev ^2
+
+# compare to eigenvalues
+ei$values
+```
+
+--------------------------------------------------------------------------------
+
+`$x` contains the new scores on the PCs for the dataset
+
+```{r}
+pca$x
+```
+
+As expected, they are uncorrelated
+```{r}
+round(cor(pca$x[,1], pca$x[,2]), 5)
+```
+
+## Using PCA for Dimensionality Reduction
+
+In our example, `PC1` and `PC2`
+
+- Contain all the variance from `x1` and `x2`
 - Are orthogonal 
 
-But when using PCA for dimensionality reduction, we wanted to describe the variance of our variables in few dimensions (with fewer features)
+But when using PCA for dimensionality reduction, we wanted to use the variance of our variables in few dimensions (with fewer features) for prediction to reduce overfitting.
 
-- Most of variance from the full dataset is now in PC1
-- We can use PC1 as a feature rather than both x1 and x2.
+- Most of variance from the full dataset is now in `PC1`
+- We can use `PC1` as a feature rather than both `x1` and `x2`.
 
--------------------------------
+## PCA in Tidymodels
 
-Can even reconstruct x1 and x2 now using only variance in PC1 to see how much info we lost
+We can use PCA for dimensionality reduction as part of our feature engineering.
 
-------------------------------------------------------
-
-
-`step_pca()` uses `prcomp()`
-
-https://recipes.tidymodels.org/reference/step_pca.html
-
-
-Default is center = false and scale = false
-you definitely want to center and maybe scale predictors in recipe before using step_pca
-
-You can choose number of components to retain by specifying the exact number (`num_comp = `) or by indicating the minimum variance retained across PCs (`threshold = `)
+- `step_pca()` uses `prcomp()`
+- See [help](https://recipes.tidymodels.org/reference/step_pca.html)
+- Default is center = false and scale = false.  You definitely want to center and maybe scale predictors in a previous recipe step before using `step_pca()`
+- You can choose number of components to retain by specifying the exact number (`num_comp = `) or by indicating the minimum variance retained across PCs (`threshold = `)
