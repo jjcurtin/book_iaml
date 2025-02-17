@@ -37,6 +37,9 @@ This example is based loosely on a tutorial and demonstration data developed by 
 Let's start with a toy dataset for two variables (e.g., predictors), `x1` and `x2` and a sample size of 10.  We will work in two dimensions to make the example easier to visualize but the generalization to p dimensions (where p = number of variables) is not difficult.
 
 ```{r}
+#| message: false
+#| warning: false
+
 library(tidyverse)
 d <- tibble(x1 = c(2.5, 0.5, 2.2, 1.9, 3.1, 2.3, 2.0, 1.0, 1.5, 1.1),
             x2 = c(2.4, 0.7, 2.9, 2.2, 3.0, 2.7, 1.6, 1.1, 1.6, 0.9))
@@ -94,7 +97,7 @@ NOTE: It is sometimes useful to also scale the original variables (i.e.,, set th
 Our goal now is to find the axes of the new coordinate system.   The first axis (the first principal component) will be situated such it maximizes the variance in the data across its span.  Imagine fittinng all possible lines through the green dot and choosing the line that moves along the widest spread of the data.  That line (displayed in green below) will be the first axis of the new coordinate system and projections of the points onto that axis will represent the scores for each observation on our first principal component defined by this axis.
 
 ```{r}
-#| include: false
+#| echo: false
 
 ei <- d |> 
   select(x1c, x2c) |>
@@ -116,7 +119,7 @@ This axis associated with the first principal component is similar to a regressi
 - In contrast, the green line maximized variance across that PC1 dimension.  As a result, it also minimized deviations around the line.  However, thsee deviations are the squared perpendicular distances between the green line and the points.  These distances go up and to the left and down and to the right from the green line to the points rather than vertical.   They are not the same line!
 
 ```{r}
-#| include: false
+#| echo: false
 
 m <- lm(x2c ~ x1c, data = d)
 
@@ -140,7 +143,7 @@ However, if we were in a higher dimensional space with p > 2 variables, this nex
 We have added this second second component to our 2 dimensional example below.
 
 ```{r}
-#| include: false
+#| echo: false
 
 plot +
   geom_abline(slope = ei$vectors[2,1]/ei$vectors[1,1], 
@@ -161,7 +164,7 @@ Here is a figure displaying the data in this new coordinate system. Notice the g
 - When the observations are scored/defined on these PCs, `PC1` and `PC2` are now new, uncorrelated features we can use to describe the data.
 
 ```{r}
-#| include: false
+#| echo: false
 
 pca <- prcomp(d |> select(x1, x2))
 
