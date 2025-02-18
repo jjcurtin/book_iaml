@@ -1,0 +1,356 @@
+---
+title: "Unit 04 Lab Agenda"
+date: "`r lubridate::today()`"
+format: 
+  html: 
+    embed-resources: true
+    toc: true 
+    toc_depth: 4
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+#| echo: FALSE
+#| message: FALSE
+options(conflicts.policy = "depends.ok")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+tidymodels_conflictRules()
+library(tidyverse) 
+library(tidymodels)
+theme_set(theme_classic())
+options(tibble.width = Inf, dplyr.print_max=Inf)
+```
+
+-   When I included all of the predictors in my recipe (survived ~ ., data = data_trn) I would make it to the data validation bake and get an error that I had columns that weren't accounted for and when I looked it up, it said to change my dataset. Could we discuss troubleshooting that or best practices for the order to put our step functions.
+
+## Quick Answers
+
+> *Q: Can you visualize classification/decision boundaries for more than 2 variables? I feel like that would be helpful for tuning the models.*
+
+Yes! There are R packages available that can plot three-dimension figures. However, the plots we use in class are only for lecturing purposes. Things get more complicated and are hard to visualize when it's more than three dimensions. And in reality, we often have more than three predictors.
+
+> *Q: For LDA and QDA, is centering/scaling not important? Also, I am curious if model configuration will be more prone to errors if key predictors have highly different scales (e.g., income and age).*
+
+We don't need centering/scaling for LDA or QDA.
+
+> *Q: - I am interested in how to find the optimal K value in knn. Last semester, we did a visualization about how to find optimal k in knn in Python, and I am wondering if that works the same in R.*
+
+We'll learn more in later chapters on resampling and hyperparameter tuning:)!
+
+## 1. Handle Missingness
+
+> *Q: Still, I would like to learn more about how to properly use feature engineering functions such as step_impute series and how to handle missing values, specifically for categorical variables.*
+
+### Most common step functions to impute missing values
+
+-   `step_impute_median()`: creates a specification of a recipe step that will substitute missing values of numeric variables by the training set **median** of those variables
+
+-   `step_impute_mean()`: creates a specification of a recipe step that will substitute missing values of numeric variables by the training set **mean** of those variables
+
+-   `step_impute_mode()`: creates a specification of a recipe step that will substitute missing values of nominal variables by the training set **mode** of those variables
+
+-   `step_impute_linear()`: creates a specification of a recipe step that will create **linear regression models** to impute missing data
+
+-   `step_impute_knn()`: creates a specification of a recipe step that will impute missing data using **nearest neighbors**
+
+-   `step_impute_bag()`: creates a specification of a recipe step that will create **bagged tree models** to impute missing data
+
+### Numeric vs. nominal predictors
+
+<font style = "color:red">**Numeric predictors:** </font>`step_impute_median()`, `step_impute_mean()`, `step_impute_linear()`, `step_impute_knn()`, `step_impute_bag()`
+
+<font style = "color:red">**Nominal predictors:** </font> `step_impute_mode()`, `step_impute_knn()`, `step_impute_bag()`
+
+## 2. Mismatch of category levels in training, validation and test data
+
+> *Q: What is an easier way to check if we need to ensure the levels from the train, validation and the test set of the data match? In another word when do I know I will need to manually mutate the level for a categorical variable for one predictor in a specific data set among those three to match the levels of the others.*
+
+<font style = "color:green"> ***For more detailed steps to handle novel levels in held-out data, please consult [John's page](https://jjcurtin.github.io/book_iaml/app_dummy_coding.html)😊!!*** </font>
+
+### Step 1: Check if levels match across held-in and held-out datasets
+
+```{r}
+#| eval: FALSE
+levels(data_trn$x)
+levels(data_validation$x)
+levels(data_test$x)
+```
+
+### Step 2: Create new levels when building recipes (only do this step when there're novel levels in your held-out data)
+
+```{r}
+#| eval: FALSE
+rec <- recipe(y ~ ., data = data_trn) |>  
+  step_novel(x) |> 
+  step_dummy(x)
+```
+
+❗ You should always create novel levels before dummy coding.
+
+❗ When there are multiple novel levels in your held-out data, they would all collapse into a single class called "new" (and it's fine!).
+
+## 3. Handle Multicollinearity
+
+> *Q: Error in solve.default(reg.cov) : system is computationally singular: reciprocal condition number = 1.08418e-37*
+
+> *Q: Error handling with QDA models, there were a ton of "perfectly correlated" predictors, or something of the like, that felt really hard to get around, even with step_ncz.*
+
+*Quick note: `step_nzv()` removes variables that have very low variance (highly sparse and unbalanced); it cannot help with multicollinearity*
+
+### Step 1: Inspect correlations during modeling EDA
+
+<font style = "color:darkblue">💡 Remove highly correlated predictors before applying LDA/QDA</font>
+
+**Correlation matrix**
+
+```{r}
+#| eval: FALSE
+data_trn |> 
+  select(where(is.numeric)) |> 
+  cor(use = "pairwise.complete.obs") |> 
+  corrplot::corrplot.mixed()
+```
+
+*Sample graph*:
+
+```{r}
+#| echo: FALSE
+#| message: FALSE
+iris |> 
+  select(where(is.numeric)) |> 
+  cor(use = "pairwise.complete.obs") |> 
+  corrplot::corrplot.mixed()
+```
+
+**VIF (regression models only)**
+
+```{r}
+#| eval: FALSE
+# linear regression
+lm(y ~ ., data) |> car::vif()
+# logistic regression
+glm(y ~ . , data, family = binomial) |> car::vif()
+```
+
+### Handle Multicollinearity when building recipes
+
+-   dimensionality reduction techniques such as `step_pca()`: creates a specification of a recipe step that will convert numeric variables into one or more principal components (<font style = "color: red">don't forget to center and scale your variables before applying pca!!</font>)
+
+    - PCA can transform correlated predictors into uncorrelated principle components
+  
+    - 💡 How do we choose which variables to do a PCA?
+  
+      - domain knowledge: for example, we collapse items from the same scale together (e.g., the seven items from GAD-7 anxiety scale)
+    
+      - predictors with high correlations
+    
+    - <font style = "color:green"> ***Find more information on [John's page](https://jjcurtin.github.io/book_iaml/app_pca.html)😊!!*** </font>
+
+-   `step_corr()`: creates a specification of a recipe step that will potentially remove variables that have large absolute correlations with other variables
+
+    - not typically used
+
+### Regularization Methods
+
+Regularization is a technique to prevent overfitting by adding a penalty to the model's complexity. This helps with handling high-dimensional data or multicollinearity.
+
+For example, RDA uses two regularization parameters -- $\alpha$ to control the mix between LDA and QDA, and $\lambda$ to shrink the covariance matrix towards a diagonal matrix which helps handle multicollinearity
+
+## 4. Step Functions (and ordering)
+
+`step_impute_**()`, `step_YeonJohnson()`, `step_mutate()`, `step_dummy()`, `step_other()`, `step_novel()`, `step_ordinalscore()`, `step_interact()`, `step_poly()`, `step_scale()`, `step_range()`, `step_pca()`
+
+```{r}
+#| eval: FALSE
+rec <- recipe(y ~ ., data_trn) |> 
+  # handle missing values first
+  step_impte_median(all_numeric_predictors()) |> 
+  step_impute_mean(all_numeric_predictors()) |> 
+  step_impute_mode(all_nominal_predictors()) |> 
+  step_impute_linear() |> 
+  step_impute_knn() |> 
+  step_impute_bag() |> 
+  
+  # convert nominal to numeric if needed
+  step_ordinalscore() |> 
+  
+  # transformation
+  step_YeoJohnson() |> # best for models that assume normality (linear models, 
+                       # discriminant analysis, bayesian models, etc.), may not
+                       # needed for knn
+  
+  # feature engineering to create new features
+  step_mutate() |> 
+  
+  # encoding categorical variables
+  step_novel() |> 
+  step_other() |> 
+  step_dummy() |> # not needed for tree-based models and bayesian models
+  
+  # interactions & polynomial features
+  step_interact() |> # may not needed for knn
+  step_poly() |> 
+  
+  # scaling & normalization -- suitable for regularization-based models (knn, etc.) 
+  # and regularized models (ridge, lasso, RDA, etc.), PCA, and neural networks
+  # not needed for tree-based models
+  step_scale() |> 
+  step_range() |> 
+  
+  # dimensionality reduction
+  step_pca() # suitable for high dimensional data
+```
+
+### More on `step_ordinalscore()`
+
+**`step_ordinalscore()` converts ordinal factor variables into numeric scores**
+
+- ❗ only works for ordered factors
+
+  - we can create ordered factors with function `ordered()`(not recommended), or `factor(x, ordered = TRUE)`
+
+- Alternatively (and most often), we simply use `as.numeric()` to complete the transformation
+
+## 5. Models and their parameters
+
+> *Q: Can we discuss more about parameters in KNN, LR, LDA/QDA/RDA and what we should be and should not be tuning?*
+
+### Linear Regression
+
+-   penalty: amount of regularization
+
+-   mixture: proportion of L1 regularization
+
+```{r}
+#| eval: FALSE
+linear_reg(penalty = NULL, mixture = NULL) |> 
+  set_engine("lm")
+```
+
+### KNN
+
+-   neighbors: number of neighbors to consider
+
+-   weight_func (`rectangular`, `triangular`, `epanechnikov`, `biweight`, `triweight`, `cos`, `inv`, `gaussian`, `rank`, `optimal`): the function used to weight distances
+
+-   dist_power: for calculating Minkowski distance
+
+```{r}
+#| eval: FALSE
+nearest_neighbor(neighbors = NULL, weight_func = NULL, dist_power = NULL) |> 
+  set_engine("kknn") |> 
+  set_mode("regression") # or set_mode("classification")
+```
+
+### Logistic Regression
+
+-   penalty: amount of regularization
+
+-   mixture: proportion of L1 regularization
+
+```{r}
+#| eval: FALSE
+logistic_reg(penalty = NULL, mixture = NULL) |> 
+  set_engine("glm")
+```
+
+### discriminant analysis
+
+#### LDA
+
+-   penalty: amount of regularization
+
+-   regularization_method (`diagonal`, `min_distance`, `shrink_cov`, `shrink_mean`): type of regularized estimation
+
+```{r}
+#| eval: FALSE
+discrim_linear(penalty = NULL, regularization_method = NULL) |> 
+  set_engine("MASS")
+```
+
+#### QDA
+
+-   frac_common_cov
+
+-   frac_identity
+
+```{r}
+#| eval: FALSE
+discrim_regularized(frac_common_cov =  NULL, frac_identity = NULL) |> 
+  set_engine("klaR")
+```
+
+### Naive bayes classifier
+
+-   smoothness: relative smoothness of the class boundary
+
+-   Laplace: Laplace correction to smoothing low-frequency counts
+
+```{r}
+#| eval: FALSE
+naive_Bayes(smoothness = NULL, Laplace = NULL) |> 
+  set_engine("naivebayes")
+```
+
+### Random Forest
+
+-   mtry: number of predictors at each split
+
+-   trees: number of trees in the ensemble
+
+-   min_n: required minimum number of data points in a node
+
+```{r}
+#| eval: FALSE
+rand_forest(mtry = NULL, trees = NULL, min_n = NULL) |> 
+  set_engine("ranger") |> 
+  set_mode("classification") # or set_mode("regression")
+```
+
+### Neural Networks
+
+-   hidden_units: number of units in the hidden model
+
+-   penalty: amount of weight decay
+
+-   dropout: proportion of model parameters randomly set to zero
+
+-   epochs: number of training iterations
+
+-   activation (`linear`, `softmax`, etc): type of relationship between the original predictors and the hidden unit layer
+
+-   learn_rate: rate at which the boosting algorithm adapts from iteration-to-iteration
+
+```{r}
+#| eval: FALSE
+mlp(hidden_units = NULL, penalty = NULL, dropout = NULL, epochs = NULL,
+    activaation = NULL, learn_rate = NULL) |> 
+  set_engine("nnet") |> 
+  set_mode("classification") # or set_mode("regression")
+```
+
+## 6. Multinomial regression, ordinal logistic regression
+
+> *Q: When would we use multinomial logistic regression vs. ordinal logistic regression?*
+
+**Multinomial regression**: when there are multiple predictors
+
+**Ordinal regression**: when the outcome variable is ordered
+
+## 7. Pipeline of selecting the best model and generating test predictions
+
+> *Q: You mentioned before that after training, validation, and selecting the best model, that one optional step is before taking that best model into test, training it on both the training and validation data. At what exact point(s) in the workflow/code do you do this? Is it only when prepping the recipe to bake the test data? Or do you go one step before that and re-train the model using a feature matrix also baked using both training and validation data?*
+
+![](images/clipboard-2055670079.png)
+
+We prep the best recipe to the held-in set (training & validation combined), and bake it to both held-in and held-out (test data) sets. We then train the best model configuration using these held-in features and generate predictions using the held-out features.
+
+## 8. How do we handle categorical predictors?
+
+> *Q: How can you deal with the variables like name or cabin from the homework?*
+
+If the variable is nominal (qualitative categories, no inherent order), we can do dummy coding, contrast coding, etc.
+
+If the variable is ordinal (inherent order but not equidistant spacing), we can either do 1) dummy coding, contrast coding, etc, like above, or 2) treat them as ordered levels. You can choose between those two methods by treating these as different model configurations and comparing them using held-out (validation) data.
+
