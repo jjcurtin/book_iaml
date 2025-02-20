@@ -5,83 +5,149 @@ editor_options:
 
 # IAML Unit 5: Discussion
 
+## Feedback
+
+Course
+
+- Move application assignments - thus?  fri morning?
+- some of the videos or portions don't have subtitles? (all of them should! - confirm?)
+- Transcripts? Timestamps?
+- Mic (lab, discussion?)
+- More questions in slides?
+- Vocab dictionary 
+- End with conclusions? Not sure how different from learning objectives
+- Full solution of a problem posted at end of unit?
+
+Lab
+
+- Less review of previous application assignment
+- More interactive - coding problems?  Forward or backward or both?
+
 ## Announcements
 
 - Starting Unit 6 (Regularization/Penalized models) at end of class today; All set!
 - Unit 7 is Mid-term Exam unit
   - No readings, lecture or quiz
-  - Application assignment as exam (due at normal application assignment day/time; Weds, March 6th at 8pm)
-  - Conceptual exam during discussion meeting (Thursday March 7th at 11 am) 
-- EDA with new datasets (and the last application assignment)
-
-Feedback
-
-- Move application assignments - thus?  fri morning?
-- some of the videos or portions don't have subtitles? (all of them?)
-- Transcripts? Timestamps?
-- Mic (lab, discussion?)
-- more questions
-- vocab dictionary 
-- End with conclusions?
-- Full solution of a problem posted at end of unit?
-
-- less review of previous application assignment
-- more interactive - coding problems?  Forward or backward or both?
+  - Application assignment as exam (due at normal application assignment day/time; Weds, March 5th at 8pm OR NEW TIME BASED ON ABOVE?)
+  - Conceptual exam during discussion meeting (Thursday March 6th at 11 am) 
+- Minimal EDA with new data sets (and the last application assignment)
 
 -----
 
-## Bias and Variance
+## Resampling methods to BOTH select and evaluate models
 
-- General definitions - need to think about repeated estimation of something ($\hat{f}$, $\hat{DGP}$; $\hat{accuracy}$, $\hat{rmse}$)
+Most common scenario requires both model selection and final model evaluation
+
+- Need data for training, validation and test data set(s)
+
+### Test set
+
+All methods (other than nested) use a single test set 
+
+- 20-30% of data
+- The problems associated with a small test set motivate nested resampling ([What problem?]{.uwred})
+- Conceptually, get test set first 
+  - use `initial_split()` for all but validation set approach (now use `initial_validation_split()` for this last approach)
+
+### Train and Validation set
+
+Describe how each of these methods produce training and validation sets
+
+  - Single validation set
+  - LOOCV
+  - K-fold
+  - Repeated k-fold
+  - Grouped k-fold
+  - Bootstrap
+
+-----
+
+## No performance estimate necessary
+
+When might you just want to know the best model configuration but NOT care about how it performs? (though I think you might always want to know!)
+
+How would you modify the resampling procedure?
+
+In this instance, we might call the held-out sets `validation sets` when using that terminology
+
+-----
+
+## Only one model configuration
+
+When might you have only one model configuration? (is this ever really true?)
+
+How would you modify the resampling procedure?
+
+In this instance, we might call the held-out sets `test sets` when using that terminology
+
+-----
+
+## Bias and Variance - The MOST Fundamental Issues in Inferential Statistics
+
+Describe these two properties of estimates in general
+
+- need to think about repeated estimation of something ($\hat{f}$, $\hat{DGP}$; $\hat{accuracy}$, $\hat{rmse}$)
+
+
+Describe bias and variance associated with developing models (estimates of the DGP)
+
 - Examples for our models ($\hat{f}$, $\hat{DGP}$)
+- What factors affect each?
+
+Describe bias and variance of our performance estimates
+
 - Examples for our performance estimates ($\hat{accuracy}$, $\hat{rmse}$)
+- What factors affect each?
 
 -----
 
-## Describe process to use resampling to get a performance estimate to evaluate of a single model configuration
+## Connect Bias and Variance to our Resampling Methods
 
-- Which method? 
-- Use held-in/held-out terminology in addition to train/test    
+Our resampling methods yield an ESTIMATE of (held-out/out of sample) performance metric
+
+- We can use it to select among model configurations (validation sets)
+- We can use it to evaluate a single (or best) model configuration (test sets)
+
+Lets consider the bias and variable of this ESTIMATE of a performance metric for each METHOD 
+- Use held-in/held-out terminology    
 - Discuss the bias and variance of the performance estimate of this configuration.  Consider implications of:
   - The method
   - size of the held-in data
   - size of held out data
 
------
+Our METHODS
 
-## Describe process to use resampling to get performance estimates to select a best model configuration among many (explanatory setting?)
-
-- When done (what are you selecting among)?
-- Which method? 
-- Use held-in/held-out terminology in addition to train/val
-- Discuss the bias and variance of the performance estimate of this configuration
-- Discuss the bias and variance of the performance estimate used to select the best configuration.  Consider implications of:
-  - The method
-  - size of the held-in data
-  - size of held out data
-- What are the implications if you use that same performance estimate to evaluate that best model configuration (i.e., estimate its performance in new data)?
+- Single validation set
+- LOOCV
+- K-fold
+- Repeated k-fold
+- Bootstrap
 
 -----
 
-## Describe process to use resampling (other than nested) to get performance estimates to both select best configuration and evaluate it in new data
+## Biased Performance Estimates
 
-- Which method?
-- Describe how to do it using held-in/held-out terminology in addition to train/val/test
-- Discuss the bias and variance of the performance estimate used to select the best configuration.  Consider implications of:
-  - The method
-  - size of the held-in data
-  - size of held out data
-- Discuss the bias and variance of the performance estimate used to evaluate that best configuration.  Consider implications of:
-  - The method
-  - size of the held-in data
-  - size of held out data
+ALL resampling methods yield performance estimates with some degree of bias when used to evaluate the performance of a model we will implement trained on ALL the data  
+
+WHY?
+
+-----
+
+## Optimization bias
+
+What are the implications if you use that same performance estimate to select the best model configuration AND to evaluate that best model configuration (i.e., estimate its performance in new data)?
+
+Can this source of bias be eliminated?
 
 -----
 
 ## Describe process to use Nested CV to get performance estimates to both select best configuration and evaluate it in new data
 
 - When used?
+- Why needed?
 - Describe how to do it using held-in/held-out terminology in addition to train/val/test
+
+
 - Discuss the bias and variance of the performance estimate used to select the best configuration.  Consider implications of:
   - The method
   - size of the held-in data
@@ -91,37 +157,7 @@ Feedback
   - size of the held-in data
   - size of held out data
 
------
-
-## Methods to EITHER select best model configuration (among many) OR evaluate a single best model configuration
-
-What are pros, cons, and when to use?
-
-  - Single validation (or test) set
-  - LOOCV
-  - K-fold
-  - Repeated k-fold
-  - Bootstrap
-
-  - ALSO: grouped k-fold
-
------
-
-## Methods to BOTH select best model configuration and evaluate that best configuration
-
-- What is optimization bias (its just a form of bias but given a fancy name due to its source)?
-- Combine above method with held out test set
-- Nested CV (see [tutorial](https://www.tidymodels.org/learn/work/nested-resampling/))
-
------
-
-## Discuss data leakage with resampling
-
-- Why is data leakage a problem?
-- How does noise factor into the problem?
-- Why does resampling substantially reduce data leakage?
-- How to use eyeball sample with single held out test set
-
+-------
 
 ## PCA
 
