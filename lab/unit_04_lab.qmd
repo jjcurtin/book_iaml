@@ -22,19 +22,21 @@ theme_set(theme_classic())
 options(tibble.width = Inf, dplyr.print_max=Inf)
 ```
 
--   When I included all of the predictors in my recipe (survived \~ ., data = data_trn) I would make it to the data validation bake and get an error that I had columns that weren't accounted for and when I looked it up, it said to change my dataset. Could we discuss troubleshooting that or best practices for the order to put our step functions.
+-   When I included all of the predictors in my recipe (survived ~ ., data = data_trn) I would make it to the data validation bake and get an error that I had columns that weren't accounted for and when I looked it up, it said to change my dataset. Could we discuss troubleshooting that or best practices for the order to put our step functions.
 
--   Why the transformations and PCA don't seem to help with our current data. When is this the case? What should we do?
+## Quick Answers
 
--   For the previous assignment, I tested some of the same models used in the lectures (using the exact same procedures/code) but got different RMSE--why?
+> *Q: Can you visualize classification/decision boundaries for more than 2 variables? I feel like that would be helpful for tuning the models.*
 
--   I think we need to learn more techniques for loading different types of datasets into RStudio. For example, when I tried to load the car dataset from the StatLib Dataset Archive, which was used in the video lecture, I had trouble because it contained Unix code instead of consisting with plain CSV file.
+Yes! There are R packages available that can plot three-dimension figures. However, the plots we use in class are only for lecturing purposes. Things get more complicated and are hard to visualize when it's more than three dimensions. And in reality, we often have more than three predictors.
 
--   For LDA and QDA, is centering/scaling not important? Also, I am curious if model configuration will be more prone to errors if key predictors have highly different scales (e.g., income and age).
+> *Q: For LDA and QDA, is centering/scaling not important? Also, I am curious if model configuration will be more prone to errors if key predictors have highly different scales (e.g., income and age).*
 
--   Can you visualize classification/decision boundaries for more than 2 variables? I feel like that would be helpful for tuning the models.
+We don't need centering/scaling for LDA or QDA.
 
 > *Q: - I am interested in how to find the optimal K value in knn. Last semester, we did a visualization about how to find optimal k in knn in Python, and I am wondering if that works the same in R.*
+
+We'll learn more in later chapters on resampling and hyperparameter tuning:)!
 
 ## 1. Handle Missingness
 
@@ -133,11 +135,21 @@ glm(y ~ . , data, family = binomial) |> car::vif()
 
 ### Handle Multicollinearity when building recipes
 
--   `step_pca()`: creates a specification of a recipe step that will convert numeric variables into one or more principal components (<font style = "color: red">don't forget to center and scale your variables before applying pca!!</font>)
+-   dimensionality reduction techniques such as `step_pca()`: creates a specification of a recipe step that will convert numeric variables into one or more principal components (<font style = "color: red">don't forget to center and scale your variables before applying pca!!</font>)
 
-    -   PCA can transform correlated predictors into uncorrelated principle components
+    - PCA can transform correlated predictors into uncorrelated principle components
+  
+    - 💡 How do we choose which variables to do a PCA?
+  
+      - domain knowledge: for example, we collapse items from the same scale together (e.g., the seven items from GAD-7 anxiety scale)
+    
+      - predictors with high correlations
+    
+    - <font style = "color:green"> ***Find more information on [John's page](https://jjcurtin.github.io/book_iaml/app_pca.html)😊!!*** </font>
 
--   `step_corr`: creates a specification of a recipe step that will potentially remove variables that have large absolute correlations with other variables
+-   `step_corr()`: creates a specification of a recipe step that will potentially remove variables that have large absolute correlations with other variables
+
+    - not typically used
 
 ### Regularization Methods
 
@@ -189,6 +201,16 @@ rec <- recipe(y ~ ., data_trn) |>
   # dimensionality reduction
   step_pca() # suitable for high dimensional data
 ```
+
+### More on `step_ordinalscore()`
+
+**`step_ordinalscore()` converts ordinal factor variables into numeric scores**
+
+- ❗ only works for ordered factors
+
+  - we can create ordered factors with function `ordered()`(not recommended), or `factor(x, ordered = TRUE)`
+
+- Alternatively (and most often), we simply use `as.numeric()` to complete the transformation
 
 ## 5. Models and their parameters
 
@@ -318,5 +340,17 @@ mlp(hidden_units = NULL, penalty = NULL, dropout = NULL, epochs = NULL,
 
 ## 7. Pipeline of selecting the best model and generating test predictions
 
+> *Q: You mentioned before that after training, validation, and selecting the best model, that one optional step is before taking that best model into test, training it on both the training and validation data. At what exact point(s) in the workflow/code do you do this? Is it only when prepping the recipe to bake the test data? Or do you go one step before that and re-train the model using a feature matrix also baked using both training and validation data?*
+
 ![](images/clipboard-2055670079.png)
+
+We prep the best recipe to the held-in set (training & validation combined), and bake it to both held-in and held-out (test data) sets. We then train the best model configuration using these held-in features and generate predictions using the held-out features.
+
+## 8. How do we handle categorical predictors?
+
+> *Q: How can you deal with the variables like name or cabin from the homework?*
+
+If the variable is nominal (qualitative categories, no inherent order), we can do dummy coding, contrast coding, etc.
+
+If the variable is ordinal (inherent order but not equidistant spacing), we can either do 1) dummy coding, contrast coding, etc, like above, or 2) treat them as ordered levels. You can choose between those two methods by treating these as different model configurations and comparing them using held-out (validation) data.
 

@@ -3,7 +3,7 @@ editor_options:
   chunk_output_type: console
 ---
 
-# Principal Components Analysis 
+# Principal Components Analysis  { .unnumbered}
 
 ##  Overview
 
@@ -33,6 +33,10 @@ When we discuss PCA in the machine learning world, we consider it an example of 
 ## A Two Dimensional Example
 
 This example is based loosely on a tutorial and demonstration data developed by [Lindsay Smith](https://www.iro.umontreal.ca/~pift6080/H09/documents/papers/pca_tutorial.pdf)
+
+For a second example that extends to 3D space, see this [website](https://setosa.io/ev/principal-component-analysis/)
+
+--------------------------------------------------------------------------------
 
 Let's start with a toy dataset for two variables (e.g., predictors), `x1` and `x2` and a sample size of 10.  We will work in two dimensions to make the example easier to visualize but the generalization to p dimensions (where p = number of variables) is not difficult.
 
@@ -140,7 +144,7 @@ In our example with only two variables, there is only one direction remaining th
 
 However, if we were in a higher dimensional space with p > 2 variables, this next component could follow the direction of maximal remaining variance in a direction orthogonal to `PC1`.  Subsequent components up to the pth component given p variables would each be orthogonal to all previous components and in the direction of maximal variance.
 
-We have added this second second component to our 2 dimensional example below.
+We have added this second component (orange) to our 2 dimensional example below.
 
 ```{r}
 #| echo: false
@@ -149,7 +153,7 @@ plot +
   geom_abline(slope = ei$vectors[2,1]/ei$vectors[1,1], 
               intercept = 0, color = "green") +
   geom_abline(slope = ei$vectors[2,2]/ei$vectors[1,2], 
-              intercept = 0, color = "green") + 
+              intercept = 0, color = "orange") + 
   coord_fixed()
 ```
 
@@ -171,7 +175,7 @@ pca <- prcomp(d |> select(x1, x2))
 pca$x |> ggplot(aes(x = PC1, y = PC2)) +
   geom_point() +
   geom_hline(yintercept = 0, color = "green") +
-  geom_vline(xintercept = 0, color = "green") +
+  geom_vline(xintercept = 0, color = "orange") +
   xlim(-2.5, 2.5) +
   ylim(-2.5, 2.5) +
   coord_fixed() 

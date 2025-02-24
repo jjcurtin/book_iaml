@@ -3,7 +3,12 @@ editor_options:
   chunk_output_type: console
 ---
 
+::: {.content-visible unless-format="revealjs"}
 # Regularization and Penalized Models
+:::
+::: {.content-visible when-format="revealjs"}
+# IAML Unit 6: Regularization and Penalized Models
+:::
 
 ##  Learning Objectives
 
@@ -21,7 +26,6 @@ editor_options:
 - Contrasts of PCA, PCR, PLS, and glmnet/LASSO for dimensionality reduction (covered in reading only)
 
 -----
-
 
 ## Introduction to Penalized/Regularized Statistical Algorithms
 
@@ -94,6 +98,7 @@ The cost function for logistic regression is log loss:
 - They can take on any values with the only goal to minimize the sum of the log loss in the training sample
 
 ![](figs/unit5_log_loss.png){height=5in}
+
 -----
 
 ## Intuitions about Penalized Cost Functions and Regularization 
@@ -322,9 +327,11 @@ It has two components:
 
 This penalty:
 
-  - Includes the sum of the absolute value of the parameter estimates (excluding $\beta_0$).  The absolute value removes the sign of these parameter estimates.
-  - This sum is multiplied by $\lambda$, a hyperparameter in LASSO regression.  Lambda allows us to tune the size of the penalty.
-  - This is an application of the L1 norm to the vector of parameter estimates
+- Includes the sum of the absolute value of the parameter estimates (excluding $\beta_0$).  The absolute value removes the sign of these parameter estimates.
+
+- This sum is multiplied by $\lambda$, a hyperparameter in LASSO regression.  Lambda allows us to tune the size of the penalty.
+
+- This is an application of the L1 norm to the vector of parameter estimates
 
 -----
 
@@ -360,7 +367,9 @@ Ridge tends to outperform LASSO wrt prediction in new data.  There are cases whe
 ### Advantages of Ridge
 
 - Computationally superior (closed form solution vs. iterative;  Only one solution to minimize the cost function)
+
 - More robust to measurement error in features (remember no measurement error is an assumption for unbiased estimates in OLS regression)
+
 - Tends to do better when there are many features with large (and comparable) effects (i.e., most features are related to the outcome)
 
 -----
@@ -424,7 +433,7 @@ theme_set(theme_classic())
 options(tibble.width = Inf)
 path_data <- "./data"
 
-rerun_setting <- FALSE 
+rerun_setting <- TRUE 
 ``` 
 
 For the first example, we will simulate data with:
@@ -620,6 +629,7 @@ Fit best configuration (i.e., best lambda) to full train set
 
 - Use `select_best()`
 - Don't forget to indicate which column ($penalty$)
+
 ```{r}
 fit_lasso_1 <-
   linear_reg(penalty = select_best(fits_lasso_1)$penalty, 
@@ -802,7 +812,6 @@ fit_glmnet_1 <-
 
 -----
 
-
 ```{r}
 fit_glmnet_1 |> 
   tidy() |> 
@@ -831,8 +840,8 @@ A final comparison of training and test error for the four statistical algorithm
 For the second example, we will simulate data with:
 
 - Two sets of correlated predictors
-- First set related to outcome
-- Second set unrelated to outcome
+- First (smaller) set related to outcome (5 predictors)
+- Second (larger) set unrelated to outcome (15 predictors)
 - Get a small training sample
 - Get a big test sample (for more precise estimates of performance of our model configurations)
 
@@ -845,7 +854,7 @@ n_cases_test <- 1000
 n_x <- 20
 covs_x <- 50 
 vars_x <- 100
-b_x <- rep(c(1,0), each = n_x / 2)
+b_x <- c(rep(1,5),rep(0, 15))
 y_error <- 100
 ```
 
@@ -893,7 +902,7 @@ data_test_2 <- x |>
 -----
 
 Set up a tibble to track model performance in train and test
-```{r u6-examples-2-2}
+```{r}
 error_ex2 <- tibble(model = character(), rmse_trn = numeric(), rmse_test = numeric()) |> 
   glimpse()
 ```
@@ -940,7 +949,7 @@ For all glmnet algorithms, set up:
 - Recipe
 - Feature matrices
 - Bootstraps for model configuration selection (tuning)
-```{r u6-examples-2-5}
+```{r}
 rec_2 <- recipe(y ~ ., data = data_trn_2) |> 
   step_normalize(all_predictors())
 
@@ -996,7 +1005,7 @@ Fit best LASSO to full training set
 - It did set some of the "good" features to 0 as well
 ```{r}
 fit_lasso_2 <-
-  linear_reg(penalty = select_best(fits_lasso_2)$penalty, 
+  linear_reg(penalty = select_best(fits_lasso_2, metric = "rmse")$penalty, 
              mixture = 1) |>
   set_engine("glmnet") |> 
   fit(y ~ ., data = feat_trn_2)
@@ -1057,18 +1066,12 @@ plot_hyperparameters(fits_ridge_2, hp1 = "penalty", metric = "rmse")
 
 -----
 
-```{r}
-plot_hyperparameters(fits_ridge_2, hp1 = "penalty", metric = "rmse")
-```
-
------
-
 Fit best Ridge to full training set
 
 - Notice no $\beta$ = 0
 ```{r}
 fit_ridge_2 <-
-  linear_reg(penalty = select_best(fits_ridge_2)$penalty, 
+  linear_reg(penalty = select_best(fits_ridge_2, metric = "rmse")$penalty, 
              mixture = 0) |>
   set_engine("glmnet") |> 
   fit(y ~ ., data = feat_trn_2)
@@ -1083,7 +1086,7 @@ fit_ridge_2 |>
 Irreducible error was set by `y_error` (`r y_error`)
 
 - Somewhat overfit to train
-- Still slightly better than LASSO in test 
+- Still slightly better than LASSO in test (but maybe equivalent?)
 ```{r}
 (error_ex2 <- error_ex2 |> 
   bind_rows(tibble(model = "Ridge model",                       
@@ -1119,7 +1122,6 @@ fits_glmnet_2 <- xfun::cache_rds(
   file = "fits_glmnet_2")
 ```
 
-
 -----
 
 Plot hyperparameters
@@ -1129,15 +1131,15 @@ plot_hyperparameters(fits_glmnet_2, hp1 = "penalty", hp2 = "mixture", metric = "
 
 -----
 
-Fit Best glmnet in full train set
+Fit best glmnet in full train set
 
 - Still Ridge (but won't always be)
 ```{r}
-select_best(fits_glmnet_2)
+select_best(fits_glmnet_2, metric = "rmse")
 
 fit_glmnet_2 <-
-  linear_reg(penalty = select_best(fits_glmnet_2)$penalty, 
-             mixture = select_best(fits_glmnet_2)$mixture) |>
+  linear_reg(penalty = select_best(fits_glmnet_2, metric = "rmse")$penalty, 
+             mixture = select_best(fits_glmnet_2, metric = "rmse")$mixture) |>
   set_engine("glmnet") |> 
   fit(y ~ ., data = feat_trn_2)
 
@@ -1194,15 +1196,12 @@ What are your options to test `iv` prior to this course?
 
 
 NOW, We might use the feature selection characteristics for LASSO to select which covariates are included
-\
-\
+
 There are two possibilities that occur to me
 
 -----
 
 1.  Use LASSO to build best DGP for a covariates only model
-\
-\
 
 - Could be more conservative (fewer covariates) by using within 1 SE of best performance but less flexible (i.e., will set more parameter estimates to 0)
 - Follow up with a linear model (using $lm$), regressing y on $iv$ and covariates from LASSO that are non-zero
@@ -1214,20 +1213,16 @@ fit_lasso_2 |>
 ```
 
 - You clearly improved your best guess on covariates to include 
-- You will regress y on `iv` and the 11 covariates with non-zero effects
+- You will regress y on `iv` and the 7 covariates with non-zero effects
 
 -----
 
 2. Use LASSO to build best DGP including `iv` and covariates but don't penalize `iv`
-\
-\
 
 - Look at `penalty.factor = rep(1, nvars)` argument in `glmnet()`
 - Can fit LASSO with unbiased? estimate of `iv`
 - Need to bootstrap for SE for `iv` (next unit)
 - Only appropriate if IV is manipulated
-\
-\
 
 Should really conduct simulation study of both of these options (vs. all and no covariates).  
 
@@ -1239,19 +1234,14 @@ Should really conduct simulation study of both of these options (vs. all and no 
 ## Ridge, LASSO, and Elastic net models for other Y distributions
 
 These penalties can be added to the cost functions of other generalized linear models to yield regularized/penalized versions of those models as well.  For example
-\
-\
+
 L1 penalized (LASSO) logistic regression (w/ labels coded 0,1):
 
 - $\frac{1}{n}([\:\sum_{i = 1}^{n} -Y_ilog(\hat{Y_i}) - (1-Y_i)log(1-\hat{Y_i})\:]\:+\:[\:\lambda\sum_{j = 1}^{p} |\beta_j|\:]$
-\
-\
 
 For L2 penalized (Ridge) logistic regression (w/ labels coded 0,1)
 
 - $\frac{1}{n}([\:\sum_{i = 1}^{n} -Y_ilog(\hat{Y_i}) - (1-Y_i)log(1-\hat{Y_i})\:]\:+\:[\:\lambda\sum_{j = 1}^{p} \beta_j^{2}\:]$
-\
-\
 
 `glmnet` implements: 
 
