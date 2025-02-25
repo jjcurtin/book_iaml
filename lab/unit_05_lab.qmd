@@ -88,25 +88,30 @@ rerun_setting <- F
 ```
 
 ```{r}
-cache_xfun <- cache_rds(
+results <- cache_rds(
   expr = {
-    results <- c(1, 2, 3)
     Sys.sleep(10)
+    results <- c(1, 2, 3)
   }, 
-  dir = "application_assignments/unit_05/cache/",
+  dir = "cache/",
   file = "cache_demo_xfun",
   rerun = rerun_setting)
 ```
+
+```{r}
+results
+```
+
 
 After running the first time, the rerun will be quicker because the process had been cached in the folder.
 
 And we could also do the cache more manually with `write_rds` ourselves.
 
 ```{r}
-if (file.exists(here::here("application_assignments/unit_05/cache/brute_force_method.rds"))){
+if (file.exists(here::here("lab/cache/brute_force_method.rds"))){
   
  # file with computations exists, so just load it
- results <- readr::read_rds(here::here("application_assignments/unit_05/cache/brute_force_method.rds"))
+ results <- readr::read_rds(here::here("lab/cache/brute_force_method.rds"))
   
 } else {
  
@@ -115,7 +120,7 @@ if (file.exists(here::here("application_assignments/unit_05/cache/brute_force_me
   results <- 1 
  
   # write results so we have it the next time we run this code chunk 
-  results |>  readr::write_rds(here::here("application_assignments/unit_05/cache/brute_force_method.rds"))
+  results |>  readr::write_rds(here::here("lab/cache/brute_force_method.rds"))
 }
 
 results
@@ -253,7 +258,7 @@ fits_glmnet <- xfun::cache_rds(
   
   },
   rerun = rerun_setting,
-  dir = here::here("application_assignments/unit_05/cache//"),
+  dir = here::here("lab/cache//"),
   file = "brain_demo")
 ```
 
