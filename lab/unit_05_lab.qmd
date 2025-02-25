@@ -148,7 +148,6 @@ This way, the cached file could also be uploaded and downloaded for the usage el
 
 #### LASSO/Elastic Net
 
-
 **Let's make a glmnet model and tune it's hyperparameter together!**
 
 Brain imaging data could be very high-dimensional. And thus, regularization techniques are very helpful in building neuroimaging decoding models. (Decoding here refers to use the neuroimaging data to "predict" the information about the subjects and stimuli.) here I created a fake dataset simulating fMRI data. Each column will be a voxel (the spatial unit of the imaging, proxy toward a small region of cortex) and each row is the response time to a stimulus when the simulated subject was lying in the scanner watching visual stimuli and making decisions on it.
@@ -197,7 +196,7 @@ brain_data <-
   mutate(rt = as.numeric(response_times))  # Add response time column
 
 # Print first few rows
-print(head(brain_data[, c(1:5, 100, 101)]))
+head(brain_data[, c(1:5, 100, 101)]) |> view()
 ```
 
 ```{r}
@@ -229,6 +228,11 @@ feat_trn <- rec_prep |>
 feat_test <- rec_prep |> 
   bake(data_test)
 ```
+
+```{r}
+data_trn
+```
+
 
 ```{r}
 rerun_setting <- F
@@ -295,12 +299,27 @@ fit_glmnet |>
   sum()
 ```
 
-The selected features are less than the real predictive features. So, penalty (especially LASSO) could also cause oversparsity. We should be mindful with this trade-off.
+The selected features are less than the real predictive features. So, penalty (especially LASSO) could also cause oversparsity (in data with correlated features). We should be mindful with this trade-off if you indeed want correlated features at some point).
+
+
+We could have a look on the performance:
+
+```{r}
+rmse_vec(truth = feat_trn$rt,
+         estimate = predict(fit_glmnet, feat_trn)$.pred) |> 
+  suppressWarnings()
+```
+
+```{r}
+rmse_vec(truth = feat_test$rt,
+         estimate = predict(fit_glmnet, feat_test)$.pred) |> 
+  suppressWarnings()
+```
+
 
 ### 4. Example of nested CV
 
 We have a nice example in the slides. In inner loops we use bootstrapping CV and k-fold for the outer loop.
-
 
 ### 5. Other questions
 
