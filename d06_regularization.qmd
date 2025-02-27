@@ -7,79 +7,154 @@ editor_options:
 
 ## Announcements
 
-- Midterm - application and conceptual parts
-- Can we have a midterm review session?
-
------
-
-## feature matrix vs. raw predictors
-
-When to use which and why could I use raw predictors in simulated data example from lectures
-
------
+Midterm 
+ 
+- Application exam available now.  Due NEXT friday at noon
+- Concepts exam in discussion section next thursday
+- Review for concepts exam next tuesday in Lab (w/ me)
 
 
-## Cost functions
+## Bias and Variance - The MOST Fundamental Issues in Inferential Statistics
 
-What is Cost function?
+Describe these two properties of estimates in general
 
-Linear model 
+- need to think about repeated estimation of something ($\hat{f}$, $\hat{DGP}$; $\hat{accuracy}$, $\hat{rmse}$)
+
+
+Describe bias and variance associated with developing models (estimates of the DGP)
+
+- Examples for our models ($\hat{f}$, $\hat{DGP}$)
+- What factors affect each?
+
+Describe bias and variance of our performance estimates
+
+- Examples for our performance estimates ($\hat{accuracy}$, $\hat{rmse}$)
+- What factors affect each?
+
+
+## Curse of Dimensionality
+
+- What is high dimensional data?
+- What happens when p >= n in GLM
+- Connect to issues of overfitting and interpretation
+- Why would we even want high dimensional data?
+- Describe two broad categories of approaches to solve high dimensionality problem
+  - Feature selection (subset approaches, LASSO)
+  - Dimensionality reduction (Ridge, PCA, PCR, PLS, autoencoders, word embeddings) 
+
+## Steps for three subsetting approaches
+
+Three approaches
+
+- Best subset
+- Forward stepwise
+- Backward stepwise
+
+- Why can you select among models with fixed p using training error
+- Why do you need test error to select among models with different p
+
+Advantages and disadvantages
+
+- Best subset
+  - potentially better at finding DPG because considers all possible models for specific k
+  - Computationally very expensive (can't do with p > 40?)
+  - LASSO is very similar and computationally much faster!
+  
+- Forward stepwise
+  - Lower computational costs than best subset
+  - Wont always find best model (3 X example)
+  - Can be used with p > n
+  
+- Backward stepwise
+  - Lower computational costs than best subset
+  - Maybe better in scenarios like 3 X example
+  - Can't be used with p > n
+  
+
+## Cost functions for OLS, LASSO and Ridge
+
+OLS
 
 - $\frac{1}{n}\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}$
 
-Ridge (L2)
+  
+Ridge (l2)
 
 - $\frac{1}{n}([\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}] + [\:\lambda\sum_{j = 1}^{p} \beta_j^{2}\:])$
 
+
+LASSO
+
 - $\frac{1}{n}([\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}] + [\:\lambda\sum_{j = 1}^{p} |\beta_j|\:])$
 
-Elastic Net
+
+## Lambda
+
+- How does the value of Lambda affect LASSO and Ridge?
+
+
+## LASSO vs. Ridge Comparison
+
+With respect to the parameter estimates: 
+
+- LASSO yields sparse solution (some parameter estimates set to **exactly zero**)
+
+- Ridge tends to retain all features (parameter estimates don't get set to exactly zero)
+
+- LASSO selects one feature among correlated group and sets others to zero
+
+- Ridge shrinks all parameter estimates for correlated features 
+
+Ridge tends to outperform LASSO wrt prediction in new data.  There are cases where LASSO can predict better (most features have zero effect and only a few are non-zero) but even in those cases, Ridge is competitive.  
+
+
+### Advantages of LASSO
+
+- Does feature selection (sets parameter estimates to exactly 0)
+  - Yields a sparse solution
+  - Sparse model is more interpretable?
+  - Sparse model is easier to implement? (fewer features included so don’t need to measure as many predictors)
+
+- More robust to outliers (similar to LAD vs. OLS)
+
+- Tends to do better when there are a small number of robust features and the others are close to zero or zero
+
+
+### Advantages of Ridge
+
+- Computationally superior (closed form solution vs. iterative;  Only one solution to minimize the cost function)
+
+- More robust to measurement error in features (remember no measurement error is an assumption for unbiased estimates in OLS regression)
+
+- Tends to do better when there are many features with large (and comparable) effects (i.e., most features are related to the outcome)
+
+
+## Elasticnet
+
+
+Cost function
 
 - $\frac{1}{n}([\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}] + [\:\lambda (\alpha\sum_{j = 1}^{p} |\beta_j| + (1-\alpha)\sum_{j = 1}^{p} \beta_j^{2})\:])$
+- Lambda works the same
+- What does alpha (blending/mixture hyperparameter) do
 
------
+## PCA, PRC, and PLS
 
-## LASSO, Ridge, and elastic net questions
+PCA
 
-- The pros and cons of Lasso and Ridge vs. Elastic Net
+- See [appendix](https://jjcurtin.github.io/book_iaml/app_pca.html) and section 12.2 in James et al
 
-- I'm still a little confused as to why you would ever use Ridge or LASSO separately when you can just selectively use one or the other through elastic net. Wouldn't it make sense to just always use elastic net and then change the penalty accordingly for when you wanted to use a Ridge or LASSO regression approach?
-  - Pure LASSO
-  - model variance
-  - two self-report measure scales vs. items
+PCR
 
-- Some explanation why Lasso is more robust to outliers and ridge is more robust to measurement error would be appreciated.
+- GLM with PCA as part of feature engineering
+- Tune number of components retained
+- Doesnt derived components based on `Y`
+- Very similar to Ridge
 
-- I'm not very clear why LASSO could limit some parameters to be zero but ridge regression cannot. Can we go through this a bit?
+PLS
 
-- How do you know what numbers to start at for tuning lamba (like in the code below)? I think John mentioned he has a function to find these, but I'm wondering if there are any rules of thumb.
+- Modification where components are derived to predict `Y`
+- Still prefer ridge generally
 
-- How do we know how "strong" of a penalty we need to be applying to our cost function? Does the reduction in variance increase as we increase the strength of the penalty?
+All do dimensionality reduction but NOT feature selection.  Still need to measure all predictors
 
-- Is a decreased number of features always good or bad, or does it depend on the model/recipe
-
-- Can you talk more about how to interpret the scale of the parameter estimates? In the lecture you said the following and I'm not quite sure what that means:
-
-- I might be totally wrong but I wonder if we have to care about the multi-collinearity or high dimension on classification as well. Or this is only limited to regression and so we are solving with regularising only regression model? 
-
------
-
-## Stepwise questions
-
-- Could you go over Forward, Backward, and Best Subset subsetting? I think I understand the algorithm they use, but I do not understand the penalty function they use for picking the "best" model. In the book, it looks like it uses R-squared to pick the best model, but wouldn't the full model always have the greatest R-squared?
-
-- Is there a reason why we do not discuss variable selection using subset methods? 
-
-- Is there specific cases when you would pick backwards or forwards selection, or is it up to the researcher?
-
-- Training vs. val/val error in stepwise approaches.   
-
-- Use of AIC, BIC, Cp, and adjusted R2 vs. cross-validation
-
------
-
-## Explanatory goals
-
-- Can LASSO be used for variable selection when engaging in cross sectional data analysis to identify which variables in a large set of Xs are important for a particular outcome? 
-
-- In practice, what elements should be considered before selecting IVs and covariates?
