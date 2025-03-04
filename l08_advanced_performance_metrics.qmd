@@ -190,7 +190,7 @@ plot_hyperparameters(fits_glmnet, hp1 = "penalty", hp2 = "mixture",
 ```
 
 ```{r}
-show_best(fits_glmnet, n = 1)
+show_best(fits_glmnet, n = 1, metric = "accuracy")
 ```
 
 --------------------------------------------------------------------------------
@@ -203,8 +203,8 @@ feat_trn <- rec_prep |>
   bake(data_trn)
 
 fit_glmnet <-   
-  logistic_reg(penalty = select_best(fits_glmnet)$penalty, 
-               mixture = select_best(fits_glmnet)$mixture) |> 
+  logistic_reg(penalty = select_best(fits_glmnet, metric = "accuracy")$penalty, 
+               mixture = select_best(fits_glmnet, metric = "accuracy")$mixture) |> 
   set_engine("glmnet") |> 
   set_mode("classification") |> 
   fit(disease ~ ., data = feat_trn)
@@ -1068,7 +1068,7 @@ fits_glmnet_auc <- cache_rds(
 
 And now use `show_best()`, with best defined by auROC
 ```{r}
-show_best(fits_glmnet_auc, n = 5)
+show_best(fits_glmnet_auc, n = 5, metric = "accuracy")
 ```
 
 --------------------------------------------------------------------------------
@@ -1150,8 +1150,8 @@ cm_auc |>
 Fit best model using balanced accuracy
 ```{r}
 fit_glmnet_bal <-   
-  logistic_reg(penalty = select_best(fits_glmnet_many, metric = "bal_accuracy")$penalty, 
-               mixture = select_best(fits_glmnet_many, metric = "bal_accuracy")$mixture) |> 
+  logistic_reg(penalty = select_best(fits_glmnet_many, metric = "roc_auc")$penalty, 
+               mixture = select_best(fits_glmnet_many, metric = "roc_auc")$mixture) |> 
   set_engine("glmnet") |> 
   set_mode("classification") |> 
   fit(disease ~ ., data = feat_trn)
@@ -1354,8 +1354,8 @@ feat_trn_up |>
 
 ```{r}
 fit_glmnet_up <-   
-  logistic_reg(penalty = select_best(fits_glmnet_up)$penalty, 
-               mixture = select_best(fits_glmnet_up)$mixture) |> 
+  logistic_reg(penalty = select_best(fits_glmnet_up, metric = "bal_accuracy")$penalty, 
+               mixture = select_best(fits_glmnet_up, metric = "bal_accuracy")$mixture) |> 
   set_engine("glmnet") |> 
   set_mode("classification") |> 
   fit(disease ~ ., data = feat_trn_up)
@@ -1477,8 +1477,8 @@ feat_trn_down |> skim_some()
 Now fit the model to these downsampled training data
 ```{r}
 fit_glmnet_down <-   
-  logistic_reg(penalty = select_best(fits_glmnet_down)$penalty, 
-               mixture = select_best(fits_glmnet_down)$mixture) |> 
+  logistic_reg(penalty = select_best(fits_glmnet_down, metric = "bal_accuracy")$penalty, 
+               mixture = select_best(fits_glmnet_down, metric = "bal_accuracy")$mixture) |> 
   set_engine("glmnet") |> 
   set_mode("classification") |> 
   fit(disease ~ ., data = feat_trn_down)
@@ -1608,8 +1608,8 @@ feat_trn_smote |> skim_some()
 Fit model to smote sampled training data
 ```{r}
 fit_glmnet_smote <-   
-  logistic_reg(penalty = select_best(fits_glmnet_smote)$penalty, 
-               mixture = select_best(fits_glmnet_smote)$mixture) |> 
+  logistic_reg(penalty = select_best(fits_glmnet_smote, metric = "bal_accuracy")$penalty, 
+               mixture = select_best(fits_glmnet_smote, metric = "bal_accuracy")$mixture) |> 
   set_engine("glmnet") |> 
   set_mode("classification") |> 
   fit(disease ~ ., data = feat_trn_smote)
