@@ -1,0 +1,281 @@
+---
+title: "Unit 06 Lab Agenda"
+author: "Coco Yu"
+date: "`r lubridate::today()`"
+format: 
+  html: 
+    embed-resources: true
+    toc: true 
+    toc_depth: 4
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+#| echo: FALSE
+#| message: FALSE
+options(conflicts.policy = "depends.ok")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+tidymodels_conflictRules()
+library(tidyverse) 
+library(tidymodels)
+theme_set(theme_classic())
+options(tibble.width = Inf, dplyr.print_max=Inf)
+
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true",
+                     sha1 = "c045eee2655a18dc85e715b78182f176327358a7")
+```
+
+- Is it possible to use both step_novel and step_impute_mode in a recipe for dealing with unseen levels in the test data and missing values for categorical variables? When I tried this in the assignment I got this error: 
+
+Error in bake():
+! Can't convert from new_data[[col_name]] <factor<ac8fc>> to <factor<a9e24>> due to loss of generality.
+• Locations: 377
+Run rlang::last_trace() to see where the error occurred.
+> rlang::last_trace()
+<error/vctrs_error_cast_lossy>
+Error in bake():
+! Can't convert from new_data[[col_name]] <factor<ac8fc>> to <factor<a9e24>> due to loss of generality.
+• Locations: 377
+---
+Backtrace:
+    ▆
+ 1. ├─recipes::bake(rec_prep, data_test)
+ 2. └─recipes:::bake.recipe(rec_prep, data_test)
+ 3.   ├─recipes::bake(step, new_data = new_data)
+ 4.   └─recipes:::bake.step_impute_mode(step, new_data = new_data)
+ 
+- 
+
+- Maybe having a demo of going over the steps of PCR and PLS regression.
+
+- I was curious about what the warnings R would give about the rank-deficient part of the assignment.
+
+
+- I was wondering how to remove the x in both ms_sub_class and pid? I am still working on the homework assignment and will probably figure this out as I complete it. But so far I have not been able to remove it after turning it into a factor.
+
+`str_replace_all(text, "x", "")`
+
+- I noticed that some of the output contains warnings, and it mentioned that they aren’t a concern for now. Could you explain these warnings in more detail?
+
+
+
+## Parallel Processing & Cache
+
+> *Is there any way that I can set my R to run things faster in coding?*
+
+Yes! We can use parallel processing and/or caching to speed up computation time. You can find explanations in lab 5 too (I'm copying and pasting the examples Zihan put up here!).
+
+### Parallel processing
+
+Parallel processing allows us to speed up computation by executing multiple tasks **simultaneously** with multiple CPU cores.
+
+We can use parallel processing when:
+
+- The fitting process for each of these configurations is independent for the others
+
+- The order that the configurations are fit doesn’t matter either
+
+- When these two criteria are met, the processes can be run in parallel with an often big time savings
+
+<font style = "color:green"> ***Find more information on [here](https://tune.tidymodels.org/articles/extras/optimizations.html)😊!!*** </font>
+
+**Set up parallel processing**
+```{r}
+cl <- parallel::makePSOCKcluster(parallel::detectCores(logical = FALSE))
+doParallel::registerDoParallel(cl)
+```
+
+### Using cache
+
+> *Can we review how to use the cache in our code?*
+
+> *I'm just curious about the rerun = rerun_setting and how this makes the model rerun or of it is skipped. Is it just if data is changed or adjusting parameter it should be rerun?*
+
+When we're doing caching, we store the results of the processing steps as objects. And then, we could read them in directly once we run through the process. It could save us a lot of time when working with large scale data and repetitive procedures.
+
+If you want to set up the rerun option globally, assign it to a variable.
+
+**Set up cache**
+```{r}
+library(xfun, include.only = "cache_rds")
+rerun_setting <- FALSE
+```
+
+**Example code**
+```{r}
+results <- cache_rds(
+  expr = {
+    Sys.sleep(10)
+    results <- c(1, 2, 3)
+  }, 
+  dir = "cache/",
+  file = "cache_demo_xfun",
+  rerun = rerun_setting)
+
+results
+```
+
+<font style = "color:blue">When you set `rerun_setting = TRUE`, you will overwrite anything stored in your cache file and run your codes from the start. When it is set to `FALSE`, you will read in whatever is stored in your cache file and keeps running what's remaining. It is important to note that you should overwrite your cache file (i.e., `rerun_setting = TRUE`) every time you change something in your codes.</font>
+
+## Generating Data
+
+> *it would be great to cover some technique for generating own fake data like MASS function.*
+
+```{r}
+set.seed(123)
+
+n <- 100
+
+# Generate 10 correlated numeric predictors
+mu <- c(50, 100, 10, 5000, 0.5, 75, 5, 20, 2, 1)  # define mean for each predictor
+sigma <- matrix(.7, nrow = 10, ncol = 10) # base correlation
+diag(sigma) <- 1
+
+data <- as.data.frame(MASS::mvrnorm(n = 100, mu = mu, Sigma = sigma))
+
+
+# Generate 5 independent numeric variables
+data <- data |> bind_cols(
+  independent_numeric <- tibble(
+  runif(n, min = 0, max = 1),      # Uniform distribution (0–1)
+  rnorm(n, mean = 200, sd = 50),  # Normal distribution (high mean)
+  rpois(n, lambda = 5),           # Poisson-distributed data
+  rbeta(n, shape1 = 2, shape2 = 5) * 100, # Beta distribution scaled
+  sample(1000:5000, n, replace = TRUE)  # Discrete uniform
+))
+
+# Generate categorical predictors
+data <- data |> bind_cols(tibble(
+  sample(c("A", "B", "C", "D"), n, replace = TRUE,     # Nominal
+         prob = c(0.6, 0.2, 0.02, 0.18)), # make the data sparse
+  sample(c("Low", "Medium", "High"), n, replace = TRUE),  # Ordinal
+  sample(letters[1:5], n, replace = TRUE),  # Random categorical levels
+  sample(0:1, n, replace = TRUE, prob = c(0.7, 0.3)),  # Binary
+  sample(c("Yes", "No"), n, replace = TRUE)  # Binary categorical
+))
+
+names(data) <- paste0("x", 1:20)
+
+data$y <- rnorm(100, 1000, 300)
+```
+
+**Introduce random missingness to the data**
+```{r}
+set.seed(123)
+
+data$x2[sample(1:100, size = 5)] <- NA
+data$x3[sample(1:100, size = 15)] <- NA
+data$x8[sample(1:100, size = 8)] <- NA
+data$x12[sample(1:100, size = 2)] <- NA
+data$x18[sample(1:100, size = 25)] <- NA
+```
+
+```{r}
+skimr::skim_without_charts(data)
+```
+
+## Data Cleaning
+
+> *Cleaning the data. The application assignment due this Friday required a lot of data cleaning with the variable names and the data values. I was wondering if we could have a refresher about what functions to use to clean the data (i.e. remove quotation marks, unnecessary leading x's, etc.)*
+
+> *More on cleaning data. Good practice? Concise methods? The data this week is dreadful to look at.*
+
+> *One question I'm curious about comes from ames dataset for this week. In this dataset, there are ordinal variables such as "electrical" which has very low frequency count at certain level: only one value for "ms" level. When spliting the data into training and test sets, this one value was assigned to test set, resulting in the missing of a level in this column, which leads to the creation of new level called "NA" in this column within the training set. I wonder if this could become a problem for the model performance and if you have any suggestions to resovle such situation. *
+
+### Clean variable name
+
+```{r}
+data <- data |> janitor::clean_names()
+```
+
+### Class variable
+
+```{r}
+data <- data |> 
+  mutate(
+    x16 = factor(x16),
+    x17 = factor(x17),
+    x18 = factor(x18),
+    x19 = factor(x19),
+    x20 = factor(x20)
+  ) |> 
+  glimpse()
+```
+
+### Clean variable response
+
+```{r}
+data <- data |> mutate(across(where(is.factor), tidy_responses)) |> 
+  glimpse()
+```
+
+### Relevel factors if deem necessary
+
+I'm releveling x17 here because I want to transform it into numeric values later
+```{r}
+data <- data |> mutate(x17 = fct_relevel(x17, c("low", "medium", "high"))) |> 
+  glimpse()
+```
+
+## Train/validation/test split
+
+- ???*Can you do grouped kfold CV with multiple groups?*
+
+`group_vfold_cv()` only allows <font style = "color:red">one grouping variable</font> at a time. However, we can do a workaround to group kfold CV with multiple groups.
+
+**For example, say if we want to group observations based on x16 and x20**
+```{r}
+cv_folds <- data |> 
+  mutate(combined_group = paste0(x16, "_", x20)) |> 
+  group_vfold_cv(group = combined_group, v = 5)
+
+print(cv_folds)
+```
+
+- ???*I experienced a data leakage in an assignment a few unit ago, is it a good idea to make all the training, validation, and test set to read-only before the feature engineering? if so, how to do that.*
+
+## Feature Engineering
+
+> *Regarding standardizing variables before regularization, I wonder if the same applies to categorical variables. Should we also standardize categorical variables? If so, wouldn't that make interpretability difficult?*
+
+> *What is the difference between step_normalize and step_normalize() and step_scale(). I feel like we have used both and they serve a similar purpose. Is there any difference or any circumstance where one is better than the other?*
+
+> *I was curious if we would go over some of the methods like best subset and stepwise selection in code?*
+
+> *What's the difference between step_scale and step_range?*
+
+> ???*When applying transformation and scaling in recipe function, is there a method to measure or visualize how well are they doing? Or should this be conducted when checking the univariate stats?*
+
+## Hyperparameter tuning
+
+> *Selecting values for lambda and alpha (i.e. tuning for the hyperspace grid). How can one try to choose the best range of values?*
+
+> ???*Is there a way of getting a good alpha or lambda value that does not include guessing?*
+
+> *More on the expand_grid stuff and looking at multiple dimensions there.*
+
+> *When using linear_reg() with set_engine("glmnet" and tune_grid(), how does tune_grid() choose the best model?*
+
+## Regularization
+
+> ???*The web book mentions using penalty.factor to prevent the IV from being penalized, but are there any best practices for tuning this? Could we allow some shrinkage of the IV’s effect while still maintaining an unbiased estimate?*
+
+> ???*How can we use LASSO for feature selection in a dataset where the independent variable (IV) is dichotomous (e.g., an experimental manipulation), and we want to select the best covariates to predict a quantitative outcome (y)? I particularly want to focus on bootstrapping to find the best lambda value and following up with a linear model. *
+
+> *is it correct that we only need to consider cost function but not loss function and glmnet packaget only has arguments for cost function?*
+
+> *What are the differences between Ridge and LASSO for logistic regression?*
+
+> ???*Interaction terms in High-Dimension regularization*
+
+> *I would hope to have more explanation on tuning the penalty hyperparameter*
+
+> *Why would we need to tune both the mixture hyperparameter and the penalty hyperparameter in elastic net regression but only penalty hyperparameter in LASSO model?*
+
+
+
+
+
+
+
