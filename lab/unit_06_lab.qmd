@@ -26,45 +26,21 @@ devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.
                      sha1 = "c045eee2655a18dc85e715b78182f176327358a7")
 ```
 
-- Is it possible to use both step_novel and step_impute_mode in a recipe for dealing with unseen levels in the test data and missing values for categorical variables? When I tried this in the assignment I got this error: 
-
-Error in bake():
-! Can't convert from new_data[[col_name]] <factor<ac8fc>> to <factor<a9e24>> due to loss of generality.
-• Locations: 377
-Run rlang::last_trace() to see where the error occurred.
-> rlang::last_trace()
-<error/vctrs_error_cast_lossy>
-Error in bake():
-! Can't convert from new_data[[col_name]] <factor<ac8fc>> to <factor<a9e24>> due to loss of generality.
-• Locations: 377
----
-Backtrace:
-    ▆
- 1. ├─recipes::bake(rec_prep, data_test)
- 2. └─recipes:::bake.recipe(rec_prep, data_test)
- 3.   ├─recipes::bake(step, new_data = new_data)
- 4.   └─recipes:::bake.step_impute_mode(step, new_data = new_data)
- 
-- 
-
-- Maybe having a demo of going over the steps of PCR and PLS regression.
-
-- I was curious about what the warnings R would give about the rank-deficient part of the assignment.
 
 
-- I was wondering how to remove the x in both ms_sub_class and pid? I am still working on the homework assignment and will probably figure this out as I complete it. But so far I have not been able to remove it after turning it into a factor.
+
+## Homework specific
+
+> *I was wondering how to remove the x in both ms_sub_class and pid? I am still working on the homework assignment and will probably figure this out as I complete it. But so far I have not been able to remove it after turning it into a factor.*
 
 `str_replace_all(text, "x", "")`
-
-- I noticed that some of the output contains warnings, and it mentioned that they aren’t a concern for now. Could you explain these warnings in more detail?
-
 
 
 ## Parallel Processing & Cache
 
 > *Is there any way that I can set my R to run things faster in coding?*
 
-Yes! We can use parallel processing and/or caching to speed up computation time. You can find explanations in lab 5 too (I'm copying and pasting the examples Zihan put up here!).
+Yes! We can use parallel processing and/or caching to speed up computation time. You can find explanations in lab 5 too (I'm copying and pasting the examples Zihan put up there!).
 
 ### Parallel processing
 
@@ -81,6 +57,7 @@ We can use parallel processing when:
 <font style = "color:green"> ***Find more information on [here](https://tune.tidymodels.org/articles/extras/optimizations.html)😊!!*** </font>
 
 **Set up parallel processing**
+
 ```{r}
 cl <- parallel::makePSOCKcluster(parallel::detectCores(logical = FALSE))
 doParallel::registerDoParallel(cl)
@@ -97,12 +74,14 @@ When we're doing caching, we store the results of the processing steps as object
 If you want to set up the rerun option globally, assign it to a variable.
 
 **Set up cache**
+
 ```{r}
 library(xfun, include.only = "cache_rds")
 rerun_setting <- FALSE
 ```
 
 **Example code**
+
 ```{r}
 results <- cache_rds(
   expr = {
@@ -125,15 +104,18 @@ results
 ```{r}
 set.seed(123)
 
-n <- 100
+n <- 1000
 
-# Generate 10 correlated numeric predictors
-mu <- c(50, 100, 10, 5000, 0.5, 75, 5, 20, 2, 1)  # define mean for each predictor
-sigma <- matrix(.7, nrow = 10, ncol = 10) # base correlation
+# Generate 3 correlated numeric predictors
+mu <- c(5, 100, 0.1)  # define mean for each predictor
+sigma <- matrix(.7, nrow = 3, ncol = 3) # base correlation
 diag(sigma) <- 1
 
-data <- as.data.frame(MASS::mvrnorm(n = 100, mu = mu, Sigma = sigma))
+(sigma)
 
+data <- MASS::mvrnorm(n, mu, sigma) |> 
+  magrittr::set_colnames(paste0("x", 1:3)) |>
+  as_tibble()
 
 # Generate 5 independent numeric variables
 data <- data |> bind_cols(
@@ -155,20 +137,29 @@ data <- data |> bind_cols(tibble(
   sample(c("Yes", "No"), n, replace = TRUE)  # Binary categorical
 ))
 
-names(data) <- paste0("x", 1:20)
+data <- data |> magrittr::set_colnames(paste0("x", 1:13)) |> 
+  glimpse()
 
-data$y <- rnorm(100, 1000, 300)
+data |> 
+  select(paste0("x", 1:8)) |> 
+  cor(use = "pairwise.complete.obs") |>
+  corrplot::corrplot.mixed()
+
+# simulate outcome data that follow certain data generation process (linear model)
+data <- data |> 
+  mutate(y = 5 + 2 * x1 + 4 * x3 + .3 * x5 + 10 * x6 + 3 * x12 + 
+           rnorm(n, mean = 0, sd = 5))
 ```
 
 **Introduce random missingness to the data**
+
 ```{r}
 set.seed(123)
 
-data$x2[sample(1:100, size = 5)] <- NA
-data$x3[sample(1:100, size = 15)] <- NA
-data$x8[sample(1:100, size = 8)] <- NA
-data$x12[sample(1:100, size = 2)] <- NA
-data$x18[sample(1:100, size = 25)] <- NA
+data$x2[sample(1:1000, size = 5)] <- NA
+data$x3[sample(1:1000, size = 15)] <- NA
+data$x8[sample(1:1000, size = 80)] <- NA
+data$x12[sample(1:1000, size = 2)] <- NA
 ```
 
 ```{r}
@@ -194,11 +185,7 @@ data <- data |> janitor::clean_names()
 ```{r}
 data <- data |> 
   mutate(
-    x16 = factor(x16),
-    x17 = factor(x17),
-    x18 = factor(x18),
-    x19 = factor(x19),
-    x20 = factor(x20)
+    across(paste0("x", 9:13), as.factor)
   ) |> 
   glimpse()
 ```
@@ -212,66 +199,203 @@ data <- data |> mutate(across(where(is.factor), tidy_responses)) |>
 
 ### Relevel factors if deem necessary
 
-I'm releveling x17 here because I want to transform it into numeric values later
+I'm releveling x10 here because I want to transform it into numeric values later
+
 ```{r}
-data <- data |> mutate(x17 = fct_relevel(x17, c("low", "medium", "high"))) |> 
+data <- data |> mutate(x10 = fct_relevel(x10, c("low", "medium", "high"))) |> 
   glimpse()
 ```
 
 ## Train/validation/test split
 
-- ???*Can you do grouped kfold CV with multiple groups?*
+> *Can you do grouped kfold CV with multiple groups?*
 
 `group_vfold_cv()` only allows <font style = "color:red">one grouping variable</font> at a time. However, we can do a workaround to group kfold CV with multiple groups.
 
 **For example, say if we want to group observations based on x16 and x20**
+
 ```{r}
-cv_folds <- data |> 
-  mutate(combined_group = paste0(x16, "_", x20)) |> 
+group_cv_folds <- data |> 
+  mutate(combined_group = paste0(x11, "_", x13)) |> 
   group_vfold_cv(group = combined_group, v = 5)
 
-print(cv_folds)
+print(group_cv_folds)
 ```
-
-- ???*I experienced a data leakage in an assignment a few unit ago, is it a good idea to make all the training, validation, and test set to read-only before the feature engineering? if so, how to do that.*
 
 ## Feature Engineering
 
+### Comparison of standardization methods
+
 > *Regarding standardizing variables before regularization, I wonder if the same applies to categorical variables. Should we also standardize categorical variables? If so, wouldn't that make interpretability difficult?*
+
+If we dummy code category variables, we don't need to standardize them. However, if we use other encoding methods (e.g., ordinal encoding), we should standardize them.
 
 > *What is the difference between step_normalize and step_normalize() and step_scale(). I feel like we have used both and they serve a similar purpose. Is there any difference or any circumstance where one is better than the other?*
 
-> *I was curious if we would go over some of the methods like best subset and stepwise selection in code?*
-
 > *What's the difference between step_scale and step_range?*
 
-> ???*When applying transformation and scaling in recipe function, is there a method to measure or visualize how well are they doing? Or should this be conducted when checking the univariate stats?*
+`step_normalize()` creates a specification of a recipe step that will normalize numeric data to have a standard deviation of one and a mean of zero. `step_scale()` creates a specification of a recipe step that will normalize numeric data to have a standard deviation of one. `step_range()` creates a specification of a recipe step that will normalize numeric data to be within a pre-defined range of values.
+
+`step_normalize()` and `step_scale()` are similar in that they both standardize the data, but `step_normalize()` also centers the data by subtracting the mean. `step_range()` is different because it scales the data to a specific range, rather than standardizing it.
+
+| Formula | Description | When to use |
+|---------|-------------|--------|
+| $x' = \frac{x - \mu}{\sigma}$ | centers data by mean; scale data by SD | when applying to models sensitive to magnitude (e.g., linear regression, PCA, ridge/lasso regression) |
+| $x' = \frac{x}{\sigma}$ | scale data by SD (without centering) | when want to adjust scale without shifting center |
+| $x' = \frac{x - min(x)}{max(x) - min(x)}$ | scale data to a specific range | when working with models that require a specific range (e.g., neural networks, knn, svm) |
+
+
+💻 **Sample Codes**
+
+```{r}
+# step_yeojohnson()
+data_yeojohnson <- recipe(y ~ ., data = data) |> 
+  step_YeoJohnson(x7) |> 
+  prep(data) |> 
+  bake(NULL)
+
+# step_normalize()
+data_normalize <- recipe(y ~ ., data = data) |> 
+  step_normalize(x7) |> 
+  prep(data) |> 
+  bake(NULL)
+
+# step_scale()
+data_scale <- recipe(y ~ ., data = data) |> 
+  step_scale(x7) |> 
+  prep(data) |> 
+  bake(NULL) 
+
+# step_range()
+data_range <- recipe(y ~ ., data = data) |> 
+  step_range(x7) |> 
+  prep(data) |> 
+  bake(NULL) 
+```
+
+### Visualization
+
+> *When applying transformation and scaling in recipe function, is there a method to measure or visualize how well are they doing? Or should this be conducted when checking the univariate stats?*
+
+We can visualize the distribution of the data before and after applying the transformations to see how they affect the data.
+
+```{r}
+cowplot::plot_grid(
+  data |> ggplot(aes(x = x7)) + geom_histogram() + labs(title = "Original Data"),
+  data_yeojohnson |> ggplot(aes(x = x7)) + geom_histogram() + labs(title = "step_yeojohnson()"),
+  data_normalize |> ggplot(aes(x = x7)) + geom_histogram() + labs(title = "step_normalize()"),
+  data_scale |> ggplot(aes(x = x7)) + geom_histogram() + labs(title = "step_scale()"),
+  data_range |> ggplot(aes(x = x7)) + geom_histogram() + labs(title = "step_range()")
+)
+
+bind_rows(
+  data |> 
+    summarize(x7_mean = mean(x7, na.rm = TRUE), 
+              x7_sd = sd(x7, na.rm = TRUE)),
+  data_yeojohnson |>
+    summarize(x7_mean = mean(x7, na.rm = TRUE), 
+              x7_sd = sd(x7, na.rm = TRUE)),
+  data_normalize |>
+    summarize(x7_mean = mean(x7, na.rm = TRUE), 
+              x7_sd = sd(x7, na.rm = TRUE)),
+  data_scale |>
+    summarize(x7_mean = mean(x7, na.rm = TRUE), 
+              x7_sd = sd(x7, na.rm = TRUE)),
+  data_range |>
+    summarize(x7_mean = mean(x7, na.rm = TRUE), 
+              x7_sd = sd(x7, na.rm = TRUE))
+) |> 
+  mutate(method = c("Original Data", "step_YeoJohnson", "step_normalize()", 
+                    "step_scale()", "step_range()")) |> 
+  select(method, everything())
+```
+
+## Machine Learning Models
+
+> *Maybe having a demo of going over the steps of PCR and PLS regression.*
+
+When we want to more specifics about any model, we can go to the [tidymodels parsnip documentation](https://parsnip.tidymodels.org/) and search for the model we are interested in. For example, we can find information on PLS regression [here](https://parsnip.tidymodels.org/reference/details_pls_mixOmics.html?q=pls#null). 
+
+There is no PCR model in tidymodels, but we can use PCA when building recipes to reduce the dimensionality of the data and then use a linear regression model to predict the outcome.
 
 ## Hyperparameter tuning
 
+### Selecting best range
+
 > *Selecting values for lambda and alpha (i.e. tuning for the hyperspace grid). How can one try to choose the best range of values?*
 
-> ???*Is there a way of getting a good alpha or lambda value that does not include guessing?*
+> *I would hope to have more explanation on tuning the penalty hyperparameter*
+
+> *Is there a way of getting a good alpha or lambda value that does not include guessing?*
+
+In terms of alpha (which range from 0 to 1), we typically do a grid search of 11 values from 0 to 1. For lambda, we can do a grid search of a wide range, and use plotting to determine whether we have determined an optimal range. 
+
+John also has an [example function called `get_lambdas`](https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R) that generates a grid of best guess values for lambda.
+
+```{r}
+recipe <- recipe(y ~ ., data = data) |> 
+  step_rm(x11, x13) |> 
+  step_mutate(x10 = as.numeric(x10)) |>
+  step_impute_mean(all_numeric_predictors()) |> 
+  step_impute_mode(all_nominal_predictors()) |> 
+  step_pca(x1:x3, num_comp = tune(), options = list(center = TRUE, scale. = TRUE),) |> 
+  step_normalize(all_numeric_predictors()) |> 
+  step_other(x9) |>
+  step_dummy(all_nominal_predictors()) |> 
+  step_nzv(all_predictors())
+
+grid <- expand_grid(
+  num_comp = 1:2,
+  penalty = exp(seq(-30, 3, length.out = 500)),
+  mixture = seq(0, 1, length = 10)
+)
+
+fit <- linear_reg(penalty = tune(), mixture = tune()) |> 
+  set_engine("glmnet") |> 
+  tune_grid(
+    preprocessor = recipe,
+    resamples = group_cv_folds,
+    grid = grid,
+    metrics = metric_set(rmse)
+  )
+
+plot_hyperparameters(fit, hp1 = "penalty", hp2 = "mixture", metric = "rmse")
+```
 
 > *More on the expand_grid stuff and looking at multiple dimensions there.*
 
 > *When using linear_reg() with set_engine("glmnet" and tune_grid(), how does tune_grid() choose the best model?*
 
+```{r}
+grid |> head(500) |> print_kbl()
+show_best(fit, metric = "rmse", n = 10) |> print_kbl()
+```
+
+> *Why would we need to tune both the mixture hyperparameter and the penalty hyperparameter in elastic net regression but only penalty hyperparameter in LASSO model?*
+
+In LASSO regression, the penalty hyperparameter controls the amount of regularization applied to the model. In elastic net regression, both the penalty and mixture hyperparameters control the amount of regularization applied to the model. The mixture hyperparameter controls the balance between LASSO and ridge regression, while the penalty hyperparameter controls the overall amount of regularization. A mixture of 1 in elastic net regression is equivalent to LASSO regression, while a mixture of 0 is equivalent to ridge regression.
+
 ## Regularization
 
-> ???*The web book mentions using penalty.factor to prevent the IV from being penalized, but are there any best practices for tuning this? Could we allow some shrinkage of the IV’s effect while still maintaining an unbiased estimate?*
+> *The web book mentions using penalty.factor to prevent the IV from being penalized, but are there any best practices for tuning this? Could we allow some shrinkage of the IV’s effect while still maintaining an unbiased estimate?*
 
-> ???*How can we use LASSO for feature selection in a dataset where the independent variable (IV) is dichotomous (e.g., an experimental manipulation), and we want to select the best covariates to predict a quantitative outcome (y)? I particularly want to focus on bootstrapping to find the best lambda value and following up with a linear model. *
+> *How can we use LASSO for feature selection in a dataset where the independent variable (IV) is dichotomous (e.g., an experimental manipulation), and we want to select the best covariates to predict a quantitative outcome (y)? I particularly want to focus on bootstrapping to find the best lambda value and following up with a linear model. *
+
+We do not tune the penalty factor, but we can set it to 0 for the IVs (manupulated variables) we do not want to penalize. This will prevent the IV from being penalized, but it will still be included in the model. This is useful when we want to include an IV in the model but do not want it to be penalized.
 
 > *is it correct that we only need to consider cost function but not loss function and glmnet packaget only has arguments for cost function?*
 
-> *What are the differences between Ridge and LASSO for logistic regression?*
+Loss function is the function that measures how well our predictions match the actual values (e.g., MSE, rmse). Cost function is the function that we want to minimize in order to find the best model parameters (e.g., loss function and the regularization term in glmnet). In glmnet, we only need to specify the cost function because it is already minimizing the loss function as part of the optimization process.
 
-> ???*Interaction terms in High-Dimension regularization*
+> *Interaction terms in High-Dimension regularization*
 
-> *I would hope to have more explanation on tuning the penalty hyperparameter*
+We can add interaction terms to the model by using the `step_interact()` function in the recipe. Note that it might lead to highly dimensional feature sets if we include lots of interactions in our model. This can lead to problems of overfitting, so we should be cautious when selecting which interactions to include. We can use regularization to select the most important interaction terms and prevent overfitting. However, in LASSO regression, it'd make interpretation harder if only interaction term is retained but not the main effects. We can use `penalty.factor` to prevent the main effects from being penalized.
 
-> *Why would we need to tune both the mixture hyperparameter and the penalty hyperparameter in elastic net regression but only penalty hyperparameter in LASSO model?*
+The decision to include interaction terms in the model should be based on domain knowledge and theory. If we believe that the interaction terms are important for predicting the outcome, we should include them in the model. If we are unsure, we can use regularization to select the most important interaction terms.
+
+
+
+
 
 
 
