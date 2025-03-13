@@ -1,0 +1,149 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+# IAML Unit 8: Discussion
+
+
+- Installing keras package - stay tuned
+
+-------------------------------------------------------------------------------
+
+### General
+
+- I'm not understanding the difference between tuning the model to create a fit object, and then creating a separate fit object to evaluate it using the test data. I know this is fundamental but it somehow has slipped through my understanding.
+
+  - What is "tuning"
+  - How do we tune hyperparameters and then evaluate best model config?  Using valiation + test.  Using 10-fold + test
+
+-----
+
+### Confusion matrix
+
+
+|               | **Ground Truth** |    |
+|:--------------|:--------- |:----------|
+| **Prediction**| Positive  | Negative  | 
+| Positive      | TP        | FP        |
+| Negative      | FN        | TN        |
+
+Definitions: 
+
+- TP: True positive
+- TN: True negative
+- FP: False positive (Type 1 error/false alarm)
+- FN: False negative (Type 2 error/miss)
+
+- More generally
+  - define accuracy, sens, spec, ppv, npv, bal_accuracy
+  - Cost of FP and FN?
+
+--------------------------------------------------------------------------------  
+
+|               | **Ground Truth** |    |
+|:--------------|:--------- |:----------|
+| **Prediction**| Positive  | Negative  | 
+| Positive      | 95        | 5         |
+| Negative      | 5         | 95        |
+
+--------------------------------------------------------------------------------  
+
+|               | **Ground Truth** |     |
+|:--------------|:--------- |:-----------|
+| **Prediction**| Positive  | Negative   | 
+| Positive      | 95        | 50         |
+| Negative      | 5         | 950        |
+
+- Predicting lapses
+- COVID testing during pandemic early vs. late
+--------------------------------------------------------------------------------
+
+### Resampling
+
+- similarities and differences
+- resampling held-in but not held-out
+- Is there a limit on how much you should up/down-sample or SMOTE? In other words, is there a threshold of imbalance at which it's not helpful to use one of those techniques, since you are just putting in "fake" data? (Or is "fake data" a bad/incorrect way to think about it?)
+
+--------------------------------------------------------------------------------
+
+### ROC
+
+- Axes and various names/representations
+- Why is top right perfect performance
+- thresholds
+- interpretation of auROC and the diagonal line
+- Can we go over some more concrete (real-world) examples of when it would be a good idea to use a different threshold for classification? 
+  - I would like to understand more about adjusting decision thresholds across a few more application contexts. Also, are there any techniques to optimize decision thresholds? Or is it trial and error.
+
+```{r}
+library(tidyverse)
+theme_set(theme_classic()) 
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/format_path.R?raw=true")
+path_models <- format_path("studydata/risk/models/ema")
+preds_hour<- read_rds(file.path(path_models, 
+                               "outer_preds_1hour_0_v5_nested_main.rds"))
+roc_hour <- preds_hour|> 
+  yardstick::roc_curve(prob_beta, truth = label)
+```
+
+Option 1 - TPR vs. FPR
+
+- sensible axes
+- Less common terms
+```{r}
+roc_hour |> 
+  ggplot(aes(x = 1 - specificity, y = sensitivity)) +
+    geom_path(linewidth = 1.25) +
+    geom_abline(lty = 3) +
+    coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+    labs(x = "False Positive Rate (FPR)",
+        y = "True Positive Rate (TPR)") +
+  scale_x_continuous(breaks = seq(0,1,.25))
+```
+
+Option 2 - Sensitivity vs. 1 - Specificity 
+
+- More common terms
+- 1 - Specificity is confusing!
+```{r}
+roc_hour |> 
+  ggplot(aes(x = 1 - specificity, y = sensitivity)) +
+    geom_path(linewidth = 1.25) +
+    geom_abline(lty = 3) +
+    coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+    labs(x = "(1 - Specificity)",
+        y = "Sensitivity") +
+  scale_x_continuous(breaks = seq(0,1,.25))
+```
+
+
+Option 3
+ 
+- More common terms
+- Sensible (though reversed) axis
+- My preferred format
+```{r}
+roc_hour |> 
+  ggplot(aes(x = 1 - specificity, y = sensitivity)) +
+    geom_path(linewidth = 1.25) +
+    geom_abline(lty = 3) +
+    coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+    labs(x = "Specificity",
+        y = "Sensitivity") +
+  scale_x_continuous(breaks = seq(0,1,.25),
+    labels = sprintf("%.2f", seq(1,0,-.25)))
+```
+
+-----
+
+-----
+
+### Kappa
+
+- expected accuracy
+  - given majority class proportion
+  - by chance given base rates
+- ratio of improvement above expected accuracy
+
+
