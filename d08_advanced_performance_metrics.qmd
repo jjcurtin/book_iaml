@@ -12,10 +12,8 @@ editor_options:
 
 ### General
 
-- I'm not understanding the difference between tuning the model to create a fit object, and then creating a separate fit object to evaluate it using the test data. I know this is fundamental but it somehow has slipped through my understanding.
+- Can we go over if/how post hoc is different for this class than it was in 610? It seems like we do more for it in this class than we did before
 
-  - What is "tuning"
-  - How do we tune hyperparameters and then evaluate best model config?  Using valiation + test.  Using 10-fold + test
 
 -----
 
@@ -36,8 +34,9 @@ Definitions:
 - FN: False negative (Type 2 error/miss)
 
 - More generally
-  - define accuracy, sens, spec, ppv, npv, bal_accuracy
+  - define accuracy, sens, spec, ppv, npv, bal_accuracy, f1
   - Cost of FP and FN?
+  - How to choose between?
 
 --------------------------------------------------------------------------------  
 
@@ -57,52 +56,35 @@ Definitions:
 
 - Predicting lapses
 - COVID testing during pandemic early vs. late
+
 --------------------------------------------------------------------------------
 
 ### Resampling
 
-- similarities and differences
-- resampling held-in but not held-out
-- Is there a limit on how much you should up/down-sample or SMOTE? In other words, is there a threshold of imbalance at which it's not helpful to use one of those techniques, since you are just putting in "fake" data? (Or is "fake data" a bad/incorrect way to think about it?)
+- Options?
+- similarities and differences, relative comparisons?
+- resampling held-in but not held-out.  Why?
+- Why does it work?
 
 --------------------------------------------------------------------------------
 
 ### ROC
 
 - Axes and various names/representations
-- Why is top right perfect performance
-- thresholds
-- interpretation of auROC and the diagonal line
-- Can we go over some more concrete (real-world) examples of when it would be a good idea to use a different threshold for classification? 
-  - I would like to understand more about adjusting decision thresholds across a few more application contexts. Also, are there any techniques to optimize decision thresholds? Or is it trial and error.
 
 ```{r}
 library(tidyverse)
 theme_set(theme_classic()) 
 devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/format_path.R?raw=true")
-path_models <- format_path("studydata/risk/models/ema")
+path_models <-"~/mnt/private/studydata/risk/models/ema" # format_path("studydata/risk/models/ema", "restricted")
 preds_hour<- read_rds(file.path(path_models, 
                                "outer_preds_1hour_0_v5_nested_main.rds"))
 roc_hour <- preds_hour|> 
   yardstick::roc_curve(prob_beta, truth = label)
 ```
 
-Option 1 - TPR vs. FPR
 
-- sensible axes
-- Less common terms
-```{r}
-roc_hour |> 
-  ggplot(aes(x = 1 - specificity, y = sensitivity)) +
-    geom_path(linewidth = 1.25) +
-    geom_abline(lty = 3) +
-    coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
-    labs(x = "False Positive Rate (FPR)",
-        y = "True Positive Rate (TPR)") +
-  scale_x_continuous(breaks = seq(0,1,.25))
-```
-
-Option 2 - Sensitivity vs. 1 - Specificity 
+Option 1 - Sensitivity vs. 1 - Specificity 
 
 - More common terms
 - 1 - Specificity is confusing!
@@ -118,7 +100,7 @@ roc_hour |>
 ```
 
 
-Option 3
+Option 2
  
 - More common terms
 - Sensible (though reversed) axis
@@ -135,9 +117,59 @@ roc_hour |>
     labels = sprintf("%.2f", seq(1,0,-.25)))
 ```
 
------
+Option 3 - TPR vs. FPR
+
+- sensible axes
+- Less common terms
+- But coming to prefer (depending on audience)
+```{r}
+roc_hour |> 
+  ggplot(aes(x = 1 - specificity, y = sensitivity)) +
+    geom_path(linewidth = 1.25) +
+    geom_abline(lty = 3) +
+    coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+    labs(x = "False Positive Rate (FPR)",
+        y = "True Positive Rate (TPR)") +
+  scale_x_continuous(breaks = seq(0,1,.25))
+```
 
 -----
+
+- Why is top right perfect performance
+- Thresholds
+- Interpretation of auROC and the diagonal line
+- Can we go over some more concrete (real-world) examples of when it would be a good idea to use a different threshold for classification? 
+- Are there any techniques to optimize decision thresholds? Or is it trial and error.
+- How does AUROC perform in highly imbalanced datasets
+- Sensitivity vs. Specificity Trade-offs, is it always true increase in one will sacrifice another?
+
+```{r}
+roc_hour |> 
+  ggplot(aes(x = 1 - specificity, y = sensitivity)) +
+    geom_path(linewidth = 1.25) +
+    geom_abline(lty = 3) +
+    coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+    labs(x = "Specificity",
+        y = "Sensitivity") +
+  scale_x_continuous(breaks = seq(0,1,.25),
+    labels = sprintf("%.2f", seq(1,0,-.25)))
+```
+
+--------------------------------------------------------------------------------
+
+- "means" of sensitivity/specificity vs. precision(ppv)/recall(sensitivity)
+- Balanced accuracy is the arithmetic mean of sens/spec
+- f1 is the harmonic mean of precision/recall
+
+[harmonic mean](https://en.wikipedia.org/wiki/Harmonic_mean) example: if a vehicle travels 60km outbound at a speed of 60 km/h and returns the same distance at a speed of 20 km/h, then its average speed is the harmonic mean of x and y (30 km/h), not 40 km/h
+
+harmonic mean of
+
+- .5 and .5 is .5
+- .75 and .75 is .75
+- .25 and .75 is .375
+- 0 and 1 is 0
+--------------------------------------------------------------------------------
 
 ### Kappa
 
@@ -145,5 +177,3 @@ roc_hour |>
   - given majority class proportion
   - by chance given base rates
 - ratio of improvement above expected accuracy
-
-
