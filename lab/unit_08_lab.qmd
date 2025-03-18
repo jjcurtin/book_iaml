@@ -1,0 +1,336 @@
+---
+title: "lab_unit_08"
+format: html
+editor: visual
+---
+
+```{r}
+options(conflicts.policy = "depends.ok")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+tidymodels_conflictRules()
+```
+
+```{r}
+library(tidyverse) 
+library(tidymodels)
+library(ggplot2)
+library(xfun, include.only = "cache_rds")
+
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+```
+```{r}
+theme_set(theme_classic())
+options(tibble.width = Inf, dplyr.print_max=Inf)
+```
+
+### function, vis, eda
+
+#### CM, `autoplot`
+
+-   I haven't started the coding assignment yet (because of the 710 midterm this week), but I'd like to know if autoplot is only used to plot confusion matrices or if we can use it to plot other things? And if so, what? - We can also use `autoplot` for simple plotting of appropriate data type
+
+```{r}
+?autoplot
+
+# in ggplot2
+# autoplot: Create a complete ggplot appropriate to a particular data type
+```
+
+-   Maybe provide some functions we can play around about modifying confusion matrix to make it publication quality?
+
+```{r}
+# Sample multi-class data
+set.seed(421)
+df <- tibble(
+  truth = factor(sample(c("A", "B", "C", "D"), 150, replace = TRUE)),  # True Labels
+  predicted = factor(sample(c("A", "B", "C", "D"), 150, replace = TRUE))  # Model Predictions
+)
+
+# Compute confusion matrix
+cm <- conf_mat(df, truth, predicted)
+
+# Default autoplot
+autoplot(cm)
+```
+
+We can modify the color, label and fonts, etc.
+
+```{r}
+autoplot(cm, type = "heatmap") +
+  scale_fill_gradient(low = "yellow", high = "blue") +  # Custom color scale
+  theme_minimal() +
+  labs(title = "Confusion Matrix",
+       fill = "Count") +  # Adjust labels
+  theme(plot.title = element_text(hjust = 0.5, size = 16, face = "bold"))
+
+```
+
+#### predictor variance
+
+-   **Scale of variance**: In the homework there is a question about variance. I had trouble understanding that and would like to hear more about it. It was not easy to tell visually whether variance was an issue for the predictors because some predictors appeared to have a wide spread but the scale was only like 0.1 from min to max. Others had what appeared to be a very compressed spread but the scale was in the hundreds. Do we consider absolute variance or the relative variance here?
+
+
+#### grid plot
+
+-   I would also be open to looking over how we can make our glmnet hyperparameter graphs look better. It was kind of confusing to fix.
+-   perhaps a way to visualize the best hyperparameter indices for resampling.
+
+> John's function to plot the performance as y, a hyperparamter as the x and another hyperparameter as colorful curves could provide an overall trend of the perforamance when tuning the hyperparameters.
+
+> Another choice might be using a heatmap.
+
+```{r}
+# create a fake df
+set.seed(123)  # Ensure reproducibility
+
+# Generate a fake dataset
+n <- 100  # Number of samples
+p <- 20   # Number of features
+
+# Generate informative features (correlated with outcome)
+X <- as.data.frame(matrix(rnorm(n * p), nrow = n, ncol = p))
+colnames(X) <- paste0("V", 1:p)  # Assign column names
+
+# Create a linear combination of some features as the signal
+signal <- 0.8 * X$V1 + 0.6 * X$V2 - 0.5 * X$V3 + 0.4 * X$V4
+
+# Generate probabilities using logistic function
+prob <- 1 / (1 + exp(-signal))  # Sigmoid function
+
+# Assign binary labels based on probability
+y <- rbinom(n, 1, prob) |> 
+  as.factor()
+
+# Combine into a dataframe
+df <- cbind(X, y = y)
+
+# Print first few rows
+head(df)
+
+```
+```{r}
+set.seed(12345)
+
+splits_test <- df |>  
+  initial_split(prop = 3/4, strata = "y")
+
+d_trn <- splits_test |> 
+  analysis()
+
+d_test <- splits_test |> 
+  assessment()
+```
+
+```{r}
+# set up resampling and hp grid
+set.seed(12345)
+
+splits_boot <- d_trn |> 
+  bootstraps(times = 10, strata = "y") 
+
+grid_glmnet <- expand_grid(penalty = exp(seq(-6, 3, length.out = 100)),
+                           mixture = seq(0, 1, length.out = 6))
+```
+
+```{r}
+rec <- recipe(y ~ ., data = d_trn)
+
+fits_glmnet <- cache_rds(
+  expr = {
+    logistic_reg(penalty = tune(), 
+                 mixture = tune()) |> 
+      set_engine("glmnet") |> 
+      set_mode("classification") |> 
+      tune_grid(preprocessor = rec, 
+                resamples = splits_boot, grid = grid_glmnet, 
+                metrics = metric_set(accuracy))
+  },
+  dir = "cache/",
+  file = "fits_glmnet_lab_8",
+  rerun = F)
+```
+
+```{r}
+plot_hyperparameters(fits_glmnet, hp1 = "penalty", hp2 = "mixture", 
+                     metric = "accuracy", log_hp1 = TRUE)
+```
+
+```{r}
+metric_data <- tune::collect_metrics(fits_glmnet)
+
+metric_data |> 
+  ggplot(aes(x = log(penalty), y = mixture, fill = mean)) +
+  geom_tile() +
+  scale_fill_gradient()
+```
+
+#### facet_wrap
+
+-   Can we go over the type of arguments that go into facet_wrap? In histograms?
+
+```{r}
+# Create a fake dataset
+set.seed(123)
+df <- data.frame(
+  category = rep(c("A", "B", "C"), each = 100),
+  value = c(rnorm(100, mean = 50, sd = 10),
+            rnorm(100, mean = 70, sd = 15),
+            rnorm(100, mean = 30, sd = 5))
+)
+
+# Plot histograms with facet_wrap()
+ggplot(df, aes(x = value)) +
+  geom_histogram(binwidth = 5, fill = "steelblue", color = "white") +
+  facet_wrap(~ category) +
+  theme_bw()
+```
+
+#### function construction
+
+-   I still confused about building a function in R.
+
+```{r}
+# define a function
+demo_fun <- function(x = 10, y = 10){
+  # some operations on the inputs
+  z1 <- x * y
+  z2 <- x + y
+  
+  # return outputs
+  return(c(z1, z2))
+}
+```
+
+```{r}
+demo_fun()
+# 100 20
+demo_fun(5, 5)
+# 25 10
+```
+
+#### function conflict
+
+-   Why do I still need to specify function conflicts even though I have only libraried tidyverse and tidymodel. I also included John's function. The one function which has the conflict is the select().
+
+> Maybe load the conflict rule polices before loading any packages.
+
+### regularization, tuning
+
+#### grid
+
+-   I would like to know more about how to specify the numeric values for the penalty values that are inside the `expand_grid` function. What does it mean to have `seq(-8, 3, length.out = 200)`?
+
+> This means to generate a sequence from -8 to 3, including 200 values between them.
+
+```{r}
+?seq
+
+# ## Default S3 method:
+# seq(from = 1, to = 1, by = ((to - from)/(length.out - 1)), length.out = NULL, along.with = NULL, ...)
+
+# length.out	
+# desired length of the sequence. A non-negative number, which for seq and seq.int will be rounded up if fractional.
+```
+
+### balanced sampling
+
+#### over/under_ratio
+
+- In downsampling what does under_ratio = 1 mean? What would different values mean. Is it just the number of samples?
+
+> It means the ratio of the #majority/#minority
+
+```{r}
+?themis::step_downsample
+
+# under_ratio	
+# A numeric value for the ratio of the majority-to-minority frequencies. 
+# The default value (1) means that all other levels are sampled down to have the same frequency as the least occurring level. 
+# A value of 2 would mean that the majority levels will have (at most) (approximately) twice as many rows than the minority level.
+```
+
+-   How does change over_ratio to some values other than 1 make a difference?
+
+```{r}
+?themis::step_upsample
+
+# over_ratio	
+# A numeric value for the ratio of the minority-to-majority frequencies. 
+# The default value (1) means that all other levels are sampled up to have the same frequency as the most occurring level. 
+# A value of 0.5 would mean that the minority levels will have (at most) (approximately) half as many rows than the majority level.
+```
+
+#### examples to implement up/down-sampling
+
+-   Upsampling and downsampling; more examples of how this would be implemented.
+-   How to use the different resampling techniques to address uneven class distribution? examples for the same.
+-   Can you talk more on the step_upsample()?
+
+> We use them in the recipe by calling `themis::step_upsample` or `themis::step_downsample`
+
+#### details of up/down-sampling and SMOTE
+
+-   The underlying procedure of step_downsample and step_upsample. Why we use this function after step_dummy and before step_normalize in recipe?
+
+> We randomly remove/sample from existing instances of the majority/minority class. And the order is intended to maintain the pattern of the original data, such as the overall status of the distribution of the feature values.
+
+-   I think I would like to look more at the smote technique for resampling. I find this topic a little bit confusing.
+
+> It's a special upsampling for minority class, where the upsampled instances are synthesized from the feature values limited by the existing instances.
+
+-   Implementing SMOTE for class imbalance correctly while avoiding data leakage.
+
+> Only prepare the recipe with trianing data.
+
+-   How do we correctly implement up-sampling, down-sampling, and SMOTE in tidymodels, ensuring that resampling affects only the training set and not the test set?
+
+> Check out the key.
+
+-   What are the key considerations when tuning models on resampled data?
+
+### metrics
+
+#### ROC
+
+-   What do the arguments for building the ROC plot mean?
+
+```{r}
+#| eval: false
+roc_plot <- 
+  tibble(truth = feat_test$diagnosis,
+         prob = predict(fit_best_knn, feat_test, type = "prob")$.pred_malignant) |> 
+  roc_curve(prob, truth = truth)
+
+roc_plot |>
+  ggplot(aes(x = 1 - specificity, y = sensitivity, color = .threshold)) +
+  geom_path() +
+  geom_abline(lty = 3) +
+  coord_equal() +
+  labs(x = "1 - Specificity (FPR)",
+       y = "Sensitivity (TPR)")
+```
+
+> In the dataframe, `truth` refers to the ground truth, and `prob` refers to the probability of the prediction to be positive. We pipes it into roc_curve to compute specificity and sensitivity.
+
+-   Using and interpreting the results for ROC and auROC.
+
+> The ROC provides a more formal method to visualize the trade-offs between sensitivity and specificity across all possible thresholds for classification.
+
+> auROC is the probability that the classifier will rank/predict a randomly selected true positive observation higher than a randomly selected true negative observation. Alternatively, it can be thought of as the average sensitivity across all decision thresholds. It summarizes performance (sensitivity vs. specificity trade-off) across all possible thresholds and is not affected by class imbalances in contrast to many other metrics.
+
+#### multiple metrics usage
+
+- `metrics = metric_set(roc_auc, accuracy, sens, spec, bal_accuracy)`: I still don't really understand why we run all of these metrics at once, is it just to see which one is the best? And if you can do that why would we not always include all of the metrics to see which one is most accurate apart from specific scenarios?
+
+> If we're selecting a best model connfiguration, we should make sure the criterion is the same across all candidate configurations. And for different aims, we might use different metric as this criterion (for more comprehensive selection, there are also metrics like balanced accuracy). We assess the model on its universal performance using all those metrics.
+
+### parallel processing, cache
+
+####specify parallel processing and cache - I am still unsure about parallel processing, do we simply include those 2 lines from the slides or do we need to do a similar process as caching where we wrap the expression in a code? - I am a little confused how parallel processing works, and if we have to integrate it into the other code chunks.
+
+> The parallel processing is a global setting for the script, so we only need to specify it at the beginning of the computation. Normally, computations run sequentially (one after another). With parallel processing, multiple tasks run simultaneously, leveraging multi-cores.
+
+> Cache is case-specific for chunks/computational steps that need a long time and may be repeated in the future, so it needs to be set for a specific process.
+
+### Questions on application midterm and keras installation
