@@ -19,6 +19,7 @@ library(xfun, include.only = "cache_rds")
 devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
 devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
 ```
+
 ```{r}
 theme_set(theme_classic())
 options(tibble.width = Inf, dplyr.print_max=Inf)
@@ -70,7 +71,6 @@ autoplot(cm, type = "heatmap") +
 
 -   **Scale of variance**: In the homework there is a question about variance. I had trouble understanding that and would like to hear more about it. It was not easy to tell visually whether variance was an issue for the predictors because some predictors appeared to have a wide spread but the scale was only like 0.1 from min to max. Others had what appeared to be a very compressed spread but the scale was in the hundreds. Do we consider absolute variance or the relative variance here?
 
-
 #### grid plot
 
 -   I would also be open to looking over how we can make our glmnet hyperparameter graphs look better. It was kind of confusing to fix.
@@ -109,6 +109,7 @@ df <- cbind(X, y = y)
 head(df)
 
 ```
+
 ```{r}
 set.seed(12345)
 
@@ -237,7 +238,7 @@ demo_fun(5, 5)
 
 #### over/under_ratio
 
-- In downsampling what does under_ratio = 1 mean? What would different values mean. Is it just the number of samples?
+-   In downsampling what does under_ratio = 1 mean? What would different values mean. Is it just the number of samples?
 
 > It means the ratio of the #majority/#minority
 
@@ -321,7 +322,7 @@ roc_plot |>
 
 #### multiple metrics usage
 
-- `metrics = metric_set(roc_auc, accuracy, sens, spec, bal_accuracy)`: I still don't really understand why we run all of these metrics at once, is it just to see which one is the best? And if you can do that why would we not always include all of the metrics to see which one is most accurate apart from specific scenarios?
+-   `metrics = metric_set(roc_auc, accuracy, sens, spec, bal_accuracy)`: I still don't really understand why we run all of these metrics at once, is it just to see which one is the best? And if you can do that why would we not always include all of the metrics to see which one is most accurate apart from specific scenarios?
 
 > If we're selecting a best model connfiguration, we should make sure the criterion is the same across all candidate configurations. And for different aims, we might use different metric as this criterion (for more comprehensive selection, there are also metrics like balanced accuracy). We assess the model on its universal performance using all those metrics.
 
