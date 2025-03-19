@@ -1,0 +1,95 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+# Demonstration of using mapping to fit_resamples or tune_grid
+
+```{r}
+library(tidyverse)
+library(tidymodels)
+```
+
+
+Create a simple dataset and get 100 bootstrap samples
+```{r}
+d <- tibble(x = rnorm(100), y = factor(rbinom(100, 1, 0.5)))
+set.seed(123456)
+splits <- bootstraps(d, times = 100)
+
+
+
+```  
+
+
+## fit_resmples done manually
+
+Set up a simple recipe for feature engineering for the logistic regression
+```{r}
+rec <- recipe(y ~ x, data = d)
+```
+
+Create a function to fit logistic regression to held-in training data
+```{r}  
+fit_lr <- function(held_in) {
+  logistic_reg() |> 
+    set_engine("glm") |> 
+    set_mode("classification") |> 
+    fit(y ~ ., data = held_in)
+}
+```
+
+
+Use `map()` and list columns to save the individual steps for evaluating the model in each resample.  The following steps are done for EACH resample using `map()` or `map2()`
+
+- prep the recipe with held-in data
+- bake the recipe using `new_data = NULL` to get held-in features
+- bake the recipe using `new_data = assessment(split)` to get held-out features
+- fit the model using the held-in features
+- get predictions using the model with the held-out features
+- calculate the accuracy of the model
+
+```{r}
+models <- tibble(prep_recs = map(splits$splits, 
+                                 \(split) prep(rec, training = analysis(split))),
+                 held_ins = map2(splits$splits, prep_recs, 
+                                \(split, prep_rec) bake(prep_rec, new_data = NULL)),
+                 held_outs = map2(splits$splits, prep_recs, 
+                                 \(split, prep_rec) bake(prep_rec, 
+                                                         new_data = assessment(split))),
+                 models = map(held_ins, \(held_in) fit_lr(held_in)),
+                 predictions = map2(models, held_outs, 
+                                    \(model, held_out) predict(model, held_out, type = "class")),
+                 accuracy = map2_dbl(predictions, held_outs, 
+                                     \(pred, held_out) accuracy_vec(held_out$y, pred$.pred_class)))
+```
+
+The pipline above creates a tibble with columns for each of the intermediate products and the accuracy of the model in each resample.  All but the last columns are list columns that can hold objects of any time.  The final column is a double column that holds the accuracy of the model in each resample.  That is why we used `map_dbl()` to create the accuracy column.
+```{r}
+models |> glimpse()
+```
+
+
+We can now look at accuracy across the 100 bootstraps.  For example, we can make a histogram using ggplot from the accuracy column in the models tibble
+```{r}
+models |> 
+  ggplot(aes(accuracy)) +
+  geom_histogram(binwidth = 0.05)
+```
+
+And we can summarize the min, max, mean, median and stdev of the accuracy column in the models tibble
+```{r}
+models |> 
+  summarize(min = min(accuracy), 
+            max = max(accuracy), 
+            mean = mean(accuracy), 
+            median = median(accuracy),
+            std_dev = sd(accuracy))
+```
+
+Easy peasy!  But remember, it is easier still using `fit_reamples()
+
+
+## tune_grid done manually
+
