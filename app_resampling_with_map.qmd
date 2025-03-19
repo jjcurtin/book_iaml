@@ -88,7 +88,20 @@ models |>
             std_dev = sd(accuracy))
 ```
 
-Easy peasy!  But remember, it is easier still using `fit_reamples()
+Easy peasy!  But remember, it is easier still using `fit_reamples()`
+
+```{r}
+fits_lr <-
+  logistic_reg() |> 
+    set_engine("glm") |> 
+    fit_resamples(preprocessor = rec, 
+                  resamples = splits, 
+                  metrics = metric_set(accuracy))
+
+fits_lr |> collect_metrics()
+
+fits_lr |> collect_metrics(summarize = FALSE)
+```
 
 
 ## tune_grid done manually
