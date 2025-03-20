@@ -4,44 +4,53 @@ editor_options:
   chunk_output_type: console
 ---
 
-# Demonstration of using mapping to fit_resamples or tune_grid
+# Map across resamples { .unnumbered}
 
+We can use map (and foreach) to fit and evaluate models over resamples/splits manually
+
+- This can be done to replace `fit_resamples()` and `tune_grid()`
+- Useful if we need to fit models outside of full tidymodels framework (e.g., when using keras for neural networks)
+- Useful for nested resampling, which is not supported by `fit_resamples()` and `tune_grid()`
+
+## Set up
+
+Lets start by....
+
+- loading libraries
 ```{r}
 library(tidyverse)
 library(tidymodels)
+library(foreach)
 ```
 
-
-Create a simple dataset and get 100 bootstrap samples
+- creating a simple data set and get 50 bootstrap samples
 ```{r}
-d <- tibble(x = rnorm(100), y = factor(rbinom(100, 1, 0.5)))
 set.seed(123456)
-splits <- bootstraps(d, times = 100)
-
-
-
+n_obs <- 100
+n_boots <- 50
+d <- tibble(x1 = rnorm(n), x2 = rnorm(n), y = 2*x1 + 3*x2 + rnorm(n))
+splits <- bootstraps(d, times = n_boots)
 ```  
 
-
-## fit_resmples done manually
-
-Set up a simple recipe for feature engineering for the logistic regression
+- setting up a simple recipe for feature engineering all our models (just use raw x and y)
 ```{r}
-rec <- recipe(y ~ x, data = d)
+rec <- recipe(y ~ ., data = d)
 ```
 
-Create a function to fit logistic regression to held-in training data
+## Using map() to replace fit_resamples() - step x step
+
+In this first example, we will combine `map()` with the use of list columns to save all the intermediate products that are produced when fitting and evaluating a single model configuration across resamples.
+
+To do this, we will need a function to fit logistic regression to held-in training data
 ```{r}  
-fit_lr <- function(held_in) {
-  logistic_reg() |> 
-    set_engine("glm") |> 
-    set_mode("classification") |> 
+fit_lm <- function(held_in) {
+  linear_reg() |> 
+    set_engine("lm") |> 
     fit(y ~ ., data = held_in)
 }
 ```
 
-
-Use `map()` and list columns to save the individual steps for evaluating the model in each resample.  The following steps are done for EACH resample using `map()` or `map2()`
+Then we use `map()` and list columns to save the individual steps for evaluating the model in each resample.  The following steps are done for EACH resample using `map()` or `map2()`
 
 - prep the recipe with held-in data
 - bake the recipe using `new_data = NULL` to get held-in features
@@ -51,58 +60,190 @@ Use `map()` and list columns to save the individual steps for evaluating the mod
 - calculate the accuracy of the model
 
 ```{r}
-models <- tibble(prep_recs = map(splits$splits, 
-                                 \(split) prep(rec, training = analysis(split))),
-                 held_ins = map2(splits$splits, prep_recs, 
-                                \(split, prep_rec) bake(prep_rec, new_data = NULL)),
-                 held_outs = map2(splits$splits, prep_recs, 
-                                 \(split, prep_rec) bake(prep_rec, 
-                                                         new_data = assessment(split))),
-                 models = map(held_ins, \(held_in) fit_lr(held_in)),
-                 predictions = map2(models, held_outs, 
-                                    \(model, held_out) predict(model, held_out, type = "class")),
-                 accuracy = map2_dbl(predictions, held_outs, 
-                                     \(pred, held_out) accuracy_vec(held_out$y, pred$.pred_class)))
+fits <- tibble(resample = 1:n_boots) |> 
+  mutate(prep_recs = map(splits$splits, 
+                         \(split) prep(rec, training = analysis(split))),
+         held_ins = map2(splits$splits, prep_recs, 
+                         \(split, prep_rec) bake(prep_rec, new_data = NULL)),
+         held_outs = map2(splits$splits, prep_recs, 
+                          \(split, prep_rec) bake(prep_rec, 
+                                                  new_data = assessment(split))),
+         models = map(held_ins, 
+                      \(held_in) fit_lm(held_in)),
+         predictions = map2(models, held_outs, 
+                            \(model, held_out) predict(model, held_out)$.pred),
+         errors = map2_dbl(predictions, held_outs, 
+                           \(pred, held_out) rmse_vec(held_out$y, pred)))
 ```
 
-The pipline above creates a tibble with columns for each of the intermediate products and the accuracy of the model in each resample.  All but the last columns are list columns that can hold objects of any time.  The final column is a double column that holds the accuracy of the model in each resample.  That is why we used `map_dbl()` to create the accuracy column.
+The pipline above creates a tibble with columns for each of the intermediate products and the rmse/error of the model in each resample.  All but the last columns are list columns that can hold objects of any time (e.g., prepped recipes, data frames, model objects).  The final column is a double column that holds the rmse of the model in each resample.  That is why we used `map_dbl()` to create the error column.
 ```{r}
-models |> glimpse()
+fits |> glimpse()
 ```
 
-
-We can now look at accuracy across the 100 bootstraps.  For example, we can make a histogram using ggplot from the accuracy column in the models tibble
+We can now look at rmses across the 50 bootstraps.  For example, we can make a histogram using ggplot from the errors column in the fits tibble
 ```{r}
-models |> 
-  ggplot(aes(accuracy)) +
+fits |> 
+  ggplot(aes(errors)) +
   geom_histogram(binwidth = 0.05)
 ```
 
-And we can summarize the min, max, mean, median and stdev of the accuracy column in the models tibble
+And we can summarize the min, max, mean, median and stdev of the error column in the fits tibble
 ```{r}
-models |> 
-  summarize(min = min(accuracy), 
-            max = max(accuracy), 
-            mean = mean(accuracy), 
-            median = median(accuracy),
-            std_dev = sd(accuracy))
+fits |> 
+  summarize(min = min(errors), 
+            max = max(errors), 
+            mean = mean(errors), 
+            median = median(errors),
+            std_dev = sd(errors))
 ```
 
-Easy peasy!  But remember, it is easier still using `fit_reamples()`
+Easy peasy!  But remember, it is easier still using `fit_reamples()`.  We demo this only to make clear what `fit_resamples()` is doing and to give you an alternative workflow in case you can't use `fit_resamples()`.  It is also a demontration of the use of `map()` and list columns, which has many uses.
 
 ```{r}
-fits_lr <-
-  logistic_reg() |> 
-    set_engine("glm") |> 
+fits_tidy <-
+  linear_reg() |> 
+    set_engine("lm") |> 
     fit_resamples(preprocessor = rec, 
                   resamples = splits, 
-                  metrics = metric_set(accuracy))
+                  metrics = metric_set(rmse))
 
-fits_lr |> collect_metrics()
+fits_tidy |> collect_metrics()
 
-fits_lr |> collect_metrics(summarize = FALSE)
+fits_tidy |> collect_metrics(summarize = FALSE)
+```
+
+## Using map() to replace fit_resamples() - one function
+
+If we wanted to generate the held-out error using resampling but didnt need the intermediate products, we could wrap all the steps in one function and just map that single function.  
+```{r}
+fit_and_eval <- function(split, rec) {
+  # prep the recipe with held-in data
+  prep_rec <- prep(rec, training = analysis(split))
+  
+  # bake the recipe using new_data = NULL to get held-in features
+  held_in <- bake(prep_rec, new_data = NULL)
+  
+  # bake the recipe using new_data = assessment(split) to get held-out features
+  held_out <- bake(prep_rec, new_data = assessment(split))
+  
+  # fit the model using the held-in features
+  model <- 
+    linear_reg() |> 
+    set_engine("lm") |> 
+    fit(y ~ ., data = held_in)
+  
+  # get predictions using the model with the held-out features
+  pred <- predict(model, held_out)$.pred
+  
+  # calculate the accuracy of the model
+  rmse_vec(held_out$y, pred)
+}
+```
+
+Now map this function over the splits to get a vector of rmse.  Same results, but not saving intermediate steps by using one function.
+```{r}
+fits <- tibble(resample = 1:n_boots) |> 
+  mutate(errors = map_dbl(splits$splits, \(split) fit_and_eval(split, rec)))
+```
+
+Here is what the fits tibble now looks like and summary stats on the resampled rmse
+```{r}
+fits
+
+fits |> 
+  summarize(min = min(errors), 
+            max = max(errors), 
+            mean = mean(errors), 
+            median = median(errors),
+            std_dev = sd(errors))
 ```
 
 
-## tune_grid done manually
+## Using map() and foreach() to replace tune_grid()
+
+Now we can make this a bit more complicated by adding a grid of hyperparameters to tune.  Lets keep it simple and tune only lambda in a ridge regression model.  To tune lambda, we would normally use `tune_grid()` but we can do it again with two loops (using `map()` and `foreach()`; we could also have used a second `map()` instead of `foreach()`)
+
+We need a single function to repeatedly fit and eval over a grid of parameters
+```{r}
+library(foreach)
+fit_and_eval_hyper <- function(idx, split, rec, lambdas) {
+ 
+  # get held-in and held-out features for split 
+  prep_rec <- prep(rec, training = analysis(split))
+  held_in <- bake(prep_rec, new_data = NULL)
+  held_out <- bake(prep_rec, new_data = assessment(split))
+
+  # loop through lambdas and fit/eval model for each lambda 
+  # bind together one row per lambda
+  errors <- foreach(i=1:length(lambdas), .combine = rbind) %do% {
+    lambda <- lambdas[i]
+    
+    model <- 
+      linear_reg(penalty = lambda,
+                 mixture = 0) |> 
+      set_engine("glmnet") |> 
+      fit(y ~ ., data = held_in)
+    
+     pred <- predict(model, held_out)$.pred
+   
+     tibble(resample = idx, 
+            lambda = lambda, 
+            error = rmse_vec(held_out$y, pred))
+  }
+}
+```
+
+Now map this function over the splits to get a vector of rmse.  Same results, but not saving intermediate steps by using one function
+```{r}
+lambdas = c(.001, .01, .1)
+fits <- imap(splits$splits, 
+              \(split, idx) fit_and_eval_hyper(idx, split, rec, lambdas)) |> 
+  list_rbind()
+```
+
+fits contains the rmse for each lambda value for each split/resample
+```{r}
+print(fits, n = 20)
+```
+
+We can get the median (or mean) across resamples and then arrange to find the best lambda
+
+```{r}
+fits |> 
+  group_by(lambda) |> 
+  summarize(n_resamples = n(),
+            median_rmse = median(error)) |> 
+  arrange(median_rmse)
+```
+
+But of course, this can be done more easily with `tune_grid()`
+
+```{r}
+fits <- 
+  linear_reg(penalty = tune(), 
+               mixture = 0) |> 
+    set_engine("glmnet") |> 
+    tune_grid(preprocessor = rec, 
+              resamples = splits, 
+              grid = tibble(penalty = lambdas), 
+              metrics = metric_set(rmse))
+
+fits |> collect_metrics()
+
+fits |> collect_metrics(summarize = FALSE)
+```
+
+## Using map() and foreach() to do nested cv
+
+
+```{r}
+nested_splits <- d |> 
+  nested_cv(outside = vfold_cv(v = 5), inside = bootstraps(times = 10))
+
+```
+
+
+
+
 
