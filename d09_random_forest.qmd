@@ -9,63 +9,79 @@ editor_options:
 
 - Installing keras package
 - Slack media channel
-- App for nested cross validation
+- Appendix for nested cross validation
+  - using tidymodels packages but not parsnip engines and fit_resamples/tune_grid
+  - tidymodels wrappers at three levels (we use levels 1-2 for engines and resampling/tuning but not workflows, etc)
 
 --------------------------------------------------------------------------------
 
 ## General
 
-- I'm still confused about what out-of-bag error is and how it would differ from just model error (Out-of-Bag Error Estimation: I did not really understand the logic behind this - in RF)
+- I'm still confused about what out-of-bag error is and how it would differ from just model error 
 
 - What did you mean in the lectures when you said that the hyperparameters were around the edges?
 
-- ??why we are not tuning lambda when applying the random forest algorithm???
+- Learn more about the algorithms you use by reading package documentation
+
+  - [ranger](https://cran.r-project.org/web/packages/ranger/index.html)
+  - [rpart](https://cran.r-project.org/web/packages/rpart/index.html)
 
 --------------------------------------------------------------------------------
 
 ## Trees
+
+- When we split the data in a tree by a variable, how the threshold is specified? Is the algorithm determining it internally? 
+
+  - RSS
+  - Error/accuracy, gini, entropy (book formula)
+  
+
+- Can we discuss further how tree-models can handle nonlinear effects and interactions natively? 
+
+  - Interactions (draw)
+  - [non-linear?](https://bradleyboehmke.github.io/HOML/DT.html#partitioning)
+
+-  What determines the depth of trees that we set in decision trees and random forest?
+
+- How do trees handle missing data?  Do we ever want to impute missing data in our recipes?
+
 
 - In what situations might additional feature engineering (e.g., alternative handling of missing values or categorical aggregation) still improve decision tree performance?
 
   - missing values, categorical aggregation, nsv, other dimensionality reduction
   - Why isn't feature engineering required as extensively when it comes to decision trees?
   - out of box statistical algorithms
-
-- Can we discuss further how tree-models can handle nonlinear effects and interactions natively? It was mentioned that returning to a previous feature used for a split is how a decision tree will model interactions and repeated splits on the same feature will model nonlinear effects. Can we go deeper into these concepts?
-
-
-
-- When we split the data in a tree by a variable, how the threshold is specified? Is the algorithm determining it internally? (It looks like so, but I wonder if we could/should/might decide threshold manully sometime?) How it automatically decides the thresholds: is the tree calculating the accuracy(or other metrics) value at each node for each possible threshold decided by each variable?
-
-- Can you explain more on gini and entropy? What are the costs and benefits of them, and how can we determine which to use?
-
-
-- How does CART and RF handle categorical variables?  What about other transformations of predictors (normalize, scale, combine)? [non-linear?](https://bradleyboehmke.github.io/HOML/DT.html#partitioning)
-
--  What determines the depth of trees that we set in decision trees and random forest?
-
-- Can we compare the advantages or situations when we should choose trees and random forests?
-
-- How do trees handle missing data?  Do we ever want to impute missing data in our recipes?
-
+  
 - Can you give more examples of how to interpret the decision tree graph?
 
+  - book examples
+  
 --------------------------------------------------------------------------------
 
 ## Bagging
 
 - A further explanation on what a base learner is
 
-- When and Why does bagging improve model performance
+- When and why does bagging improve model performance
   - What are the benefits of bagging
   - No impact on bias
   - Interpretability loss
+  - computational cost
   
 - Can you talk more about bagging and how it utilizes bootstrapping techniques?
 
 - Can you explain more on why we should de-correlate the bagged trees? Do we not need to de-correlate if we are not using bagging?
 
 - Besides using the same resampling (bootstrapping), how is the inner loop/outer loop with bagging and random forest distinct from nested CV? 
+ - its not similar
+
+- Out-of-Bag Error Estimation: I did not really understand the logic behind this 
+
+--------------------------------------------------------------------------------
+
+## Random Forest
+
+Understanding mtry
 
 --------------------------------------------------------------------------------
 
@@ -80,8 +96,3 @@ editor_options:
   - simple tree (e.g. CART)
   - bagged tress
   - rf and XGBoost
-
-
-
-
-
