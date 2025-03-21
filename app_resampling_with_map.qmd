@@ -23,14 +23,24 @@ library(tidymodels)
 library(foreach)
 ```
 
-- creating a simple data set and get 50 bootstrap samples
+- creating a simple data set
 ```{r}
 set.seed(123456)
-n_obs <- 100
+n_obs <- 300
 n_boots <- 50
-d <- tibble(x1 = rnorm(n), x2 = rnorm(n), y = 2*x1 + 3*x2 + rnorm(n))
-splits <- bootstraps(d, times = n_boots)
+d <- tibble(x1 = rnorm(n_obs), x2 = rnorm(n_obs), y = 2*x1 + 3*x2 + rnorm(n_obs))
 ```  
+
+- getting bootstrap resamples of d.  It has two columns and n_boots rows.  Each row is a bootstrap sample of the data.  The columns are:
+
+  - `splits` - contains a bootstrap sample of the data that includes held-in raw data and OOB held-out raw data subsamples
+  - `id` - name of the resample
+
+```{r}
+resamples <- bootstraps(d, times = n_boots)
+
+resamples
+```
 
 - setting up a simple recipe for feature engineering all our models (just use raw x and y)
 ```{r}
@@ -39,9 +49,9 @@ rec <- recipe(y ~ ., data = d)
 
 ## Using map() to replace fit_resamples() - step x step
 
-In this first example, we will combine `map()` with the use of list columns to save all the intermediate products that are produced when fitting and evaluating a single model configuration across resamples.
+In this first example, we will combine `map()` with the use of list columns to save all the intermediate products that are produced when fitting and evaluating a single model configuration for a logistic regression across resamples.
 
-To do this, we will need a function to fit logistic regression to held-in training data
+To do this, we will need a function to fit logistic regression to held-in training data.  We can use the typical tidymodels code here.
 ```{r}  
 fit_lm <- function(held_in) {
   linear_reg() |> 
@@ -60,12 +70,12 @@ Then we use `map()` and list columns to save the individual steps for evaluating
 - calculate the accuracy of the model
 
 ```{r}
-fits <- tibble(resample = 1:n_boots) |> 
-  mutate(prep_recs = map(splits$splits, 
+resamples_ex1 <- resamples |> 
+  mutate(prep_recs = map(splits, 
                          \(split) prep(rec, training = analysis(split))),
-         held_ins = map2(splits$splits, prep_recs, 
+         held_ins = map2(resamples$splits, prep_recs, 
                          \(split, prep_rec) bake(prep_rec, new_data = NULL)),
-         held_outs = map2(splits$splits, prep_recs, 
+         held_outs = map2(resamples$splits, prep_recs, 
                           \(split, prep_rec) bake(prep_rec, 
                                                   new_data = assessment(split))),
          models = map(held_ins, 
@@ -78,50 +88,53 @@ fits <- tibble(resample = 1:n_boots) |>
 
 The pipline above creates a tibble with columns for each of the intermediate products and the rmse/error of the model in each resample.  All but the last columns are list columns that can hold objects of any time (e.g., prepped recipes, data frames, model objects).  The final column is a double column that holds the rmse of the model in each resample.  That is why we used `map_dbl()` to create the error column.
 ```{r}
-fits |> glimpse()
+resamples_ex1 |> glimpse()
 ```
 
 We can now look at rmses across the 50 bootstraps.  For example, we can make a histogram using ggplot from the errors column in the fits tibble
 ```{r}
-fits |> 
+resamples_ex1 |> 
   ggplot(aes(errors)) +
   geom_histogram(binwidth = 0.05)
 ```
 
 And we can summarize the min, max, mean, median and stdev of the error column in the fits tibble
 ```{r}
-fits |> 
-  summarize(min = min(errors), 
+resamples_ex1 |> 
+  summarize(n = n(),
+            min = min(errors), 
             max = max(errors), 
             mean = mean(errors), 
             median = median(errors),
             std_dev = sd(errors))
 ```
 
-Easy peasy!  But remember, it is easier still using `fit_reamples()`.  We demo this only to make clear what `fit_resamples()` is doing and to give you an alternative workflow in case you can't use `fit_resamples()`.  It is also a demontration of the use of `map()` and list columns, which has many uses.
+Easy peasy!  But remember, it is easier still using `fit_reamples()`.  We demo this only to make clear what `fit_resamples()` is doing and to give you an alternative workflow in case you can't use `fit_resamples()`.  It is also a demonstration of the use of `map()` and list columns, which has many uses.
 
 ```{r}
-fits_tidy <-
+resamples_tidy_ex1 <-
   linear_reg() |> 
     set_engine("lm") |> 
     fit_resamples(preprocessor = rec, 
-                  resamples = splits, 
+                  resamples = resamples, 
                   metrics = metric_set(rmse))
 
-fits_tidy |> collect_metrics()
+resamples_tidy_ex1 |> 
+  collect_metrics()
 
-fits_tidy |> collect_metrics(summarize = FALSE)
+resamples_tidy_ex1 |> 
+  collect_metrics(summarize = FALSE)
 ```
 
 ## Using map() to replace fit_resamples() - one function
 
-If we wanted to generate the held-out error using resampling but didnt need the intermediate products, we could wrap all the steps in one function and just map that single function.  
+If we wanted to generate the held-out error using resampling but didnt need/want the intermediate products, we could wrap all the steps in one function and just map that single function.  
 ```{r}
 fit_and_eval <- function(split, rec) {
   # prep the recipe with held-in data
   prep_rec <- prep(rec, training = analysis(split))
   
-  # bake the recipe using new_data = NULL to get held-in features
+  # bake the recipe using new_data = NULL to pull out the held-in features
   held_in <- bake(prep_rec, new_data = NULL)
   
   # bake the recipe using new_data = assessment(split) to get held-out features
@@ -143,16 +156,17 @@ fit_and_eval <- function(split, rec) {
 
 Now map this function over the splits to get a vector of rmse.  Same results, but not saving intermediate steps by using one function.
 ```{r}
-fits <- tibble(resample = 1:n_boots) |> 
-  mutate(errors = map_dbl(splits$splits, \(split) fit_and_eval(split, rec)))
+resamples_ex2 <- resamples |> 
+  mutate(errors = map_dbl(splits, \(split) fit_and_eval(split, rec)))
 ```
 
-Here is what the fits tibble now looks like and summary stats on the resampled rmse
+Here is what the resamples_ex2 tibble now looks like and summary stats on the resampled rmse
 ```{r}
-fits
+resamples_ex2
 
-fits |> 
-  summarize(min = min(errors), 
+resamples_ex2 |> 
+  summarize(n = n(),
+            min = min(errors), 
             max = max(errors), 
             mean = mean(errors), 
             median = median(errors),
@@ -160,90 +174,173 @@ fits |>
 ```
 
 
-## Using map() and foreach() to replace tune_grid()
+## Using two map()s to replace tune_grid()
 
-Now we can make this a bit more complicated by adding a grid of hyperparameters to tune.  Lets keep it simple and tune only lambda in a ridge regression model.  To tune lambda, we would normally use `tune_grid()` but we can do it again with two loops (using `map()` and `foreach()`; we could also have used a second `map()` instead of `foreach()`)
+Now we can make this a bit more complicated by adding a grid of hyperparameters to tune.  Lets keep it simple and tune only k in a knn model.  To tune k, we would normally use `tune_grid()` but we can do it again with two loops using `map()`.  We use an outer `map()` to loop over the resamples and an inner `map()` to loop over the values of lambda.   
 
 We need a single function to repeatedly fit and eval over a grid of parameters
 ```{r}
-library(foreach)
-fit_and_eval_hyper <- function(idx, split, rec, lambdas) {
+eval_grid <- function(split, rec, grid_k) {
  
   # get held-in and held-out features for split 
   prep_rec <- prep(rec, training = analysis(split))
   held_in <- bake(prep_rec, new_data = NULL)
   held_out <- bake(prep_rec, new_data = assessment(split))
 
-  # loop through lambdas and fit/eval model for each lambda 
-  # bind together one row per lambda
-  errors <- foreach(i=1:length(lambdas), .combine = rbind) %do% {
-    lambda <- lambdas[i]
-    
+  # function fit fit and eval model for a specific lambda and resample
+  fit_eval_k <- function(k, held_in, held_out) {
     model <- 
-      linear_reg(penalty = lambda,
-                 mixture = 0) |> 
-      set_engine("glmnet") |> 
-      fit(y ~ ., data = held_in)
+      nearest_neighbor(neighbors = k) |>   
+        set_engine("kknn") |>   
+        set_mode("regression") |>  
+        fit(y ~ ., data = held_in)
     
-     pred <- predict(model, held_out)$.pred
-   
-     tibble(resample = idx, 
-            lambda = lambda, 
-            error = rmse_vec(held_out$y, pred))
+    pred <- predict(model, held_out)$.pred
+    
+    tibble(k = k, 
+           rmse = rmse_vec(held_out$y, pred))
   }
+  
+  # loop through grid_k and fit/eval model for each k 
+  # this is the inner loop
+  # use list_rbind() to bind the separate rows for each tibble into one larger tibble
+  grid_k |> 
+    map(\(k) fit_eval_k(k, held_in, held_out)) |> 
+    list_rbind()
 }
 ```
 
-Now map this function over the splits to get a vector of rmse.  Same results, but not saving intermediate steps by using one function
+Now map this function over the splits. This is the outer loop.  `fit_eval_hyper()` will return a tibble with rows for each value of k.  We will save one tibble for each split in a list column called `errors`. 
+
 ```{r}
-lambdas = c(.001, .01, .1)
-fits <- imap(splits$splits, 
-              \(split, idx) fit_and_eval_hyper(idx, split, rec, lambdas)) |> 
-  list_rbind()
+grid_k = c(2, 4, 8, 16)
+resamples_ex3 <- resamples |> 
+  mutate(rmses = map(splits, 
+              \(split) eval_grid(split, rec, grid_k)))
 ```
 
-fits contains the rmse for each lambda value for each split/resample
+The rmses column contains the rmse for each value of k for each split/resample in a tibble.  Each tibble has 4 rows (one for each k) and 2 columns (k and rmse).
 ```{r}
-print(fits, n = 20)
+resamples_ex3
 ```
 
-We can get the median (or mean) across resamples and then arrange to find the best lambda
-
+We can `unnest()` the rmses column to get a tibble with one row for each lambda value in each resample.  No need to see the original splits column so we will select it out.  For example.
 ```{r}
-fits |> 
-  group_by(lambda) |> 
-  summarize(n_resamples = n(),
-            median_rmse = median(error)) |> 
-  arrange(median_rmse)
+resamples_ex3 |> 
+  unnest(rmses) |> 
+  select(-splits) |>
+  print(n = 30)
 ```
 
-But of course, this can be done more easily with `tune_grid()`
+We can pipe this unnested tibble into a `group_by()` and `summarize()` to get the median (or mean) across resamples and then arrange to find the best k 
 
 ```{r}
-fits <- 
-  linear_reg(penalty = tune(), 
-               mixture = 0) |> 
-    set_engine("glmnet") |> 
+resamples_ex3 |> 
+  unnest(rmses) |> 
+  select(-splits) |>
+  group_by(k) |> 
+  summarize(n = n(),
+            mean_rmse = mean(rmse)) |> 
+  arrange(mean_rmse)
+```
+
+The code above makes it clear that using resampling to tune a grid of hyperparameters is just a matter of looping over the resamples in an outer loop and looping over a  grid of hyperparameters in an inner loop. 
+
+But of course, this can be done more easily with `tune_grid()`.  Here is the tidymodels version with `tune_grid()`.  Its clearly more concise code but the looping is not transparent.  
+```{r}
+resamples_tidy_ex3 <- 
+  nearest_neighbor(neighbors = tune()) |>   
+    set_engine("kknn") |>   
+    set_mode("regression") |>  
     tune_grid(preprocessor = rec, 
-              resamples = splits, 
-              grid = tibble(penalty = lambdas), 
+              resamples = resamples, 
+              grid = tibble(neighbors = grid_k), 
               metrics = metric_set(rmse))
 
-fits |> collect_metrics()
+resamples_tidy_ex3 |> 
+  collect_metrics() |> 
+  arrange(mean)
 
-fits |> collect_metrics(summarize = FALSE)
+resamples_tidy_ex3 |> 
+  collect_metrics(summarize = FALSE)
 ```
 
 ## Using map() and foreach() to do nested cv
 
+Now lets do the most complicated version of this.   Nested resampling involves looping over outer splits where the held out data are test sets used to evaluate best model configurations for each outer split and the inner loop makes validation sets that are used to select the best model configuration for each outer fold.  However, if we are tuning a grid of hyperparameters, there is even a further nested loop inside the inner resampling loop to get performance metrics for each value of the hyperparameter in the validation sets.
 
+rsample supports creating a nested resamplinng object.  You can specify different resampling for the inner and outer loops.  k-fold for the outer loop and bootstraps for the inner loop is a common choice.
 ```{r}
-nested_splits <- d |> 
+resamples_nested <- d |> 
   nested_cv(outside = vfold_cv(v = 5), inside = bootstraps(times = 10))
-
 ```
 
+Lets take a look at it.  It has five rows for each of the five outer splits.  The inner_resamples column contains a list column with 10 rows for each of the 10 inner splits.  The inner splits are the bootstrap samples.  The outer splits are the k-folds.
+```{r}
+resamples_nested
+```
 
+```{r}
+eval_grid <- function(bootstrap_split, rec, grid_k) {
+ 
+  # get held-in and held-out features for split 
+  prep_rec <- prep(rec, training = analysis(bootstrap_split))
+  held_in <- bake(prep_rec, new_data = NULL)
+  held_out <- bake(prep_rec, new_data = assessment(bootstrap_split))
 
+  # function fit fit and eval model for a specific lambda and resample
+  fit_eval_k <- function(k, held_in, held_out) {
+    model <- 
+      nearest_neighbor(neighbors = k) |>   
+        set_engine("kknn") |>   
+        set_mode("regression") |>  
+        fit(y ~ ., data = held_in)
+    
+    pred <- predict(model, held_out)$.pred
+    
+    tibble(k = k, 
+           rmse = rmse_vec(held_out$y, pred))
+  }
+  
+  # loop through grid_k and fit/eval model for each k 
+  # this is the inner loop
+  # use list_rbind() to bind the separate rows for each tibble into one larger tibble
+  grid_k |> 
+    map(\(k) fit_eval_k(k, held_in, held_out)) |> 
+    list_rbind()
+}
+```
+
+```{r}
+bind_bootstraps <- function(bootstraps, rec, grid_k) {
+ 
+  bootstraps$splits |>  
+    map(\(bootstrap_split) eval_grid(bootstrap_split, rec, grid_k)) |> 
+    list_rbind()
+}
+```
+
+```{r}
+resamples_nested_ex4 <- resamples_nested |> 
+  mutate(inner_rmses = map(inner_resamples, 
+                          \(inner_resample) bind_bootstraps(inner_resample, 
+                                                            rec, 
+                                                            grid_k)))
+```
+
+Get best k for each outer fold
+```{r}
+get_best_k <- function(rmses) {
+  rmses |>  
+    group_by(k) |> 
+    summarize(mean_rmse = mean(rmse)) |> 
+    arrange(mean_rmse) |> 
+    slice(1) |> 
+    pull(k)
+}
+
+resamples_nested_ex4 <- resamples_nested_ex4 |> 
+  mutate(best_k = map_dbl(inner_rmses, \(rmses) get_best_k(rmses)))
+```
 
 

@@ -1,0 +1,133 @@
+---
+title: "Homework Unit 10: Neural Networks"
+author: "Your name here"
+date: "`r lubridate::today()`"
+format: 
+  html: 
+    embed-resources: true
+    toc: true 
+    toc_depth: 4
+editor_options: 
+  chunk_output_type: console
+---
+
+## Introduction
+
+To begin, download the following from the course web book (Unit 10):
+
+* `hw_unit_10_neural_nets.qmd` (notebook for this assignment)
+
+* `wine_quality_trn.csv` and `wine_quality_test.csv` (data for this assignment)
+
+The data for this week's assignment include wine quality ratings for various white wines. The outcome is `quality` - a categorical ("high_quality" or "low_quality") outcome. There are 11 numeric predictors that describe attributes of the wine (e.g., acidity) that may relate to the overall quality rating. 
+
+We will be doing another competition this week. You will fit a series of neural network model configurations and select the best configuration among them. You will use the `wine_quality_test.csv` file **only once** at the end of the assignment to generate your best model's predictions in the held-out test set (the test set will not include outcome labels). We will assess everyone's predictions on the held-out set to determine the best fitting model in the class. **The winner again gets a free lunch from John!**
+
+Note that this week's assignment is less structured than previous assignments, allowing you to make more independent decisions about how to approach all aspects of the modeling process. Try to use the knowledge that you have developed from the work in previous assignments to explore your data, generate features, and examine different model configurations.
+
+Let's get started!
+
+## Setup
+
+Set up your notebook in this section. You will want to be sure to set your `path_data` and initiate parallel processing here!
+
+```{r}
+
+```
+
+
+
+## Expectations for minimum model requirements
+
+Across the model configurations you compare, you must fit models that vary with respect to:
+
+* Hidden layer architecture: Consider **at least two** different numbers of units within the hidden layer.
+
+* Controlling overfitting: Consider **at least one** method to control overfitting (either L2 regularization or drop-out) with **at least two** associated hyperparameter values.
+
+* Hidden layer activation function: Consider **at least two** activation functions for the hidden layer.
+
+### Some things to consider
+#### About configurations
+Of course you can't choose between model configurations based on training set performance, so you'll need to use some resampling technique. There are different costs and benefits associated with different resampling techniques (e.g., bias, variance, computing time), so you'll need to decide which technique is the best for your needs for this assignment. Specifically, you should choose among a validation split, k-fold cross-validation, or bootstrapping for cross-validation.
+
+#### Resampling and tuning
+Given what you've learned about resampling/tuning, think about how you might move systematically through model configurations rather than haphazardly changing model configuration characteristics.
+
+#### Consider compute time
+As you weigh computing costs, think about what that might look like given your current context. For example, imagine that each model configuration takes 2 minutes to fit. If you want to use 100 bootstraps for CV, that means ~200 minutes (just over 3 hours) per model configuration. Now imagine you're comparing 8 different model configurations. That multiplies your 200 minutes by 8, which starts to get pretty long. If you're using 10-fold CV, that means it only takes 20 minutes per model configuration, so you might be able to compare more configurations. A validation split would be even simpler. Think about the costs and benefits of each approach, pick one and motivate it with commentary in your submission.
+
+#### Performance metric: accuracy
+Regardless of the resampling technique you choose, please compare models using **accuracy** as your performance metric.
+
+Okay, now onto some EDA and then modeling...
+
+## Feature engineering
+Read in `wine_quality_trn.csv`
+```{r}
+data_trn <- NA
+```
+
+Perform some modeling EDA. How will you scale your features? Should your features be normalized, scaled, or transformed in some other way? Decorrelated? Provide an explanation for your decisions here along with as much EDA as you find necessary.
+
+```{r}
+
+```
+
+
+## Fit models
+Depending on the resampling technique you choose and how you plan to examine various model configurations, your code set-up is going to look different. Create as many code chunks as needed for whatever your approach. 
+
+Where needed, please include some annotation (in text outside of code chunks and/or in commented lines within code chunks) to help us review your assignment. You don't need to tell us everything you're doing because that should be relatively clear from the code! A good rule of thumb is to use annotation to tell us **why** you're doing something (e.g., if you had several choices for how to proceed, why did you choose the one you did?) but you don't have to describe **what** you're doing (e.g., you don't need to tell us you're building a recipe - we will see that in your code). 
+
+```{r}
+
+```
+
+## Generate predictions
+This section is for generating predictions for your best model in the held-out test set. You should only generate predictions for **one model** out of all configurations you examined. We will use these predictions to generate your one estimate of model performance in the held-out data.
+
+Add your last name between the quotation marks to be used in naming your predictions file.
+```{r}
+last_name <- ""
+```
+
+### Read in test data
+Read in the `wine_quality_test.csv` file.
+```{r}
+data_test <- NA
+```
+
+### Make feature matrices
+Make training feature matrix using your best recipe. 
+```{r}
+feat_trn_best <- NA
+```
+
+Make test feature matrix using your best recipe.
+```{r}
+feat_test_best <- NA
+```
+
+### Fit best model
+Fit your best model in `feat_trn_best.csv` (no resampling). 
+```{r}
+best_model <- NA
+```
+
+### Generate test predictions
+Run this code chunk to save out your best model's predictions in the held-out test set. Look over your predictions to confirm your model generated valid predictions for each test observation. Make sure the file containing your predictions has the form that you think it should. This requires visually inspecting the output csv file after you write it. The `glimpse()` call helps too.
+```{r}
+feat_test %>% 
+  mutate(quality = predict(best_model, feat_test_best)$.pred_class) %>% 
+  select(quality) %>% 
+  glimpse() %>% 
+  write_csv(here(path_data, str_c("test_preds_", last_name, ".csv")))
+```
+
+## Save & render
+Render this .qmd file with your last name at the end (e.g., hw_unit_10_neural_nets_name.qmd). Make sure you changed "Your name here" at the top of the file to be your own name. Render the file to html. Upload the rendered file and your saved test_preds_lastname.csv to Canvas.  
+
+We will assess everyone's predictions in the test, and the winner gets a free lunch from John!
+
+**Way to go!!**
