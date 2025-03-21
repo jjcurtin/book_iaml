@@ -1,7 +1,6 @@
 ---
 title: "lab_unit_08"
 format: html
-self-contained: true
 editor: visual
 ---
 
@@ -56,7 +55,7 @@ cm <- conf_mat(df, truth, predicted)
 autoplot(cm)
 ```
 
-We can plot confusin matrix for multi-category models and modify the aesthetics like color, label and fonts, etc.
+We can modify the color, label and fonts, etc.
 
 ```{r}
 autoplot(cm, type = "heatmap") +
@@ -71,29 +70,6 @@ autoplot(cm, type = "heatmap") +
 #### predictor variance
 
 -   **Scale of variance**: In the homework there is a question about variance. I had trouble understanding that and would like to hear more about it. It was not easy to tell visually whether variance was an issue for the predictors because some predictors appeared to have a wide spread but the scale was only like 0.1 from min to max. Others had what appeared to be a very compressed spread but the scale was in the hundreds. Do we consider absolute variance or the relative variance here?
-
-> We inspect on the variance of the training data when doing EDA and also conduct feature engineering when creating recipes. Here are some points we pay attention to for variance:
->
-> 1\. The features we select to create the recipe/model should be variable so that it helps to differentiate the outcome variable. For example, if almost all the participants for a study are around 20-year-old, the variable `age` might not be a very predictive and influential feature.
->
-> 2\. The variance will affect the performance of linear models, which is based on a normal hypothesis of the prediction error (and reflected on the distribution of the features). So if the distribution is skewed, we'll be careful for possible transformation steps.
->
-> 3\. For the scale, both glmnet and knn ask for a common range of the features. For knn, it's based on the distance calculation. So we should range the features to make sure of the influence of each feature on the distance is the same. For glmnet, because we're (by default) imposing same penalty on the feature coefficients, we should make sure they are in the same range to penalize consistently. And thus, the scale of the variance will be ranged accordingly with the feature engineering.
-
-#### correlation plot
-
--   Also, is there a better way to print the correlation matrices when there are many predictors? With many predictors it just look like a mess. I can't read the variable names or make out anything useful. Even zooming in and making it fullscreen does not help.
-
-> An alternative for the correlation plot function could be the GGally functions, which return some comprehensive correlation information for the variable pairs. Besides, if using the corr plots, we could tweak on the format to show the numeric numbers of the correlation or other shapes.
-
-```{r}
-# corr plot example w/ numbers
-M <- cor(mtcars)
-corrplot::corrplot(M, method = "number", type = "upper") # colorful number
-
-# explore the funcion
-??corrplot::corrplot
-```
 
 #### grid plot
 
@@ -306,17 +282,13 @@ demo_fun(5, 5)
 
 -   Implementing SMOTE for class imbalance correctly while avoiding data leakage.
 
-> Only prepare the recipe with trianing data. In our workflow, practically this will be specifying the parameter `new_data` as NULL for `bake` before training. If NULL is given, the function will interanlly pass this information to the `skip` parameter for `step_upsample` (or other balanced resampling steps) to resample and prepare the data. If some other data is given, the function will skip the resampling step to avoid data leakage in resampling.
+> Only prepare the recipe with trianing data.
 
 -   How do we correctly implement up-sampling, down-sampling, and SMOTE in tidymodels, ensuring that resampling affects only the training set and not the test set?
 
 > Check out the key.
 
--   **tuning with resampled data**: What are the key considerations when tuning models on resampled data?
-
-> (1) Referring to the hyperparameter tuning using resampling techniques, we shoudl pay attention to the range the of the grid. It should wide enough to include a local extremum. A footnote from John on this will be the selection of the hyperparameters should be inclusive to accept a range within one standard deviation around the "best", because the resampling may introduce some uncertainty in this optimization.
-> (2) the inverse) is tunable. Because the ratio in the real world data is usually not very ideally balanced, the best resampling ratio may not be 1 in practice.
-> (3) Do not up/downresample the validation data and test data. And the pratice suggestion is above in the leakage avoiding question.
+-   What are the key considerations when tuning models on resampled data?
 
 ### metrics
 
@@ -356,9 +328,7 @@ roc_plot |>
 
 ### parallel processing, cache
 
-#### specify parallel processing and cache
-
--   I am still unsure about parallel processing, do we simply include those 2 lines from the slides or do we need to do a similar process as caching where we wrap the expression in a code? - I am a little confused how parallel processing works, and if we have to integrate it into the other code chunks.
+####specify parallel processing and cache - I am still unsure about parallel processing, do we simply include those 2 lines from the slides or do we need to do a similar process as caching where we wrap the expression in a code? - I am a little confused how parallel processing works, and if we have to integrate it into the other code chunks.
 
 > The parallel processing is a global setting for the script, so we only need to specify it at the beginning of the computation. Normally, computations run sequentially (one after another). With parallel processing, multiple tasks run simultaneously, leveraging multi-cores.
 

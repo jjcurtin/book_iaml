@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>11&nbsp; Demonstration of using mapping to fit_resamples or tune_grid – Introduction to Applied Machine Learning</title>
+<title>Map across resamples – Introduction to Applied Machine Learning</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -116,7 +116,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./review_midterm.html">Appendices</a></li><li class="breadcrumb-item"><a href="./app_resampling_with_map.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Demonstration of using mapping to fit_resamples or tune_grid</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./review_midterm.html">Appendices</a></li><li class="breadcrumb-item"><a href="./app_resampling_with_map.html">Map across resamples</a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -251,7 +251,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./app_resampling_with_map.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Demonstration of using mapping to fit_resamples or tune_grid</span></span></a>
+ <span class="menu-text">Map across resamples</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -269,7 +269,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./app_shap.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Appendix 3: Understanding Shapley Values from SHAP</span></a>
+ <span class="menu-text">Understanding Shapley Values from SHAP</span></a>
   </div>
 </li>
           <li class="sidebar-item">
@@ -281,7 +281,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./app_test.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text"><span class="chapter-number">12</span>&nbsp; <span class="chapter-title">Test</span></span></a>
+ <span class="menu-text"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Test</span></span></a>
   </div>
 </li>
       </ul>
@@ -296,17 +296,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#fit_resmples-done-manually" id="toc-fit_resmples-done-manually" class="nav-link active" data-scroll-target="#fit_resmples-done-manually"><span class="header-section-number">11.1</span> fit_resmples done manually</a></li>
-  <li><a href="#tune_grid-done-manually" id="toc-tune_grid-done-manually" class="nav-link" data-scroll-target="#tune_grid-done-manually"><span class="header-section-number">11.2</span> tune_grid done manually</a></li>
+  <li><a href="#set-up" id="toc-set-up" class="nav-link active" data-scroll-target="#set-up">Set up</a></li>
+  <li><a href="#using-map-to-replace-fit_resamples---step-x-step" id="toc-using-map-to-replace-fit_resamples---step-x-step" class="nav-link" data-scroll-target="#using-map-to-replace-fit_resamples---step-x-step">Using map() to replace fit_resamples() - step x step</a></li>
+  <li><a href="#using-map-to-replace-fit_resamples---one-function" id="toc-using-map-to-replace-fit_resamples---one-function" class="nav-link" data-scroll-target="#using-map-to-replace-fit_resamples---one-function">Using map() to replace fit_resamples() - one function</a></li>
+  <li><a href="#using-two-maps-to-replace-tune_grid" id="toc-using-two-maps-to-replace-tune_grid" class="nav-link" data-scroll-target="#using-two-maps-to-replace-tune_grid">Using two map()s to replace tune_grid()</a></li>
+  <li><a href="#using-map-and-foreach-to-do-nested-cv" id="toc-using-map-and-foreach-to-do-nested-cv" class="nav-link" data-scroll-target="#using-map-and-foreach-to-do-nested-cv">Using map() and foreach() to do nested cv</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/jjcurtin/book_iaml/edit/main/app_resampling_with_map.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./review_midterm.html">Appendices</a></li><li class="breadcrumb-item"><a href="./app_resampling_with_map.html"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Demonstration of using mapping to fit_resamples or tune_grid</span></a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./review_midterm.html">Appendices</a></li><li class="breadcrumb-item"><a href="./app_resampling_with_map.html">Map across resamples</a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">11</span>&nbsp; <span class="chapter-title">Demonstration of using mapping to fit_resamples or tune_grid</span></h1>
+<h1 class="title">Map across resamples</h1>
 </div>
 
 
@@ -323,6 +326,18 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
+<p>We can use map (and foreach) to fit and evaluate models over resamples/splits manually</p>
+<ul>
+<li>This can be done to replace <code>fit_resamples()</code> and <code>tune_grid()</code></li>
+<li>Useful if we need to fit models outside of full tidymodels framework (e.g., when using keras for neural networks)</li>
+<li>Useful for nested resampling, which is not supported by <code>fit_resamples()</code> and <code>tune_grid()</code></li>
+</ul>
+<section id="set-up" class="level2">
+<h2 class="anchored" data-anchor-id="set-up">Set up</h2>
+<p>Lets start by….</p>
+<ul>
+<li>loading libraries</li>
+</ul>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
@@ -333,7 +348,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 ✔ dplyr     1.1.4     ✔ readr     2.1.5
 ✔ forcats   1.0.0     ✔ stringr   1.5.1
 ✔ ggplot2   3.5.1     ✔ tibble    3.2.1
-✔ lubridate 1.9.4     ✔ tidyr     1.3.1
+✔ lubridate 1.9.3     ✔ tidyr     1.3.1
 ✔ purrr     1.0.2     
 ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
 ✖ dplyr::filter() masks stats::filter()
@@ -350,7 +365,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 ✔ dials        1.3.0     ✔ tune         1.2.1
 ✔ infer        1.0.7     ✔ workflows    1.1.4
 ✔ modeldata    1.4.0     ✔ workflowsets 1.1.0
-✔ parsnip      1.2.1     ✔ yardstick    1.3.2
+✔ parsnip      1.2.1     ✔ yardstick    1.3.1
 ✔ recipes      1.1.0     
 ── Conflicts ───────────────────────────────────────── tidymodels_conflicts() ──
 ✖ scales::discard() masks purrr::discard()
@@ -359,40 +374,90 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 ✖ dplyr::lag()      masks stats::lag()
 ✖ yardstick::spec() masks readr::spec()
 ✖ recipes::step()   masks stats::step()
-• Use tidymodels_prefer() to resolve common conflicts.</code></pre>
+• Search for functions across packages at https://www.tidymodels.org/find/</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(foreach)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'foreach'
+
+The following objects are masked from 'package:purrr':
+
+    accumulate, when</code></pre>
 </div>
 </div>
-<p>Create a simple dataset and get 100 bootstrap samples</p>
+<ul>
+<li>creating a simple data set</li>
+</ul>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">x =</span> <span class="fu">rnorm</span>(<span class="dv">100</span>), <span class="at">y =</span> <span class="fu">factor</span>(<span class="fu">rbinom</span>(<span class="dv">100</span>, <span class="dv">1</span>, <span class="fl">0.5</span>)))</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123456</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>splits <span class="ot">&lt;-</span> <span class="fu">bootstraps</span>(d, <span class="at">times =</span> <span class="dv">100</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">123456</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>n_obs <span class="ot">&lt;-</span> <span class="dv">300</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>n_boots <span class="ot">&lt;-</span> <span class="dv">50</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">x1 =</span> <span class="fu">rnorm</span>(n_obs), <span class="at">x2 =</span> <span class="fu">rnorm</span>(n_obs), <span class="at">y =</span> <span class="dv">2</span><span class="sc">*</span>x1 <span class="sc">+</span> <span class="dv">3</span><span class="sc">*</span>x2 <span class="sc">+</span> <span class="fu">rnorm</span>(n_obs))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<section id="fit_resmples-done-manually" class="level2" data-number="11.1">
-<h2 data-number="11.1" class="anchored" data-anchor-id="fit_resmples-done-manually"><span class="header-section-number">11.1</span> fit_resmples done manually</h2>
-<p>Set up a simple recipe for feature engineering for the logistic regression</p>
+<ul>
+<li><p>getting bootstrap resamples of d.&nbsp;It has two columns and n_boots rows. Each row is a bootstrap sample of the data. The columns are:</p>
+<ul>
+<li><code>splits</code> - contains a bootstrap sample of the data that includes held-in raw data and OOB held-out raw data subsamples</li>
+<li><code>id</code> - name of the resample</li>
+</ul></li>
+</ul>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>rec <span class="ot">&lt;-</span> <span class="fu">recipe</span>(y <span class="sc">~</span> x, <span class="at">data =</span> d)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>resamples <span class="ot">&lt;-</span> <span class="fu">bootstraps</span>(d, <span class="at">times =</span> n_boots)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>resamples</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+<div class="cell-output cell-output-stdout">
+<pre><code># Bootstrap sampling 
+# A tibble: 50 × 2
+   splits            id         
+   &lt;list&gt;            &lt;chr&gt;      
+ 1 &lt;split [300/115]&gt; Bootstrap01
+ 2 &lt;split [300/108]&gt; Bootstrap02
+ 3 &lt;split [300/108]&gt; Bootstrap03
+ 4 &lt;split [300/107]&gt; Bootstrap04
+ 5 &lt;split [300/112]&gt; Bootstrap05
+ 6 &lt;split [300/102]&gt; Bootstrap06
+ 7 &lt;split [300/112]&gt; Bootstrap07
+ 8 &lt;split [300/114]&gt; Bootstrap08
+ 9 &lt;split [300/115]&gt; Bootstrap09
+10 &lt;split [300/117]&gt; Bootstrap10
+# ℹ 40 more rows</code></pre>
 </div>
-<p>Create a function to fit logistic regression to held-in training data</p>
+</div>
+<ul>
+<li>setting up a simple recipe for feature engineering all our models (just use raw x and y)</li>
+</ul>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>fit_lr <span class="ot">&lt;-</span> <span class="cf">function</span>(held_in) {</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">logistic_reg</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_engine</span>(<span class="st">"glm"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_mode</span>(<span class="st">"classification"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fit</span>(y <span class="sc">~</span> ., <span class="at">data =</span> held_in)</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>rec <span class="ot">&lt;-</span> <span class="fu">recipe</span>(y <span class="sc">~</span> ., <span class="at">data =</span> d)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>Use <code>map()</code> and list columns to save the individual steps for evaluating the model in each resample. The following steps are done for EACH resample using <code>map()</code> or <code>map2()</code></p>
+</section>
+<section id="using-map-to-replace-fit_resamples---step-x-step" class="level2">
+<h2 class="anchored" data-anchor-id="using-map-to-replace-fit_resamples---step-x-step">Using map() to replace fit_resamples() - step x step</h2>
+<p>In this first example, we will combine <code>map()</code> with the use of list columns to save all the intermediate products that are produced when fitting and evaluating a single model configuration for a logistic regression across resamples.</p>
+<p>To do this, we will need a function to fit logistic regression to held-in training data. We can use the typical tidymodels code here.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>fit_lm <span class="ot">&lt;-</span> <span class="cf">function</span>(held_in) {</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">linear_reg</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_engine</span>(<span class="st">"lm"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fit</span>(y <span class="sc">~</span> ., <span class="at">data =</span> held_in)</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Then we use <code>map()</code> and list columns to save the individual steps for evaluating the model in each resample. The following steps are done for EACH resample using <code>map()</code> or <code>map2()</code></p>
 <ul>
 <li>prep the recipe with held-in data</li>
 <li>bake the recipe using <code>new_data = NULL</code> to get held-in features</li>
@@ -404,114 +469,489 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>models <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">prep_recs =</span> <span class="fu">map</span>(splits<span class="sc">$</span>splits, </span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>                                 \(split) <span class="fu">prep</span>(rec, <span class="at">training =</span> <span class="fu">analysis</span>(split))),</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">held_ins =</span> <span class="fu">map2</span>(splits<span class="sc">$</span>splits, prep_recs, </span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>                                \(split, prep_rec) <span class="fu">bake</span>(prep_rec, <span class="at">new_data =</span> <span class="cn">NULL</span>)),</span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">held_outs =</span> <span class="fu">map2</span>(splits<span class="sc">$</span>splits, prep_recs, </span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>                                 \(split, prep_rec) <span class="fu">bake</span>(prep_rec, </span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>                                                         <span class="at">new_data =</span> <span class="fu">assessment</span>(split))),</span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>                 <span class="at">models =</span> <span class="fu">map</span>(held_ins, \(held_in) <span class="fu">fit_lr</span>(held_in)),</span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>                 <span class="at">predictions =</span> <span class="fu">map2</span>(models, held_outs, </span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>                                    \(model, held_out) <span class="fu">predict</span>(model, held_out, <span class="at">type =</span> <span class="st">"class"</span>)),</span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>                 <span class="at">accuracy =</span> <span class="fu">map2_dbl</span>(predictions, held_outs, </span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>                                     \(pred, held_out) <span class="fu">accuracy_vec</span>(held_out<span class="sc">$</span>y, pred<span class="sc">$</span>.pred_class)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>resamples_ex1 <span class="ot">&lt;-</span> resamples <span class="sc">|&gt;</span> </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">prep_recs =</span> <span class="fu">map</span>(splits, </span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>                         \(split) <span class="fu">prep</span>(rec, <span class="at">training =</span> <span class="fu">analysis</span>(split))),</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>         <span class="at">held_ins =</span> <span class="fu">map2</span>(resamples<span class="sc">$</span>splits, prep_recs, </span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>                         \(split, prep_rec) <span class="fu">bake</span>(prep_rec, <span class="at">new_data =</span> <span class="cn">NULL</span>)),</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">held_outs =</span> <span class="fu">map2</span>(resamples<span class="sc">$</span>splits, prep_recs, </span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>                          \(split, prep_rec) <span class="fu">bake</span>(prep_rec, </span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>                                                  <span class="at">new_data =</span> <span class="fu">assessment</span>(split))),</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>         <span class="at">models =</span> <span class="fu">map</span>(held_ins, </span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>                      \(held_in) <span class="fu">fit_lm</span>(held_in)),</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>         <span class="at">predictions =</span> <span class="fu">map2</span>(models, held_outs, </span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>                            \(model, held_out) <span class="fu">predict</span>(model, held_out)<span class="sc">$</span>.pred),</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>         <span class="at">errors =</span> <span class="fu">map2_dbl</span>(predictions, held_outs, </span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>                           \(pred, held_out) <span class="fu">rmse_vec</span>(held_out<span class="sc">$</span>y, pred)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<p>The pipline above creates a tibble with columns for each of the intermediate products and the accuracy of the model in each resample. All but the last columns are list columns that can hold objects of any time. The final column is a double column that holds the accuracy of the model in each resample. That is why we used <code>map_dbl()</code> to create the accuracy column.</p>
+<p>The pipline above creates a tibble with columns for each of the intermediate products and the rmse/error of the model in each resample. All but the last columns are list columns that can hold objects of any time (e.g., prepped recipes, data frames, model objects). The final column is a double column that holds the rmse of the model in each resample. That is why we used <code>map_dbl()</code> to create the error column.</p>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>models <span class="sc">|&gt;</span> <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>resamples_ex1 <span class="sc">|&gt;</span> <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code>Rows: 100
-Columns: 6
-$ prep_recs   &lt;list&gt; [x, y, double, numeric, factor, unordered, nominal, predi…
-$ held_ins    &lt;list&gt; [&lt;tbl_df[100 x 2]&gt;], [&lt;tbl_df[100 x 2]&gt;], [&lt;tbl_df[100 x …
-$ held_outs   &lt;list&gt; [&lt;tbl_df[36 x 2]&gt;], [&lt;tbl_df[36 x 2]&gt;], [&lt;tbl_df[38 x 2]&gt;…
-$ models      &lt;list&gt; [0, 1, ~NULL, ~NULL, classification, TRUE, stats, formula…
-$ predictions &lt;list&gt; [&lt;tbl_df[36 x 1]&gt;], [&lt;tbl_df[36 x 1]&gt;], [&lt;tbl_df[38 x 1]&gt;…
-$ accuracy    &lt;dbl&gt; 0.5277778, 0.4722222, 0.4736842, 0.5405405, 0.5000000, 0.4…</code></pre>
+<pre><code>Rows: 50
+Columns: 8
+$ splits      &lt;list&gt; [&lt;boot_split[300 x 115 x 300 x 3]&gt;], [&lt;boot_split[300 x 1…
+$ id          &lt;chr&gt; "Bootstrap01", "Bootstrap02", "Bootstrap03", "Bootstrap04"…
+$ prep_recs   &lt;list&gt; [x1, x2, y, double, numeric, double, numeric, double, num…
+$ held_ins    &lt;list&gt; [&lt;tbl_df[300 x 3]&gt;], [&lt;tbl_df[300 x 3]&gt;], [&lt;tbl_df[300 x …
+$ held_outs   &lt;list&gt; [&lt;tbl_df[115 x 3]&gt;], [&lt;tbl_df[108 x 3]&gt;], [&lt;tbl_df[108 x …
+$ models      &lt;list&gt; [NULL, ~NULL, ~NULL, regression, FALSE, stats, formula, f…
+$ predictions &lt;list&gt; &lt;1.38587470, 2.84334628, -2.07435584, 1.24941793, -0.0569…
+$ errors      &lt;dbl&gt; 0.9826968, 0.9380291, 1.0127994, 0.9929520, 0.9849202, 0.9…</code></pre>
 </div>
 </div>
-<p>We can now look at accuracy across the 100 bootstraps. For example, we can make a histogram using ggplot from the accuracy column in the models tibble</p>
+<p>We can now look at rmses across the 50 bootstraps. For example, we can make a histogram using ggplot from the errors column in the fits tibble</p>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>models <span class="sc">|&gt;</span> </span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(accuracy)) <span class="sc">+</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="fl">0.05</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>resamples_ex1 <span class="sc">|&gt;</span> </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(errors)) <span class="sc">+</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="fl">0.05</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="app_resampling_with_map_files/figure-html/unnamed-chunk-7-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="app_resampling_with_map_files/figure-html/unnamed-chunk-8-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
 </div>
-<p>And we can summarize the min, max, mean, median and stdev of the accuracy column in the models tibble</p>
+<p>And we can summarize the min, max, mean, median and stdev of the error column in the fits tibble</p>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>models <span class="sc">|&gt;</span> </span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">min =</span> <span class="fu">min</span>(accuracy), </span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">max =</span> <span class="fu">max</span>(accuracy), </span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">mean =</span> <span class="fu">mean</span>(accuracy), </span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">median =</span> <span class="fu">median</span>(accuracy),</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">std_dev =</span> <span class="fu">sd</span>(accuracy))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 1 × 5
-    min   max  mean median std_dev
-  &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;
-1 0.306 0.645 0.480  0.486  0.0776</code></pre>
-</div>
-</div>
-<p>Easy peasy! But remember, it is easier still using <code>fit_reamples()</code></p>
-<div class="cell">
-<details open="" class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>fits_lr <span class="ot">&lt;-</span></span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">logistic_reg</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_engine</span>(<span class="st">"glm"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fit_resamples</span>(<span class="at">preprocessor =</span> rec, </span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>                  <span class="at">resamples =</span> splits, </span>
-<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>                  <span class="at">metrics =</span> <span class="fu">metric_set</span>(accuracy))</span>
-<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>fits_lr <span class="sc">|&gt;</span> <span class="fu">collect_metrics</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>resamples_ex1 <span class="sc">|&gt;</span> </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">min =</span> <span class="fu">min</span>(errors), </span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">max =</span> <span class="fu">max</span>(errors), </span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">mean =</span> <span class="fu">mean</span>(errors), </span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">median =</span> <span class="fu">median</span>(errors),</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">std_dev =</span> <span class="fu">sd</span>(errors))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 1 × 6
-  .metric  .estimator  mean     n std_err .config             
-  &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
-1 accuracy binary     0.480   100 0.00776 Preprocessor1_Model1</code></pre>
+      n   min   max  mean median std_dev
+  &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;
+1    50 0.876  1.12 0.997  0.989  0.0557</code></pre>
+</div>
+</div>
+<p>Easy peasy! But remember, it is easier still using <code>fit_reamples()</code>. We demo this only to make clear what <code>fit_resamples()</code> is doing and to give you an alternative workflow in case you can’t use <code>fit_resamples()</code>. It is also a demonstration of the use of <code>map()</code> and list columns, which has many uses.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>resamples_tidy_ex1 <span class="ot">&lt;-</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">linear_reg</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_engine</span>(<span class="st">"lm"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fit_resamples</span>(<span class="at">preprocessor =</span> rec, </span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>                  <span class="at">resamples =</span> resamples, </span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>                  <span class="at">metrics =</span> <span class="fu">metric_set</span>(rmse))</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>resamples_tidy_ex1 <span class="sc">|&gt;</span> </span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect_metrics</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 6
+  .metric .estimator  mean     n std_err .config             
+  &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
+1 rmse    standard   0.997    50 0.00788 Preprocessor1_Model1</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>fits_lr <span class="sc">|&gt;</span> <span class="fu">collect_metrics</span>(<span class="at">summarize =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>resamples_tidy_ex1 <span class="sc">|&gt;</span> </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect_metrics</span>(<span class="at">summarize =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
-<pre><code># A tibble: 100 × 5
-   id           .metric  .estimator .estimate .config             
-   &lt;chr&gt;        &lt;chr&gt;    &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;               
- 1 Bootstrap001 accuracy binary         0.528 Preprocessor1_Model1
- 2 Bootstrap002 accuracy binary         0.472 Preprocessor1_Model1
- 3 Bootstrap003 accuracy binary         0.474 Preprocessor1_Model1
- 4 Bootstrap004 accuracy binary         0.541 Preprocessor1_Model1
- 5 Bootstrap005 accuracy binary         0.5   Preprocessor1_Model1
- 6 Bootstrap006 accuracy binary         0.4   Preprocessor1_Model1
- 7 Bootstrap007 accuracy binary         0.471 Preprocessor1_Model1
- 8 Bootstrap008 accuracy binary         0.611 Preprocessor1_Model1
- 9 Bootstrap009 accuracy binary         0.526 Preprocessor1_Model1
-10 Bootstrap010 accuracy binary         0.457 Preprocessor1_Model1
-# ℹ 90 more rows</code></pre>
+<pre><code># A tibble: 50 × 5
+   id          .metric .estimator .estimate .config             
+   &lt;chr&gt;       &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;               
+ 1 Bootstrap01 rmse    standard       0.983 Preprocessor1_Model1
+ 2 Bootstrap02 rmse    standard       0.938 Preprocessor1_Model1
+ 3 Bootstrap03 rmse    standard       1.01  Preprocessor1_Model1
+ 4 Bootstrap04 rmse    standard       0.993 Preprocessor1_Model1
+ 5 Bootstrap05 rmse    standard       0.985 Preprocessor1_Model1
+ 6 Bootstrap06 rmse    standard       0.947 Preprocessor1_Model1
+ 7 Bootstrap07 rmse    standard       1.00  Preprocessor1_Model1
+ 8 Bootstrap08 rmse    standard       1.06  Preprocessor1_Model1
+ 9 Bootstrap09 rmse    standard       1.05  Preprocessor1_Model1
+10 Bootstrap10 rmse    standard       0.981 Preprocessor1_Model1
+# ℹ 40 more rows</code></pre>
 </div>
 </div>
 </section>
-<section id="tune_grid-done-manually" class="level2" data-number="11.2">
-<h2 data-number="11.2" class="anchored" data-anchor-id="tune_grid-done-manually"><span class="header-section-number">11.2</span> tune_grid done manually</h2>
+<section id="using-map-to-replace-fit_resamples---one-function" class="level2">
+<h2 class="anchored" data-anchor-id="using-map-to-replace-fit_resamples---one-function">Using map() to replace fit_resamples() - one function</h2>
+<p>If we wanted to generate the held-out error using resampling but didnt need/want the intermediate products, we could wrap all the steps in one function and just map that single function.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>fit_and_eval <span class="ot">&lt;-</span> <span class="cf">function</span>(split, rec) {</span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># prep the recipe with held-in data</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  prep_rec <span class="ot">&lt;-</span> <span class="fu">prep</span>(rec, <span class="at">training =</span> <span class="fu">analysis</span>(split))</span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a>  <span class="co"># bake the recipe using new_data = NULL to pull out the held-in features</span></span>
+<span id="cb22-6"><a href="#cb22-6" aria-hidden="true" tabindex="-1"></a>  held_in <span class="ot">&lt;-</span> <span class="fu">bake</span>(prep_rec, <span class="at">new_data =</span> <span class="cn">NULL</span>)</span>
+<span id="cb22-7"><a href="#cb22-7" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb22-8"><a href="#cb22-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># bake the recipe using new_data = assessment(split) to get held-out features</span></span>
+<span id="cb22-9"><a href="#cb22-9" aria-hidden="true" tabindex="-1"></a>  held_out <span class="ot">&lt;-</span> <span class="fu">bake</span>(prep_rec, <span class="at">new_data =</span> <span class="fu">assessment</span>(split))</span>
+<span id="cb22-10"><a href="#cb22-10" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb22-11"><a href="#cb22-11" aria-hidden="true" tabindex="-1"></a>  <span class="co"># fit the model using the held-in features</span></span>
+<span id="cb22-12"><a href="#cb22-12" aria-hidden="true" tabindex="-1"></a>  model <span class="ot">&lt;-</span> </span>
+<span id="cb22-13"><a href="#cb22-13" aria-hidden="true" tabindex="-1"></a>    <span class="fu">linear_reg</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb22-14"><a href="#cb22-14" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_engine</span>(<span class="st">"lm"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb22-15"><a href="#cb22-15" aria-hidden="true" tabindex="-1"></a>    <span class="fu">fit</span>(y <span class="sc">~</span> ., <span class="at">data =</span> held_in)</span>
+<span id="cb22-16"><a href="#cb22-16" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb22-17"><a href="#cb22-17" aria-hidden="true" tabindex="-1"></a>  <span class="co"># get predictions using the model with the held-out features</span></span>
+<span id="cb22-18"><a href="#cb22-18" aria-hidden="true" tabindex="-1"></a>  pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(model, held_out)<span class="sc">$</span>.pred</span>
+<span id="cb22-19"><a href="#cb22-19" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb22-20"><a href="#cb22-20" aria-hidden="true" tabindex="-1"></a>  <span class="co"># calculate the accuracy of the model</span></span>
+<span id="cb22-21"><a href="#cb22-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rmse_vec</span>(held_out<span class="sc">$</span>y, pred)</span>
+<span id="cb22-22"><a href="#cb22-22" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Now map this function over the splits to get a vector of rmse. Same results, but not saving intermediate steps by using one function.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>resamples_ex2 <span class="ot">&lt;-</span> resamples <span class="sc">|&gt;</span> </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">errors =</span> <span class="fu">map_dbl</span>(splits, \(split) <span class="fu">fit_and_eval</span>(split, rec)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Here is what the resamples_ex2 tibble now looks like and summary stats on the resampled rmse</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>resamples_ex2</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># Bootstrap sampling 
+# A tibble: 50 × 3
+   splits            id          errors
+   &lt;list&gt;            &lt;chr&gt;        &lt;dbl&gt;
+ 1 &lt;split [300/115]&gt; Bootstrap01  0.983
+ 2 &lt;split [300/108]&gt; Bootstrap02  0.938
+ 3 &lt;split [300/108]&gt; Bootstrap03  1.01 
+ 4 &lt;split [300/107]&gt; Bootstrap04  0.993
+ 5 &lt;split [300/112]&gt; Bootstrap05  0.985
+ 6 &lt;split [300/102]&gt; Bootstrap06  0.947
+ 7 &lt;split [300/112]&gt; Bootstrap07  1.00 
+ 8 &lt;split [300/114]&gt; Bootstrap08  1.06 
+ 9 &lt;split [300/115]&gt; Bootstrap09  1.05 
+10 &lt;split [300/117]&gt; Bootstrap10  0.981
+# ℹ 40 more rows</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>resamples_ex2 <span class="sc">|&gt;</span> </span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">min =</span> <span class="fu">min</span>(errors), </span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">max =</span> <span class="fu">max</span>(errors), </span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">mean =</span> <span class="fu">mean</span>(errors), </span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">median =</span> <span class="fu">median</span>(errors),</span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">std_dev =</span> <span class="fu">sd</span>(errors))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 1 × 6
+      n   min   max  mean median std_dev
+  &lt;int&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;  &lt;dbl&gt;   &lt;dbl&gt;
+1    50 0.876  1.12 0.997  0.989  0.0557</code></pre>
+</div>
+</div>
+</section>
+<section id="using-two-maps-to-replace-tune_grid" class="level2">
+<h2 class="anchored" data-anchor-id="using-two-maps-to-replace-tune_grid">Using two map()s to replace tune_grid()</h2>
+<p>Now we can make this a bit more complicated by adding a grid of hyperparameters to tune. Lets keep it simple and tune only k in a knn model. To tune k, we would normally use <code>tune_grid()</code> but we can do it again with two loops using <code>map()</code>. We use an outer <code>map()</code> to loop over the resamples and an inner <code>map()</code> to loop over the values of lambda.</p>
+<p>We need a single function to repeatedly fit and eval over a grid of parameters</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>eval_grid <span class="ot">&lt;-</span> <span class="cf">function</span>(split, rec, grid_k) {</span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># get held-in and held-out features for split </span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>  prep_rec <span class="ot">&lt;-</span> <span class="fu">prep</span>(rec, <span class="at">training =</span> <span class="fu">analysis</span>(split))</span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  held_in <span class="ot">&lt;-</span> <span class="fu">bake</span>(prep_rec, <span class="at">new_data =</span> <span class="cn">NULL</span>)</span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a>  held_out <span class="ot">&lt;-</span> <span class="fu">bake</span>(prep_rec, <span class="at">new_data =</span> <span class="fu">assessment</span>(split))</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># function fit fit and eval model for a specific lambda and resample</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a>  fit_eval_k <span class="ot">&lt;-</span> <span class="cf">function</span>(k, held_in, held_out) {</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>    model <span class="ot">&lt;-</span> </span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">nearest_neighbor</span>(<span class="at">neighbors =</span> k) <span class="sc">|&gt;</span>   </span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>        <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">|&gt;</span>   </span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a>        <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span>  </span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a>        <span class="fu">fit</span>(y <span class="sc">~</span> ., <span class="at">data =</span> held_in)</span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb28-16"><a href="#cb28-16" aria-hidden="true" tabindex="-1"></a>    pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(model, held_out)<span class="sc">$</span>.pred</span>
+<span id="cb28-17"><a href="#cb28-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb28-18"><a href="#cb28-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(<span class="at">k =</span> k, </span>
+<span id="cb28-19"><a href="#cb28-19" aria-hidden="true" tabindex="-1"></a>           <span class="at">rmse =</span> <span class="fu">rmse_vec</span>(held_out<span class="sc">$</span>y, pred))</span>
+<span id="cb28-20"><a href="#cb28-20" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb28-21"><a href="#cb28-21" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb28-22"><a href="#cb28-22" aria-hidden="true" tabindex="-1"></a>  <span class="co"># loop through grid_k and fit/eval model for each k </span></span>
+<span id="cb28-23"><a href="#cb28-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># this is the inner loop</span></span>
+<span id="cb28-24"><a href="#cb28-24" aria-hidden="true" tabindex="-1"></a>  <span class="co"># use list_rbind() to bind the separate rows for each tibble into one larger tibble</span></span>
+<span id="cb28-25"><a href="#cb28-25" aria-hidden="true" tabindex="-1"></a>  grid_k <span class="sc">|&gt;</span> </span>
+<span id="cb28-26"><a href="#cb28-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">map</span>(\(k) <span class="fu">fit_eval_k</span>(k, held_in, held_out)) <span class="sc">|&gt;</span> </span>
+<span id="cb28-27"><a href="#cb28-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">list_rbind</span>()</span>
+<span id="cb28-28"><a href="#cb28-28" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Now map this function over the splits. This is the outer loop. <code>fit_eval_hyper()</code> will return a tibble with rows for each value of k. We will save one tibble for each split in a list column called <code>errors</code>.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>grid_k <span class="ot">=</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">8</span>, <span class="dv">16</span>)</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>resamples_ex3 <span class="ot">&lt;-</span> resamples <span class="sc">|&gt;</span> </span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">rmses =</span> <span class="fu">map</span>(splits, </span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>              \(split) <span class="fu">eval_grid</span>(split, rec, grid_k)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>The rmses column contains the rmse for each value of k for each split/resample in a tibble. Each tibble has 4 rows (one for each k) and 2 columns (k and rmse).</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>resamples_ex3</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># Bootstrap sampling 
+# A tibble: 50 × 3
+   splits            id          rmses           
+   &lt;list&gt;            &lt;chr&gt;       &lt;list&gt;          
+ 1 &lt;split [300/115]&gt; Bootstrap01 &lt;tibble [4 × 2]&gt;
+ 2 &lt;split [300/108]&gt; Bootstrap02 &lt;tibble [4 × 2]&gt;
+ 3 &lt;split [300/108]&gt; Bootstrap03 &lt;tibble [4 × 2]&gt;
+ 4 &lt;split [300/107]&gt; Bootstrap04 &lt;tibble [4 × 2]&gt;
+ 5 &lt;split [300/112]&gt; Bootstrap05 &lt;tibble [4 × 2]&gt;
+ 6 &lt;split [300/102]&gt; Bootstrap06 &lt;tibble [4 × 2]&gt;
+ 7 &lt;split [300/112]&gt; Bootstrap07 &lt;tibble [4 × 2]&gt;
+ 8 &lt;split [300/114]&gt; Bootstrap08 &lt;tibble [4 × 2]&gt;
+ 9 &lt;split [300/115]&gt; Bootstrap09 &lt;tibble [4 × 2]&gt;
+10 &lt;split [300/117]&gt; Bootstrap10 &lt;tibble [4 × 2]&gt;
+# ℹ 40 more rows</code></pre>
+</div>
+</div>
+<p>We can <code>unnest()</code> the rmses column to get a tibble with one row for each lambda value in each resample. No need to see the original splits column so we will select it out. For example.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>resamples_ex3 <span class="sc">|&gt;</span> </span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(rmses) <span class="sc">|&gt;</span> </span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>splits) <span class="sc">|&gt;</span></span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>(<span class="at">n =</span> <span class="dv">30</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 200 × 3
+   id              k  rmse
+   &lt;chr&gt;       &lt;dbl&gt; &lt;dbl&gt;
+ 1 Bootstrap01     2  1.54
+ 2 Bootstrap01     4  1.49
+ 3 Bootstrap01     8  1.46
+ 4 Bootstrap01    16  1.58
+ 5 Bootstrap02     2  1.38
+ 6 Bootstrap02     4  1.27
+ 7 Bootstrap02     8  1.25
+ 8 Bootstrap02    16  1.29
+ 9 Bootstrap03     2  1.50
+10 Bootstrap03     4  1.47
+11 Bootstrap03     8  1.48
+12 Bootstrap03    16  1.52
+13 Bootstrap04     2  1.44
+14 Bootstrap04     4  1.39
+15 Bootstrap04     8  1.32
+16 Bootstrap04    16  1.36
+17 Bootstrap05     2  1.60
+18 Bootstrap05     4  1.47
+19 Bootstrap05     8  1.41
+20 Bootstrap05    16  1.44
+21 Bootstrap06     2  1.33
+22 Bootstrap06     4  1.32
+23 Bootstrap06     8  1.42
+24 Bootstrap06    16  1.53
+25 Bootstrap07     2  1.35
+26 Bootstrap07     4  1.33
+27 Bootstrap07     8  1.34
+28 Bootstrap07    16  1.35
+29 Bootstrap08     2  1.39
+30 Bootstrap08     4  1.32
+# ℹ 170 more rows</code></pre>
+</div>
+</div>
+<p>We can pipe this unnested tibble into a <code>group_by()</code> and <code>summarize()</code> to get the median (or mean) across resamples and then arrange to find the best k</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>resamples_ex3 <span class="sc">|&gt;</span> </span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">unnest</span>(rmses) <span class="sc">|&gt;</span> </span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>splits) <span class="sc">|&gt;</span></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(k) <span class="sc">|&gt;</span> </span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(<span class="at">n =</span> <span class="fu">n</span>(),</span>
+<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">mean_rmse =</span> <span class="fu">mean</span>(rmse)) <span class="sc">|&gt;</span> </span>
+<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(mean_rmse)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 3
+      k     n mean_rmse
+  &lt;dbl&gt; &lt;int&gt;     &lt;dbl&gt;
+1     8    50      1.34
+2    16    50      1.37
+3     4    50      1.39
+4     2    50      1.48</code></pre>
+</div>
+</div>
+<p>The code above makes it clear that using resampling to tune a grid of hyperparameters is just a matter of looping over the resamples in an outer loop and looping over a grid of hyperparameters in an inner loop.</p>
+<p>But of course, this can be done more easily with <code>tune_grid()</code>. Here is the tidymodels version with <code>tune_grid()</code>. Its clearly more concise code but the looping is not transparent.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>resamples_tidy_ex3 <span class="ot">&lt;-</span> </span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nearest_neighbor</span>(<span class="at">neighbors =</span> <span class="fu">tune</span>()) <span class="sc">|&gt;</span>   </span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">|&gt;</span>   </span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span>  </span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tune_grid</span>(<span class="at">preprocessor =</span> rec, </span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>              <span class="at">resamples =</span> resamples, </span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">grid =</span> <span class="fu">tibble</span>(<span class="at">neighbors =</span> grid_k), </span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a>              <span class="at">metrics =</span> <span class="fu">metric_set</span>(rmse))</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a>resamples_tidy_ex3 <span class="sc">|&gt;</span> </span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect_metrics</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb36-12"><a href="#cb36-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(mean)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 4 × 7
+  neighbors .metric .estimator  mean     n std_err .config             
+      &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;               
+1         8 rmse    standard    1.34    50  0.0178 Preprocessor1_Model3
+2        16 rmse    standard    1.37    50  0.0219 Preprocessor1_Model4
+3         4 rmse    standard    1.39    50  0.0160 Preprocessor1_Model2
+4         2 rmse    standard    1.48    50  0.0161 Preprocessor1_Model1</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>resamples_tidy_ex3 <span class="sc">|&gt;</span> </span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">collect_metrics</span>(<span class="at">summarize =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># A tibble: 200 × 6
+   id          neighbors .metric .estimator .estimate .config             
+   &lt;chr&gt;           &lt;dbl&gt; &lt;chr&gt;   &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;               
+ 1 Bootstrap01         2 rmse    standard        1.54 Preprocessor1_Model1
+ 2 Bootstrap02         2 rmse    standard        1.38 Preprocessor1_Model1
+ 3 Bootstrap03         2 rmse    standard        1.50 Preprocessor1_Model1
+ 4 Bootstrap04         2 rmse    standard        1.44 Preprocessor1_Model1
+ 5 Bootstrap05         2 rmse    standard        1.60 Preprocessor1_Model1
+ 6 Bootstrap06         2 rmse    standard        1.33 Preprocessor1_Model1
+ 7 Bootstrap07         2 rmse    standard        1.35 Preprocessor1_Model1
+ 8 Bootstrap08         2 rmse    standard        1.39 Preprocessor1_Model1
+ 9 Bootstrap09         2 rmse    standard        1.43 Preprocessor1_Model1
+10 Bootstrap10         2 rmse    standard        1.54 Preprocessor1_Model1
+# ℹ 190 more rows</code></pre>
+</div>
+</div>
+</section>
+<section id="using-map-and-foreach-to-do-nested-cv" class="level2">
+<h2 class="anchored" data-anchor-id="using-map-and-foreach-to-do-nested-cv">Using map() and foreach() to do nested cv</h2>
+<p>Now lets do the most complicated version of this. Nested resampling involves looping over outer splits where the held out data are test sets used to evaluate best model configurations for each outer split and the inner loop makes validation sets that are used to select the best model configuration for each outer fold. However, if we are tuning a grid of hyperparameters, there is even a further nested loop inside the inner resampling loop to get performance metrics for each value of the hyperparameter in the validation sets.</p>
+<p>rsample supports creating a nested resamplinng object. You can specify different resampling for the inner and outer loops. k-fold for the outer loop and bootstraps for the inner loop is a common choice.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>resamples_nested <span class="ot">&lt;-</span> d <span class="sc">|&gt;</span> </span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">nested_cv</span>(<span class="at">outside =</span> <span class="fu">vfold_cv</span>(<span class="at">v =</span> <span class="dv">5</span>), <span class="at">inside =</span> <span class="fu">bootstraps</span>(<span class="at">times =</span> <span class="dv">10</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Lets take a look at it. It has five rows for each of the five outer splits. The inner_resamples column contains a list column with 10 rows for each of the 10 inner splits. The inner splits are the bootstrap samples. The outer splits are the k-folds.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>resamples_nested</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code># Nested resampling:
+#  outer: 5-fold cross-validation
+#  inner: Bootstrap sampling
+# A tibble: 5 × 3
+  splits           id    inner_resamples
+  &lt;list&gt;           &lt;chr&gt; &lt;list&gt;         
+1 &lt;split [240/60]&gt; Fold1 &lt;boot [10 × 2]&gt;
+2 &lt;split [240/60]&gt; Fold2 &lt;boot [10 × 2]&gt;
+3 &lt;split [240/60]&gt; Fold3 &lt;boot [10 × 2]&gt;
+4 &lt;split [240/60]&gt; Fold4 &lt;boot [10 × 2]&gt;
+5 &lt;split [240/60]&gt; Fold5 &lt;boot [10 × 2]&gt;</code></pre>
+</div>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>eval_grid <span class="ot">&lt;-</span> <span class="cf">function</span>(bootstrap_split, rec, grid_k) {</span>
+<span id="cb43-2"><a href="#cb43-2" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb43-3"><a href="#cb43-3" aria-hidden="true" tabindex="-1"></a>  <span class="co"># get held-in and held-out features for split </span></span>
+<span id="cb43-4"><a href="#cb43-4" aria-hidden="true" tabindex="-1"></a>  prep_rec <span class="ot">&lt;-</span> <span class="fu">prep</span>(rec, <span class="at">training =</span> <span class="fu">analysis</span>(bootstrap_split))</span>
+<span id="cb43-5"><a href="#cb43-5" aria-hidden="true" tabindex="-1"></a>  held_in <span class="ot">&lt;-</span> <span class="fu">bake</span>(prep_rec, <span class="at">new_data =</span> <span class="cn">NULL</span>)</span>
+<span id="cb43-6"><a href="#cb43-6" aria-hidden="true" tabindex="-1"></a>  held_out <span class="ot">&lt;-</span> <span class="fu">bake</span>(prep_rec, <span class="at">new_data =</span> <span class="fu">assessment</span>(bootstrap_split))</span>
+<span id="cb43-7"><a href="#cb43-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb43-8"><a href="#cb43-8" aria-hidden="true" tabindex="-1"></a>  <span class="co"># function fit fit and eval model for a specific lambda and resample</span></span>
+<span id="cb43-9"><a href="#cb43-9" aria-hidden="true" tabindex="-1"></a>  fit_eval_k <span class="ot">&lt;-</span> <span class="cf">function</span>(k, held_in, held_out) {</span>
+<span id="cb43-10"><a href="#cb43-10" aria-hidden="true" tabindex="-1"></a>    model <span class="ot">&lt;-</span> </span>
+<span id="cb43-11"><a href="#cb43-11" aria-hidden="true" tabindex="-1"></a>      <span class="fu">nearest_neighbor</span>(<span class="at">neighbors =</span> k) <span class="sc">|&gt;</span>   </span>
+<span id="cb43-12"><a href="#cb43-12" aria-hidden="true" tabindex="-1"></a>        <span class="fu">set_engine</span>(<span class="st">"kknn"</span>) <span class="sc">|&gt;</span>   </span>
+<span id="cb43-13"><a href="#cb43-13" aria-hidden="true" tabindex="-1"></a>        <span class="fu">set_mode</span>(<span class="st">"regression"</span>) <span class="sc">|&gt;</span>  </span>
+<span id="cb43-14"><a href="#cb43-14" aria-hidden="true" tabindex="-1"></a>        <span class="fu">fit</span>(y <span class="sc">~</span> ., <span class="at">data =</span> held_in)</span>
+<span id="cb43-15"><a href="#cb43-15" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb43-16"><a href="#cb43-16" aria-hidden="true" tabindex="-1"></a>    pred <span class="ot">&lt;-</span> <span class="fu">predict</span>(model, held_out)<span class="sc">$</span>.pred</span>
+<span id="cb43-17"><a href="#cb43-17" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb43-18"><a href="#cb43-18" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(<span class="at">k =</span> k, </span>
+<span id="cb43-19"><a href="#cb43-19" aria-hidden="true" tabindex="-1"></a>           <span class="at">rmse =</span> <span class="fu">rmse_vec</span>(held_out<span class="sc">$</span>y, pred))</span>
+<span id="cb43-20"><a href="#cb43-20" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb43-21"><a href="#cb43-21" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb43-22"><a href="#cb43-22" aria-hidden="true" tabindex="-1"></a>  <span class="co"># loop through grid_k and fit/eval model for each k </span></span>
+<span id="cb43-23"><a href="#cb43-23" aria-hidden="true" tabindex="-1"></a>  <span class="co"># this is the inner loop</span></span>
+<span id="cb43-24"><a href="#cb43-24" aria-hidden="true" tabindex="-1"></a>  <span class="co"># use list_rbind() to bind the separate rows for each tibble into one larger tibble</span></span>
+<span id="cb43-25"><a href="#cb43-25" aria-hidden="true" tabindex="-1"></a>  grid_k <span class="sc">|&gt;</span> </span>
+<span id="cb43-26"><a href="#cb43-26" aria-hidden="true" tabindex="-1"></a>    <span class="fu">map</span>(\(k) <span class="fu">fit_eval_k</span>(k, held_in, held_out)) <span class="sc">|&gt;</span> </span>
+<span id="cb43-27"><a href="#cb43-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">list_rbind</span>()</span>
+<span id="cb43-28"><a href="#cb43-28" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>bind_bootstraps <span class="ot">&lt;-</span> <span class="cf">function</span>(bootstraps, rec, grid_k) {</span>
+<span id="cb44-2"><a href="#cb44-2" aria-hidden="true" tabindex="-1"></a> </span>
+<span id="cb44-3"><a href="#cb44-3" aria-hidden="true" tabindex="-1"></a>  bootstraps<span class="sc">$</span>splits <span class="sc">|&gt;</span>  </span>
+<span id="cb44-4"><a href="#cb44-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">map</span>(\(bootstrap_split) <span class="fu">eval_grid</span>(bootstrap_split, rec, grid_k)) <span class="sc">|&gt;</span> </span>
+<span id="cb44-5"><a href="#cb44-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">list_rbind</span>()</span>
+<span id="cb44-6"><a href="#cb44-6" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>resamples_nested_ex4 <span class="ot">&lt;-</span> resamples_nested <span class="sc">|&gt;</span> </span>
+<span id="cb45-2"><a href="#cb45-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">inner_rmses =</span> <span class="fu">map</span>(inner_resamples, </span>
+<span id="cb45-3"><a href="#cb45-3" aria-hidden="true" tabindex="-1"></a>                          \(inner_resample) <span class="fu">bind_bootstraps</span>(inner_resample, </span>
+<span id="cb45-4"><a href="#cb45-4" aria-hidden="true" tabindex="-1"></a>                                                            rec, </span>
+<span id="cb45-5"><a href="#cb45-5" aria-hidden="true" tabindex="-1"></a>                                                            grid_k)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Get best k for each outer fold</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>get_best_k <span class="ot">&lt;-</span> <span class="cf">function</span>(rmses) {</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>  rmses <span class="sc">|&gt;</span>  </span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(k) <span class="sc">|&gt;</span> </span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarize</span>(<span class="at">mean_rmse =</span> <span class="fu">mean</span>(rmse)) <span class="sc">|&gt;</span> </span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">arrange</span>(mean_rmse) <span class="sc">|&gt;</span> </span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">slice</span>(<span class="dv">1</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">pull</span>(k)</span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>resamples_nested_ex4 <span class="ot">&lt;-</span> resamples_nested_ex4 <span class="sc">|&gt;</span> </span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">best_k =</span> <span class="fu">map_dbl</span>(inner_rmses, \(rmses) <span class="fu">get_best_k</span>(rmses)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
 
 
 </section>
