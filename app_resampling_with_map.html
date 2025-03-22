@@ -300,8 +300,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#using-map-to-replace-fit_resamples---step-x-step" id="toc-using-map-to-replace-fit_resamples---step-x-step" class="nav-link" data-scroll-target="#using-map-to-replace-fit_resamples---step-x-step">Using map() to replace fit_resamples() - step x step</a></li>
   <li><a href="#using-map-to-replace-fit_resamples---one-function" id="toc-using-map-to-replace-fit_resamples---one-function" class="nav-link" data-scroll-target="#using-map-to-replace-fit_resamples---one-function">Using map() to replace fit_resamples() - one function</a></li>
   <li><a href="#using-two-maps-to-replace-tune_grid" id="toc-using-two-maps-to-replace-tune_grid" class="nav-link" data-scroll-target="#using-two-maps-to-replace-tune_grid">Using two map()s to replace tune_grid()</a></li>
-  <li><a href="#using-map-and-foreach-to-do-nested-cv" id="toc-using-map-and-foreach-to-do-nested-cv" class="nav-link" data-scroll-target="#using-map-and-foreach-to-do-nested-cv">Using map() and foreach() to do nested cv</a></li>
-  <li><a href="#final-notes" id="toc-final-notes" class="nav-link" data-scroll-target="#final-notes">Final notes</a></li>
+  <li><a href="#using-maps-to-do-nested-cv" id="toc-using-maps-to-do-nested-cv" class="nav-link" data-scroll-target="#using-maps-to-do-nested-cv">Using map()s to do nested cv</a></li>
+  <li><a href="#final-notes---parallel-processing" id="toc-final-notes---parallel-processing" class="nav-link" data-scroll-target="#final-notes---parallel-processing">Final notes - parallel processing</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/jjcurtin/book_iaml/edit/main/app_resampling_with_map.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
@@ -935,8 +935,8 @@ $ rmses       &lt;dbl&gt; 0.9826968, 0.9380291, 1.0127994, 0.9929520, 0.9849202,
 </div>
 </div>
 </section>
-<section id="using-map-and-foreach-to-do-nested-cv" class="level2">
-<h2 class="anchored" data-anchor-id="using-map-and-foreach-to-do-nested-cv">Using map() and foreach() to do nested cv</h2>
+<section id="using-maps-to-do-nested-cv" class="level2">
+<h2 class="anchored" data-anchor-id="using-maps-to-do-nested-cv">Using map()s to do nested cv</h2>
 <p>Now lets do the most complicated version of this. Nested resampling involves looping over outer splits where the held out data are test sets used to evaluate best model configurations for each outer split and the inner loop makes validation sets that are used to select the best model configuration for each outer fold. However, if we are tuning a grid of hyperparameters, there is even a further nested loop inside the inner resampling loop to get performance metrics for each value of the hyperparameter in the validation sets.</p>
 <p><code>rsample</code> supports creating a nested resampling object.</p>
 <ul>
@@ -1229,8 +1229,8 @@ $ rmses       &lt;dbl&gt; 0.9826968, 0.9380291, 1.0127994, 0.9929520, 0.9849202,
 <p>If we want to know the true best k to use when we train a final model to implement using all our data, we need select it by using our inner reasampling method (10 boostraps) with all our data.</p>
 <p>We could then train our final implementation model by fitting a model to all our data using this value of k.</p>
 </section>
-<section id="final-notes" class="level2">
-<h2 class="anchored" data-anchor-id="final-notes">Final notes</h2>
+<section id="final-notes---parallel-processing" class="level2">
+<h2 class="anchored" data-anchor-id="final-notes---parallel-processing">Final notes - parallel processing</h2>
 <p>All of these examples were done without the use of parallel processing. <code>fit_resamples()</code> and <code>tune_grid()</code> can use a parallel backend if you set it up.</p>
 <ul>
 <li>You could modify our code to implement <code>map()</code> in parallel using <code>future_map()</code> from the <code>furrr</code> package.</li>
