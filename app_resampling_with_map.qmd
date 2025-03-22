@@ -20,7 +20,6 @@ Lets start by....
 ```{r}
 library(tidyverse)
 library(tidymodels)
-library(foreach)
 ```
 
 - creating a simple data set
@@ -178,17 +177,26 @@ resamples_ex2 |>
 
 Now we can make this a bit more complicated by adding a grid of hyperparameters to tune.  Lets keep it simple and tune only k in a knn model.  To tune k, we would normally use `tune_grid()` but we can do it again with two loops using `map()`.  We use an outer `map()` to loop over the resamples and an inner `map()` to loop over the values of lambda.   
 
-We need a single function to repeatedly fit and eval over a grid of parameters
+Lets start by setting up a grid of hyperparameters to tune over.
+```{r}
+grid_k = tibble(neighbors = c(2, 4, 8, 16))
+```
+
+We need a single function to repeatedly fit and eval over our grid of parameters
 ```{r}
 eval_grid <- function(split, rec, grid_k) {
  
   # get held-in and held-out features for split 
+  # we calcuate features inside the function where fit all models across the grid 
+  # because we want to make sure we only need to prep and bake the recipe once
+  # per split.  Otherwise, we would waste a lot of computational time
   prep_rec <- prep(rec, training = analysis(split))
   held_in <- bake(prep_rec, new_data = NULL)
   held_out <- bake(prep_rec, new_data = assessment(split))
 
-  # function fit fit and eval model for a specific lambda and resample
-  fit_eval_k <- function(k, held_in, held_out) {
+  # function fit fit and eval model for a specific lambda using held-in/held-out
+  # for this split
+  fit_eval <- function(k, held_in, held_out) {
     model <- 
       nearest_neighbor(neighbors = k) |>   
         set_engine("kknn") |>   
@@ -202,29 +210,28 @@ eval_grid <- function(split, rec, grid_k) {
   }
   
   # loop through grid_k and fit/eval model for each k 
-  # this is the inner loop
+  # this is the inner loop from tune_grid()
   # use list_rbind() to bind the separate rows for each tibble into one larger tibble
-  grid_k |> 
-    map(\(k) fit_eval_k(k, held_in, held_out)) |> 
+  grid_k$neighbors |> 
+    map(\(k) fit_eval(k, held_in, held_out)) |> 
     list_rbind()
 }
 ```
 
-Now map this function over the splits. This is the outer loop.  `fit_eval_hyper()` will return a tibble with rows for each value of k.  We will save one tibble for each split in a list column called `errors`. 
+Now map this function over the splits. This is the outer loop from `tune_grid()`.  `eval_grid()` will return a tibble with rows for each value of k.  We will save one tibble for each split in a list column called `rmses``. 
 
 ```{r}
-grid_k = c(2, 4, 8, 16)
 resamples_ex3 <- resamples |> 
   mutate(rmses = map(splits, 
               \(split) eval_grid(split, rec, grid_k)))
 ```
 
-The rmses column contains the rmse for each value of k for each split/resample in a tibble.  Each tibble has 4 rows (one for each k) and 2 columns (k and rmse).
+The `rmses` column contains the rmse for each value of k for each split/resample in a tibble.  Each tibble has 4 rows (one for each k) and 2 columns (k and rmse).
 ```{r}
 resamples_ex3
 ```
 
-We can `unnest()` the rmses column to get a tibble with one row for each lambda value in each resample.  No need to see the original splits column so we will select it out.  For example.
+We can `unnest()` the rmses column to get a tibble with one row for each k value in each resample.  No need to display the original splits column so we will select it out.  For example.
 ```{r}
 resamples_ex3 |> 
   unnest(rmses) |> 
@@ -254,7 +261,7 @@ resamples_tidy_ex3 <-
     set_mode("regression") |>  
     tune_grid(preprocessor = rec, 
               resamples = resamples, 
-              grid = tibble(neighbors = grid_k), 
+              grid = grid_k, 
               metrics = metric_set(rmse))
 
 resamples_tidy_ex3 |> 
@@ -275,21 +282,58 @@ resamples_nested <- d |>
   nested_cv(outside = vfold_cv(v = 5), inside = bootstraps(times = 10))
 ```
 
-Lets take a look at it.  It has five rows for each of the five outer splits.  The inner_resamples column contains a list column with 10 rows for each of the 10 inner splits.  The inner splits are the bootstrap samples.  The outer splits are the k-folds.
+Lets take a look at it.  
+
+- It has five rows for each of the five outer splits.  The outer splits are the k-folds.
+- The inner_resamples column contains the inner splits associated with each outer fold.  Each inner split is a bootstrap resample with 10 bootstraps.
+
 ```{r}
 resamples_nested
 ```
 
+Lets look a little more carefully at this structure because its critical to understanding nested cv. 
+
+- Below we pull out and look at the first outer k-fold split. 
+- The total sample size is 300 and the outer k-fold split has 60 observations held-out to eventually use as a test set and 240 held-in that will eventually be used as training data when we train models in the outer loop to get our final performance metrics for best values of k.
 ```{r}
-eval_grid <- function(bootstrap_split, rec, grid_k) {
+resamples_nested |> 
+  slice(1) |> 
+  pull(splits)
+
+# NOTE: sometimes its easier to use base R list notation to do this
+# resamples_nested[[1]]$splits
+```
+
+Now look at the inner resamples for the first outer fold.  
+
+- For each outer k-fold split, we take the held-in data (240 observations in this case) and split it further, using the inner resampling method (10 bootstraps here).
+- Notice that each of the 10 bootstraps associated with the first outer k-fold split have 240 observation (because we used the held-in data form that outer k-fold split).  These will be used as training data for the inner loop of nested.  We will train models with various values of k with these data
+- Notice also that each of these 10 boostraps have held-out (OOB) observations that will be used as validation sets for the inner loop of nested.  We will use these held-out validation sets to calculate performance metrics for the models withh diffferent value of k.  This will let us select the best value of k for each outer fold.
+
+```{r}
+# going to switch to base R notation 
+resamples_nested[[1]]$inner_resamples
+```
+
+Now that we have an appropriate resamples structure to use for nested cv, lets get some functions together to calculate rmses for inner validation sets and outer test sets
+
+We will need a function again that takes a split, uses the recipe to get held-in/held-out features, and then fits and evaluates a model for each value of k in the grid.  This is the exact same function as we  used earlier (because we are using knn again).   We include it below again for your review.
+
+- We will use this function twice.
+- In the inner loop of our nested cv, we will map this function over all 10 of our bootstraps for each inner fold using all values of k.
+- In the outer loop of our nested cv, we will map this function over all 5 of our outer folds using the best value of k that was identified for eacd fold using its respective 10 bootstraps.
+```{r}
+#| eval: false
+
+eval_grid <- function(split, rec, grid_k) {
  
   # get held-in and held-out features for split 
-  prep_rec <- prep(rec, training = analysis(bootstrap_split))
+  prep_rec <- prep(rec, training = analysis(split))
   held_in <- bake(prep_rec, new_data = NULL)
-  held_out <- bake(prep_rec, new_data = assessment(bootstrap_split))
+  held_out <- bake(prep_rec, new_data = assessment(split))
 
   # function fit fit and eval model for a specific lambda and resample
-  fit_eval_k <- function(k, held_in, held_out) {
+  fit_eval <- function(k, held_in, held_out) {
     model <- 
       nearest_neighbor(neighbors = k) |>   
         set_engine("kknn") |>   
@@ -305,12 +349,13 @@ eval_grid <- function(bootstrap_split, rec, grid_k) {
   # loop through grid_k and fit/eval model for each k 
   # this is the inner loop
   # use list_rbind() to bind the separate rows for each tibble into one larger tibble
-  grid_k |> 
-    map(\(k) fit_eval_k(k, held_in, held_out)) |> 
+  grid_k$neighbors |> 
+    map(\(k) fit_eval(k, held_in, held_out)) |> 
     list_rbind()
 }
 ```
 
+To loop eval_grid over the 10 bootstraps in the nested cv inner loop, we will need another simple function that applies eval_grid over each bootstrap with a set of 10 and binds the results into a single tibble.  
 ```{r}
 bind_bootstraps <- function(bootstraps, rec, grid_k) {
  
@@ -320,6 +365,8 @@ bind_bootstraps <- function(bootstraps, rec, grid_k) {
 }
 ```
 
+Now we are ready to get performance metrics for each k in `grid_k` for each of the inner 10 bootstraps in each of the five outer folds. Remember that `bind_bootstraps()` just calls `eval_grid()` for each of the 10 bootstraps in the inner loop and binds the results.  
+
 ```{r}
 resamples_nested_ex4 <- resamples_nested |> 
   mutate(inner_rmses = map(inner_resamples, 
@@ -328,7 +375,22 @@ resamples_nested_ex4 <- resamples_nested |>
                                                             grid_k)))
 ```
 
-Get best k for each outer fold
+Lets look at what we just added to our resamples object
+
+- We now have a tibble with 40 rows and 2 columns associated with each set of 10 inner boostraps splits.
+```{r}
+resamples_nested_ex4 
+```
+
+If we look at one of them, we see
+
+- The 40 rows are because we have 10 boostraps for each of the 4 values of k in the grid.  So 10 * 4 = 40 rmses
+- we have columns for k and rmse
+```{r}
+resamples_nested_ex4$inner_rmses[[1]]
+```
+
+We now need to calculate the best k for each of the sets of 10 boostraps (associated with one outer k-fold split). To do this, we average the 10 rmses together for each value of k and then choose the k with the lowest rmse.  We will write a function to do this because we can then map that function over each of the sets of 10 boostraps associatged with each outer split. 
 ```{r}
 get_best_k <- function(rmses) {
   rmses |>  
@@ -343,4 +405,26 @@ resamples_nested_ex4 <- resamples_nested_ex4 |>
   mutate(best_k = map_dbl(inner_rmses, \(rmses) get_best_k(rmses)))
 ```
 
+Now we have determined the best value of k for each of the 5 outer folds.  
+```{r}
+resamples_nested_ex4
+```
+
+Now we move up to the outer k-fold splits.  We will use the best k for each outer fold to fit a model using the held-in data from the outer fold and then evaluate that model using the held-out test data.  Those test data were NEVER used before so the will allow us to see how that model with a best value of k (selected by boostrap resampling) performs in new data
+
+We can reuse the `eval_grid()` function we used before to fit and evaluate the model using the held-in data and the held-out test data.  But now we just use one value of k, the one that was best for each fold
+
+```{r}
+resamples_nested_ex4 <- resamples_nested_ex4 |> 
+  mutate(test_rmse = map2(splits, best_k, 
+                               \(split, k) eval_grid(split, rec, tibble(neighbors = k))))
+```
+
+We can pull the one row tibbles out of this final column and bind them together to get a tibble with one row for each outer fold.  We have retained the best value of k for each fold for our information (these don't need to be the same for each k-fold split).   If we want to know the true best k to use when we train a final model to implement using all our data, we need select it by using our inner reasampling method (10 boostraps) with all our data.  
+```{r}
+resamples_nested_ex4$test_rmse |> 
+  list_rbind() |> 
+  mutate(outer_fold = 1:length(resamples_nested_ex4$test_rmse)) |> 
+  relocate(outer_fold)
+```
 
