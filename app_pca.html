@@ -291,8 +291,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </ul></li>
   <li><a href="#a-two-dimensional-example" id="toc-a-two-dimensional-example" class="nav-link" data-scroll-target="#a-two-dimensional-example">A Two Dimensional Example</a></li>
   <li><a href="#pca-using-eigenvectors-and-eigenvalues" id="toc-pca-using-eigenvectors-and-eigenvalues" class="nav-link" data-scroll-target="#pca-using-eigenvectors-and-eigenvalues">PCA using Eigenvectors and Eigenvalues</a></li>
-  <li><a href="#stable-compuation-of-princippal-components" id="toc-stable-compuation-of-princippal-components" class="nav-link" data-scroll-target="#stable-compuation-of-princippal-components">Stable Compuation of Princippal Components</a></li>
+  <li><a href="#stable-compuation-of-principal-components" id="toc-stable-compuation-of-principal-components" class="nav-link" data-scroll-target="#stable-compuation-of-principal-components">Stable Compuation of Principal Components</a></li>
   <li><a href="#using-pca-for-dimensionality-reduction" id="toc-using-pca-for-dimensionality-reduction" class="nav-link" data-scroll-target="#using-pca-for-dimensionality-reduction">Using PCA for Dimensionality Reduction</a></li>
+  <li><a href="#reconstructing-the-original-data" id="toc-reconstructing-the-original-data" class="nav-link" data-scroll-target="#reconstructing-the-original-data">Reconstructing the Original Data</a></li>
+  <li><a href="#deciding-on-the-number-of-components-to-retain" id="toc-deciding-on-the-number-of-components-to-retain" class="nav-link" data-scroll-target="#deciding-on-the-number-of-components-to-retain">Deciding on the Number of Components to Retain</a></li>
+  <li><a href="#limitations-of-pca" id="toc-limitations-of-pca" class="nav-link" data-scroll-target="#limitations-of-pca">Limitations of PCA</a></li>
   <li><a href="#pca-in-tidymodels" id="toc-pca-in-tidymodels" class="nav-link" data-scroll-target="#pca-in-tidymodels">PCA in Tidymodels</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/jjcurtin/book_iaml/edit/main/app_pca.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
@@ -324,9 +327,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <section id="general-information" class="level3">
 <h3 class="anchored" data-anchor-id="general-information">General Information</h3>
 <p>To start, the introductory sections about PCA from <a href="https://en.wikipedia.org/wiki/Principal_component_analysis">Wikipedia</a> provide a nice orientation and summary of the technique.</p>
+<p>There is also a useful demonstration of PCA in R on <a href="https://cran.r-project.org/web/packages/LearnPCA/vignettes/Vig_03_Step_By_Step_PCA.pdf">CRAN</a></p>
 <p>In short, PCA linearly transforms our data (our <code>x</code>s to be precise) onto a new coordinate system such that the directions/axes (principal components) capturing the largest variation in the data can be easily identified.</p>
-<p>A set of up to <code>p</code> principal components can be derived from <code>p</code> raw variables (e.g.&nbsp;predictors) such that the first principal component is a linear combination of the <code>p</code> raw variables that accounts for the most variance across those variables. The 2nd prinicipal component is a similar linear combination of the raw variables that is orthogonal (uncorrleated) with the first component and accounts for the largest proportionn of remaining variance among the raw variables. PCA continues to derive additional components that are each orthogonal to the previous components and account for successively less variance.</p>
-<p>These new components represent a new coordinate system within which to represent score on our observations. This new system is a rotation of the original coordinate system that consists of orthogonal axes (e.g., x, y, z) defined by our raw variables.</p>
+<p>A set of up to <code>p</code> principal components can be derived from <code>p</code> raw variables (e.g.&nbsp;predictors) such that the first principal component is a linear combination of the <code>p</code> raw variables that accounts for the most variance across those variables. The 2nd principal component is a similar linear combination of the raw variables that is orthogonal (uncorrelated) with the first component and accounts for the largest proportion of remaining variance among the raw variables. PCA continues to derive additional components that are each orthogonal to the previous components and account for successively less variance.</p>
+<p>These new components represent a new coordinate system within which to represent scores for our observations. This new system is a rotation of the original coordinate system that consists of orthogonal axes (e.g., x, y, z) defined by our raw variables.</p>
 <p>We can use PCA to</p>
 <ul>
 <li>Understand the structure of our data</li>
@@ -348,6 +352,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h2 class="anchored" data-anchor-id="a-two-dimensional-example">A Two Dimensional Example</h2>
 <p>This example is based loosely on a tutorial and demonstration data developed by <a href="https://www.iro.umontreal.ca/~pift6080/H09/documents/papers/pca_tutorial.pdf">Lindsay Smith</a></p>
 <p>For a second example that extends to 3D space, see this <a href="https://setosa.io/ev/principal-component-analysis/">website</a></p>
+<p>And to be clear, PCA can be applied to any number of dimensions and is most useful for high dimensional data (e.g., p &gt;&gt; 2).</p>
 <hr>
 <p>Let’s start with a toy dataset for two variables (e.g., predictors), <code>x1</code> and <code>x2</code> and a sample size of 10. We will work in two dimensions to make the example easier to visualize but the generalization to p dimensions (where p = number of variables) is not difficult.</p>
 <div class="cell">
@@ -488,6 +493,10 @@ replace the existing one.</code></pre>
 <li>When the observations are scored/defined on these PCs, <code>PC1</code> and <code>PC2</code> are now new, uncorrelated features we can use to describe the data.</li>
 </ul>
 <div class="cell">
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: Removed 1 row containing missing values or values outside the scale range
+(`geom_point()`).</code></pre>
+</div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
@@ -506,10 +515,10 @@ replace the existing one.</code></pre>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>ei <span class="ot">&lt;-</span> d <span class="sc">|&gt;</span> </span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(x1c, x2c) <span class="sc">|&gt;</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cov</span>() <span class="sc">|&gt;</span> </span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">eigen</span>(<span class="at">symmetric =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ei <span class="ot">&lt;-</span> d <span class="sc">|&gt;</span> </span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(x1c, x2c) <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cov</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">eigen</span>(<span class="at">symmetric =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <ul>
@@ -518,7 +527,7 @@ replace the existing one.</code></pre>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>ei<span class="sc">$</span>vectors</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>ei<span class="sc">$</span>vectors</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>          [,1]       [,2]
@@ -530,11 +539,11 @@ replace the existing one.</code></pre>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>plot <span class="sc">+</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"segment"</span>, <span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="dv">0</span>, <span class="at">xend =</span> ei<span class="sc">$</span>vectors[<span class="dv">1</span>,<span class="dv">1</span>], <span class="at">yend =</span> ei<span class="sc">$</span>vectors[<span class="dv">2</span>,<span class="dv">1</span>], </span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">color =</span> <span class="st">"green"</span>) <span class="sc">+</span> </span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"segment"</span>, <span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="dv">0</span>, <span class="at">xend =</span> ei<span class="sc">$</span>vectors[<span class="dv">1</span>,<span class="dv">2</span>], <span class="at">yend =</span> ei<span class="sc">$</span>vectors[<span class="dv">2</span>,<span class="dv">2</span>], </span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">color =</span> <span class="st">"green"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>plot <span class="sc">+</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"segment"</span>, <span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="dv">0</span>, <span class="at">xend =</span> ei<span class="sc">$</span>vectors[<span class="dv">1</span>,<span class="dv">1</span>], <span class="at">yend =</span> ei<span class="sc">$</span>vectors[<span class="dv">2</span>,<span class="dv">1</span>], </span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>              <span class="at">color =</span> <span class="st">"green"</span>) <span class="sc">+</span> </span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">annotate</span>(<span class="st">"segment"</span>, <span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="dv">0</span>, <span class="at">xend =</span> ei<span class="sc">$</span>vectors[<span class="dv">1</span>,<span class="dv">2</span>], <span class="at">yend =</span> ei<span class="sc">$</span>vectors[<span class="dv">2</span>,<span class="dv">2</span>], </span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>              <span class="at">color =</span> <span class="st">"green"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -551,13 +560,13 @@ replace the existing one.</code></pre>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>ei<span class="sc">$</span>values</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>ei<span class="sc">$</span>values</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1.2840277 0.0490834</code></pre>
 </div>
 </div>
-<p>The eigen decomposition parses the complete variance in the original variables such that <code>PC1</code> has the most variance, <code>PC2</code>, the secondmost, etc. The full set of the PCs will contain all the variance of the original variables.</p>
+<p>The eigen decomposition parses the complete variance in the original variables such that <code>PC1</code> has the most variance, <code>PC2</code>, the second-most, etc. The full set of the PCs will contain all the variance of the original variables.</p>
 <p>In our example:</p>
 <ul>
 <li>Variance was originally split across <code>x1</code> and <code>x2</code>.<br>
@@ -567,14 +576,14 @@ replace the existing one.</code></pre>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(d<span class="sc">$</span>x1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(d<span class="sc">$</span>x1)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.6165556</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(d<span class="sc">$</span>x2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(d<span class="sc">$</span>x2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0.7165556</code></pre>
@@ -584,33 +593,33 @@ replace the existing one.</code></pre>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>ei<span class="sc">$</span>values[<span class="dv">1</span>] <span class="sc">+</span> ei<span class="sc">$</span>values[<span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>ei<span class="sc">$</span>values[<span class="dv">1</span>] <span class="sc">+</span> ei<span class="sc">$</span>values[<span class="dv">2</span>]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1.333111</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(d<span class="sc">$</span>x1) <span class="sc">+</span> <span class="fu">var</span>(d<span class="sc">$</span>x2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(d<span class="sc">$</span>x1) <span class="sc">+</span> <span class="fu">var</span>(d<span class="sc">$</span>x2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1.333111</code></pre>
 </div>
 </div>
 </section>
-<section id="stable-compuation-of-princippal-components" class="level2">
-<h2 class="anchored" data-anchor-id="stable-compuation-of-princippal-components">Stable Compuation of Princippal Components</h2>
+<section id="stable-compuation-of-principal-components" class="level2">
+<h2 class="anchored" data-anchor-id="stable-compuation-of-principal-components">Stable Compuation of Principal Components</h2>
 <p>It is more numerically stable to get the principal components using singular vector decomposition (<code>svd()</code> in R) than eigen decomposition.</p>
 <p>In base R, <code>prcomp()</code> uses svd and also directly calculates the PCs.</p>
 <ul>
 <li>See <a href="https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/prcomp">help</a></li>
 <li>We pass in our raw variables.</li>
-<li>By default, the raw variables are centered by not scaled.</li>
+<li>By default, the raw variables are centered by not scaled (We included both arguements below with their defaults so you can see their names)</li>
 </ul>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>pca <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(d <span class="sc">|&gt;</span> <span class="fu">select</span>(x1, x2))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>pca <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(d <span class="sc">|&gt;</span> <span class="fu">select</span>(x1, x2), <span class="at">center =</span> <span class="cn">TRUE</span>, <span class="at">scale =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <hr>
@@ -618,7 +627,7 @@ replace the existing one.</code></pre>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>ei<span class="sc">$</span>vectors</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>ei<span class="sc">$</span>vectors</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>          [,1]       [,2]
@@ -627,7 +636,7 @@ replace the existing one.</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>pca<span class="sc">$</span>rotation</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>pca<span class="sc">$</span>rotation</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>          PC1        PC2
@@ -640,23 +649,23 @@ x2 -0.7351787 -0.6778734</code></pre>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>pca<span class="sc">$</span>sdev</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>pca<span class="sc">$</span>sdev</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1.1331495 0.2215477</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co"># square for variances</span></span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>pca<span class="sc">$</span>sdev <span class="sc">^</span><span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># square for variances</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>pca<span class="sc">$</span>sdev <span class="sc">^</span><span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1.2840277 0.0490834</code></pre>
 </div>
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="co"># compare to eigenvalues</span></span>
-<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>ei<span class="sc">$</span>values</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="co"># compare to eigenvalues</span></span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>ei<span class="sc">$</span>values</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 1.2840277 0.0490834</code></pre>
@@ -667,7 +676,7 @@ x2 -0.7351787 -0.6778734</code></pre>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb31"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a>pca<span class="sc">$</span>x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb32"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a>pca<span class="sc">$</span>x</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>              PC1         PC2
@@ -687,7 +696,7 @@ x2 -0.7351787 -0.6778734</code></pre>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">cor</span>(pca<span class="sc">$</span>x[,<span class="dv">1</span>], pca<span class="sc">$</span>x[,<span class="dv">2</span>]), <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="fu">round</span>(<span class="fu">cor</span>(pca<span class="sc">$</span>x[,<span class="dv">1</span>], pca<span class="sc">$</span>x[,<span class="dv">2</span>]), <span class="dv">5</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] 0</code></pre>
@@ -701,11 +710,315 @@ x2 -0.7351787 -0.6778734</code></pre>
 <li>Contain all the variance from <code>x1</code> and <code>x2</code></li>
 <li>Are orthogonal</li>
 </ul>
-<p>But when using PCA for dimensionality reduction, we wanted to use the variance of our variables in few dimensions (with fewer features) for prediction to reduce overfitting.</p>
+<p>But when using PCA for dimensionality reduction, we wanted to use the variance of our variables in fewer dimensions (with fewer features) for prediction to reduce overfitting.</p>
 <ul>
 <li>Most of variance from the full dataset is now in <code>PC1</code></li>
 <li>We can use <code>PC1</code> as a feature rather than both <code>x1</code> and <code>x2</code>.</li>
 </ul>
+<p>These were the variances of the orginal variables <code>x1</code> and <code>x2</code>.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(d<span class="sc">$</span>x1) <span class="co"># variance of x1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.6165556</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(d<span class="sc">$</span>x2) <span class="co"># variance of x2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.7165556</code></pre>
+</div>
+</div>
+<p>And now most of the variance is in <code>PC1</code>.</p>
+<ul>
+<li>We can see this in the eigenvalues</li>
+</ul>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>pca<span class="sc">$</span>sdev <span class="sc">^</span><span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.2840277 0.0490834</code></pre>
+</div>
+</div>
+<ul>
+<li>and also by just looking at the variances of the PCs directly</li>
+</ul>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(pca<span class="sc">$</span>x[,<span class="dv">1</span>]) <span class="co"># variance of PC1</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.284028</code></pre>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="fu">var</span>(pca<span class="sc">$</span>x[,<span class="dv">2</span>]) <span class="co"># variance of PC2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.0490834</code></pre>
+</div>
+</div>
+</section>
+<section id="reconstructing-the-original-data" class="level2">
+<h2 class="anchored" data-anchor-id="reconstructing-the-original-data">Reconstructing the Original Data</h2>
+<p>If we use all of the principal components, we can reconstruct the original data exactly. However, if our goal is dimensionality reduction, we plan to use fewer than our full set of PCs in our subsequent analyses. Therefore, it can be instructive to see how well we can reproduce the raw data using fewer PCs.</p>
+<p>If we used <code>prcomp()</code> to get the PCs, we can reconstruct the original data using the following code</p>
+<ul>
+<li>Lets use this code with our toy dataset</li>
+<li>We will recreate the raw data using the first principal component only from our example.</li>
+</ul>
+<p>This first step reproduces the original Xs, but in their centered/scaled format</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>n_pc <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># use only the first PC</span></span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>x_estimated <span class="ot">&lt;-</span> pca<span class="sc">$</span>x[, <span class="dv">1</span><span class="sc">:</span>n_pc] <span class="sc">%*%</span> <span class="fu">t</span>(pca<span class="sc">$</span>rotation[, <span class="dv">1</span><span class="sc">:</span>n_pc])</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>If the raw data were scaled and centered, we need to add back the means and scale the data back to the original scale. We need to do this in two steps (in this order)</p>
+<p>First, we unscale the data (we did not scale, so we will show the code but not execute it)</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>orig_x_sd <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.7852105</span>, <span class="fl">0.846496</span>) <span class="co"># original sd of x1 and x2</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>x_estimated <span class="ot">&lt;-</span> <span class="fu">scale</span>(x_estimated, <span class="at">center =</span> <span class="cn">FALSE</span>, <span class="at">scale =</span> <span class="dv">1</span><span class="sc">/</span>orig_x_sd)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>And then we can add back the means of our raw Xs that we previously subtracted out.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>orig_x_means <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">1.81</span>, <span class="fl">1.91</span>) <span class="co"># original means of x1 and x2</span></span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>x_estimated <span class="ot">&lt;-</span> <span class="fu">scale</span>(x_estimated, <span class="at">center =</span> <span class="sc">-</span>orig_x_means, <span class="at">scale =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Lets see how well we were able to recreate the original data using only the first principal component. Below are plots of the original and reconstructed data.</p>
+<ul>
+<li>As expected, we do pretty well.<br>
+</li>
+<li>We retain all the variance over the direction of the first PC.<br>
+</li>
+<li>And of course, we lose all the variance over the direction of the second PC because we didnnt use it.<br>
+</li>
+<li>However, in this dataset, most of the variance was in the first PC. This one PC may likely work well for us.</li>
+</ul>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>d <span class="sc">|&gt;</span> </span>
+<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x1, <span class="at">y =</span> x2)) <span class="sc">+</span></span>
+<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlim</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">4</span>) <span class="sc">+</span></span>
+<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylim</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">4</span>) <span class="sc">+</span></span>
+<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
+<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Original Data"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="app_pca_files/figure-html/unnamed-chunk-25-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>x_estimated <span class="sc">|&gt;</span> </span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x1, <span class="at">y =</span> x2)) <span class="sc">+</span></span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlim</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">4</span>) <span class="sc">+</span></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylim</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">4</span>) <span class="sc">+</span></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Reconstructed Data"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="app_pca_files/figure-html/unnamed-chunk-25-2.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="deciding-on-the-number-of-components-to-retain" class="level2">
+<h2 class="anchored" data-anchor-id="deciding-on-the-number-of-components-to-retain">Deciding on the Number of Components to Retain</h2>
+<p>When using PCA for dimensionality reduction, we need to decide how many components to retain.</p>
+<p>Lets make another toy dataset with 8 variables that represent a self-report measure that has two subscales. In this instance, if the scale works well, we might expect that we could reduce the 8 items to just 2 components (one for each subscale). This would be a nice reduction from 8 variables to 2 variables. (of course, we don’t need PCA for this because we could just use two subscales to reduce the dimensionality from 8 to 2, but this is just for demonstration purposes).</p>
+<p>We will use <code>mvrnorm()</code> to generate a dataset with 8 variables that are correlated.</p>
+<ul>
+<li>The first four variables will load primarily on the first component and the last four will load on the second component.<br>
+</li>
+<li>This will create a situation where we can reduce from 8 variables to 2 components.</li>
+</ul>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>cov_matrix <span class="ot">&lt;-</span> <span class="fu">matrix</span>(<span class="dv">0</span>, <span class="at">nrow =</span> <span class="dv">8</span>, <span class="at">ncol =</span> <span class="dv">8</span>)</span>
+<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>cov_matrix[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>] <span class="ot">&lt;-</span> <span class="fl">0.5</span> </span>
+<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>cov_matrix[<span class="dv">5</span><span class="sc">:</span><span class="dv">8</span>, <span class="dv">5</span><span class="sc">:</span><span class="dv">8</span>] <span class="ot">&lt;-</span> <span class="fl">0.5</span></span>
+<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>cov_matrix[<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, <span class="dv">5</span><span class="sc">:</span><span class="dv">8</span>] <span class="ot">&lt;-</span> <span class="fl">0.2</span> <span class="co"># some cross0loadings to make it more realistic</span></span>
+<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>cov_matrix[<span class="dv">5</span><span class="sc">:</span><span class="dv">8</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>] <span class="ot">&lt;-</span> <span class="fl">0.2</span></span>
+<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a><span class="fu">diag</span>(cov_matrix) <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># set variances of all items to 1</span></span>
+<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>d2 <span class="ot">&lt;-</span> MASS<span class="sc">::</span><span class="fu">mvrnorm</span>(<span class="at">n =</span> <span class="dv">200</span>, <span class="at">mu =</span> <span class="fu">rep</span>(<span class="dv">0</span>, <span class="dv">8</span>), <span class="at">Sigma =</span> cov_matrix) <span class="sc">|&gt;</span> </span>
+<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>  magrittr<span class="sc">::</span><span class="fu">set_colnames</span>(<span class="fu">str_c</span>(<span class="st">"i"</span>, <span class="dv">1</span><span class="sc">:</span><span class="dv">8</span>)) <span class="sc">|&gt;</span></span>
+<span id="cb51-11"><a href="#cb51-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Get principal components for this dataset</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>pca2 <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(d2)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>There are several common approaches for deciding on the number of components to retain:</p>
+<ol type="1">
+<li><p><strong>Variance Explained</strong></p>
+<ul>
+<li>Look at the proportion of variance explained by each component.<br>
+</li>
+<li>You can plot this using a scree plot and look for an “elbow” in the plot where the addition of more components explains less variance.<br>
+</li>
+<li>In this case, we would retain the two components to the left of the elbow.</li>
+</ul></li>
+</ol>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>pca2 <span class="sc">|&gt;</span> <span class="fu">screeplot</span>(<span class="at">type =</span> <span class="st">"lines"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="app_pca_files/figure-html/unnamed-chunk-28-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<ol start="2" type="1">
+<li><p><strong>PCs that account for more variance than individual variables</strong></p>
+<ul>
+<li>The eigenvalues (<code>$sdev</code> from <code>prcomp()</code>) quantify the variance explained by each component. In our example, the individual items had raw variances of 1. Therefore PCs with eigenvalues &gt; 1 account for more variance than any single item. Using this approach, we would retain 2 components</li>
+</ul></li>
+</ol>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>pca2<span class="sc">$</span>sdev<span class="sc">^</span><span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 3.7659676 1.5972025 0.6073997 0.5659021 0.5209373 0.4974199 0.4211896
+[8] 0.3293157</code></pre>
+</div>
+</div>
+<ol start="3" type="1">
+<li><p><strong>Cumulative Variance Explained</strong></p>
+<ul>
+<li>You can also look at the cumulative proportion of variance explained by the components.<br>
+</li>
+<li>You may choose to retain enough components such that you explain a certain threshold of variance (e.g., 70% or 90%).</li>
+<li>Here is the proportion of total variance accounted for by each PC</li>
+</ul></li>
+</ol>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a>var_explained <span class="ot">&lt;-</span> pca2<span class="sc">$</span>sdev<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> <span class="fu">sum</span>(pca2<span class="sc">$</span>sdev<span class="sc">^</span><span class="dv">2</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<ul>
+<li>And here is the cumulative variance as more PCs are retained. Of course, the threshold for variance can feel somewhat arbitrary in most instances so we see less use for this method except in special circumstances.</li>
+</ul>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>var_explained <span class="sc">|&gt;</span> <span class="fu">cumsum</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 0.4534396 0.6457500 0.7188837 0.7870209 0.8497441 0.9096357 0.9603489
+[8] 1.0000000</code></pre>
+</div>
+</div>
+</section>
+<section id="limitations-of-pca" class="level2">
+<h2 class="anchored" data-anchor-id="limitations-of-pca">Limitations of PCA</h2>
+<p>PCA is a linear transformation of the data. As a result, it only works well if the structure in the data is linear. In our preceding example, there was a clear linear relationship between the two variables <code>x1</code> and <code>x2</code>. PCA was able to capture this linear relationship well with the first principal component.</p>
+<p>If instead, there was a more complicated, non-linear relationship between the variables, PCA may not be able to capture the structure of the data well with just a few components. In this case, we may need to use more components to capture the variance in the data or consider other non-linear dimensionality reduction techniques (e.g., using auto-encoders as in our neural networks unit)</p>
+<p>Lets see this problem in a final toy example where this is a quadratic relationship between <code>x1</code> and <code>x2</code>. In this case, PCA will not be able to capture the variance in the data well with just one component.</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb59"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb59-1"><a href="#cb59-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">12345</span>)</span>
+<span id="cb59-2"><a href="#cb59-2" aria-hidden="true" tabindex="-1"></a>d3 <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">x1 =</span> <span class="fu">rnorm</span>(<span class="dv">200</span>, <span class="dv">0</span>, <span class="dv">1</span>),</span>
+<span id="cb59-3"><a href="#cb59-3" aria-hidden="true" tabindex="-1"></a>             <span class="at">x2 =</span> <span class="fu">rnorm</span>(<span class="dv">200</span>, <span class="dv">0</span>, .<span class="dv">5</span>) <span class="sc">+</span> (x1)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">|&gt;</span>  <span class="co"># quadratic relationship</span></span>
+<span id="cb59-4"><a href="#cb59-4" aria-hidden="true" tabindex="-1"></a>             <span class="fu">mutate</span>(<span class="at">x1 =</span> x1 <span class="sc">/</span> <span class="fu">sd</span>(x1),</span>
+<span id="cb59-5"><a href="#cb59-5" aria-hidden="true" tabindex="-1"></a>                    <span class="at">x2 =</span> x2 <span class="sc">/</span> <span class="fu">sd</span>(x2)) <span class="co"># keeping scale of both Xs comparable for simplicity</span></span>
+<span id="cb59-6"><a href="#cb59-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb59-7"><a href="#cb59-7" aria-hidden="true" tabindex="-1"></a>d3 <span class="sc">|&gt;</span> <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x1, <span class="at">y =</span> x2)) <span class="sc">+</span></span>
+<span id="cb59-8"><a href="#cb59-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb59-9"><a href="#cb59-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlim</span>(<span class="sc">-</span><span class="dv">4</span>, <span class="dv">4</span>) <span class="sc">+</span></span>
+<span id="cb59-10"><a href="#cb59-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylim</span>(<span class="sc">-</span><span class="dv">1</span>, <span class="dv">7</span>) <span class="sc">+</span></span>
+<span id="cb59-11"><a href="#cb59-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="app_pca_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Do the PCA</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a>pca3 <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(d3)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+</div>
+<p>Look at eigenvalues for the two PCs. PCA wasn’t successful at capturing the variance in the data with just one component. The first component only accounts for only slightly more variance that the original Xs (raw Xs has variance of 1.0 for both <code>x1</code> and <code>x2</code>).</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>pca3<span class="sc">$</span>sdev <span class="sc">^</span><span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 1.2251214 0.7748786</code></pre>
+</div>
+</div>
+<p>And if we were to try to reconstruct the original data using only the first principal component, we would not do a good job. PCA is not a good choice for dimensionality reduction in this case!!</p>
+<div class="cell">
+<details open="" class="code-fold">
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>n_pc <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="co"># use only the first PC</span></span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>x_estimated3 <span class="ot">&lt;-</span> pca3<span class="sc">$</span>x[, <span class="dv">1</span><span class="sc">:</span>n_pc] <span class="sc">%*%</span> <span class="fu">t</span>(pca3<span class="sc">$</span>rotation[, <span class="dv">1</span><span class="sc">:</span>n_pc])</span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>orig_x_means3 <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fu">mean</span>(d3<span class="sc">$</span>x1), <span class="fu">mean</span>(d3<span class="sc">$</span>x2)) <span class="co"># original means of x1 and x2</span></span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a>x_estimated3 <span class="ot">&lt;-</span> <span class="fu">scale</span>(x_estimated3, <span class="at">center =</span> <span class="sc">-</span>orig_x_means3, <span class="at">scale =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a>x_estimated3 <span class="sc">|&gt;</span> </span>
+<span id="cb63-7"><a href="#cb63-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb63-8"><a href="#cb63-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> x1, <span class="at">y =</span> x2)) <span class="sc">+</span></span>
+<span id="cb63-9"><a href="#cb63-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb63-10"><a href="#cb63-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlim</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">4</span>) <span class="sc">+</span></span>
+<span id="cb63-11"><a href="#cb63-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylim</span>(<span class="sc">-</span><span class="dv">1</span>,<span class="dv">4</span>) <span class="sc">+</span></span>
+<span id="cb63-12"><a href="#cb63-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">coord_fixed</span>() <span class="sc">+</span></span>
+<span id="cb63-13"><a href="#cb63-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Reconstructed Data"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="app_pca_files/figure-html/unnamed-chunk-35-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
 </section>
 <section id="pca-in-tidymodels" class="level2">
 <h2 class="anchored" data-anchor-id="pca-in-tidymodels">PCA in Tidymodels</h2>
