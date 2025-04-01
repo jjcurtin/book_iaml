@@ -11,11 +11,13 @@ editor_options:
 
 To start, the introductory sections about PCA from [Wikipedia](https://en.wikipedia.org/wiki/Principal_component_analysis) provide a nice orientation and summary of the technique.
 
+There is also a useful demonstration of PCA in R on [CRAN](https://cran.r-project.org/web/packages/LearnPCA/vignettes/Vig_03_Step_By_Step_PCA.pdf)
+
 In short, PCA linearly transforms our data (our `x`s to be precise) onto a new coordinate system such that the directions/axes (principal components) capturing the largest variation in the data can be easily identified.
 
-A set of up to `p` principal components can be derived from `p` raw variables (e.g. predictors) such that the first principal component is a linear combination of the `p` raw variables that accounts for the most variance across those variables.   The 2nd prinicipal component is a similar linear combination of the raw variables that is orthogonal (uncorrleated) with the first component and accounts for the largest proportionn of remaining variance among the raw variables.  PCA continues to derive additional components that are each orthogonal to the previous components and account for successively less variance.
+A set of up to `p` principal components can be derived from `p` raw variables (e.g. predictors) such that the first principal component is a linear combination of the `p` raw variables that accounts for the most variance across those variables.   The 2nd principal component is a similar linear combination of the raw variables that is orthogonal (uncorrelated) with the first component and accounts for the largest proportion of remaining variance among the raw variables.  PCA continues to derive additional components that are each orthogonal to the previous components and account for successively less variance.
 
-These new components represent a new coordinate system within which to represent score on our observations.   This new system is a rotation of the original coordinate system that consists of orthogonal axes (e.g., x, y, z) defined by our raw variables.
+These new components represent a new coordinate system within which to represent scores for our observations.   This new system is a rotation of the original coordinate system that consists of orthogonal axes (e.g., x, y, z) defined by our raw variables.
 
 We can use PCA to
 
@@ -35,6 +37,8 @@ When we discuss PCA in the machine learning world, we consider it an example of 
 This example is based loosely on a tutorial and demonstration data developed by [Lindsay Smith](https://www.iro.umontreal.ca/~pift6080/H09/documents/papers/pca_tutorial.pdf)
 
 For a second example that extends to 3D space, see this [website](https://setosa.io/ev/principal-component-analysis/)
+
+And to be clear, PCA can be applied to any number of dimensions and is most useful for high dimensional data (e.g., p >> 2).  
 
 --------------------------------------------------------------------------------
 
@@ -170,7 +174,7 @@ Here is a figure displaying the data in this new coordinate system. Notice the g
 ```{r}
 #| echo: false
 
-pca <- prcomp(d |> select(x1, x2))
+pca <- prcomp(d)
 
 pca$x |> ggplot(aes(x = PC1, y = PC2)) +
   geom_point() +
@@ -219,7 +223,7 @@ plot +
 ei$values
 ```
 
-The eigen decomposition parses the complete variance in the original variables such that `PC1` has the most variance, `PC2`, the secondmost, etc.  The full set of the PCs will contain all the variance of the original variables.
+The eigen decomposition parses the complete variance in the original variables such that `PC1` has the most variance, `PC2`, the second-most, etc.  The full set of the PCs will contain all the variance of the original variables.
 
 In our example:
 
@@ -236,7 +240,7 @@ ei$values[1] + ei$values[2]
 var(d$x1) + var(d$x2)
 ```
 
-## Stable Compuation of Princippal Components
+## Stable Compuation of Principal Components
 
 It is more numerically stable to get the principal components using singular vector decomposition (`svd()` in R) than eigen decomposition.  
 
@@ -244,10 +248,10 @@ In base R, `prcomp()` uses svd and also directly calculates the PCs.
 
 - See [help](https://www.rdocumentation.org/packages/stats/versions/3.6.2/topics/prcomp)
 - We pass in our raw variables.
-- By default, the raw variables are centered by not scaled.
+- By default, the raw variables are centered by not scaled (We included both arguements below with their defaults so you can see their names)
 
 ```{r}
-pca <- prcomp(d |> select(x1, x2))
+pca <- prcomp(d |> select(x1, x2), center = TRUE, scale = FALSE)
 ```
 
 --------------------------------------------------------------------------------
@@ -294,10 +298,206 @@ In our example, `PC1` and `PC2`
 - Contain all the variance from `x1` and `x2`
 - Are orthogonal 
 
-But when using PCA for dimensionality reduction, we wanted to use the variance of our variables in few dimensions (with fewer features) for prediction to reduce overfitting.
+But when using PCA for dimensionality reduction, we wanted to use the variance of our variables in fewer dimensions (with fewer features) for prediction to reduce overfitting.
 
 - Most of variance from the full dataset is now in `PC1`
 - We can use `PC1` as a feature rather than both `x1` and `x2`.
+
+These were the variances of the orginal variables `x1` and `x2`.  
+```{r}
+var(d$x1) # variance of x1
+var(d$x2) # variance of x2
+```
+
+And now most of the variance is in `PC1`.  
+
+- We can see this in the eigenvalues 
+
+```{r}
+pca$sdev ^2
+```
+
+- and also by just looking at the variances of the PCs directly
+
+```{r}
+var(pca$x[,1]) # variance of PC1
+var(pca$x[,2]) # variance of PC2
+```
+
+
+## Reconstructing the Original Data
+
+If we use all of the principal components, we can reconstruct the original data exactly.  However, if our goal is dimensionality reduction, we plan to use fewer than our full set of PCs in our subsequent analyses.  Therefore, it can be instructive to see how well we can reproduce the raw data using fewer PCs.
+
+If we used `prcomp()` to get the PCs, we can reconstruct the original data using the following code
+
+- Lets use this code with our toy dataset
+- We will recreate the raw data using the first principal component only from our example.
+
+This first step reproduces the original Xs, but in their centered/scaled format
+```{r}
+n_pc <- 1 # use only the first PC
+x_estimated <- pca$x[, 1:n_pc] %*% t(pca$rotation[, 1:n_pc])
+```
+
+If the raw data were scaled and centered, we need to add back the means and scale the data back to the original scale.  We need to do this in two steps (in this order)
+
+First, we unscale the data (we did not scale, so we will show the code but not execute it)
+
+```{r}
+#| eval: false
+
+orig_x_sd <- c(0.7852105, 0.846496) # original sd of x1 and x2
+x_estimated <- scale(x_estimated, center = FALSE, scale = 1/orig_x_sd)
+```
+
+And then we can add back the means of our raw Xs that we previously subtracted out.
+
+```{r}
+orig_x_means <- c(1.81, 1.91) # original means of x1 and x2
+x_estimated <- scale(x_estimated, center = -orig_x_means, scale = FALSE)
+```
+
+Lets see how well we were able to recreate the original data using only the first principal component.  Below are plots of the original and reconstructed data.  
+
+- As expected, we do pretty well.  
+- We retain all the variance over the direction of the first PC.  
+- And of course, we lose all the variance over the direction of the second PC because we didnnt use it.  
+- However, in this dataset, most of the variance was in the first PC.  This one PC may likely work well for us. 
+```{r}
+d |> 
+  ggplot(aes(x = x1, y = x2)) +
+  geom_point() +
+  xlim(-1,4) +
+  ylim(-1,4) +
+  coord_fixed() +
+  ggtitle("Original Data")
+
+x_estimated |> 
+  as_tibble() |> 
+  ggplot(aes(x = x1, y = x2)) +
+  geom_point() +
+  xlim(-1,4) +
+  ylim(-1,4) +
+  coord_fixed() +
+  ggtitle("Reconstructed Data")
+```
+
+## Deciding on the Number of Components to Retain
+
+When using PCA for dimensionality reduction, we need to decide how many components to retain.  
+
+Lets make another toy dataset with 8 variables that represent a self-report measure that has two subscales.  In this instance, if the scale works well, we might expect that we could reduce the 8 items to just 2 components (one for each subscale).  This would be a nice reduction from 8 variables to 2 variables. (of course, we don't need PCA for this because we could just use two subscales to reduce the dimensionality from 8 to 2, but this is just for demonstration purposes).
+
+We will use `mvrnorm()` to generate a dataset with 8 variables that are correlated.  
+
+- The first four variables will load primarily on the first component and the last four will load on the second component.  
+- This will create a situation where we can reduce from 8 variables to 2 components.
+```{r}
+set.seed(12345)
+cov_matrix <- matrix(0, nrow = 8, ncol = 8)
+cov_matrix[1:4, 1:4] <- 0.5 
+cov_matrix[5:8, 5:8] <- 0.5
+cov_matrix[1:4, 5:8] <- 0.2 # some cross0loadings to make it more realistic
+cov_matrix[5:8, 1:4] <- 0.2
+diag(cov_matrix) <- 1 # set variances of all items to 1
+
+d2 <- MASS::mvrnorm(n = 200, mu = rep(0, 8), Sigma = cov_matrix) |> 
+  magrittr::set_colnames(str_c("i", 1:8)) |>
+  as_tibble()
+```
+
+Get principal components for this dataset
+
+```{r}
+pca2 <- prcomp(d2)
+```
+
+There are several common approaches for deciding on the number of components to retain:
+  
+1. **Variance Explained**  
+
+    - Look at the proportion of variance explained by each component.  
+    - You can plot this using a scree plot and look for an "elbow" in the plot where the addition of more components explains less variance.  
+    - In this case, we would retain the two components to the left of the elbow.
+```{r}
+pca2 |> screeplot(type = "lines")
+```
+
+2. **PCs that account for more variance than individual variables**
+
+    - The eigenvalues (`$sdev` from `prcomp()`) quantify the variance explained by each component.  
+    - In our example, the individual items had raw variances of 1.  Therefore PCs with eigenvalues > 1 account for more variance than any single item.  
+    - Using this approach, we would retain 2 components
+```{r}
+pca2$sdev^2
+```
+
+3. **Cumulative Variance Explained**
+
+    - You can also look at the cumulative proportion of variance explained by the components.  
+    - You may choose to retain enough components such that you explain a certain threshold of variance (e.g., 70% or 90%).
+    - Here is the proportion of total variance accounted for by each PC
+```{r}
+var_explained <- pca2$sdev^2 / sum(pca2$sdev^2)
+```
+
+- And here is the cumulative variance as more PCs are retained. Of course, the threshold for variance can feel somewhat arbitrary in most instances so we see less use for this method except in special circumstances. 
+```{r}
+var_explained |> cumsum()
+```
+
+
+## Limitations of PCA
+
+PCA is a linear transformation of the data.  As a result, it only works well if the structure in the data is linear.  In our preceding example, there was a clear linear relationship between the two variables `x1` and `x2`.  PCA was able to capture this linear relationship well with the first principal component. 
+
+If instead, there was a more complicated, non-linear relationship between the variables, PCA may not be able to capture the structure of the data well with just a few components.  In this case, we may need to use more components to capture the variance in the data or consider other non-linear dimensionality reduction techniques (e.g., using auto-encoders as in our neural networks unit)
+
+Lets see this problem in a final toy example where this is a quadratic relationship between `x1` and `x2`.  In this case, PCA will not be able to capture the variance in the data well with just one component.
+
+```{r}
+set.seed(12345)
+d3 <- tibble(x1 = rnorm(200, 0, 1),
+             x2 = rnorm(200, 0, .5) + (x1)^2) |>  # quadratic relationship
+             mutate(x1 = x1 / sd(x1),
+                    x2 = x2 / sd(x2)) # keeping scale of both Xs comparable for simplicity
+
+d3 |> ggplot(aes(x = x1, y = x2)) +
+  geom_point() +
+  xlim(-4, 4) +
+  ylim(-1, 7) +
+  coord_fixed()
+```
+
+Do the PCA
+```{r}
+pca3 <- prcomp(d3)
+```
+
+Look at eigenvalues for the two PCs.  PCA wasn't successful at capturing the variance in the data with just one component.  The first component only accounts for only slightly more variance that the original Xs (raw Xs has variance of 1.0 for both `x1` and `x2`). 
+
+```{r}
+pca3$sdev ^2
+```
+
+And if we were to try to reconstruct the original data using only the first principal component, we would not do a good job.  PCA is not a good choice for dimensionality reduction in this case!!
+
+```{r}
+n_pc <- 1 # use only the first PC
+x_estimated3 <- pca3$x[, 1:n_pc] %*% t(pca3$rotation[, 1:n_pc])
+orig_x_means3 <- c(mean(d3$x1), mean(d3$x2)) # original means of x1 and x2
+x_estimated3 <- scale(x_estimated3, center = -orig_x_means3, scale = FALSE)
+
+x_estimated3 |> 
+  as_tibble() |> 
+  ggplot(aes(x = x1, y = x2)) +
+  geom_point() +
+  xlim(-1,4) +
+  ylim(-1,4) +
+  coord_fixed() +
+  ggtitle("Reconstructed Data")
+```
 
 ## PCA in Tidymodels
 
