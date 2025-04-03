@@ -20,8 +20,26 @@ data_trn <- read_csv(here::here(path_data, "mnist_train.csv.gz"),
   mutate(y = factor(y, levels = 0:9, labels = 0:9))
 data_trn |> dim()
 
+data_val <- data_trn()
+
 data_test <- read_csv(here::here(path_data, "mnist_test.csv"),
                       col_types = cols()) |> 
     mutate(y = factor(y, levels = 0:9, labels = 0:9))
 data_test |> dim()
 ```
+
+
+
+
+```{r}
+# # Determine the number of rows in the dataset
+n <- nrow(iris)
+
+# Create a random sample of row indices for the training set (80% of the data)
+trainIndex <- sample(seq_len(n), size = 0.8 * n)
+
+# Split the data into training and validation sets
+trainData <- iris[trainIndex, ]
+validationData <- iris[-trainIndex, ]
+```
+
