@@ -1,0 +1,27 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+# Autoencoder for Dimensionality Reduction
+
+```{r}
+library(tidyverse)
+library(tidymodels)
+options(conflicts.policy = "depends.ok")
+library(keras, exclude = "get_weights")
+```
+
+
+```{r}
+path_data <- "./data"
+data_trn <- read_csv(here::here(path_data, "mnist_train.csv.gz"),
+                     col_types = cols()) |> 
+  mutate(y = factor(y, levels = 0:9, labels = 0:9))
+data_trn |> dim()
+
+data_test <- read_csv(here::here(path_data, "mnist_test.csv"),
+                      col_types = cols()) |> 
+    mutate(y = factor(y, levels = 0:9, labels = 0:9))
+data_test |> dim()
+```
