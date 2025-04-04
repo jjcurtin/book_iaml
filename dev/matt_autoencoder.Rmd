@@ -1,0 +1,206 @@
+---
+title: "Hidden layer activations"
+date: "2023-04-13"
+output: 
+  html_document:
+    toc: true 
+    toc_depth: 4
+    toc_float: true
+    code_folding: show
+---
+
+```{r setup, echo=FALSE}
+library(here)
+library(tidyverse)
+library(tidymodels)
+library(keras)
+```
+
+
+```{css, echo = TRUE}
+pre, code {
+  max-height: 500px;
+  overflow-y: auto;
+  white-space: pre !important; 
+  overflow-x: auto
+}
+```
+
+## Using an ANN for dimensionality reduction
+This walks through the steps of using keras in R to fit an autoencoder to a set of semantic features.
+
+## GloVe data
+Let's start by reading in some data. This is a subset of 30 observations from all the GloVe representations from the Stanford repository. These representations are semantic features derived from coocurrence data in a large corpus of words, which you can read more about [here](https://nlp.stanford.edu/projects/glove/) and download the code for [here](https://github.com/stanfordnlp/GloVe). The dataset here is from the much larger set of GloVe representations, and contains features for three sets of concepts (10 concepts in each set, 30 concepts total). You can think of the concepts as "words", but because we are talking about semantics, let's go with _concept_. The concepts (variable name `concept`) are ensembles of three higher-order conceptual categories (variable name `category`): colors, shapes, and emotions.
+
+The objective is to take the 30 observations and reduce their dimensionality from 50 features (the raw GloVe features) down to three features in a simple artificial neural network (multilayer perceptron). Given that the 30 observations are actually groupings of three higher order conceptual categories, we are interested in whether the three hidden units of this ANN capture essential structure from the larger set of 30 concepts in the lower dimensional (3 dimensional) space found in the hidden layer of the network. We will accomplish this by _autoencoding_ the features: predicting each concept's set of semantic features (as an output) using the concept's features as an input. In such an architecture, the hidden layer serves as a lower dimensional "bottleneck" of the full set of features for all the concepts in the training set. This is a common architecture for dimensionality reduction.
+
+
+```{r loadData}
+glove_subset = read_csv("data/glove_trainset_for_dimensionality_reduction.csv")
+data_trn = glove_subset %>% 
+  select(where(is.numeric))
+
+glove_test = read_csv("data/glove_testset_for_dimensionality_reduction.csv")
+data_test = glove_test %>% 
+  select(where(is.numeric))
+```
+
+## Fit
+We will fit our network over 1000 epochs to get to asymptotic performance. We will set the number of hidden units to three in an attempt to capture our three higher order conceptual categories across all our observations (colors, shapes, human emotions). This network takes a few minutes to train to asymptote.
+
+```{r fitModel}
+
+set.seed(7777)
+fit_seeds <- sample.int(10^4, size = 3)
+
+model <- mlp(epochs = 1500, hidden_units = 3) %>% 
+   set_mode("regression") %>% 
+   set_engine("keras", verbose = 1,
+              validation_split = 0.0,
+              seeds = fit_seeds) %>% 
+   fit_xy(x = data_trn, y = data_trn)
+
+```
+
+
+## Introspect on layers
+The model object is contained in `model$fit`. If you call `model$fit$summary()` you get the model summary (also true if you just call the object `model$fit` itself). This allows you to see the layer names (alternatively, you can also set yourself when you build the model). Here, the layer we want to target for getting activations is the layer called `dense` (not `dense_1`).
+
+```{r summary}
+model$fit$summary()
+```
+
+We know the layer named "dense" is the one we want because of the dimensions of the layer (we want activations over 3 units), and also because keras orders the layers (top to bottom) starting with the first layer in the network (i.e., the bottom layer listed is the output layer - which we also know from the shape). This is somewhat confusing in that the input layer isn't listed as a layer in the summary - so just take note of that.
+
+## Extract outputs of hidden layer
+Somewhat non-intuitively, in order to generate the outputs of an intermediate layer of a model, you have to create a new model object that consists of the layer(s) that you want activations for. In keras, we do this with `keras_model()`, specifying the input tensor as the inputs of our already trained model (`model$fit$input`) and our outputs as the outputs for the intermediate layer for which we want output activations. There are actually a couple different ways of doing this, but an easy one is calling `get_layer()` on our trained model object (`model$fit`), and naming the layer we want ("dense").
+
+```{r}
+layer <- 'dense' # just the name of the target layer
+
+model_hidden_layer <- keras_model(inputs = model$fit$input,
+                                    outputs = get_layer(model$fit, layer)$output)
+
+hidden_layer_output <- model_hidden_layer$predict_on_batch(data_trn) %>% 
+  as_tibble() %>% 
+  set_names(~str_replace(., "V", "unit_")) %>% 
+  mutate(concept = glove_subset$concept,
+         category = glove_subset$category) %>% 
+  select(concept, category, everything())
+
+```
+
+Now, the `hidden_layer_output` variable contains the activations for each of the three hidden units. We have one vector of activations for each of our 30 examples, which we call "concepts" here (`concepts`), and each concept is associated with one of our three categories (`category`).
+
+The activations for each unit across all our concepts have some shared structure, which we can see if we correlate any two unit activation columns in `hidden_layer_output`. For example, the correlation of the first and second unit is ```r cor(hidden_layer_output$unit_1, hidden_layer_output$unit_2)```. This is important (and interesting) in ANNs because it helps us understand the ways in which our observations cluster together with respect to their underlying structure. Let's try to see this in three dimensions (with a fourth dimension showing each of the three categories by color).
+
+
+```{r threeDimActs}
+hidden_layer_output %>% 
+  ggplot(aes(unit_1, unit_2, size = unit_3, label = concept, color = category)) +
+  geom_label() +
+  labs(x = "Unit 1 Activation",
+       y = "Unit 2 Activation",
+       size = "Unit 3 Activation",
+       color = "Category") +
+  xlim(c(-.1, 1.1)) +
+  ylim(c(-.1, 1.1)) +
+  theme_minimal()
+  
+```
+
+There are three coherent clusters here, each corresponding to the three categories. Remember though that the network didn't learn representations that explicitly labeled the three categories - it just learned a lower dimensional projection (sometimes referred to as an _embedding_) of the features of our 30 training examples. Though, you could imagine a different model where your output patterns (sometimes called "labels") are the three categories themselves - which would be a classification approach to this problem. Here the autoencoder simply discovers the underlying similarity structure of our 30 concepts across our three hidden units.
+
+We can plot these activations using hierarchical clustering in the form a cluster dendrogram. This is a method which detects the similarity structure across observations in your feature data that represents the representational space in terms of hierarchical relationships. Applying this method to our unit activations we see that (a) there is clear separation across our three categories, and (b) that the algorithm teases apart some of the graded similarity structure within categories as well. The clustering detects that the concepts _white_ and _black_, or _red_ and _orange_ are more similar than _blue_ and _brown_, and certainly more than _circle_ and _brown_.
+
+```{r hclusters}
+hidden_layer_output %>% 
+  select(where(is.numeric)) %>% 
+  dist() %>% 
+  hclust() %>% 
+  plot(labels = hidden_layer_output$concept,
+       xlab = "Concept",
+       ylab = "Hierarchy depth",
+       sub = "Grouped by clustering based on unit activations")
+
+```
+
+#### Principal Components Analysis
+Alternatively, we can use principal components analysis instead of an ANN to solve this problem. Let's generate a PCA using `prcomp()` and extract the principal components (putting them in an object called `pcs`). We will only select the first three components here for plotting.
+
+```{r PCA}
+pca = data_trn %>% 
+  prcomp()
+
+pcs = pca$x %>% 
+  as_tibble() %>% 
+  mutate(concept = glove_subset$concept,
+         category = glove_subset$category) %>% 
+  select(concept, category, PC1, PC2, PC3)
+
+```
+
+If we plot the analogous figure to the one above containing the activation states of the three units of the autoencoding ANN, we see something similar, but with the categories rotated in the space.
+
+```{r PCSplot}
+pcs %>% 
+  ggplot(aes(PC1, PC2, size = PC3, label = concept, color = category)) +
+  geom_label() +
+  labs(x = "Component 1",
+       y = "Component  2",
+       size = "Component 3",
+       color = "Category") +
+  xlim(c(-4, 4)) +
+  ylim(c(-4, 4)) +
+  theme_minimal()
+
+```
+
+However, let's think about the utility of PCA for a moment. This approach derives the structure of a given dataset using an unsupervised algorithm. That is, the algorithm searches your data, makes calculations about the components of variance based on some assumptions about the components (like forcing them to be orthogonal), and returns the vectors corresponding to those components (the return object for `prcomp()` actually contains much more than this, but this is the part we are looking at here). This is useful for analyzing the structure of the input data to `prcomp()` but is limited in its utility. For example, what if we want to project _new_ data into the representational space derived from the algorithm (i.e., _predict_ into new data)? Well, PCA doesn't let us do that. However, an ANN does - let's see that.
+
+## Projecting new data into the hidden space
+Let's predict into a new semantic category that was held out from the training process with our trained autoencoder. The new category represents personality characteristics, containing concepts like _motivated_, _talkative_, and _morose_. Remember that these weren't included in train so these predictions are likely quite biased. However, we will get a sense of how these new concepts fit into the lower dimensional embeddings we've generated for our three other categories. We aren't focusing on test accuracy right now, just the lower dimensional projection of the concepts into our trained hidden state.
+
+One thing to think about before you look at these data: how might these concepts be related to the three others (shapes, colors, and emotions) that were represented in the training data? What type of relationships do you expect to see with the new test set?
+
+### Predict into test
+We will generate the predicted activations and combine them with those generated for the training set.
+
+```{r dataTest}
+
+hidden_layer_output_test = model_hidden_layer$predict_on_batch(data_test) %>% 
+  as_tibble() %>% 
+  set_names(~str_replace(., "V", "unit_")) %>% 
+  mutate(concept = glove_test$concept,
+         category = glove_test$category,
+         condition = "test")
+
+hidden_layer_output = hidden_layer_output %>% 
+  mutate(condition = "train") %>% 
+  full_join(hidden_layer_output_test) %>% 
+  select(concept, category, condition, everything())
+
+rm(hidden_layer_output_test)
+```
+
+Now we can see our test items for personality characteristics projected into the hidden space from the model trained on our three other conceptual categories (shape, color, emotion). 
+
+```{r threeDimActsHidden}
+hidden_layer_output %>% 
+  ggplot(aes(unit_1, unit_2, size = unit_3, label = concept, fill = condition)) +
+  geom_label() +
+  labs(x = "Unit 1 Activation",
+       y = "Unit 2 Activation",
+       size = "Unit 3 Activation",
+       color = "Category", 
+       fill = "Condition") +
+  xlim(c(-.1, 1)) +
+  ylim(c(-.1, 1.1)) +
+  theme_minimal()
+  
+```
+
+A couple things are worth noting here though. First, the hidden layer activations clearly position the test items in similarity space relative to the _emotions_ category. This makes sense of course; the meaning of these concepts most clearly aligns with the meaning of the _emotions_ group. Second, it is noteworthy how closely aligned these representations are between the emotions and characteristics categories. Consider especially that these representations weren't included in the training process at all, yet by their raw semantic representations from GloVe alone our model was able to organize these novel concepts in an intuitively appealing way.
+
+## Why the hidden layer?
+It is worth asking yourself why me might introspect on the hidden layer at all? Why not take the output of the _final_ layer of the network (i.e., the "output" layer)? There are a couple ways of thinking about this. First, consider that the outputs are being trained to _be more similar to the true outputs_ of the network. So, in an obvious way, we would expect for the structure of our categories to to cluster based on their output because that is what the cost function is oriented towards doing. Also, the output dimensionality in our case is the same as the input dimension (because the outputs and the inputs are the same in an autoencoder). Therefore, we don't get a lower dimensional representation at all. It is the hidden layer that gets us the lower dimensional information compression that we want when using a modeling architecture like this for dimensionality reduction.

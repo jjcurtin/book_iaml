@@ -1,0 +1,200 @@
+---
+title: "Unit 09 Lab Agenda"
+author: "Coco Yu"
+date: "`r lubridate::today()`"
+format: 
+  html: 
+    embed-resources: true
+    toc: true 
+    toc_depth: 4
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+#| echo: FALSE
+#| message: FALSE
+options(conflicts.policy = "depends.ok")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+tidymodels_conflictRules()
+library(tidyverse) 
+library(tidymodels)
+library(baguette)
+theme_set(theme_classic())
+options(tibble.width = Inf, dplyr.print_max=Inf)
+
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true",
+                     sha1 = "c045eee2655a18dc85e715b78182f176327358a7")
+```
+
+### Package Conflicts
+
+- Why do I constantly see conflict error when doing resampling especially with tidyverse and Matrix packages? The only way I can get around it is to mannually library the Matrix package and exclude the function that is conflicting with the ones in tidyverse. 
+
+```{r}
+library(Matrix, exclude = c("expand", "pack", "unpack"))
+```
+
+### Methods to speed up EDA (skimr) when dealing with large-scale data
+
+```{r}
+library(skimr)
+
+ames <- ames |> janitor::clean_names()
+ames |> skim()
+
+# select a subset of summary statistics
+my_skim <- skim_with(numeric = sfl(hist = NULL, p0 = NULL, p25 = NULL,
+                                   p75 = NULL, p100 = NULL))
+ames |> my_skim()
+
+# select a subset of columns
+ames |> summarize(across(where(is.numeric), ~median(.x, na.rm = TRUE)))
+
+```
+
+### Graph Interpretation
+
+**Example decision tree graph with different tree depths (min_n)**
+
+```{r} 
+set.seed(123)
+data_trn <- ames |> 
+  initial_split(prop = 3/4, strata = "sale_price", breaks = 4) |> 
+  analysis()
+data_test <- ames |> 
+  initial_split(prop = 3/4, strata = "sale_price", breaks = 4) |>
+  assessment()
+
+rec <- recipe(sale_price ~ ., data = data_trn)
+rec_prep <- rec |> 
+  prep(data_trn)
+feat_trn <- rec_prep |> bake(NULL)
+feat_test <- rec_prep |> bake(data_test)
+feat_trn |> skim_some()
+
+# Decision Tree
+fit_tree_1 <-   
+  decision_tree(tree_depth = 1, min_n = 2, cost_complexity = 0) |>
+  set_engine("rpart", model = TRUE) |>
+  set_mode("regression") |>  
+  fit(sale_price ~ ., data = feat_trn)
+fit_tree_1$fit |> rpart.plot::rpart.plot()
+
+fit_tree_2 <-   
+  decision_tree(tree_depth = 2, min_n = 2, cost_complexity = 0) |>
+  set_engine("rpart", model = TRUE) |>
+  set_mode("regression") |>  
+  fit(sale_price ~ ., data = feat_trn)
+fit_tree_2$fit |> rpart.plot::rpart.plot()
+
+fit_tree_3 <-   
+  decision_tree(tree_depth = 3, min_n = 2, cost_complexity = 0) |>
+  set_engine("rpart", model = TRUE) |>
+  set_mode("regression") |>  
+  fit(sale_price ~ ., data = feat_trn)
+fit_tree_3$fit |> rpart.plot::rpart.plot()
+
+```
+
+Decision tree is only somewhat interpretable when your tree structure is simple. As the tree depth increases, the tree becomes more complex and harder to interpret.
+
+Bagged trees and random forests are inherently not interpretable. However, we will introduce a few model agnostic approaches in later chapters to interpret these models.
+
+### Bagged Trees
+
+`tree_depth`: maximum depth of the tree
+
+`min_n`: minimum number of observations in the terminal nodes
+
+`cost_complexity`: complexity parameter for the tree. The larger the value, the simpler the tree.
+
+```{r}
+evaluate_bagged_trees <- function(n_boots) {
+  model <- bag_tree(mode = "regression") |> 
+    set_engine("rpart", times = n_boots) |>  # Adjust number of bootstraps
+    fit(sale_price ~ ., data = feat_trn)
+  
+  predictions <- predict(model, new_data = feat_test) |> 
+    bind_cols(feat_test) |> 
+    metrics(truth = sale_price, estimate = .pred)
+  
+  rmse_value <- predictions |> filter(.metric == "rmse") |> pull(.estimate)
+  return(rmse_value)
+}
+
+# Test different bootstrap values
+boot_values <- seq(2, 100, by = 10)  # Adjust as needed
+rmse_results <- sapply(boot_values, evaluate_bagged_trees)
+
+# Create a dataframe for plotting
+results_df <- data.frame(Bootstraps = boot_values, RMSE = rmse_results)
+
+# Plot RMSE vs. Number of Bootstraps
+ggplot(results_df, aes(x = Bootstraps, y = RMSE)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "Performance of Bagged Trees with Increasing Bootstraps",
+       x = "Number of Bootstraps",
+       y = "RMSE") +
+  theme_minimal()
+```
+
+How do we determine the optimal number of bootstraps for bagged trees? We can use cross-validation to evaluate the model performance with different numbers of bootstraps.
+
+The performance of bagged trees generally improves with more bootstraps. However, the improvement may not be significant after a certain number of bootstraps. When the performance stabilizes, we can choose that optimal number of bootstraps to save computation time.
+
+The usual number of bootstraps is 100, but you can adjust this number based on your dataset size, number of features you have, and computational resources. You might start with a larger number if you have a small dataset or a large number of features.
+
+### Random Forest
+
+- `mtry`: number of variables randomly sampled as candidates at each split
+
+- `trees`: number of trees in the forest
+
+- `min_n`: minimum number of observations in the terminal nodes
+
+```{r}
+grid_rf <- expand_grid(trees = c(250, 500, 750, 1000), 
+                       mtry = c(5, 10, 20, 25), 
+                       min_n = c(1, 2, 5, 10))
+splits_boot <- bootstraps(data = data_trn, times = 10, strata = "sale_price")
+
+fits_rf <- 
+  rand_forest(trees = tune(), mtry = tune(), min_n = tune()) |>
+  set_engine("ranger",
+             respect.unordered.factors = "order",
+             oob.error = FALSE,
+             seed = 102030) |> 
+  set_mode("regression") |>
+  tune_grid(preprocessor = rec,
+            resamples = splits_boot,
+            grid = grid_rf,
+            metrics = metric_set(rmse))
+```
+
+[ranger documentation](https://cran.r-project.org/web/packages/ranger/ranger.pdf)
+
+- `respect.unordered.factors`: Unorderedfactor covariates can be handled in 3 different ways by using respect.unordered.factors: For ’ignore’ all factors are regarded ordered, for ’partition’ all possible 2-partitions are considered for splitting. For ’order’ and 2-class classification the factor levels are ordered by their proportion falling in the second class, for regression by their mean response, as described in Hastie et al. (2009), chapter 9.2.4. For multiclass classification the factor levels are ordered by the first principal component of the weighted covariance matrix of the contingency table (Coppersmith et al. 1999), for survival by the median survival (or the largest available quantile if the median is not available). The use of ’order’ is recommended, as it computationally fast and can handle an unlimited number of factor levels. Note that the factors are only reordered once and not again in each split.
+
+- `oob.error`: If TRUE, the out-of-bag error is calculated. The out-of-bag error is the mean squared error of the predictions on the out-of-bag samples for the bootstraps. It is different mean squared error on the test set. We prefer to use the test set error for model evaluation because it allows us to compare the performance of different models. If FALSE, the out-of-bag error is not calculated. This can save some computation time. 
+
+- `seed`: Random seed for reproducibility. This is the inherent random seed set for the ranger engine. Somehow the seed set in the code chunk does not work for ranger, so we will set up seed here to make it reproducible.
+
+### Metrics to evaluate decision trees
+
+**Classification**: accuracy, balanced accuracy, F1 score, precision, recall, auROC, ppv, npv, kappa, etc.
+
+**Regression**: RMSE, MAE, MAPE, R-squared, etc.
+
+### Class imbalance
+
+Class imbalance is a common issue in classification problems where the number of observations in one class is significantly lower than the other class. This can lead to biased models that predict the majority class more accurately than the minority class.
+
+Data balance can significantly impact the performance of decision trees and random forests. Imbalanced data can lead to biased models that predict the majority class more accurately than the minority class. In such cases, we can use techniques like oversampling, undersampling, or SMOTE to balance the data.
+
+### Missingness
+
+- Missing data in Decision Trees: decision trees naturally deal with missing data because they use the available data to make splits. So, if there is missing data, it is not used to make decisions about splits. 
+
+- Missing data in Random Forest: Random Forest is a collection of decision trees so when there is missing data in a variable and that variable is used for splitting multiple times, this can create bias in the model. Random Forest imputes missing data by using the median of the non-missing values in the training set.
