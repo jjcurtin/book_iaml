@@ -1,0 +1,1771 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+::: {.content-visible unless-format="revealjs"}
+# Natural Language Processing: Text Processing and Feature Engineering
+:::
+::: {.content-visible when-format="revealjs"}
+# IAML Unit 2: Natural Language Processing - Text Processing and Feature Engineering
+:::
+
+
+## Learning Objectives
+
+- Objective 1
+- Objective 2
+
+--------------------------------------------------------------------------------
+
+## General Text (Pre-) Processing
+
+In order to work with text, we need to be able to manipulate text.  We have two 
+sets of tools to master:
+
+- The `stringr` [package](https://cran.r-project.org/web/packages/stringr/index.html)
+- Regular expressions (regex)
+
+### The stringr package
+
+There are many functions in the `stringr` package that are very useful for searching
+and manipulating text.   
+
+- `stringr` is included in tidyverse
+- I recommend keeping the [stringr cheatsheet](pdfs/cheatsheet_strings.pdf) open whenever you are working with text until you learn these functions well.
+
+--------------------------------------------------------------------------------
+
+All functions in `stringr` start with `str_` and take a vector of strings as the first argument.
+
+Here is a simple vector of strings to use as an example
+```{r}
+library(tidyverse)
+
+x <- c("why", "video", "cross", "extra", "deal", "authority")
+```
+
+- Length of each string
+```{r}
+str_length(x)
+```
+
+- Collapse all strings in vector into one long string that is comma separated
+
+```{r}
+str_c(x, collapse = ", ")
+```
+
+- Get substring based on position (start and end position)
+```{r}
+str_sub(x, 1, 2)
+```
+
+--------------------------------------------------------------------------------
+
+Most `stringr` functions work with regular expressions, a concise language for describing patterns of text. 
+
+For example, the regular expression "[aeiou]" matches any single character that is a vowel.  
+
+- Here we use `str_subset()` to return the strings that contain vowels (doesnt include "why")
+
+```{r}
+str_subset(x, "[aeiou]")
+```
+
+- Here we count the vowels in each string
+```{r}
+str_count(x, "[aeiou]") 
+```
+
+--------------------------------------------------------------------------------
+
+There are eight main verbs that work with patterns:
+
+1 `str_detect(x, pattern)` tells you if there is any match to the pattern in each string
+
+```{r}
+# x <- c("why", "video", "cross", "extra", "deal", "authority")
+str_detect(x, "[aeiou]")
+```
+
+--------------------------------------------------------------------------------
+
+2 `str_count(x, pattern)` counts the number of patterns
+```{r}
+# x <- c("why", "video", "cross", "extra", "deal", "authority")
+str_count(x, "[aeiou]")
+```
+
+--------------------------------------------------------------------------------
+
+3 `str_subset(x, pattern)` extracts the matching components
+
+```{r}
+# x <- c("why", "video", "cross", "extra", "deal", "authority")
+str_subset(x, "[aeiou]")
+```
+
+--------------------------------------------------------------------------------
+
+4 `str_locate(x, pattern)` gives the position of the match
+```{r}
+# x <- c("why", "video", "cross", "extra", "deal", "authority")
+str_locate(x, "[aeiou]")
+```
+
+--------------------------------------------------------------------------------
+
+5 `str_extract(x, pattern)` extracts the text of the match
+```{r}
+# x <- c("why", "video", "cross", "extra", "deal", "authority")
+str_extract(x, "[aeiou]")
+```
+
+--------------------------------------------------------------------------------
+
+6 `str_match(x, pattern)` extracts parts of the match defined by parentheses. In this case, the characters on either side of the vowel 
+```{r}
+# x <- c("why", "video", "cross", "extra", "deal", "authority")
+str_match(x, "(.)[aeiou](.)")
+```
+
+--------------------------------------------------------------------------------
+
+7 `str_replace(x, pattern, replacement)` replaces the matches with new text
+
+```{r}
+# x <- c("why", "video", "cross", "extra", "deal", "authority")
+str_replace(x, "[aeiou]", "?")
+```
+
+--------------------------------------------------------------------------------
+
+8 `str_split(x, pattern)` splits up a string into multiple pieces.
+```{r}
+str_split(c("a,b", "c,d,e"), ",")
+```
+
+--------------------------------------------------------------------------------
+
+###  Regular Expressions
+
+Regular expressions are a way to specify or search for patterns of strings using a sequence of characters. By combining a selection of simple patterns, we can capture quite complicated strings.
+
+The `stringr` package uses regular expressions extensively
+
+The regular expressions are passed as the pattern = argument. Regular expressions can be used to detect, locate, or extract parts of a string.
+
+--------------------------------------------------------------------------------
+
+Julia Silge has put together a wonderful [tutorial/primer on the use of regular expressions](https://smltar.com/regexp.html#literal-characters). After reading it, I finally had a solid grasp on them.  Rather than grab sections, I will direct you to it (and review it live in our filmed lectures).  She does it much better than I could!
+
+You might consider installing the `RegExplain` [package](https://www.garrickadenbuie.com/project/regexplain/) using devtools if you want more support working with regular expressions.  They are powerful but they are complicated to learn initially
+
+There is also a very helpful [cheatsheet](pdfs/cheatsheert_regex.pdf) for regular expressions
+
+And finally, there is a great @RDS chapter on [strings](https://r4ds.had.co.nz/strings.html) more generally, which covers both `stringr` and regex.
+
+--------------------------------------------------------------------------------
+
+## The IMDB Dataset
+
+```{r}
+#| include: false
+
+# set up environment.  Now hidden from view
+library(tidyverse) # for general data wrangling
+library(tidymodels) # for modeling
+options(conflicts.policy = "depends.ok")
+library(xfun, include.only = "cache_rds")
+
+cl <- parallel::makePSOCKcluster(parallel::detectCores(logical = FALSE))
+doParallel::registerDoParallel(cl)
+
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+
+theme_set(theme_classic())
+options(tibble.width = Inf)
+path_data <- "./data"
+
+rerun_setting <- FALSE 
+``` 
+
+Now that we have a basic understanding of how to manipulation raw text, we can get set up for NLP and introduce a guiding example for this unit
+
+We can start with our normal cast of characters RE packages, source, and settings (not displayed here)
+
+However, we will also install a few new ones that are specific to working with text.
+
+```{r}
+library(tidytext)
+library(textrecipes)  #step_- functions for NLP
+library(SnowballC)  
+library(stopwords)
+```
+
+--------------------------------------------------------------------------------
+
+The IMDB Reviews dataset is a classic NLP dataset that is used for sentiment analysis
+
+It contains: 
+
+- 25,000 movie reviews in train and test
+- Balanced on positive and negative sentiment (labeled outcome)
+- For more info, see the [website](http://ai.stanford.edu/~amaas/data/sentiment/)
+
+--------------------------------------------------------------------------------
+
+Let's start by loading the dataset and adding an identifier for each review (i.e., **document**, `doc_num`)
+```{r}
+data_trn <- read_csv(here::here(path_data, "imdb_trn.csv"), 
+                     show_col_types = FALSE) |>
+  rowid_to_column(var = "doc_num") |> 
+  mutate(sentiment = fct(sentiment, levels = c("neg", "pos"))) 
+
+data_trn  |>
+  skim_some()
+```
+
+--------------------------------------------------------------------------------
+
+Let's look at our outcome
+
+```{r}
+data_trn |> tab(sentiment)
+```
+
+--------------------------------------------------------------------------------
+
+To get a better sense of the dataset, We can view first five negative reviews from the training set
+```{r}
+data_trn |> 
+  filter(sentiment == "neg") |> 
+  slice(1:5) |> 
+  pull(text) |> 
+  print_kbl() 
+```
+
+--------------------------------------------------------------------------------
+
+and the first five positive reviews from the training set
+```{r}
+data_trn |> 
+  filter(sentiment == "pos") |> 
+  slice(1:5) |> 
+  pull(text) |> 
+  print_kbl()
+```
+
+--------------------------------------------------------------------------------
+
+You need to spend a LOT of time reviewing the text before you begin to process it.
+
+I have NOT done this yet!
+
+My models will be sub-optimal!
+
+--------------------------------------------------------------------------------
+
+## Tokens
+
+Machine learning algorithms cannot work with raw text (documents) directly
+
+We must feature engineer these documents to allow them to serve as input to statistical algorithms
+
+The first step for most NLP feature engineering methods is to represent text (documents) as 
+tokens (words, ngrams)
+
+Given that **tokenization** is often one of our first steps for extracting features from text, it is important to consider carefully what happens during this step and its implications for your subsequent modeling
+
+--------------------------------------------------------------------------------
+
+In tokenization, we take input documents (text strings) and a token type (a meaningful 
+unit of text, such as a word) and split the document into pieces (tokens) that correspond to the type
+
+We can tokenize text into a variety of token types: 
+
+- characters
+- words (most common - our focus;  unigrams)
+- sentences
+- lines
+- paragraphs
+- n-grams (bigrams, trigrams)
+
+--------------------------------------------------------------------------------
+
+An n-gram consists of a sequence of n items from a given sequence of text. Most often, it is a group of n words (bigrams, trigrams)  
+
+n-grams retain word order which would otherwise be lost if we were just using words as the token type
+
+"I am not happy"
+
+Tokenized by word, yields:
+
+- I
+- am
+- not
+- happy
+
+Tokenized by 2-gram words:
+
+- I am
+- am not
+- not happy
+
+--------------------------------------------------------------------------------
+
+We will be using tokenizer functions from the `tokenizers` package.  Three in particular are:
+
+- `tokenize_words(x, lowercase = TRUE, stopwords = NULL, strip_punct = TRUE, strip_numeric = FALSE, simplify = FALSE)`
+- `tokenize_ngrams(x, lowercase = TRUE, n = 3L, n_min = n, stopwords = character(), ngram_delim = " ", simplify = FALSE)`
+- `tokenize_regex(x, pattern = "\\s+", simplify = FALSE)`
+
+--------------------------------------------------------------------------------
+
+However, we will be accessing these functions through wrappers: 
+
+- `tidytext::unnest_tokens(tbl, output, input, token = "words", format = c("text", "man", "latex", "html", "xml"), to_lower = TRUE, drop = TRUE, collapse = NULL)` for tidyverse data exploration of tokens within tibbles
+- `textrecipes::step_tokenize()` for tokenization in our recipes
+
+--------------------------------------------------------------------------------
+
+Word-level tokenization by `tokenize_words()` is done by finding word boundaries as follows:
+
+- Break at the start and end of text, unless the text is empty
+- Do not break within CRLF (new line characters)
+- Otherwise, break before and after new lines (including CR and LF)
+- Do not break between most letters
+- Do not break letters across certain punctuation
+- Do not break within sequences of digits, or digits adjacent to letters (“3a,” or “A3”)
+- Do not break within sequences, such as “3.2” or “3,456.789.”
+- Do not break between Katakana
+- Do not break from extenders
+- Do not break within emoji zwj sequences
+- Do not break within emoji flag sequences
+- Ignore Format and Extend characters, except after sot, CR, LF, and new line
+- Keep horizontal whitespace together
+- Otherwise, break everywhere (including around ideographs, e.g., @, %, >)
+
+--------------------------------------------------------------------------------
+
+Let's start with using `tokenize_words()` to get a sense of how it works by default
+
+- Splits on spaces
+- Converts to lowercase by default (does it matter? MAYBE!!!)
+- Retains apostrophes but drops other punctuation (`,`, `.`, `!`) and some symbols (e.g., `-` `\\`,  `@`) by default.  Does not drop `_` (Do you need punctuation?  !!!!)
+- Retains numbers (by default) and decimals but drops `+` appended to `4+`
+- Has trouble with URLs and email address (do you need this?)
+- Often, these issues may NOT matter
+```{r}
+"Here is a sample document to tokenize.  How EXCITING (I _love_ it).  Sarah has spent 4 or 4.1 or 4P or 4+ or >4 years developing her pre-processing and NLP skills.  You can learn more about tokenization here: https://smltar.com/tokenization.html or by emailing me at jjcurtin@wisc.edu" |> 
+  tokenizers::tokenize_words()
+```
+
+--------------------------------------------------------------------------------
+
+Some of these behaviors can be altered from their defaults
+
+- `lowercase = TRUE`
+- `strip_punc = TRUE`
+- `strip_numeric = FALSE`
+
+--------------------------------------------------------------------------------
+
+Some of these issues can be corrected by pre-processing the text
+
+
+```{r}
+str_replace("jjcurtin@wisc.edu", "@", "_at_")
+```
+
+--------------------------------------------------------------------------------
+
+If you need finer control, you can use `tokenize_regex()` and then do further processing with `stringr` functions and regex
+
+Now it may be easier to build up from here (e.g., ):
+
+- `str_to_lower(word)`
+- `str_replace(word, ".$", "")`
+```{r}
+"Here is a sample document to tokenize.  How EXCITING (I _love_ it).  Sarah has spent 4 or 4.1 or 4P or 4+ years developing her pre-processing and NLP skills.  You can learn more about tokenization here: https://smltar.com/tokenization.html or by emailing me at jjcurtin@wisc.edu" |> 
+  tokenizers::tokenize_regex(pattern = "\\s+")
+```
+
+--------------------------------------------------------------------------------
+
+You can explore the tokens that will be formed using `unnest_tokens()` and basic tidyverse data wrangling using a tidied format of your documents as part of your EDA
+
+- We unnest to 1 token (word) per row (tidy format)
+- We keep track of `doc_num` (added earlier)
+
+Here, we tokenize the IMDB training set.  
+
+- Using defaults
+- Can change other default for `tokenize_*()` by passing into function via `...`
+- Can set `drop = TRUE` (default) to discard the original document column (text)
+- Its pretty fast!
+
+```{r}
+tokens <- data_trn |> 
+  unnest_tokens(word, text, token = "words", to_lower = TRUE, drop = FALSE) |> 
+  glimpse()
+```
+
+::: {.callout-tip}
+**Coding sidebar:** You can take a much deeper dive into tidyverse text processing in [chapter 1](https://www.tidytextmining.com/tidytext.html) of @TMR.   
+:::
+
+--------------------------------------------------------------------------------
+
+Let's get oriented by reviewing the tokens from the first document
+
+- Raw form
+```{r}
+data_trn$text[1]
+```
+
+- Tokenized by word and tidied
+```{r}
+tokens |> 
+  filter(doc_num == 1) |> 
+  select(word) |> 
+  print(n = Inf)
+```
+
+--------------------------------------------------------------------------------
+
+Considering all the tokens across all documents
+
+- There are almost 6 million words
+```{r}
+length(tokens$word)
+```
+
+- The total unique *vocabulary* is around 85 thousand words
+
+```{r}
+length(unique(tokens$word))
+```
+
+--------------------------------------------------------------------------------
+
+Word frequency is VERY skewed
+
+- These are the counts for the most frequent 750 words
+- there are 84,000 additional infrequent words in the right tail not shown here!
+```{r}
+tokens |>
+  count(word, sort = TRUE) |> 
+  slice(1:750) |> 
+  mutate(word = reorder(word, -n)) |>
+  ggplot(aes(word, n)) +
+    geom_col() +
+    xlab("Words") +
+    ylab("Raw Count") +
+    theme(axis.text.x=element_blank(), axis.ticks.x=element_blank())
+```
+
+--------------------------------------------------------------------------------
+
+Now let's review the 100 most common words
+
+- We SHOULD review MUCH deeper than this
+- Some of our feature engineering approaches (e.g., BoW) will use the first 5K - 20K tokens
+- Some of our feature engineering approaches (e.g., word embeddings) may use ALL tokens
+- Some of these are likely not very informative (the, a, of, to, is).  We will return to those words in a bit when we consider **stopwords**
+- Notice `br`.   Why is it so common?
+```{r}
+tokens |>
+  count(word, sort = TRUE) |>
+  print(n = 100)
+```
+
+--------------------------------------------------------------------------------
+
+Here is the first document that has the `br` token in it. 
+
+It is html code for a line break.
+```{r}
+tokens |> 
+  filter(word == "br") |> 
+  slice(1) |> 
+  pull(text)
+```
+
+--------------------------------------------------------------------------------
+
+Let's clean it in the raw documents and re-tokenize
+
+You should always check your replacements CAREFULLY before doing them for unexpected matches and side-effects
+
+```{r}
+data_trn <- data_trn |> 
+  mutate(text = str_replace_all(text, "<br /><br />", " "))
+
+tokens <- data_trn |> 
+  unnest_tokens(word, text, drop = FALSE)
+```
+
+We should continue to review MUCH deeper into the common tokens to detect other
+tokenization errors.  I will not demonstrate that here.
+
+--------------------------------------------------------------------------------
+
+We should also review the least common tokens
+
+- Worth searching to make sure they haven't resulted from tokenization errors
+- Can use this to tune our pre-processing and tokenization
+- BUT, not as important b/c these will be dropped by some of our feature engineering
+approaches (BoW) and may not present too much problem to others (embeddings)
+
+```{r}
+tokens |>
+  count(word) |> 
+  arrange(n) |> 
+  print(n = 200)
+```
+
+--------------------------------------------------------------------------------
+
+What is the deal with `_*_`?
+
+```{r}
+tokens |> 
+  filter(word == "_anything_") |> 
+  slice(1) |> 
+  pull(text)
+```
+
+```{r}
+tokens |> 
+  filter(word == "_love_") |> 
+  slice(1) |> 
+  pull(text)
+```
+
+--------------------------------------------------------------------------------
+
+Let's find all the tokens that start or end with `_`
+
+A few of these are even repeatedly used
+
+```{r}
+tokens |> 
+  filter(str_detect(word, "^_") | str_detect(word, "_$")) |> 
+  count(word, sort = TRUE) |>
+  print(n = Inf)
+```
+
+--------------------------------------------------------------------------------
+
+Now we can clean the raw documents again.  This works but there is probably a better regex using `^_` and `_$`
+
+```{r}
+data_trn <- data_trn |> 
+  mutate(text = str_replace_all(text, " _", " "),
+         text = str_replace_all(text, " _", " "),
+         text = str_replace_all(text, "^_", ""),
+         text = str_replace_all(text, "_\\.", "\\."),
+         text = str_replace_all(text, "\\(_", "\\("),
+         text = str_replace_all(text, ":_", ": "),
+         text = str_replace_all(text, "_{3,}", " "))
+```
+
+--------------------------------------------------------------------------------
+
+Let's take another look and uncommon tokens
+
+```{r}
+data_trn |> 
+  unnest_tokens(word, text, drop = FALSE) |> 
+  count(word) |> 
+  arrange(n) |> 
+  print(n = 200)
+```
+
+Lots of numbers.  **Probably?** not that important for our classification problem.  
+
+Let's strip them for demonstration purposes at least using `strip_numeric = TRUE`
+
+This is likey good for unigrams but wouldn't be good/possible for bigrams (break sequence)
+
+```{r}
+data_trn |> 
+  unnest_tokens(word, text, 
+                drop = FALSE,
+                strip_numeric = TRUE) |>   
+  count(word) |> 
+  arrange(n) |> 
+  print(n = 200)
+```
+
+--------------------------------------------------------------------------------
+
+The tokenizer didn't get rid of numbers connected to text
+
+- How do we want to handle these?
+- Could add a space to make them two words? 
+- We will leave them as is
+
+--------------------------------------------------------------------------------
+
+Other issues?
+
+- Mis-spellings
+- Repeated letters for emphasize or effect?
+- Did caps matter (default tokenization was to convert to lowercase)?
+- Domain knowledge is useful here though multiple model configurations can be considered
+- strings of words that aren't meaningful ("Welcome to Facebook")
+
+--------------------------------------------------------------------------------
+
+In the above workflow, we:
+
+1. tokenize
+2. review tokens for issues
+3. clean raw text documents
+4. re-tokenize
+
+In some instances, it may be easier to clean the token and then put them back together
+
+1. tokenize
+2. review tokens for issues
+3. clean tokens
+4. recreate document
+5. tokenize
+
+--------------------------------------------------------------------------------
+
+If this latter workflow feels easier (i.e., easier to regex into a token than a document), 
+we will need code to put the tokens back together into a document
+
+Here is an example using the first three documents (`slice(1:3)1) and no cleaning
+
+1. Tokenize
+```{r}
+tokens <- 
+  data_trn |>
+  slice(1:3) |> 
+  unnest_tokens(word, text, 
+                drop = FALSE,
+                strip_numeric = TRUE)
+```
+
+2. Now we can do further cleaning with tokens
+
+`INSERT CLEANING CHUNKS HERE`
+
+3. Then put back together.  Could also collapse into `text_cln` to retain original text column
+```{r}
+data_trn_cln <-
+  tokens |>  
+  group_by(doc_num, sentiment) |> 
+  summarize(text = str_c(word, collapse = " "),
+            .groups = "drop") 
+```
+
+--------------------------------------------------------------------------------
+
+Lets see what we have
+
+- Now all lower case
+- No numbers, punctuation, etc.
+- and any other cleaning we **could** have done with the tokens along the way....
+```{r}
+data_trn_cln |> 
+  pull(text) |>
+  print_kbl() 
+```
+
+--------------------------------------------------------------------------------
+
+## Stop words
+
+Not all words are equally informative or useful to our model depending on the 
+nature of our problem
+
+Very common words often may carry little or no meaningful information
+
+These words are called **stop words**
+
+It is common advice and practice to remove stop words for various NLP tasks
+
+Notice some of the top most frequent words among our tokens from IMDB reviews
+```{r}
+data_trn |> 
+  unnest_tokens(word, text, 
+                drop = FALSE,
+                strip_numeric = TRUE) |> 
+  count(word, sort = TRUE) |> 
+  print(n = 100)
+```
+
+--------------------------------------------------------------------------------
+
+Stop words can have different roles in a **corpus** (a set of documents)
+
+For our purposes, we generally care about two different types of stop words:
+
+- Global
+- Subject-specific
+
+Global stop words almost always have very little value for our modeling goals
+
+These are frequent words like "the", “of” and “and” in English.
+
+It is typically pretty safe to remove these and you can find them in pre-made lists of stop words (see below)
+
+--------------------------------------------------------------------------------
+
+Subject-specific stop words are words that are common and uninformative given the subject or context within which your text/documents were collected and your modeling goals.  
+
+For example, given our goal to classify movie reviews as positive or negative, subject-specific stop words might include:
+
+- movie
+- film
+- movies
+
+--------------------------------------------------------------------------------
+
+We likely we see others if we expand our review of commons words a bit more (which we should!)
+
+- character
+- actor
+- actress
+- director
+- cast
+- scene
+
+These are not general stop words but they will be common in this dataset and the **may* be uninformative RE our classification goal
+
+--------------------------------------------------------------------------------
+
+Subject-specific stop words may improve performance if you have the domain expertise to create a good list
+
+HOWEVER, you should think carefully about your goals and method.  For example, if you are using bigrams rather than single word (unigram) tokens, you might retain words like actor or director because them may be informative in bigrams
+
+- bad actor
+- great director
+
+Though it might be sufficient to just retain **bad** and **great** 
+
+--------------------------------------------------------------------------------
+
+The `stopwords` package contains many lists of stopwords.  
+
+- We can access these lists using through that package
+- Those lists are also available with `get_stopwords()` in the `tidytext` package (my preference)
+- `get_stopwords()` returns a tibble with two columns (see below)
+
+--------------------------------------------------------------------------------
+
+Two commonly used stop word lists are:
+
+- snowball (175 words)
+```{r}
+stop_snowball <- 
+  get_stopwords(source = "snowball") |> 
+  print(n = 50)  # review the first 50 words
+```
+
+--------------------------------------------------------------------------------
+
+- smart (571 words)
+```{r}
+stop_smart <-
+  get_stopwords(source = "smart") |> 
+  print(n = 50)  # review the first 50 words
+```
+
+--------------------------------------------------------------------------------
+
+smart is mostly a super-set of snowball except for these words which are only in snowball
+
+Stop word lists aren't perfect.  Why does smart contain `he's` but not `she's`?
+```{r}
+setdiff(pull(stop_snowball, word),
+        pull(stop_smart, word))
+```
+
+--------------------------------------------------------------------------------
+
+It is common and appropriate to start with a pre-made word list or set of lists and combine, add, and/or remove words based on your specific needs
+
+- You can add global words that you feel are missed
+- You can add subject specific words
+- You can remove global words that might be relevant to your problem
+
+--------------------------------------------------------------------------------
+
+In the service of simplicity, we will use the union of the two previous pre-made 
+global lists without any additional subject specific lists
+
+```{r}
+all_stops <- union(pull(stop_snowball, word), pull(stop_smart, word))
+```
+
+--------------------------------------------------------------------------------
+
+We can remove stop words as part of tokenization using `stopwords = all_stops`
+
+Let's see our two 100 tokens now
+```{r}
+data_trn |> 
+  unnest_tokens(word, text, 
+                drop = FALSE,
+                strip_numeric = TRUE,
+                stopwords = all_stops) |> 
+  count(word) |> 
+  arrange(desc(n)) |> 
+  print(n = 100)
+```
+
+--------------------------------------------------------------------------------
+
+What if we were doing bigrams instead?
+
+- token = "ngrams"
+- n = 2,
+- n_min = 2
+- NOTE: can't strip numeric (would break the sequence of words)
+- NOTE: There are more bigrams than unigrams (more features for BoW!)
+```{r}
+data_trn |> 
+  unnest_tokens(word, text, 
+                drop = FALSE,
+                token = "ngrams",
+                stopwords = all_stops, 
+                n = 2,
+                n_min = 2) |> 
+  count(word) |> 
+  arrange(desc(n)) |> 
+  print(n = 100)
+```
+
+Looks like we are starting to get some signal
+
+--------------------------------------------------------------------------------
+
+## Stemming
+  
+Documents often contain different versions of one base word
+
+We refer to the common base as the stem
+
+Often, we may want to treat the different versions of the stem as the same token. 
+This can reduce the total number of tokens that we need to use for features later
+which can lead to a better performing model
+
+For example, do we need to distinguish between movie vs. movies or actor vs. actors or should we collapse those pairs into a single token?
+
+--------------------------------------------------------------------------------
+
+There are many different algorithms that can stem words for us (i.e., collapse multiple
+versions into the same base).  However, we will focus on only one here as an introduction to the concept and approach for stemming
+
+This is the Porter method and a current implementation of it is available in the 
+using `wordStem()` in the `SnowballC` package
+
+--------------------------------------------------------------------------------
+
+The goal of stemming is to reduce the dimensionality (size) of our vocabulary
+
+Whenever we can combine words that "belong" together with respect to our goal,
+we may improve the performance of our model
+
+However, stemming is hard and it will also invariably combine words that shouldn't
+be combined
+
+Stemming is useful when it suceeds more than it fails or when it succees more with 
+important words/tokens
+
+--------------------------------------------------------------------------------
+
+Here are examples of when it helps to reduce our vocabulary given our task
+
+```{r}
+wordStem(c("movie", "movies"))
+
+wordStem(c("actor", "actors", "actress", "actresses"))
+
+wordStem(c("wait", "waits", "waiting", "waited"))
+
+wordStem(c("play", "plays", "played", "playing"))
+```
+
+--------------------------------------------------------------------------------
+
+Sometimes it works partially, likely with still some benefit
+
+```{r}
+wordStem(c("go", "gone", "going"))
+
+wordStem(c("send", "sending", "sent"))
+
+wordStem(c("fishing", "fished", "fisher"))
+```
+
+--------------------------------------------------------------------------------
+
+But it clearly makes salient errors too
+```{r}
+wordStem(c("university", "universal", "universe"))
+
+wordStem(c("is", "are", "was"))
+
+wordStem(c("he", "his", "him"))
+
+wordStem(c("like", "liking", "likely"))
+
+wordStem(c("mean", "meaning"))
+```
+
+--------------------------------------------------------------------------------
+
+Of course, the errors are more important if they are with words that contain predictive signal
+
+Therefore, we should look at how it works with our text
+
+To stem our tokens if we only care about unigrams:
+
+- We first tokenize as before (including removal of stop words)
+- Then we stem, for now using `wordStem()`
+- We are mutating the stemmed words into a new column, `stem`, so we can compare its effect
+
+```{r}
+tokens <- 
+  data_trn |> 
+  unnest_tokens(word, text, 
+                drop = FALSE,
+                strip_numeric = TRUE,
+                stopwords = all_stops) |> 
+  mutate(stem = wordStem(word)) |> 
+  select(word, stem)
+```
+
+--------------------------------------------------------------------------------
+
+Let's compare vocabulary size
+
+Stemming produced a sizable reduction in vocabulary size
+
+```{r}
+length(unique(tokens$word))
+
+length(unique(tokens$stem))
+```
+
+--------------------------------------------------------------------------------
+
+Let's compare frequencies of the top 100 words vs. stems
+
+- Here are our normal (not stemmed words).  Notice vocabulary size
+```{r}
+word_tokens <-
+  tokens |> 
+  tab(word) |> 
+  arrange(desc(n)) |> 
+  slice(1:100) |> 
+  select(word, n_word = n)
+
+stem_tokens <-
+  tokens |> 
+  tab(stem) |> 
+  arrange(desc(n)) |> 
+  slice(1:100) |> 
+  select(stem, n_stem = n)
+
+word_tokens |> 
+  bind_cols(stem_tokens)
+```
+
+--------------------------------------------------------------------------------
+
+Stemming is often routinely used as part of an NLP pipeline.  
+
+- Often without thought
+- We should consider carefully if it will help or hurt
+- We should likely formally evaluate it (via model configurations), sometimes without much comment about when it is helpful or not. We encourage you to think of stemming as a pre-processing step in text modeling, one that must be thought through and chosen (or not) with good judgment.
+
+--------------------------------------------------------------------------------
+
+In this example, we focused on unigrams.  
+
+If we had wanted bigrams, we would have needed a different order of steps
+
+- Extract words
+- Stem
+- Put back together
+- Extract bigrams
+- Remove stop words
+
+Think carefully about what you are doing and what your goals are!
+
+You can read more about stemming and related (more complicated but possibly more precise)
+procedure called lemmazation in a [chapter](https://smltar.com/stemming.html#how-to-stem-text-in-r) from @SMLTAR
+
+--------------------------------------------------------------------------------
+
+## Bag of Words
+
+Now that we understand how to tokenize our documents, we can begin to consider how to feature engineer using these tokens
+
+The **Bag-of-words (BoW)** method  
+
+- Provides one way of representing tokens within text data when modeling text with machine learning algorithms.
+- Is simple to understand and implement 
+- Works well for problems such as document classification
+
+--------------------------------------------------------------------------------
+
+BoW is a representation of text that describes the occurrence of words within a document. It involves two things:
+
+- A **vocabulary** of known "words" (I put words in quote because our tokens will sometimes be something other than a word)
+- A measure of the occurrence or frequency of these known words.
+
+It is called a “bag” of words because information about the order or structure of words in the document is discarded. BoW is only concerned with occurrence or frequency of known words in the document, not where in the document they occur.
+
+BoW assumes that documents that contain the same content are similar and that we can learn something about the document by its content alone.
+
+--------------------------------------------------------------------------------
+
+BoW approaches vary on two primary characteristics:
+
+- What the token type is
+  - Word is most common
+  - Also common to use bigrams, combinations of unigrams (words) and bigrams
+  - Other options exist (e.g.,trigram)
+- How occurrence frequent of the word/token is measured
+  - Binary (presence or absence)
+  - Raw count
+  - Term frequency
+  - Term frequency - inverse document frequency (tf-idf)
+  - and other less common options
+  
+--------------------------------------------------------------------------------
+
+Lets start with a very simple example
+
+- Two documents
+- Tokenization to words
+- Lowercase, strip punctuation, did not remove any stopwords, no stemming or lemmatization
+- Binary measurement (1 = yes, 0 = no)
+
+```{r}
+#| echo: false
+
+tibble::tribble(
+  ~Document, ~i, ~loved, ~that, ~movie, ~am, ~so, ~happy, ~was, ~not, ~good,
+  "I loved that movie! I am so so so happy.", 1, 1, 1, 1, 1, 1, 1, 0, 0, 0,
+  "That movie was not good.", 0, 0, 1, 1, 0, 0, 0, 1, 1, 1) |>
+  print_kbl()
+```
+
+--------------------------------------------------------------------------------
+
+This matrix is referred to as a **Document-Term Matrix (DTM)**
+
+- Rows are documents
+- Columns are terms (tokens)
+- Combination of all terms/tokens is called the **vocabulary**
+- The terms columns (or a subset) will be used as features in our statistical algorithm to predict some outcome (not displayed)
+
+--------------------------------------------------------------------------------
+
+You will also see the use of **raw counts** for measurement of the cell value for each term
+
+```{r}
+#| echo: false
+
+tibble::tribble(
+  ~Document, ~i, ~loved, ~that, ~movie, ~am, ~so, ~happy, ~was, ~not, ~good,
+  "I loved that movie! I am so so so happy.", 2, 1, 1, 1, 1, 3, 1, 0, 0, 0,
+  "That movie was not good.", 0, 0, 1, 1, 0, 0, 0, 1, 1, 1) |>
+  print_kbl()
+```
+
+Both binary and raw count measures are biased (increased) for longer documents
+
+--------------------------------------------------------------------------------
+
+The bias based on document length motivates the use of **term frequency**
+
+- Term frequency is NOT a simple frequency count (that is raw count)
+- Instead it is the raw count divided by the document length
+- This removes the bias based on document length
+
+```{r}
+## echo: false
+
+tibble::tribble(
+  ~Document, ~i, ~loved, ~that, ~movie, ~am, ~so, ~happy, ~was, ~not, ~good,
+  "I loved that movie! I am so so so happy.", .2, .1, .1, .1, .1, .3, .1, 0, 0, 0,
+  "That movie was not good.", 0, 0, .2, .2, 0, 0, 0, .2, .2, .2) |>
+  print_kbl()
+```
+
+--------------------------------------------------------------------------------
+
+Term frequency can be dominated by frequently occurring words that may not be as important to understand the document as are rarer but more domain specific words
+
+This was the motivation for removing stopwords but stopword removal may not be sufficient
+
+**Term Frequency - Inverse Document Frequency (tf-idf)** was developed to address this issue
+
+TF-IDF scales the term frequency by the inverse document frequency
+
+- Term frequency tells us that word is frequently used in the current document
+- IDF indexes how rare the word is across documents (higer IDF == more rare)
+
+This emphasizes words used in specific documents that are not commonly used otherwise
+
+--------------------------------------------------------------------------------
+
+$IDF = log(\frac{total\:number\:of\:documents}{documents\:containing\:the\:word})$
+
+This results in larger values for words that arent used in many documents.  e.g., 
+
+- for a word that appears in only 1 of 1000 documents, idf = log(1000/1) = 3
+- for a word that appears in 1000 of 1000 documents, idf = log(1000/1000) = 0
+
+Note that word that appears in no documents would result in a division by zero.  Therefore it is common to add 1 to the denominator of idf
+
+--------------------------------------------------------------------------------
+
+We should be aware of some of the limitations of BoW:
+
+- Vocabulary: The vocabulary requires careful thought  
+  - Choice of stop words (global and subject specific) can matter
+  - Choice about size (number of tokens) can matter
+
+- Sparsity: 
+  - Sparse representations (features that contain mostly zeros) are hard to model for computational reasons (space and time)
+  - Sparse representations present a challenge to extract signal in a large representational space
+  
+- Meaning: Discarding word order ignores the context, and in turn meaning of words in the document (semantics). 
+  - Context and meaning can offer a lot to the model
+  - “this is interesting” vs “is this interesting”
+  - “old bike” vs “used bike”
+
+```{r}
+#| include: false
+rm(tokens)
+```
+
+--------------------------------------------------------------------------------
+
+## Bringing it all together
+
+### General
+
+We will now explore a series of model configurations to predict the sentiment (positive vs negative) of IMDB.com reviews
+
+- To keep things simple, all model configurations will use only one statistical algorithm - glmnet
+  - Within algorithm, configurations will differ by `penatly` and `dials::mixture' - see grid below
+- We will consider BoW features derived by TF-IDF only
+- We will remove global stop words from some configurations
+- We will stem words from some configurations
+- These BoW configurations will also differ by token type
+    - Word/unigram
+    - A combination of uni- and bigrams
+    - Prior to casting the tf-idf document-term matrix, we will filter tokens to various sizes - see grid below
+- We will also train a word embedding model to demonstrate how to implement that feature
+engineering technique in tidymodels
+
+--------------------------------------------------------------------------------
+
+We are applying these feature engineering steps blindly.  YOU should not.
+
+You will want to explore the impact of your feature engineering either
+
+  - During EDA with unnest_tokens()
+  - After making your recipe by using it to make a feature matrix
+  - Likely some of both
+  
+--------------------------------------------------------------------------------
+
+Lets start fresh with our training data
+
+```{r}
+data_trn <- read_csv(here::here(path_data, "imdb_trn.csv"),
+                     show_col_types = FALSE) |> 
+  rowid_to_column(var = "doc_num") |> 
+  mutate(sentiment = factor(sentiment, levels = c("neg", "pos"))) |> 
+  glimpse()
+```
+
+--------------------------------------------------------------------------------
+
+And do our (very minimal) cleaning
+```{r}
+data_trn <- data_trn |> 
+  mutate(text = str_replace_all(text, "<br /><br />", " "),
+         text = str_replace_all(text, " _", " "),
+         text = str_replace_all(text, " _", " "),
+         text = str_replace_all(text, "^_", ""),
+         text = str_replace_all(text, "_\\.", "\\."),
+         text = str_replace_all(text, "\\(_", "\\("),
+         text = str_replace_all(text, ":_", ": "),
+         text = str_replace_all(text, "_{3,}", " "))
+```
+
+--------------------------------------------------------------------------------
+
+We will select among model configurations using a validation split resampled accuracy to ease computational costs
+
+```{r}
+set.seed(123456)
+splits <- data_trn |> 
+  validation_split(strata = sentiment)
+```
+
+--------------------------------------------------------------------------------
+
+We will use a simple union of stop words for some configurations:
+
+- It **could** help to edit the global list (or use a smaller list like snowball only)
+- It **could** help to have subject specific stop words too AND they might need to be different for words vs. bigrams
+```{r}
+all_stops <- union(pull(get_stopwords(source = "smart"), word), pull(get_stopwords(source = "snowball"), word))
+```
+
+--------------------------------------------------------------------------------
+
+All of our model configurations will be tuned on `penalty`, `mixture` and `max_tokens`
+```{r}
+grid_tokens <- grid_regular(penalty(range = c(-7, 3)), 
+                            mixture(), 
+                            max_tokens(range = c(5000, 10000)), 
+                            levels = c(20, 6, 2))
+```
+
+### Words (unigrams)
+
+We will start by fitting a BoW model configuration for word tokens
+
+Recipe for Word Tokens.  NOTE:
+
+- `token = "words"`  (default)
+- `max_tokens = tune()`  - We are now set to tune recipes!!!
+  `options = list(stopwords = all_stops)` - Passing in options to `tokenizers::tokenize_words()`
+```{r}
+rec_word <-  recipe(sentiment ~ text, data = data_trn) |>
+  step_tokenize(text, 
+                engine = "tokenizers", token = "words") |>    
+  step_tokenfilter(text, max_tokens = tune::tune()) |>
+  step_tfidf(text)  |> 
+  step_normalize(all_predictors())
+```
+
+--------------------------------------------------------------------------------
+
+Tuning hyperparameters for Word Tokens
+```{r}
+fits_word <- cache_rds(
+  expr = {
+    logistic_reg(penalty = tune::tune(), 
+                 mixture = tune::tune()) |> 
+      set_engine("glmnet") |> 
+      tune_grid(preprocessor = rec_word, 
+                resamples = splits, 
+                grid = grid_tokens, 
+                metrics = metric_set(accuracy))
+
+},
+  rerun = rerun_setting,
+  dir = "cache/012/",
+  file = "fits_word")
+```
+
+--------------------------------------------------------------------------------
+
+Confirm that the range of hyperparameters we considered was sufficient
+
+```{r}
+autoplot(fits_word)
+```
+
+--------------------------------------------------------------------------------
+
+Display performance of best configuration for Word Tokens.  
+
+Wow, pretty good!
+```{r}
+show_best(fits_word)
+```
+
+--------------------------------------------------------------------------------
+
+### Words (unigrams) Excluding Stop Words
+
+Lets try a configuration that removes stop words
+
+Recipe for Word Tokens excluding Stop Words.  NOTE:
+
+- `options = list(stopwords = all_stops)` - Passing in options to `tokenizers::tokenize_words()`
+```{r}
+rec_word_nsw <-  recipe(sentiment ~ text, data = data_trn) |>
+  step_tokenize(text, 
+                engine = "tokenizers", token = "words",   # included for clarity
+                options = list(stopwords = all_stops)) |>
+  step_tokenfilter(text, max_tokens = tune::tune()) |>
+  step_tfidf(text)  |> 
+  step_normalize(all_predictors())
+```
+
+--------------------------------------------------------------------------------
+
+Tuning hyperparameters for Word Tokens excluding Stop Words
+```{r}
+fits_word_nsw <- cache_rds(
+  expr = {
+    logistic_reg(penalty = tune::tune(), 
+                 mixture = tune::tune()) |> 
+      set_engine("glmnet") |> 
+      tune_grid(preprocessor = rec_word_nsw, 
+                resamples = splits, 
+                grid = grid_tokens, 
+                metrics = metric_set(accuracy))
+
+},
+  rerun = rerun_setting,
+  dir = "cache/012/",
+  file = "fits_word_nws")
+```
+
+--------------------------------------------------------------------------------
+
+Confirm that the range of hyperparameters we considered was sufficient
+
+```{r}
+autoplot(fits_word_nsw)
+```
+
+--------------------------------------------------------------------------------
+
+Display performance of best configuration for Word Tokens excluding Stop Words.  
+
+- Looks like our mindless use of a large list of global stop words didn't help.   
+- We might consider the more focused snowball list
+- We might consider subject specific stop words
+- For this demonstration, we will just move forward without stop words
+  
+```{r}
+show_best(fits_word_nsw)
+```
+
+--------------------------------------------------------------------------------
+
+### Stemmed Words (unigrams)
+
+Now we will try using stemmed words
+
+Recipe for Stemmed Word Tokens.  NOTE: `step_stem()`
+```{r}
+rec_stemmed_word <-  recipe(sentiment ~ text, data = data_trn) |>
+  step_tokenize(text, 
+                engine = "tokenizers", token = "words") |>    # included for clarity
+  step_stem(text) |> 
+  step_tokenfilter(text, max_tokens = tune()) |>
+  step_tfidf(text)  |> 
+  step_normalize(all_predictors())
+```
+
+--------------------------------------------------------------------------------
+
+Tuning hyperparameters for Stemmed Word Tokens
+```{r}
+
+fits_stemmed_word <- cache_rds(
+  expr = {
+    logistic_reg(penalty = tune(), mixture = tune()) |> 
+    set_engine("glmnet") |> 
+    tune_grid(preprocessor = rec_stemmed_word, 
+              resamples = splits, 
+              grid = grid_tokens, 
+              metrics = metric_set(accuracy))
+},
+  rerun = rerun_setting, 
+  dir = "cache/012/",
+  file = "fits_stemmed_word")
+```
+
+--------------------------------------------------------------------------------
+
+Confirm that the range of hyperparameters we considered was sufficient
+
+```{r}
+autoplot(fits_stemmed_word)
+```
+
+--------------------------------------------------------------------------------
+
+Display performance of best configuration for Stemmed Word Tokens
+
+Not much change
+```{r}
+show_best(fits_stemmed_word)
+```
+
+--------------------------------------------------------------------------------
+
+### ngrams (unigrams and bigrams)
+
+Now we try both unigrams and bigrams
+
+Recipe for unigrams and bigrams. NOTES:
+
+  - `token = "ngrams"`
+  - `options = list(n = 2, n_min = 1)`  - includes uni (1) and bi(2) grams
+  - not stemmed (stemming doesn't work by default for bigrams)
+```{r}
+rec_ngrams <-  recipe(sentiment ~ text, data = data_trn) |>
+  step_tokenize(text, 
+                engine = "tokenizers", token = "ngrams",
+                options = list(n = 2, n_min = 1)) |>
+  step_tokenfilter(text, max_tokens =  tune::tune()) |>
+  step_tfidf(text) |> 
+  step_normalize(all_predictors())
+```
+
+--------------------------------------------------------------------------------
+
+Tuning hyperparameters for ngrams
+```{r}
+
+fits_ngrams <- cache_rds(
+  expr = {
+    logistic_reg(penalty = tune::tune(), mixture = tune::tune()) |> 
+      set_engine("glmnet") |> 
+      tune_grid(preprocessor = rec_ngrams, 
+                resamples = splits, 
+                grid = grid_tokens, 
+                metrics = metric_set(yardstick::accuracy))
+
+},
+  rerun = rerun_setting,
+  dir = "cache/012/",
+  file = "fits_ngrams")
+```
+
+---------------------------------------------------------------------------------
+
+Confirm that the range of hyperparameters we considered was sufficient
+
+```{r}
+autoplot(fits_ngrams)
+```
+
+--------------------------------------------------------------------------------
+
+Display performance of best configuration
+
+Our best model yet!
+
+```{r}
+show_best(fits_ngrams)
+```
+
+--------------------------------------------------------------------------------
+
+### Word Embeddings
+
+BoW is an introductory approach for feature engineering.  
+
+As you have read, word embeddings are a common alternative that addresses some of the limitations of BoW.  Word embeddings are also well-support in the `tidyrecipes` package.
+
+Let's switch gears away from document term matrices and BoW to word embeddings
+
+--------------------------------------------------------------------------------
+
+You can find pre-trained word embeddings on the web
+
+- [GloVe](https://nlp.stanford.edu/projects/glove/)
+- [Word2Vec](https://code.google.com/archive/p/word2vec/)
+- [Fasttek](https://fasttext.cc/docs/en/english-vectors.html)
+
+Below, we download and open pre-trained GloVe embeddings
+
+- I chose a smaller set of embeddings to ease computational cost
+  - Wikipedia 2014 + Gigaword 5
+  - 6B tokens, 400K vocab, uncased, 50d
+
+```{r}
+temp <- tempfile()
+options(timeout = max(300, getOption("timeout")))  # need more time to download big file
+download.file("https://nlp.stanford.edu/data/glove.6B.zip", temp)
+unzip(temp, files = "glove.6B.50d.txt")
+glove_embeddings <- read_delim(here::here("glove.6B.50d.txt"),
+                               delim = " ",
+                               col_names = FALSE) 
+```
+
+```{r}
+#| include: false
+
+# unlink(temp) # remove downloaded zip 
+# unlink("glove.6B.50d.txt)
+```
+
+--------------------------------------------------------------------------------
+
+Recipe for GloVe embedding. NOTES:
+
+- `token = "words"`
+- No need to filter tokens
+- New step is `step_word_embeddings(text, embeddings = glove_embeddings)`
+```{r}
+# rec_glove <-  recipe(sentiment ~ text, data = data_trn) |>
+#   step_tokenize(text, 
+#                 engine = "tokenizers", token = "words",   # included for clarity
+#                 options = list(stopwords = all_stops)) |>
+#   step_word_embeddings(text, embeddings = glove_embeddings)
+```
+
+--------------------------------------------------------------------------------
+
+Hyperparameter grid for GloVe embedding (no need for `max_tokens`)
+```{r}
+# grid_glove <- grid_regular(penalty(range = c(-7, 3)), 
+#                             dials::mixture(), 
+#                             levels = c(20, 6))
+```
+
+--------------------------------------------------------------------------------
+
+Tuning hyperparameters for GloVe embedding
+```{r}
+# fits_glove <-
+#   logistic_reg(penalty = tune(), 
+#              mixture = tune()) |> 
+#   set_engine("glmnet") |> 
+#   tune_grid(preprocessor = rec_glove, 
+#             resamples = splits, 
+#             grid = grid_glove, 
+#             metrics = metric_set(accuracy))
+```
+
+--------------------------------------------------------------------------------
+
+Confirm that the range of hyperparameters we considered was sufficient
+```{r}
+# autoplot(fits_glove)
+```
+
+--------------------------------------------------------------------------------
+
+Display performance of best configuration for GloVe embedding
+```{r}
+# show_best(fits_glove)
+```
+
+--------------------------------------------------------------------------------
+
+### Best Configuration
+
+- Fit best model configuration to training set
+```{r}
+rec_final <-
+  recipe(sentiment ~ text, data = data_trn) |>
+    step_tokenize(text, 
+                  engine = "tokenizers", token = "ngrams",
+                  options = list(n = 2, n_min = 1)) |>
+    step_tokenfilter(text, max_tokens = select_best(fits_ngrams)$max_tokens) |>
+    step_tfidf(text) |> 
+    step_normalize(all_predictors()) 
+```
+
+```{r}
+rec_final_prep <- rec_final |>
+  prep(data_trn)
+feat_trn <- rec_final_prep |> 
+  bake(NULL) 
+```
+
+--------------------------------------------------------------------------------
+
+```{r}
+fit_final <-
+  logistic_reg(penalty = select_best(fits_ngrams)$penalty, 
+             mixture = select_best(fits_ngrams)$mixture) |> 
+  set_engine("glmnet") |> 
+  fit(sentiment ~ ., data = feat_trn)
+```
+
+--------------------------------------------------------------------------------
+
+- Open and clean test to make features
+```{r}
+data_test <- read_csv(here::here(path_data, "imdb_test.csv"),
+                      show_col_types = FALSE) |> 
+  rowid_to_column(var = "doc_num") |> 
+  mutate(sentiment = factor(sentiment, levels = c("neg", "pos"))) |> 
+  glimpse()
+
+data_test <- data_test |> 
+  mutate(text = str_replace_all(text, "<br /><br />", " "),
+         text = str_replace_all(text, " _", " "),
+         text = str_replace_all(text, " _", " "),
+         text = str_replace_all(text, "^_", ""),
+         text = str_replace_all(text, "_\\.", "\\."),
+         text = str_replace_all(text, "\\(_", "\\("),
+         text = str_replace_all(text, ":_", ": "),
+         text = str_replace_all(text, "_{3,}", " "))
+
+feat_test <- rec_final_prep |> 
+  bake(data_test)
+```
+
+--------------------------------------------------------------------------------
+
+- Predict into test
+
+```{r}
+accuracy_vec(feat_test$sentiment, predict(fit_final, feat_test)$.pred_class)
+```
+
+- Confusion matrix
+```{r}
+cm <- tibble(truth = feat_test$sentiment,
+             estimate = predict(fit_final, feat_test)$.pred_class) |> 
+  conf_mat(truth, estimate)
+
+autoplot(cm, type = "heatmap")
+```
+
+--------------------------------------------------------------------------------
+
+And lets end by calculating Permutation feature importance scores in test set using DALEX
+
+```{r}
+library(DALEX, exclude= "explain")
+library(DALEXtra)
+```
+
+--------------------------------------------------------------------------------
+
+We are going to sample only a subset of the test set to keep the computational costs lower for this example.
+
+```{r}
+set.seed(12345)
+feat_subtest <- feat_test |> 
+  slice_sample(prop = .05) # 5% of data 
+```
+
+--------------------------------------------------------------------------------
+
+Now we can get a df for the features (without the outcome) and a separate vector for the outcome.  
+```{r}
+x <- feat_subtest |> select(-sentiment)
+```
+
+For outcome, we need to convert to 0/1 (if classification), and then pull the vector out of the dataframe
+
+```{r}
+y <- feat_subtest |> 
+  mutate(sentiment = if_else(sentiment == "pos", 1, 0)) |> 
+  pull(sentiment)
+```
+
+--------------------------------------------------------------------------------
+
+We also need a specific predictor function that will work with the DALEX package
+
+```{r}
+predict_wrapper <- function(model, newdata) {
+  predict(model, newdata, type = "prob") |> 
+    pull(.pred_pos)
+}
+```
+
+--------------------------------------------------------------------------------
+
+We will also need an `explainer` object based on our model and data
+
+```{r}
+explain_test <- explain_tidymodels(fit_final, # our model object 
+                                   data = x, # df with features without outcome
+                                   y = y, # outcome vector
+                                   # our custom predictor function
+                                   predict_function = predict_wrapper)
+```
+
+--------------------------------------------------------------------------------
+
+Finally, we need to define a custom function for our performance metric as well
+
+```{r}
+accuracy_wrapper <- function(observed, predicted) {
+  observed <- fct(if_else(observed == 1, "pos", "neg"),
+                  levels = c("pos", "neg"))
+  predicted <- fct(if_else(predicted > .5, "pos", "neg"), 
+                   levels  = c("pos", "neg"))
+  accuracy_vec(observed, predicted)
+}
+```
+
+We are now ready to calculate feature importance metrics
+
+--------------------------------------------------------------------------------
+
+Only doing 1 permutation for each feature to keep computational costs lower for this demonstration.  In real, life do more!
+
+```{r}
+#| label: permutations
+
+set.seed(123456)
+imp_permute <- cache_rds(
+  expr = {model_parts(explain_test, 
+                      type = "raw", 
+                      loss_function = accuracy_wrapper,
+                      B = 1)
+  },
+  rerun = rerun_setting,
+  dir = "cache/012/",
+  file = "imp_permute"
+)
+```
+
+--------------------------------------------------------------------------------
+
+Plot top 30 in an informative display
+```{r}
+imp_permute |> 
+  filter(variable != "_full_model_",
+         variable != "_baseline_") |> 
+  mutate(variable = fct_reorder(variable, dropout_loss)) |> 
+  slice_head(n = 30) |> 
+  print()
+```
+
+```{r}
+imp_permute |> 
+  filter(variable != "_full_model_",
+         variable != "_baseline_") |> 
+  mutate(variable = fct_reorder(variable, dropout_loss, 
+                                .desc = TRUE)) |> 
+  slice_tail(n = 30) |> 
+  print()
+```
+
+```{r}
+#| fig-height: 4
+
+# full_model <- imp_permute |>  
+#    filter(variable == "_full_model_")
+  
+# imp_permute |> 
+#   filter(variable != "_full_model_",
+#          variable != "_baseline_") |> 
+#   mutate(variable = fct_reorder(variable, dropout_loss)) |> 
+#   arrange(desc(dropout_loss) |>
+#   slice(n = 30) |> 
+#   ggplot(aes(dropout_loss, variable)) +
+#     geom_vline(data = full_model, aes(xintercept = dropout_loss),
+#                linewidth = 1.4, lty = 2, alpha = 0.7) +
+#    geom_boxplot(fill = "#91CBD765", alpha = 0.4) +
+#    theme(legend.position = "none") +
+#    labs(x = "accuracy", y = NULL)
+```
