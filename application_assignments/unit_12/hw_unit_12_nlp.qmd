@@ -1,0 +1,216 @@
+---
+title: 'Unit 12: Natural Language Processing, Text Processing, and Feature Engineering'
+author: "Your name here"
+date: "`r lubridate::today()`"
+format: 
+  html: 
+    embed-resources: true
+    toc: true 
+    toc_depth: 4
+editor_options: 
+  chunk_output_type: console
+---
+
+## Assignment overview
+
+To begin, download the following from the course web book (Unit 12):
+
+* `hw_unit_12_nlp.qmd` (notebook for this assignment)
+
+* `alcohol_tweets.csv` ~5k public Tweets collected from people in New York State from July 2013 - July 2014. Tweets were filtered to contain drinking related keywords (e.g., drunk, beer, party), and were labeled by Amazon MTurk workers to identify tweets that were about the user drinking alcohol. The data set contains the following variables:
+  * `tweet_id`: unique Twitter id of the user
+  * `user_drinking`: labeled yes/no if the tweet is about the user drinking
+  * `text`: The raw text of the tweet. Note: raw text is listed as NA in this dataset if the tweet only contained an image or gif (i.e., no text was present)
+
+* `glove_twitter.csv`: These are GloVe vectors - pretrained semantic embeddings (i.e., features of word meaning) derived from Twitter data by a group from [Stanford](https://nlp.stanford.edu/projects/glove/). We provide you with a CSV version of one of the representation sets, but you can look at the other data and related tutorial on Stanford's website. They have vectors of varying sizes, generated from different large language corpora. These are very useful for examining language semantics.
+
+* A caution about these Twitter data: these are raw language data from Twitter's platform. We have not curated the data in any way. As a result, the text includes content that some may well find offensive and users of these data should take note. Words used and topics discussed could be harsh, offensive, or inflammatory. Foul language is certainly present.
+
+Your goal is to build the best logistic regression model that you can to predict whether a tweet is about a user drinking alcohol (or not). Similar to the neural networks homework, you will have a lot of flexibility in how you approach this assignment. We will include minimum steps you must consider for model building, but feel free to expand EDA beyond the steps listed in order to build the best model you can.
+
+Your assignment is due Wednesday at 8:00 PM. Let's get started!
+
+-----
+
+## Setup
+
+Load packages, paths, and function scripts you may need, including parallel processing code.
+```{r}
+
+```
+
+## Part 1: Read in and split data
+
+Since we do not have that much data, we will be splitting into a validation set for considering model configurations. However, you should still only look at the training portion of this split during EDA.
+
+### Read in `alcohol_tweets.csv`
+```{r}
+data <- 
+```
+
+For this assignment it is helpful to see (and potentially copy) the `id` values from tweets, which we can't do easily if the number is in scientific notation. To change this in R, set the relevant option called `scipen`. You can do this by running the code below, which says that any integer with 20 decimal places or fewer, will be in raw integer form, not scientific notation. This can be useful with ID-type variables like we use here.
+
+```{r}
+options(scipen = 20)
+```
+
+### Glove embeddings
+The file containing the GloVe embeddings is very large, so we will use `fread()`.
+```{r}
+glove_embeddings <- fread(here::here(path_data, 'glove_twitter.csv')) |> 
+  as_tibble()
+```
+
+
+### Validation splits
+
+Use the provided splits across all model configurations you consider
+
+```{r}
+set.seed(12345)
+
+splits <- data |> 
+  validation_split(strata = "user_drinking")
+
+# Pull out indices of training data
+training_ind <- splits |> 
+  unlist(recursive = FALSE)
+
+training_ind <- training_ind$splits$in_id
+
+data_train <- data |> 
+  slice(training_ind)
+```
+
+## Part 1: Cleaning EDA
+
+In this section, use the tidytext package to get a better sense of the data to guide model building in Part 2. Use data_train to identify what cleaning steps you may want to take. We will apply your identified cleaning steps to the full dataset and resplit again before building models.
+
+### Initial Cleaning
+
+At a minimum, complete the following steps:
+
+* Clean the tweets. Visual inspection of text data is really important. Are there any special characters or parsing errors that need to be handled in the text? For example, how will you handle NA tweets that were originally just images? This text is likely to have other characters that you want to consider for modeling the outcome. Take steps to process the text in a way that serves your modeling objective.
+
+* Classing variables. Check if `id` and `user_drinking` variables are the correct class. What is the distribution of the outcome?
+
+* Tokenization. Tokenize your text into both unigrams and bigrams. The help page for `unnest_tokens()` can help you understand your options for tokenization in tidytext.
+
+* Stopwords. Load the stopwords that you plan to use in your workflow. Think about which stopwords you will use and why, and have those ready. Look at the tokenized data in order to consider how stopwords will impact modeling.
+
+```{r}
+
+
+```
+
+### Explore tokens
+
+At a minimum, complete the following steps (for both unigram and bigram tokens):
+
+* Display the total number of tokens used across all tweets
+
+* Display the total number of unique tokens used across all tweets
+
+* Plot the frequency distribution of the 1000 most common tokens
+
+* Review the top 1000 tokens
+```{r}
+
+
+
+```
+
+
+### Final cleaning
+
+Based on your EDA above, apply your desired cleaning steps to your full data set. Call this "cleaned_data".
+```{r}
+cleaned_data <- 
+
+```
+
+### Resplit
+Run this code chunk to apply the same split as we did at the beginning to the fully cleaned data
+```{r}
+
+set.seed(12345)
+
+splits <- cleaned_data |> 
+  validation_split(strata = "user_drinking")
+
+```
+
+## Part 2: Model Building
+
+Now you will consider multiple model configurations to predict `user_drinking` from the tweet text!
+
+Each model you train must:
+
+* Use the provided validation splits provided below
+
+* Be a glmnet
+
+* Use balanced accuracy as the metric
+
+* Specify all tweet cleaning/feature engineering steps using `tidytext` recipes
+
+At a minimum, fit at least 3 model configurations:
+
+* A Unigram BoW model
+
+* An n-gram BoW model (using either bigrams, combination of unigrams and bigrams, etc.)
+
+* A model using pretrained Twitter embeddings (provided in homework files in web book, you can use `data.table::fread()` to open this file)
+
+You may end up considering more than just three model configurations. Across these configurations, also consider:
+
+* Impact of different cleaning steps on different models
+
+* Number of features retained in your document term matrix
+
+* The stopwords that are important for these data in particular
+
+* Stemming
+
+Let's do it!
+
+### Consider Configurations
+
+Use as many chunks as you'd like below to consider model configurations. Save the resampled performance for each configuration you consider.
+```{r}
+
+
+```
+
+
+## Part 3: Best Model
+
+Since we did NOT hold out an independent test set and selected our model configuration based on cross validated performance, these next steps are subject to some degree of optimization bias!
+
+### Print the cross-validated performance of your best performing model
+```{r}
+
+```
+
+### Train your top performing model on the full data set
+```{r}
+
+
+```
+
+### Plot variable importance scores of your top performing model
+* Do these make sense to you? Why or why not?
+```{r}
+
+
+```
+
+### Make a confusion matrix of your model's predictions
+* What do you notice about the predictions that your model is making?
+```{r}
+
+
+```
+
+
+**Knit this file and submit your knitted html. Make sure to leave yourself enough time to knit. Nice job completing this assignment - we are proud of you.**
