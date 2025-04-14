@@ -1,0 +1,73 @@
+## Logistic Regression
+
+```{r}
+#| echo: FALSE
+#| message: FALSE
+options(conflicts.policy = "depends.ok")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+tidymodels_conflictRules()
+library(tidyverse) 
+library(tidymodels)
+# library(baguette)
+theme_set(theme_classic())
+options(tibble.width = Inf, dplyr.print_max=Inf)
+```
+
+```{r}
+set.seed(123)
+
+n <- 1000
+
+# Generate 5 independent numeric variables
+data <- tibble(
+  rnorm(n, mean = 0, sd = 1),  # Normal distribution
+  rnorm(n, mean = 0, sd = 0.2),
+  rpois(n, lambda = 0.5),           # Poisson-distributed data
+)
+
+
+data <- data |> magrittr::set_colnames(paste0("x", 1:3)) |> 
+  glimpse()
+
+# Simulate y values
+beta <- c(0.5, 0.002, 0.2)
+intercept <- -0.2
+eta <- intercept + as.matrix(data) %*% beta
+p <- 1 / (1 + exp(-eta))
+y <- rbinom(n, 1, p)
+data$y <- y
+```
+
+```{r}
+data <- data |> 
+  mutate(
+    y = if_else(y == 1, "1", "0"),
+    y = factor(y, levels = c("1", "0"))
+  )
+```
+
+### glm
+```{r}
+glm(y ~ ., family = binomial, data) |> 
+  tidy()
+```
+
+### tidymodel
+
+```{r}
+feat_trn <- recipe(y ~ ., data = data) |> 
+  prep(data) |> 
+  bake(NULL)
+
+fit_lr <-
+  logistic_reg() |> 
+  set_engine("glm") |> 
+  fit(y ~ ., data = feat_trn)
+
+fit_lr |> tidy()
+```
+
+
+
+
+
