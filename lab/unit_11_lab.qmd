@@ -1,0 +1,381 @@
+---
+title: "Unit 11 Lab Agenda"
+author: "Coco Yu"
+date: "`r lubridate::today()`"
+format: 
+  html: 
+    embed-resources: true
+    toc: true 
+    toc_depth: 4
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r}
+#| echo: FALSE
+#| message: FALSE
+options(conflicts.policy = "depends.ok")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+tidymodels_conflictRules()
+library(tidyverse) 
+library(tidymodels)
+library(tidyposterior)
+library(DALEX, exclude= "explain")
+library(DALEXtra)
+
+theme_set(theme_classic())
+options(tibble.width = Inf, dplyr.print_max=Inf)
+
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true",
+                     sha1 = "c045eee2655a18dc85e715b78182f176327358a7")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+
+cl <- parallel::makePSOCKcluster(parallel::detectCores(logical = FALSE))
+doParallel::registerDoParallel(cl)
+```
+
+**Prepare Data**
+
+```{r}
+path_data <- "data"
+data_all <- read_csv(here::here(path_data, "student_perf_cln.csv"),
+                     col_types = cols()) 
+focal_levels <- c("none", "primary", "middle", "secondary", "higher")
+data_all <- data_all |> 
+  mutate(across(ends_with("_educ"), ~ factor(.x, levels = 0:4, labels = focal_levels)),
+         across(where(is.character), as_factor)) 
+data_all <- data_all |> 
+  mutate(failures = if_else(failures == 0, "no", "yes"),
+              travel_time = if_else(travel_time == 1, "less_than_1_hour", "more_than_1_hour"))
+```
+
+### Feature Ablation
+
+**Feature ablation**: is a technique used to assess the importance of individual features in a model by systematically removing them and observing the impact on model performance. This process helps identify which features contribute most to the model's predictive power.
+
+We need to create a recipe for the full model and a recipe for the compact model. The compact model will remove the features that are not important. We can use the `step_rm()` function to remove features from the recipe.
+
+*Importantly, we evaluate the best model configuration (or statistical algorithm) for each feature set.*
+
+Next, we will use 10-fold cross-validation with 3 repeats to select the best model configuration and evaluate the models.
+
+```{r}
+set.seed(123456)
+splits <- vfold_cv(data_all, v = 10, repeats = 3)
+
+rec_full <- recipe(grade ~ ., data = data_all) |>
+  step_scale(all_numeric_predictors()) |> 
+  step_dummy(all_nominal_predictors()) |> 
+  step_nzv(all_predictors())
+
+rec_compact <- rec_full |>
+  step_rm(starts_with("mother_educ"), starts_with("father_educ"))
+
+tune_grid <- expand_grid(penalty = exp(seq(-8, .4, length.out = 500)),
+                         mixture = seq(0, 1, length.out = 6))
+
+fits_full <- linear_reg(penalty = tune(),
+                        mixture = tune()) |>
+  set_engine("glmnet") |>
+  set_mode("regression") |> 
+  tune_grid(preprocessor = rec_full,
+                resamples = splits,
+                grid = tune_grid,
+                metrics = metric_set(rsq))
+
+fits_compact <- linear_reg(penalty = tune(),
+                        mixture = tune()) |>
+  set_engine("glmnet") |>
+  set_mode("regression") |> 
+  tune_grid(preprocessor = rec_compact,
+                resamples = splits,
+                grid = tune_grid,
+                metrics = metric_set(rsq))
+```
+
+With the fitted models, we will next obtain the 30 held-out performance metrics for the full and compact models' best configuration. We will use the `collect_metrics()` function to extract the performance metrics from the fitted models.
+
+```{r}
+rsq_full <-
+  collect_metrics(fits_full, summarize = FALSE) |>
+  filter(.config == select_best(fits_full)$.config) |> 
+  select(id, id2, full = .estimate)
+
+rsq_compact <-
+     collect_metrics(fits_compact, summarize = FALSE) |>
+     filter(.config == select_best(fits_full)$.config) |> 
+     select(id, id2, compact = .estimate)
+
+rsq_all <- rsq_full |> 
+  full_join(rsq_compact, by = c("id", "id2")) |> 
+  print()
+```
+
+#### Model Comparison via Frequentist
+
+We now have the same 30 held-out samples for the full and compact models. We might use a paired t-test to compare the two models. The paired t-test is appropriate here because we have the same samples for both models. However, the 30 differences between the full and compact models are not independent. The paired t-test assumes that the differences are independent, which is not the case here. We can use a correction to account for this.
+
+Consult the lecture slides for more information on the nb-correlated t-test! The correction is based on the number of folds in the cross-validation.
+
+```{r}
+# included in fun_ml.R
+nb_correlated_t_test <- function(cv_full, cv_compact, k = 10){
+
+    diffs <- cv_full - cv_compact
+    n <- length(diffs)
+    mean_diff <- mean(diffs)
+    var_diffs <- var(diffs)
+    proportion_test <- 1 / k
+    proportion_train <- 1 - proportion_test
+    correction <- (1 / n) + (proportion_test / proportion_train)
+    se = sqrt(correction * var_diffs)
+
+    t = abs(mean_diff/se)
+    p_value <- 2 * pt(t, n - 1, lower.tail = FALSE)
+    tibble(mean_diff = mean_diff, se = se, t = t, df = n - 1, p_value = p_value)
+}
+
+nb_correlated_t_test(rsq_all$full, rsq_all$compact, k = 10)
+```
+
+#### Model Comparison via Bayesian
+
+We can also compare the two models using Bayesian methods. Bayesian methods provide the probability of the models given the data. Using this approach, we can estimate the posterior probability of 1) the accuracy of the full model; 2) the accuracy of the compact model; and 3) the difference in accuracy between the two models.
+
+We will use the `perf_mod()` function to create a performance model. The `perf_mod()` function takes the performance metrics from the fitted models and creates a performance model. We can then use the `contrast_models()` function to compare the two models.
+
+For `perf_mod()`, we pass in a dataframe with *id* columns (repeats and folds in this case -- id == repeat, and id2 == fold within repeats), and the performance metrics for the two models. The `formula` argument specifies the model structure. It's always written as "statistics ~ model + *your random effect terms (1 | id2/id)*".
+
+We will use the `hetero_var` argument to specify whether we relax the assumption that the variance for the two model metrics is the same. If `hetero_var = TRUE`, we assume that the variance for the two model metrics is different. If `hetero_var = FALSE`, we assume that the variance for the two model metrics is the same. The default for `hetero_var` is FALSE, and it allows the model to run quicker and easier to converge. We would typically want to set it as TRUE for classification models because the variance is often different for classification models. In particular, the variance will be the largest for accuracy around 0.5, and the variance will be the smallest for accuracy around 0 or 1.
+
+```{r}
+set.seed(102030)
+
+pp <- tidyposterior::perf_mod(rsq_all, 
+                    formula = statistic ~ model + (1 | id2/id),
+                    iter = 3000, chains = 4,  
+                    hetero_var = TRUE,
+                    adapt_delta = 0.999)
+
+# Remember to always check your warnings!
+warnings()
+```
+
+Sometimes you will encounter convergence issues in your models. This can be due to a variety of reasons, including the model structure, the data, or the priors. You can try increasing the number of iterations, changing the priors, or using different model structures. Increasing the number of chains can also help with convergence issues.
+
+To check convergence, you can use the `bayesplot::mcmc_trace()` function to plot the trace of the chains. You can also use the `summary()` function to check the R-hat statistic. The R-hat statistic should be close to 1 for all parameters. If it is greater than 1, it indicates that the chains have not converged.
+
+```{r}
+bayesplot::mcmc_trace(pp$stan)
+pp |> summary()
+```
+
+We can check our posterior distributions of the models. The posterior distributions will give us the probability of the models given the data. We can use the `tidy()` function to extract the posterior distributions from the fitted models.
+
+```{r}
+pp_tidy <- pp |> 
+  tidy(seed = 123) 
+
+pp_tidy |> 
+  group_by(model) |> 
+  summarize(mean = mean(posterior),
+            lower = quantile(posterior, probs = .025), 
+            upper = quantile(posterior, probs = .975)) |> 
+  mutate(model = factor(model, levels = c("full", "compact"))) |> 
+  arrange(model)
+```
+
+We can also graph the posterior probabilities of the models.
+
+```{r}
+pp_tidy |> 
+  ggplot() + 
+  geom_density(aes(x = posterior, color = model)) +
+  xlab("R Squared")
+
+pp_tidy |> 
+  ggplot() + 
+  geom_histogram(aes(x = posterior, fill = model), color = "white", alpha = 0.4,
+                 bins = 50, position = "identity") +
+  xlab("R Squared")
+```
+
+To visualize a little better, we can use faceted plots and add the mean and 95% credible intervals to each model, separately. The mean is the average of the posterior distribution, and the 95% credible interval is the range of values that contains 95% of the posterior distribution.
+
+```{r}
+ci <- pp_tidy |> 
+  summary() |> 
+  mutate(y = 450)
+
+pp_tidy |> 
+  ggplot(aes(x = posterior)) + 
+  geom_histogram(aes(x = posterior, fill = model), color = "white", bins = 50) +  
+  geom_segment(mapping = aes(y = y+50, yend = y-50, x = mean, xend = mean,
+                           color = model),
+               data = ci) +
+  geom_segment(mapping = aes(y = y, yend = y, x = lower, xend = upper, color = model),
+                data = ci) +
+  facet_wrap(~ model, ncol = 1) +
+  theme(legend.position = "none") +
+  ylab("Count") +
+  xlab("R Squared")
+```
+
+Determine if the models are equivalent. We can use the `contrast_models()` function to compare the two models. The `contrast_models()` function takes the performance model and compares the two models. 
+
+```{r}
+# contrast_model sets up a random seed inherently within the seed argument
+# no need to specify the seed outside
+pp |> 
+  contrast_models(seed = 12) |>
+  summary(size = .01) |> 
+  glimpse()
+```
+
+A rope is the range of values that we consider to be equivalent. If the posterior distribution falls within the rope, we consider the models to be equivalent. We define the range for ROPE completely based on the context of the problem (i.e., domain knowledge).
+
+```{r}
+pp |> 
+  contrast_models(seed = 12) |> 
+  ggplot(aes(x = difference)) + 
+  geom_histogram(bins = 50, color = "white", fill = "light grey")+
+  geom_vline(aes(xintercept = -.01), linetype = "dashed") + 
+  geom_vline(aes(xintercept = .01), linetype = "dashed")
+```
+
+### Feature Importance
+
+Prepare model:
+
+```{r}
+feat_all <- rec_full |> 
+  prep(data_all) |> 
+  bake(NULL) 
+
+fit_all_data <- linear_reg(penalty = select_best(fits_full, metric = "rsq")$penalty,
+                           mixture = select_best(fits_full, metric = "rsq")$mixture) |>
+  set_engine("glmnet") |>
+  set_mode("regression") |> 
+  fit(grade ~ ., data = feat_all)
+```
+
+We now need a predictor wrapper and explainer object. Predictor wrappers are used to create a function that takes a model and a dataset and returns the predictions. An explainer object is used to create a function that takes a model and a dataset and returns the feature importance. The `predictor_wrapper()` function creates a predictor wrapper, and the `explain()` function creates an explainer object. We need a prediction wrapper function here because the DALEX package is designed to be generic to accommodate different model types. In particular, the wrapper will specify what the prediction column is for classification models.
+
+```{r}
+x <- feat_all |> select(-grade)
+y <- feat_all |> pull(grade)
+
+predict_wrapper <- function(model, newdata) {
+  predict(model, newdata) |>  
+    pull(.pred)
+}
+
+explain_full <- explain_tidymodels(fit_all_data, 
+                                   data = x, 
+                                   y = y, 
+                                   predict_function = predict_wrapper)
+```
+
+#### Permutation Feature Importance
+
+Permutation feature importance is a technique used to assess the importance of individual features in a model by permuting the values of each feature and observing the impact on model performance. This process helps identify which features contribute most to the model's predictive power.
+
+We can use the `model_parts()` function to calculate the permutation feature importance. The `model_parts()` function takes the explainer object and calculates the feature importance. The `loss_function` argument specifies the loss function to use. The `type` argument specifies the type of feature importance to calculate. The `B` argument specifies the number of permutations to use. The `variable_group` argument specifies the variable groups to use.
+
+```{r}
+set.seed(123456)
+permute <- model_parts(explain_full, 
+            loss_function = loss_root_mean_square,
+            type = "raw",
+            B = 100)
+
+(permute)
+```
+
+```{r}
+plot(permute)
+```
+
+
+#### Shapley Feature Importance
+
+Shapley feature importance is a technique used to assess the importance of individual features in a model by calculating the Shapley values. Shapley values are a concept from cooperative game theory that assigns a value to each feature based on its contribution to the model's performance.
+
+We can calculate Shapley values for a single participant. Here's an example where we calculate Shapley values for the last subject. The `new_observation` argument specifies the observation to calculate the Shapley values for. The `B` argument specifies the number of permutations to use.
+
+```{r}
+x1 <- x |> slice(nrow(feat_all))
+sv <- predict_parts(explain_full, 
+                  new_observation = x1,
+                  type = "shap",
+                  B = 25)
+plot(sv)
+```
+
+We can calculate global Shapley values (Shapley values for all observations) by adding up all local Shapley values (Shapley values for a single observation).
+
+```{r}
+get_shaps <- function(df1){
+  predict_parts(explain_full, 
+                new_observation = df1,
+                type = "shap",
+                B = 25) |> 
+    filter(B == 0) |> 
+    select(variable_name, variable_value, contribution) |> 
+    as_tibble()
+}
+
+# To save up time, I will only calculate Shapley values for 10 observations.
+set.seed(123456)
+local_shaps <- x |>
+  slice_sample(n = 10) |>
+  mutate(id = row_number()) |>
+  nest(.by = id, .key = "dfs") |>  
+  mutate(shapleys = map(dfs, \(df1) get_shaps(df1))) |>
+  select(-dfs) |>
+  unnest(shapleys)
+```
+
+```{r}
+local_shaps |>
+  mutate(contribution = abs(contribution)) |>
+  group_by(variable_name) |>
+  summarize(mean_shap = mean(contribution)) |>
+  arrange(desc(mean_shap)) |>
+  mutate(variable_name = factor(variable_name),
+         variable_name = fct_reorder(variable_name, mean_shap)) |>
+  ggplot(aes(x = variable_name, y = mean_shap)) +
+  geom_point() +
+  coord_flip()
+```
+
+### Explanatory Plots
+
+#### Partial Dependence Plots
+
+A partial dependece plot (PDP) is a technique used to visualize the relationship between a feature and the predicted outcome of a model. It shows the average predicted outcome for different values of the feature, while holding all other features constant.
+
+We can use the `model_profile()` function to calculate the PDP. The `model_profile()` function takes the explainer object and calculates the PDP. The `variable` argument specifies the variable to plot. The `type` argument specifies the type of plot to create. The `grid_points` argument specifies the number of observations to use.
+
+```{r}
+pdp <- model_profile(explain_full, 
+                     variable = "study_time", 
+                     type = "partial",
+                     N = NULL)
+pdp |> plot()
+```
+
+#### Accumulated Local Effects (ALE) Plots
+
+Accumulated local effects (ALE) plots are a technique used to visualize the relationship between a feature and the predicted outcome of a model. ALE plots show the average predicted outcome for different values of the feature, while holding all other features constant. The difference between ALE and PDP is that ALE takes into account the interaction between features.
+
+We can use the `model_profile()` function to calculate the ALE. The `model_profile()` function takes the explainer object and calculates the ALE. The `variable` argument specifies the variable to plot. The `type` argument specifies the type of plot to create. The `N` argument specifies the number of observations to use.
+
+```{r}
+ale <- model_profile(explain_full, 
+                     type = "accumulated",
+                     variable = "age",
+                     N = NULL)
+ale |> plot()
+```
+

@@ -1,0 +1,65 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+## Logistic Regression
+
+```{r}
+#| echo: FALSE
+#| message: FALSE
+
+library(tidyverse) 
+library(tidymodels)
+options(conflicts.policy = "depends.ok")
+# library(baguette)
+theme_set(theme_classic())
+options(tibble.width = Inf, dplyr.print_max=Inf)
+```
+
+Generate a dataset where x is positively related to event 1.  As x increases p(1) increases
+```{r}
+set.seed(123)
+n <- 500 
+beta <- 0.5
+intercept <- 0 
+
+data <- tibble(x = rnorm(n, mean = 0, sd = 1)) |> 
+  mutate(eta = intercept + beta * x,
+         p = 1 / (1 + exp(-eta)),
+         y = rbinom(n, 1, p)) |> 
+  select(-eta, -p)
+```
+
+### tidymodel
+set the event (1) as the first level of the factor (default for tidymodels)
+
+```{r}
+data <- data |> 
+  mutate(y_event_first = factor(y, levels = c(1, 0)))
+```
+
+Fit the model and look at coefficients.   Coefficent of x is negative.   That seems counter-intutiive to what we would expect if the coefficient for x is telling us the relationship between x and p(event)
+```{r}
+fit_tm <-
+  logistic_reg() |> 
+  set_engine("glm") |> 
+  fit(y_event_first ~ x, data)
+
+fit_tm |> tidy()
+```
+
+```{r}
+sens_vec(data$y_event_first, predict(fit_tm, new_data = data)$.pred_class)
+```
+
+
+
+```{r}
+glm (y ~ x, data = data, family = "binomial") |> 
+  broom::tidy()
+```
+
+
+
+
