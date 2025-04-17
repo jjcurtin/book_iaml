@@ -1,0 +1,188 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+# NLP Discussion
+
+## Announcements
+
+- Last application assignment done!
+- Remaining units
+  - Bring it together for applications
+  - Ethics and Algorithmic Fairness
+  - Reading and discussion only for both units.  Discussion requires you!
+  
+- Two weeks left!
+  - next Tuesday (lab on NLP)
+  - next Thursday (discussion on applications)
+  - following Tuesday (discussion on ethics/fairness)
+  - following Thursday (concepts final review)
+
+- Early start to final application assignment (assigned next Thursday, April 24th) and due Friday May 9th at noon 
+- Concepts exam at lab time during finals period (Tuesday, May 6th, 11-12:15 in this room)
+
+-----
+
+## Single nominal variable
+
+- Our algorithms need features coded with numbers
+  - How did we generally do this?
+  - What about algorithms like random forest?
+  
+-----
+
+##  Single nominal variable example
+
+- Current emotional state
+  - angry, afraid, sad, excited, happy, calm
+
+- How represented with one-hot?
+
+-----
+
+## What about document of words (e.g., sentence rather than single word)
+
+- I watched a scary movie last night and couldn't get to sleep because I was so afraid
+- I went out with my friends to a bar and slept poorly because I drank too much
+
+
+- How represented with bag of words?
+- binary, count, tf-idf
+
+
+- What are the problems with these approaches
+  - relationships between features or similarity between full vector across observations 
+  - context/order
+  - dimensionality
+  - sparsity
+
+- What is benefit of stemming, stop words, etc with BoW (and n-grams)
+  - reduce dimensionality
+  - reduce sparsity
+  - remove noise
+  
+-----
+
+## N-grams vs. simple (1-gram) BoW
+
+- How different?
+
+
+- some context/order
+- but still no relationship/meaning or similarity
+- even higher dimensionality
+
+-----
+
+## Linguistic Inquiry and Word Count (LIWC)
+
+- Tausczik, Y. R., & Pennebaker, J. W. (2010). The psychological meaning of words: LIWC and computerized text analysis methods. Journal of Language and Social Psychology, 29(1), 24–54. https://doi.org/
+
+
+- Meaningful features? (based on domain expertise)
+- Include sentiment
+- Lower dimensional
+- Very limited breadth
+
+- Can add domain specific dictionaries
+
+-----
+
+## Word Embeddings
+
+- Encodes word meaning
+- Words that are similar get similar vectors
+- Meaning derived from context in various text corpora
+- Lower dimensional
+- Less sparse
+
+-----
+
+## Examples
+
+
+- Affect Words in 2D vector space 
+
+![](figs/nlp_1.PNG){height=5in}
+
+-----
+
+- Similar words are close to each other in the vector space
+
+![](figs/nlp_2.PNG){height=5in}
+
+-----
+
+- Distance between words is meaningful and preserved across different contexts
+
+![](figs/nlp_3.PNG){height=5in}
+
+
+-----
+
+word2vec (google) for embeddings 
+  - CBOW
+  - skipgram
+
+![](figs/nlp_4.PNG){height=5in}
+
+-----
+
+![](figs/nlp_5.PNG){height=5in}
+
+-----
+
+![](figs/nlp_6.PNG){height=5in}
+
+
+-----
+
+Components of word2vec
+
+- Input, projection and output layers
+- vocabulary size
+- embedding size
+- window size
+
+
+## Other Methods
+
+fasttext (facebook)
+
+- Like word2vec but uses character n-grams
+- Better with out of vocabulary words than word2vec
+
+glove (Stanford)
+
+- embedding predict co-occurrence of words in window
+- Better at global (vs. local) context than word2vec
+  
+## BERT
+
+BERT is pre-trained on a large corpus of text using two main tasks:
+
+- **Masked Language Model (MLM)**: Randomly masks some of the words in the input text and trains the model to predict the masked words based on the surrounding context. This helps BERT learn bidirectional representations by considering both left and right contexts
+- **Next Sentence Prediction (NSP)**: Trains the model to predict whether a given pair of sentences are consecutive in the original text. This helps BERT understand the relationships between sentences.
+
+- Uses 12 hidden layers with 768 units each
+- Use 12 [attention heads](https://www.analyticsvidhya.com/blog/2023/12/berts-attention-mechanism/) (BERT uses self-attention mechanisms to weigh the importance of different words in a sentence. This allows the model to understand the context of each word by considering its relationships with other words)
+
+Advantages
+ 
+- dynamic, context aware embeddings (river bank vs. bank vault)
+- Handles out of vocabulary words using sub-tokens
+- Can be fine tuned for specific tasks by adding additional task layers
+
+## Generative AI
+
+- For classification or regression, use embeddings to predict outcome
+
+\
+
+- It is now possible to build generative models to predict directly from text
+- Example
+  - I loved that movie
+  - I hated that movie
+  - The movie was long
+- Zero-shot, one-shot, few-shot learning with generative AI
