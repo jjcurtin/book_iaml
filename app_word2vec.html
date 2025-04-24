@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Introduction to Applied Machine Learning - 7&nbsp; Midterm Exam</title>
+<title>Introduction to Applied Machine Learning - 16&nbsp; Understanding Word Embeddings and word2vec</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -30,8 +30,8 @@ ul.task-list li input[type="checkbox"] {
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./l08_advanced_performance_metrics.html" rel="next">
-<link href="./l06_regularization.html" rel="prev">
+<link href="./app_test.html" rel="next">
+<link href="./app_keras.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -82,7 +82,7 @@ ul.task-list li input[type="checkbox"] {
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./l07_midterm.html"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Midterm Exam</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./review_midterm.html">Appendices</a></li><li class="breadcrumb-item"><a href="./app_word2vec.html"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Understanding Word Embeddings and word2vec</span></a></li></ol></nav>
         <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="" onclick="window.quartoOpenSearch();">
@@ -165,7 +165,7 @@ ul.task-list li input[type="checkbox"] {
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./l07_midterm.html" class="sidebar-item-text sidebar-link active">
+  <a href="./l07_midterm.html" class="sidebar-item-text sidebar-link">
  <span class="menu-text"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Midterm Exam</span></span></a>
   </div>
 </li>
@@ -264,7 +264,7 @@ ul.task-list li input[type="checkbox"] {
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
-  <a href="./app_word2vec.html" class="sidebar-item-text sidebar-link">
+  <a href="./app_word2vec.html" class="sidebar-item-text sidebar-link active">
  <span class="menu-text"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Understanding Word Embeddings and word2vec</span></span></a>
   </div>
 </li>
@@ -286,17 +286,31 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#applications-take-home-exam" id="toc-applications-take-home-exam" class="nav-link active" data-scroll-target="#applications-take-home-exam"><span class="header-section-number">7.1</span> Applications (take-home) Exam</a></li>
-  <li><a href="#conceptual-exam" id="toc-conceptual-exam" class="nav-link" data-scroll-target="#conceptual-exam"><span class="header-section-number">7.2</span> Conceptual Exam</a></li>
+  <li><a href="#sources" id="toc-sources" class="nav-link active" data-scroll-target="#sources"><span class="header-section-number">16.1</span> Sources</a></li>
+  <li><a href="#word-embeddings" id="toc-word-embeddings" class="nav-link" data-scroll-target="#word-embeddings"><span class="header-section-number">16.2</span> Word embeddings</a></li>
+  <li><a href="#the-word2vec-architecture" id="toc-the-word2vec-architecture" class="nav-link" data-scroll-target="#the-word2vec-architecture"><span class="header-section-number">16.3</span> The Word2Vec Architecture</a></li>
+  <li><a href="#skip-gram" id="toc-skip-gram" class="nav-link" data-scroll-target="#skip-gram"><span class="header-section-number">16.4</span> Skip-gram</a>
+  <ul class="collapse">
+  <li><a href="#the-fake-task-predicting-context-words" id="toc-the-fake-task-predicting-context-words" class="nav-link" data-scroll-target="#the-fake-task-predicting-context-words"><span class="header-section-number">16.4.1</span> The Fake Task: Predicting Context Words</a></li>
+  <li><a href="#generating-training-examples" id="toc-generating-training-examples" class="nav-link" data-scroll-target="#generating-training-examples"><span class="header-section-number">16.4.2</span> Generating Training Examples</a></li>
+  <li><a href="#the-neural-network-architecture-for-skip-gram" id="toc-the-neural-network-architecture-for-skip-gram" class="nav-link" data-scroll-target="#the-neural-network-architecture-for-skip-gram"><span class="header-section-number">16.4.3</span> The Neural Network Architecture for Skip-gram</a></li>
+  </ul></li>
+  <li><a href="#advanced-details-for-skip-gram" id="toc-advanced-details-for-skip-gram" class="nav-link" data-scroll-target="#advanced-details-for-skip-gram"><span class="header-section-number">16.5</span> Advanced Details for Skip-gram</a>
+  <ul class="collapse">
+  <li><a href="#common-words" id="toc-common-words" class="nav-link" data-scroll-target="#common-words"><span class="header-section-number">16.5.1</span> Common words</a></li>
+  <li><a href="#negative-sampling" id="toc-negative-sampling" class="nav-link" data-scroll-target="#negative-sampling"><span class="header-section-number">16.5.2</span> Negative Sampling</a></li>
+  <li><a href="#context-position-weighting" id="toc-context-position-weighting" class="nav-link" data-scroll-target="#context-position-weighting"><span class="header-section-number">16.5.3</span> Context Position Weighting</a></li>
+  </ul></li>
+  <li><a href="#continuous-bag-of-words-cbow" id="toc-continuous-bag-of-words-cbow" class="nav-link" data-scroll-target="#continuous-bag-of-words-cbow"><span class="header-section-number">16.6</span> Continuous Bag of Words (CBOW)</a></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/jjcurtin/book_iaml/edit/main/l07_midterm.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/jjcurtin/book_iaml/edit/main/app_word2vec.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
-<header id="title-block-header" class="quarto-title-block default">
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./review_midterm.html">Appendices</a></li><li class="breadcrumb-item"><a href="./app_word2vec.html"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Understanding Word Embeddings and word2vec</span></a></li></ol></nav>
 <div class="quarto-title">
-<h1 class="title"><span class="chapter-number">7</span>&nbsp; <span class="chapter-title">Midterm Exam</span></h1>
+<h1 class="title"><span class="chapter-number">16</span>&nbsp; <span class="chapter-title">Understanding Word Embeddings and word2vec</span></h1>
 </div>
 
 
@@ -313,31 +327,127 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<section id="applications-take-home-exam" class="level2" data-number="7.1">
-<h2 data-number="7.1" class="anchored" data-anchor-id="applications-take-home-exam"><span class="header-section-number">7.1</span> Applications (take-home) Exam</h2>
-<p>The Applications exam is due at noon on Friday, March 7th.</p>
-<p>As the name suggests, it will focus primarily applications. However, within the QMD file there are questions that also assess your understanding of what you are doing and why.</p>
-<p>You should complete the exam as you have previously completed the application assignments:</p>
+<section id="sources" class="level2" data-number="16.1">
+<h2 data-number="16.1" class="anchored" data-anchor-id="sources"><span class="header-section-number">16.1</span> Sources</h2>
+<p>This appendix relies very heavily on materials created by</p>
+</section>
+<section id="word-embeddings" class="level2" data-number="16.2">
+<h2 data-number="16.2" class="anchored" data-anchor-id="word-embeddings"><span class="header-section-number">16.2</span> Word embeddings</h2>
+<p>Could encode categorical variables as one-hot vectors (similar to dummy coding), but ..</p>
 <ul>
-<li>Download the datasets and qmd file below</li>
-<li>Provide the requested code in the empty code chunks that are included in the qmd file</li>
-<li>Answer the questions posed outside the code chunks within the text sections of the qmd file, immediately after the question.</li>
-<li>When you are done, knit the file to html and upload this knit file through the Canvas</li>
-<li>The exam is due on Friday, March 7th, at noon</li>
+<li>This is a very high dimensional representation of the data. The vector has as many dimensions as there are words in the vocabulary.</li>
+<li>This is a sparse representation of the data. Only one value is coded 1 and all other values are 0.</li>
+<li>The vectors do not encode meaning, only identity. In other words, there is no relationship between vectors for words that share meaning (e.g., depressed and sad, couch and sofa)</li>
 </ul>
-<p>In contrast to the application assignments, the TAs and I will not be able to answer substantive questions about the exam. However, if you need us to clarify what we are requesting you to do for any specific question or believe you have found an error in the exam, please post your question to the exams channel in Slack and we will respond ASAP</p>
-<p><a href="https://dionysus.psych.wisc.edu/iaml/midterm/midterm.qmd">Exam qmd shell</a></p>
-<p>Data:</p>
+<p>Word embeddings are also vectors where these is a single vector representation for each word. But..</p>
 <ul>
-<li><a href="https://dionysus.psych.wisc.edu/iaml/midterm/data_1.csv">dataset 1</a>; <a href="https://dionysus.psych.wisc.edu/iaml/midterm/data_1_dictionary.docx">data dictionary</a></li>
-<li><a href="https://dionysus.psych.wisc.edu/iaml/midterm/data_2.csv">dataset 2</a></li>
-<li><a href="https://dionysus.psych.wisc.edu/iaml/midterm/data_3.csv">dataset 3</a></li>
+<li>The can have lower dimensionality (e.g., 100, 200, 300 values to encode a word)</li>
+<li>These are not sparse (not mostly 0s)</li>
+<li>Vectors for related words are close to each other in the vector space</li>
 </ul>
 </section>
-<section id="conceptual-exam" class="level2" data-number="7.2">
-<h2 data-number="7.2" class="anchored" data-anchor-id="conceptual-exam"><span class="header-section-number">7.2</span> Conceptual Exam</h2>
-<p>The conceptual exam will be held in class during the Discussion section on Thursday, March 6th.</p>
-<p>There will be a review session for the conceptual exam in the Lab section on Tuesday, March 4th</p>
+<section id="the-word2vec-architecture" class="level2" data-number="16.3">
+<h2 data-number="16.3" class="anchored" data-anchor-id="the-word2vec-architecture"><span class="header-section-number">16.3</span> The Word2Vec Architecture</h2>
+<p>Word2Vec is a method for creating word embeddings. It uses a neural network to learn the vector representations of words based on their context in a large corpus of text.</p>
+<p>There are two main architectures for Word2Vec:</p>
+<ul>
+<li>skip-gram: Predicts the context words given a target word.</li>
+<li>continuous bag of words (CBOW): Predicts the target word given its context words.</li>
+</ul>
+<p>We will focus on the skip-gram architecture, which is a bit more intuitively understandable. But what we learn is very easily generalized to CBOW.</p>
+</section>
+<section id="skip-gram" class="level2" data-number="16.4">
+<h2 data-number="16.4" class="anchored" data-anchor-id="skip-gram"><span class="header-section-number">16.4</span> Skip-gram</h2>
+<section id="the-fake-task-predicting-context-words" class="level3" data-number="16.4.1">
+<h3 data-number="16.4.1" class="anchored" data-anchor-id="the-fake-task-predicting-context-words"><span class="header-section-number">16.4.1</span> The Fake Task: Predicting Context Words</h3>
+<p>Word2Vec in general, and the skip-gram architecture in particular, use a neural network set up to perform a “fake” task to learn the vector representations of words.</p>
+<ul>
+<li>The fake task is to predict the context (i.e, surrounding) words given a target word.<br>
+</li>
+<li>The neural network is trained on a large corpus of text to perform this task but after we train the model, we never use it for this task. Instead, we are just interested in the weights of the trained model. The weights of the network become our word embeddings (the vectors used to represent each word).</li>
+<li>We have seen this “fake” task approach before in the context of autoencoders. In that instances we used the raw data to predict the raw data but clearly we didnt need the model make those predictions. Instead, we wanted the weights in the compressed hidden layer to reduce the dimensionality of the data</li>
+</ul>
+</section>
+<section id="generating-training-examples" class="level3" data-number="16.4.2">
+<h3 data-number="16.4.2" class="anchored" data-anchor-id="generating-training-examples"><span class="header-section-number">16.4.2</span> Generating Training Examples</h3>
+<p>To train a model to predict the context words given a target word, we need to define the context. The context is defined by a window of words around the target word. For example, if we have the sentence “The quick brown fox jumps over the lazy dog” and we set the window size to 2, the context for the word “fox” would be [“quick”, “brown”, “jumps”, “over”].</p>
+<p>We move this window over a full corpus of text (e.g., all the text in Wikipedia) to create a very large number of training samples. Each training sample is a pair of words where the first word is the target. This will be the input to our model for that sample. The second word is a context word and this will be the label for that sample. The figure below shows how we could generate training samples for this sentence using a window size of 2. The blue words represent targets for which we will eventually learn embeddings.</p>
+<p><img src="figs/w2v_1.png" class="img-fluid"></p>
+</section>
+<section id="the-neural-network-architecture-for-skip-gram" class="level3" data-number="16.4.3">
+<h3 data-number="16.4.3" class="anchored" data-anchor-id="the-neural-network-architecture-for-skip-gram"><span class="header-section-number">16.4.3</span> The Neural Network Architecture for Skip-gram</h3>
+<p>The neural network architecture for skip-gram is a simple feed-forward neural network with one hidden layer.</p>
+<ul>
+<li>The input layer has as many nodes as there are words in the vocabulary (in the figure below, the vocabulary size is V = 10,000).<br>
+</li>
+<li>The output layer also has as many nodes as there are words in the vocabulary.<br>
+</li>
+<li>The hidden layer has a smaller number of nodes (e.g., 100, 200, 300). The weights between the input and hidden layers are the word embeddings we are trying to learn. For example, in the figure below, each word in the vocabulary is represented by a D = 300 dimensional vector.</li>
+</ul>
+<p><img src="figs/w2v_2.png" class="img-fluid"></p>
+<p>This model is trained using the word pairs described above.</p>
+<ul>
+<li>The target (first) word in the pair is represented using a 10,000 value one-hot vector as an input. The figure below displays the word “ants” as a input for that sample.<br>
+</li>
+<li>The context (second) word in the pair is also represented using a 10,000 value one-hot vector as the label/output layer.</li>
+<li>The model learns to assign probabilities to each of the 10,000 context words given any specific target word as input. But we don’t care about those predicted probabilities. Instead, we just care about the V x D matrix of weights associated with the hidden layer.</li>
+<li>Each row of this matrix is a D dimensional vector that represents the word embedding for a specific word in the vocabulary. For example, the 8th row in that matrix in the figure below will contain 300 weights associated with the word “ants”. Those 300 weights are the vector representation for “ants”.</li>
+</ul>
+<p>So why does this assign similar vectors to similar words.</p>
+<ul>
+<li>Given that the input vector is a one-hot vector, the probabilities in the output layer are a function of only the row in the D X V matrix associated with the input word. In other words, when the hD X V matrix is multiplied by this one hot vector, it sets the output associated with all the other rows in the matrix to 0. The only row that is not set to 0 is the row associated with the input word. This means that the output layer is only a function of the weights (i.e., the embeddings) associated with the input word.</li>
+<li>Now if two target words are similar, they will have similar context words. For example, “intelligent” and “smart” are likely surrounded by similar words. Dog and cat are likely also surrounded by similar words to each other.<br>
+</li>
+<li>The model will need to learn similar weights for two target words so that they will assign similar probabilities to the context words that surround them. This means the embeddings (which are just these hidden layer weights) will have to be similar for both target words since only that row is used to predict the probability of the context words. Super cool! What a great fake task!!</li>
+</ul>
+</section>
+</section>
+<section id="advanced-details-for-skip-gram" class="level2" data-number="16.5">
+<h2 data-number="16.5" class="anchored" data-anchor-id="advanced-details-for-skip-gram"><span class="header-section-number">16.5</span> Advanced Details for Skip-gram</h2>
+<p>With a vocabulary of 10,000 words and a 300-demensional embedding, the D x V matrix has 3 million weights. This is a lot of weights to learn. This could be very computationally expensive to train and would required a VERY large number of training examples. And of course, with a very large number of training examples, the training process will be very slow.</p>
+<p>To speed up the training process, the creators of skip-gram made two adjustments to the training process.</p>
+<ol type="1">
+<li>The adjusted how common words were handled to reduce the size of the training set</li>
+<li>They modified the learning algorithm to use negative sampling such that only a small percentage of the weights are adjusted for each training example.</li>
+</ol>
+<section id="common-words" class="level3" data-number="16.5.1">
+<h3 data-number="16.5.1" class="anchored" data-anchor-id="common-words"><span class="header-section-number">16.5.1</span> Common words</h3>
+<p>There are two problems with commons words like “the”</p>
+<ol type="1">
+<li>Word pairs like (“fox”, “the”) don’t tell us much about the meaning of fox</li>
+<li>We will have many more samples where the target word is “the” than we need to learn embeddings for the word “the”</li>
+</ol>
+<p>Skip-gram uses a technique called subsampling to reduce the number of training examples that contain common words.</p>
+<ul>
+<li>The idea is to randomly remove some of the training examples that contain common words. This is done by assigning a probability to each word in the vocabulary based on its frequency in the corpus.<br>
+</li>
+<li>Words are then selected to be removed based on this probability.</li>
+<li>In practice, very few unique words are actually removed. For example, using Wikipedia as the corpus, only the top 27 words would be downsampled. Nonethless, downsampling these words does reduce the size of the training set because these 27 words represented 33% of all the words (by count) in Wikipedia!</li>
+</ul>
+</section>
+<section id="negative-sampling" class="level3" data-number="16.5.2">
+<h3 data-number="16.5.2" class="anchored" data-anchor-id="negative-sampling"><span class="header-section-number">16.5.2</span> Negative Sampling</h3>
+<p>The second issue with training the skip-gram model is adjusting the full set of weights after each training example can also be computationally expensive given their number.</p>
+<ul>
+<li>The creators of skip-gram used a technique called negative sampling to reduce the number of weights that are adjusted for each training example.<br>
+</li>
+<li>Negative sampling addresses this by only modifying a small number of weights for each training example. Specifcally, for each training example, the weights for the label unit (i.e, the second entry in the training pair) and a small number of randomly selected negative unit (i.e., words that are not the current context word). This speeds up the process of training the model and reduces the number of weights that need to be adjusted.</li>
+</ul>
+</section>
+<section id="context-position-weighting" class="level3" data-number="16.5.3">
+<h3 data-number="16.5.3" class="anchored" data-anchor-id="context-position-weighting"><span class="header-section-number">16.5.3</span> Context Position Weighting</h3>
+<p>One additional modification to the skip-gram architecture is to weight the context words based on their position relative to the target word. For example, the word “quick” is closer to “fox” than “over”. The creators of skip-gram used a weighting scheme that assigns higher weights to context words that are closer to the target word. This means that the model will learn more about the meaning of the target word from context words that are closer to it.</p>
+<p>It does this by randomly reducing the window size for each training example. For example, if the window size is 5, the model will randomly select a window size of somewhere between 1-5 for each target word as training sample pairs are being created from the corpus. This reduces the number of training pairs for contexts at the outer edges of the window and over-represents context words nearer to the target word.</p>
+</section>
+</section>
+<section id="continuous-bag-of-words-cbow" class="level2" data-number="16.6">
+<h2 data-number="16.6" class="anchored" data-anchor-id="continuous-bag-of-words-cbow"><span class="header-section-number">16.6</span> Continuous Bag of Words (CBOW)</h2>
+<p>CBOW is the second architecture for Word2Vec. It is similar to skip-gram but instead of predicting the context words given a target word, it predicts the target word given the context words. Given this, the inputs are now the context words and the label is now the target word. This yields training data and an architecture that is somewhat different.</p>
+<p>Here is a comparison of the training samples for the same sentence using skip-gram and CBOW with a window size of 2.</p>
+<p><img src="figs/w2v_4.png" class="img-fluid"></p>
+<p>The architecture for CBOW is similar to skip-gram but the input vector now has 1s for all the words in the context and 0s for all the other words. The output vector is a one-hot vector for the target word.</p>
+<p><img src="figs/w2v_3.png" class="img-fluid"></p>
+<p>But the same principles apply. The model will learn similar weights for similar context words so that they will assign similar probabilities to the target word. This means the embeddings (which are just these hidden layer weights) will have to be similar for all context words that are similar to each other and associated with a particular target.</p>
 
 
 </section>
@@ -732,13 +842,13 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 </script>
 <nav class="page-navigation">
   <div class="nav-page nav-page-previous">
-      <a href="./l06_regularization.html" class="pagination-link" aria-label="Regularization and Penalized Models">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">6</span>&nbsp; <span class="chapter-title">Regularization and Penalized Models</span></span>
+      <a href="./app_keras.html" class="pagination-link" aria-label="Installing Keras for Neural Networks">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Installing Keras for Neural Networks</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./l08_advanced_performance_metrics.html" class="pagination-link" aria-label="Advanced Performance Metrics">
-        <span class="nav-page-text"><span class="chapter-number">8</span>&nbsp; <span class="chapter-title">Advanced Performance Metrics</span></span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./app_test.html" class="pagination-link" aria-label="Test">
+        <span class="nav-page-text"><span class="chapter-number">17</span>&nbsp; <span class="chapter-title">Test</span></span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
@@ -747,4 +857,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/jjcurtin/book_iaml/edit/main/l07_midterm.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/jjcurtin/book_iaml/edit/main/app_word2vec.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li></ul></div></div></div></footer></body></html>
