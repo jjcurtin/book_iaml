@@ -1632,25 +1632,69 @@
     ]
   },
   {
-    "objectID": "app_test.html",
-    "href": "app_test.html",
-    "title": "16  Test",
+    "objectID": "app_word2vec.html",
+    "href": "app_word2vec.html",
+    "title": "16  Understanding Word Embeddings and word2vec",
     "section": "",
-    "text": "16.1 Standards",
+    "text": "16.1 Word embeddings\nCould encode categorical variables as one-hot vectors (similar to dummy coding), but ..\nWord embeddings are also vectors where these is a single vector representation for each word. But..",
     "crumbs": [
       "Appendices",
-      "<span class='chapter-number'>16</span>  <span class='chapter-title'>Test</span>"
+      "<span class='chapter-number'>16</span>  <span class='chapter-title'>Understanding Word Embeddings and word2vec</span>"
+    ]
+  },
+  {
+    "objectID": "app_word2vec.html#word-embeddings",
+    "href": "app_word2vec.html#word-embeddings",
+    "title": "16  Understanding Word Embeddings and word2vec",
+    "section": "",
+    "text": "This is a very high dimensional representation of the data. The vector has as many dimensions as there are words in the vocabulary.\nThis is a sparse representation of the data. Only one value is coded 1 and all other values are 0.\nThe vectors do not encode meaning, only identity. In other words, there is no relationship between vectors for words that share meaning (e.g., depressed and sad, couch and sofa)\n\n\n\nThe can have lower dimensionality (e.g., 100, 200, 300 values to encode a word)\nThese are not sparse (not mostly 0s)\nVectors for related words are close to each other in the vector space",
+    "crumbs": [
+      "Appendices",
+      "<span class='chapter-number'>16</span>  <span class='chapter-title'>Understanding Word Embeddings and word2vec</span>"
+    ]
+  },
+  {
+    "objectID": "app_word2vec.html#the-word2vec-architecture",
+    "href": "app_word2vec.html#the-word2vec-architecture",
+    "title": "16  Understanding Word Embeddings and word2vec",
+    "section": "16.2 The Word2Vec Architecture",
+    "text": "16.2 The Word2Vec Architecture\nWord2Vec is a method for creating word embeddings. It uses a neural network to learn the vector representations of words based on their context in a large corpus of text.\nThere are two main architectures for Word2Vec:\n\nskip-gram: Predicts the context words given a target word.\ncontinuous bag of words (CBOW): Predicts the target word given its context words.\n\nWe will focus on the skip-gram architecture, which is a bit more intuitively understandable. But what we learn is very easily generalized to CBOW.",
+    "crumbs": [
+      "Appendices",
+      "<span class='chapter-number'>16</span>  <span class='chapter-title'>Understanding Word Embeddings and word2vec</span>"
+    ]
+  },
+  {
+    "objectID": "app_word2vec.html#skip-gram",
+    "href": "app_word2vec.html#skip-gram",
+    "title": "16  Understanding Word Embeddings and word2vec",
+    "section": "16.3 Skip-gram",
+    "text": "16.3 Skip-gram\n\n16.3.1 The Fake Task: Predicting Context Words\nWord2Vec in general, and the skip-gram architecture in particular, use a neural network set up to perform a “fake” task to learn the vector representations of words.\n\nThe fake task is to predict the context (i.e, surrounding) words given a target word.\n\nThe neural network is trained on a large corpus of text to perform this task but after we train the model, we never use it for this task. Instead, we are just interested in the weights of the trained model. The weights of the network become our word embeddings (the vectors used to represent each word).\nWe have seen this “fake” task approach before in the context of autoencoders. In that instances we used the raw data to predict the raw data but clearly we didnt need the model make those predictions. Instead, we wanted the weights in the compressed hidden layer to reduce the dimensionality of the data\n\n\n\n16.3.2 Generating Training Examples\nTo train a model to predict the context words given a target word, we need to define the context. The context is defined by a window of words around the target word. For example, if we have the sentence “The quick brown fox jumps over the lazy dog” and we set the window size to 2, the context for the word “fox” would be [“quick”, “brown”, “jumps”, “over”].\nWe move this window over a full corpus of text (e.g., all the text in Wikipedia) to create a very large number of training samples. Each training sample is a pair of words where the first word is the target. This will be the input to our model for that sample. The second word is a context word and this will be the label for that sample. The figure below shows how we could generate training samples for this sentence using a window size of 2. The blue words represent targets for which we will eventually learn embeddings.\n\n\n\n16.3.3 The Neural Network Architecture for Skip-gram",
+    "crumbs": [
+      "Appendices",
+      "<span class='chapter-number'>16</span>  <span class='chapter-title'>Understanding Word Embeddings and word2vec</span>"
+    ]
+  },
+  {
+    "objectID": "app_test.html",
+    "href": "app_test.html",
+    "title": "17  Test",
+    "section": "",
+    "text": "17.1 Standards",
+    "crumbs": [
+      "Appendices",
+      "<span class='chapter-number'>17</span>  <span class='chapter-title'>Test</span>"
     ]
   },
   {
     "objectID": "app_test.html#standards",
     "href": "app_test.html#standards",
-    "title": "16  Test",
+    "title": "17  Test",
     "section": "",
-    "text": "16.1.1 For displaying figures:\n\n\n\n\n\n\n\n16.1.2 For displaying code and even variable names\ndemo &lt;- function(x) variable_2\n\n\n16.1.3 For sizing graphs and code-generated plots\n\nYou can specify out-height or out-width as either pixels, inches, or percentages\nYou can specify both using different units\nIf you specify only one, the other should default to “auto” which keeps the figured scaled as in the original\n\n\n\nCode\nplot(pressure)\n\n\n\n\n\n\n\n\n\n\n\n16.1.4 For code annotation\n\n\nCode\nlibrary(tidyverse)\n\n\n\n1\n\nmake a df\n\n2\n\nglimpse a df\n\n\n\n\n── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──\n✔ dplyr     1.1.4     ✔ readr     2.1.5\n✔ forcats   1.0.0     ✔ stringr   1.5.1\n✔ ggplot2   3.5.1     ✔ tibble    3.2.1\n✔ lubridate 1.9.3     ✔ tidyr     1.3.1\n✔ purrr     1.0.2     \n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter() masks stats::filter()\n✖ dplyr::lag()    masks stats::lag()\nℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\n\nCode\n1d &lt;- tibble (x = 1:5) |&gt;\n2  glimpse()\n\n\nRows: 5\nColumns: 1\n$ x &lt;int&gt; 1, 2, 3, 4, 5\n\n\n\n\n16.1.5 For displaying color (like red questions)\nthis sentence is in red\nThis is an alternative method but more complex: I love R.\nred yellow green blue\nyellow background for better contrast\n\n\n16.1.6 Callouts for questions",
+    "text": "17.1.1 For displaying figures:\n\n\n\n\n\n\n\n17.1.2 For displaying code and even variable names\ndemo &lt;- function(x) variable_2\n\n\n17.1.3 For sizing graphs and code-generated plots\n\nYou can specify out-height or out-width as either pixels, inches, or percentages\nYou can specify both using different units\nIf you specify only one, the other should default to “auto” which keeps the figured scaled as in the original\n\n\n\nCode\nplot(pressure)\n\n\n\n\n\n\n\n\n\n\n\n17.1.4 For code annotation\n\n\nCode\nlibrary(tidyverse)\n\n\n\n1\n\nmake a df\n\n2\n\nglimpse a df\n\n\n\n\n── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──\n✔ dplyr     1.1.4     ✔ readr     2.1.5\n✔ forcats   1.0.0     ✔ stringr   1.5.1\n✔ ggplot2   3.5.1     ✔ tibble    3.2.1\n✔ lubridate 1.9.3     ✔ tidyr     1.3.1\n✔ purrr     1.0.2     \n── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──\n✖ dplyr::filter() masks stats::filter()\n✖ dplyr::lag()    masks stats::lag()\nℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors\n\n\nCode\n1d &lt;- tibble (x = 1:5) |&gt;\n2  glimpse()\n\n\nRows: 5\nColumns: 1\n$ x &lt;int&gt; 1, 2, 3, 4, 5\n\n\n\n\n17.1.5 For displaying color (like red questions)\nthis sentence is in red\nThis is an alternative method but more complex: I love R.\nred yellow green blue\nyellow background for better contrast\n\n\n17.1.6 Callouts for questions",
     "crumbs": [
       "Appendices",
-      "<span class='chapter-number'>16</span>  <span class='chapter-title'>Test</span>"
+      "<span class='chapter-number'>17</span>  <span class='chapter-title'>Test</span>"
     ]
   }
 ]
