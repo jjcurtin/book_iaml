@@ -181,22 +181,9 @@ sale price of the homes.
 ### Packages and Conflicts
 First, lets set up our environment with functions from important packages.  I strongly recommend reviewing our recommendations for best practices regarding [managing function conflicts](https://jjcurtin.github.io/book_dwvt/conflicts.html) now. It will save you a lot of headaches in the future.
 
-- We set a conflicts policy that will produce errors if we have unanticipated conflicts.
-- We source a library of functions that we use for common tasks in machine learning.  
-  - This includes a function (`tidymodels_conflictRules()`) that sets conflict rules to allow us to attach `tidymodels` functions without conflicts with `tidyverse` functions.  
-  - You can [review](https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true) that function to see what it does (search for that function name at the link)
-- Then we use that function
+We first load our two main packages (which will conflict with each other but intentionally by the package creators)
 
-```{r}
-#| message: false
-options(conflicts.policy = "depends.ok")
-devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
-tidymodels_conflictRules()
-```
-
---------------------------------------------------------------------------------
-
-Next we load packages for functions that we will use regularly.  There are five things to note RE best practices
+Next we load packages for other functions that we will use regularly.  There are five things to note RE best practices
 
 1. If we will use a lot of functions from a package (e.g., `tidyverse`, `tidymodels`), we attach the full package
 2. If we will use only several functions from a package (but plan to use them repeatedly), we use the `include.only` parameter to just attach those functions.
@@ -207,26 +194,33 @@ Next we load packages for functions that we will use regularly.  There are five 
 ```{r}
 #| message: false
 #| warning: false
+
+library(tidyverse) 
+library(tidymodels) 
+
 library(janitor, include.only = "clean_names") # <1>
 library(cowplot, include.only = "plot_grid") # <2> 
 library(kableExtra, exclude = "group_rows") # <3> 
-library(tidyverse) 
-library(tidymodels) # <4>
 ```
 1. As an alternative, we could have skipped loading the package and instead called the function as `janitor::clean_names()`
 2. Same is true for `cowplot` package
 3. When loading `kableExtra` (which we use often), you will always need to exclude `groups_rows()` to prevent a conflict with `dplyr` package in the tidyverse
-4. Loading tidymodels will produce conflicts unless you source and call my function `tidymodels_conflictRules()` (see above)
 
 --------------------------------------------------------------------------------
 
 ### Source and Other Environment Settings
-We will also source (from github) two other libraries of functions that we use commonly for exploratory data analyses.  You should review these function scripts ([fun_eda.R](https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true); [fun_plots.R](https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true) to see the code for these functions. 
+We will also source (from github) libraries of functions that we use commonly for exploratory data analyses.  You should review these function scripts: 
+
+- [fun_ml.R](https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+- [fun_eda.R](https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true)
+- [fun_plots.R](https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true)
 ```{r}
 #| message: false
 #| warning: false
-devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
-devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
 ```
 
 --------------------------------------------------------------------------------
@@ -249,7 +243,7 @@ Lets read in the data and glimpse the subset of observations we will work with i
 
 ```{r}
 data_all <- read_csv(here::here(path_data, "ames_raw_class.csv"),   # <1>
-                     col_types = cols()) |> # <2> 
+                     show_col_types = FALSE) |> # <2> 
   glimpse() # <3>
 ```
 1. First we read data using a relative path and the `here::here()` function.  This is a replacement for `file.path()` that works better for both interactive use and rendering in Quarto when using projects.
@@ -807,7 +801,7 @@ We have some work to do (again)
 ```{r}
  data_trn <- 
   read_csv(here::here(path_data, "ames_clean_class_trn.csv"), 
-           col_types = cols()) |>  # <1>
+           show_col_types = FALSE) |>  # <1>
   mutate(across(where(is.character), factor)) |> # <2>
   mutate(overall_qual = factor(overall_qual, levels = 1:10),  # <3>
          garage_qual = fct_relevel(garage_qual, c("no_garage", "po", "fa", 
@@ -846,7 +840,7 @@ Now we can use this function every time we read in one of the Ames datasets
 
 data_trn <- 
   read_csv(here::here(path_data, "ames_clean_class_trn.csv"), 
-           col_types = cols()) |> 
+           show_col_types = FALSE) |> 
   class_ames() |> # <1> 
   glimpse()
 ```
@@ -928,7 +922,9 @@ plot_bar <- function(df, x){
   df |>
     ggplot(aes(x = .data[[x]])) +
     geom_bar() +
-    theme(axis.text.x = element_text(angle = 90, size = x_label_size, vjust = 0.5, hjust = 1),
+    theme(axis.text.x = element_text(angle = 90, 
+                                     size = x_label_size, vjust = 0.5, 
+                                     hjust = 1),
           axis.text.y = element_text(size = 11))
 }
 ```
