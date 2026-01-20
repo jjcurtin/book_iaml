@@ -619,26 +619,8 @@ window.Quarto = {
 <section id="packages-and-conflicts" class="level3" data-number="2.3.5">
 <h3 data-number="2.3.5" class="anchored" data-anchor-id="packages-and-conflicts"><span class="header-section-number">2.3.5</span> Packages and Conflicts</h3>
 <p>First, lets set up our environment with functions from important packages. I strongly recommend reviewing our recommendations for best practices regarding <a href="https://jjcurtin.github.io/book_dwvt/conflicts.html">managing function conflicts</a> now. It will save you a lot of headaches in the future.</p>
-<ul>
-<li>We set a conflicts policy that will produce errors if we have unanticipated conflicts.</li>
-<li>We source a library of functions that we use for common tasks in machine learning.
-<ul>
-<li>This includes a function (<code>tidymodels_conflictRules()</code>) that sets conflict rules to allow us to attach <code>tidymodels</code> functions without conflicts with <code>tidyverse</code> functions.<br>
-</li>
-<li>You can <a href="https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true">review</a> that function to see what it does (search for that function name at the link)</li>
-</ul></li>
-<li>Then we use that function</li>
-</ul>
-<div class="cell">
-<details open="" class="code-fold">
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">conflicts.policy =</span> <span class="st">"depends.ok"</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">source_url</span>(<span class="st">"https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true"</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">tidymodels_conflictRules</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-</div>
-<hr>
-<p>Next we load packages for functions that we will use regularly. There are five things to note RE best practices</p>
+<p>We first load our two main packages (which will conflict with each other but intentionally by the package creators)</p>
+<p>Next we load packages for other functions that we will use regularly. There are five things to note RE best practices</p>
 <ol type="1">
 <li>If we will use a lot of functions from a package (e.g., <code>tidyverse</code>, <code>tidymodels</code>), we attach the full package</li>
 <li>If we will use only several functions from a package (but plan to use them repeatedly), we use the <code>include.only</code> parameter to just attach those functions.</li>
@@ -649,29 +631,26 @@ window.Quarto = {
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="annotated-cell-2"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-2-1" class="code-annotation-target"><a href="#annotated-cell-2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(janitor, <span class="at">include.only =</span> <span class="st">"clean_names"</span>)</span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-2-2" class="code-annotation-target"><a href="#annotated-cell-2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cowplot, <span class="at">include.only =</span> <span class="st">"plot_grid"</span>)</span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-2-3" class="code-annotation-target"><a href="#annotated-cell-2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra, <span class="at">exclude =</span> <span class="st">"group_rows"</span>)</span>
-<span id="annotated-cell-2-4"><a href="#annotated-cell-2-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse) </span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-2" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-2-5" class="code-annotation-target"><a href="#annotated-cell-2-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidymodels)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-1"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-1-1"><a href="#annotated-cell-1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse) </span>
+<span id="annotated-cell-1-2"><a href="#annotated-cell-1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidymodels) </span>
+<span id="annotated-cell-1-3"><a href="#annotated-cell-1-3" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-1-4" class="code-annotation-target"><a href="#annotated-cell-1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(janitor, <span class="at">include.only =</span> <span class="st">"clean_names"</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-1-5" class="code-annotation-target"><a href="#annotated-cell-1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cowplot, <span class="at">include.only =</span> <span class="st">"plot_grid"</span>)</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-1" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-1-6" class="code-annotation-target"><a href="#annotated-cell-1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(kableExtra, <span class="at">exclude =</span> <span class="st">"group_rows"</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-2" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-2" data-code-lines="1" data-code-annotation="1">As an alternative, we could have skipped loading the package and instead called the function as <code>janitor::clean_names()</code></span>
+<span data-code-cell="annotated-cell-1" data-code-lines="4" data-code-annotation="1">As an alternative, we could have skipped loading the package and instead called the function as <code>janitor::clean_names()</code></span>
 </dd>
-<dt data-target-cell="annotated-cell-2" data-target-annotation="2">2</dt>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-2" data-code-lines="2" data-code-annotation="2">Same is true for <code>cowplot</code> package</span>
+<span data-code-cell="annotated-cell-1" data-code-lines="5" data-code-annotation="2">Same is true for <code>cowplot</code> package</span>
 </dd>
-<dt data-target-cell="annotated-cell-2" data-target-annotation="3">3</dt>
+<dt data-target-cell="annotated-cell-1" data-target-annotation="3">3</dt>
 <dd>
-<span data-code-cell="annotated-cell-2" data-code-lines="3" data-code-annotation="3">When loading <code>kableExtra</code> (which we use often), you will always need to exclude <code>groups_rows()</code> to prevent a conflict with <code>dplyr</code> package in the tidyverse</span>
-</dd>
-<dt data-target-cell="annotated-cell-2" data-target-annotation="4">4</dt>
-<dd>
-<span data-code-cell="annotated-cell-2" data-code-lines="5" data-code-annotation="4">Loading tidymodels will produce conflicts unless you source and call my function <code>tidymodels_conflictRules()</code> (see above)</span>
+<span data-code-cell="annotated-cell-1" data-code-lines="6" data-code-annotation="3">When loading <code>kableExtra</code> (which we use often), you will always need to exclude <code>groups_rows()</code> to prevent a conflict with <code>dplyr</code> package in the tidyverse</span>
 </dd>
 </dl>
 </div>
@@ -680,12 +659,18 @@ window.Quarto = {
 </section>
 <section id="source-and-other-environment-settings" class="level3" data-number="2.3.6">
 <h3 data-number="2.3.6" class="anchored" data-anchor-id="source-and-other-environment-settings"><span class="header-section-number">2.3.6</span> Source and Other Environment Settings</h3>
-<p>We will also source (from github) two other libraries of functions that we use commonly for exploratory data analyses. You should review these function scripts (<a href="https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true">fun_eda.R</a>; <a href="https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true">fun_plots.R</a> to see the code for these functions.</p>
+<p>We will also source (from github) libraries of functions that we use commonly for exploratory data analyses. You should review these function scripts:</p>
+<ul>
+<li><a href="https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true%22">fun_ml.R</a></li>
+<li><a href="https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true">fun_eda.R</a></li>
+<li><a href="https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true">fun_plots.R</a></li>
+</ul>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">source_url</span>(<span class="st">"https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true"</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">source_url</span>(<span class="st">"https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true"</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">"https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <hr>
@@ -693,15 +678,15 @@ window.Quarto = {
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(<span class="fu">theme_classic</span>())</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">tibble.width =</span> <span class="cn">Inf</span>, <span class="at">tibble.print_max =</span> <span class="cn">Inf</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">theme_set</span>(<span class="fu">theme_classic</span>())</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">tibble.width =</span> <span class="cn">Inf</span>, <span class="at">tibble.print_max =</span> <span class="cn">Inf</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <p>And we set a relative path to our data. This assumes you are using an RStudio project with the path to the data relative to that project file. I’ve provided more detail <a href="https://jjcurtin.github.io/book_dwvt/file_and_path_management.html">elsewhere</a> on best practices for managing files and paths.</p>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>path_data <span class="ot">&lt;-</span> <span class="st">"data"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>path_data <span class="ot">&lt;-</span> <span class="st">"data"</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <hr>
@@ -712,23 +697,23 @@ window.Quarto = {
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="annotated-cell-6"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-6-1" class="code-annotation-target"><a href="#annotated-cell-6-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(path_data, <span class="st">"ames_raw_class.csv"</span>),</span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-6-2" class="code-annotation-target"><a href="#annotated-cell-6-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">col_types =</span> <span class="fu">cols</span>()) <span class="sc">|&gt;</span></span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-6-3" class="code-annotation-target"><a href="#annotated-cell-6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-5"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-5-1" class="code-annotation-target"><a href="#annotated-cell-5-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(path_data, <span class="st">"ames_raw_class.csv"</span>),</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-5-2" class="code-annotation-target"><a href="#annotated-cell-5-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-5" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-5-3" class="code-annotation-target"><a href="#annotated-cell-5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-6" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-5" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-6" data-code-lines="1" data-code-annotation="1">First we read data using a relative path and the <code>here::here()</code> function. This is a replacement for <code>file.path()</code> that works better for both interactive use and rendering in Quarto when using projects.</span>
+<span data-code-cell="annotated-cell-5" data-code-lines="1" data-code-annotation="1">First we read data using a relative path and the <code>here::here()</code> function. This is a replacement for <code>file.path()</code> that works better for both interactive use and rendering in Quarto when using projects.</span>
 </dd>
-<dt data-target-cell="annotated-cell-6" data-target-annotation="2">2</dt>
+<dt data-target-cell="annotated-cell-5" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-6" data-code-lines="2" data-code-annotation="2">We use <code>col_types = cols()</code> to let R guess the correct class for each column. This suppresses messages that aren’t important at this point prior to EDA.</span>
+<span data-code-cell="annotated-cell-5" data-code-lines="2" data-code-annotation="2">We use <code>col_types = cols()</code> to let R guess the correct class for each column. This suppresses messages that aren’t important at this point prior to EDA.</span>
 </dd>
-<dt data-target-cell="annotated-cell-6" data-target-annotation="3">3</dt>
+<dt data-target-cell="annotated-cell-5" data-target-annotation="3">3</dt>
 <dd>
-<span data-code-cell="annotated-cell-6" data-code-lines="3" data-code-annotation="3">It is good practice to always <code>glimpse()</code> data after you read it.</span>
+<span data-code-cell="annotated-cell-5" data-code-lines="3" data-code-annotation="3">It is good practice to always <code>glimpse()</code> data after you read it.</span>
 </dd>
 </dl>
 </div>
@@ -835,24 +820,24 @@ $ SalePrice         &lt;dbl&gt; 215000, 105000, 172000, 189900, 213500, 191500, 
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="annotated-cell-7"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-7-1"><a href="#annotated-cell-7-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
-<span id="annotated-cell-7-2"><a href="#annotated-cell-7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(SalePrice,</span>
-<span id="annotated-cell-7-3"><a href="#annotated-cell-7-3" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Gr Liv Area</span><span class="st">`</span>, </span>
-<span id="annotated-cell-7-4"><a href="#annotated-cell-7-4" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Lot Area</span><span class="st">`</span>, </span>
-<span id="annotated-cell-7-5"><a href="#annotated-cell-7-5" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Year Built</span><span class="st">`</span>, </span>
-<span id="annotated-cell-7-6"><a href="#annotated-cell-7-6" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Overall Qual</span><span class="st">`</span>, </span>
-<span id="annotated-cell-7-7"><a href="#annotated-cell-7-7" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Garage Cars</span><span class="st">`</span>,</span>
-<span id="annotated-cell-7-8"><a href="#annotated-cell-7-8" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Garage Qual</span><span class="st">`</span>,</span>
-<span id="annotated-cell-7-9"><a href="#annotated-cell-7-9" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">MS Zoning</span><span class="st">`</span>,</span>
-<span id="annotated-cell-7-10"><a href="#annotated-cell-7-10" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Lot Config</span><span class="st">`</span> ,</span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-7" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-7-11" class="code-annotation-target"><a href="#annotated-cell-7-11" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Bldg Type</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-7-12"><a href="#annotated-cell-7-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-6"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-6-1"><a href="#annotated-cell-6-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-6-2"><a href="#annotated-cell-6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(SalePrice,</span>
+<span id="annotated-cell-6-3"><a href="#annotated-cell-6-3" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Gr Liv Area</span><span class="st">`</span>, </span>
+<span id="annotated-cell-6-4"><a href="#annotated-cell-6-4" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Lot Area</span><span class="st">`</span>, </span>
+<span id="annotated-cell-6-5"><a href="#annotated-cell-6-5" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Year Built</span><span class="st">`</span>, </span>
+<span id="annotated-cell-6-6"><a href="#annotated-cell-6-6" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Overall Qual</span><span class="st">`</span>, </span>
+<span id="annotated-cell-6-7"><a href="#annotated-cell-6-7" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Garage Cars</span><span class="st">`</span>,</span>
+<span id="annotated-cell-6-8"><a href="#annotated-cell-6-8" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Garage Qual</span><span class="st">`</span>,</span>
+<span id="annotated-cell-6-9"><a href="#annotated-cell-6-9" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">MS Zoning</span><span class="st">`</span>,</span>
+<span id="annotated-cell-6-10"><a href="#annotated-cell-6-10" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Lot Config</span><span class="st">`</span> ,</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-6" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-6-11" class="code-annotation-target"><a href="#annotated-cell-6-11" aria-hidden="true" tabindex="-1"></a>         <span class="st">`</span><span class="at">Bldg Type</span><span class="st">`</span>) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-6-12"><a href="#annotated-cell-6-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-7" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-6" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-7" data-code-lines="11" data-code-annotation="1">Notice that the dataset used non-standard variable names that include spaces. We need to use back-ticks around the variable names to allow us reference those variables. We will fix this during the cleaning process and you should never use spaces in variable names when setting up your own data!!!</span>
+<span data-code-cell="annotated-cell-6" data-code-lines="11" data-code-annotation="1">Notice that the dataset used non-standard variable names that include spaces. We need to use back-ticks around the variable names to allow us reference those variables. We will fix this during the cleaning process and you should never use spaces in variable names when setting up your own data!!!</span>
 </dd>
 </dl>
 </div>
@@ -917,10 +902,10 @@ $ `Bldg Type`    &lt;chr&gt; "1Fam", "1Fam", "1Fam", "1Fam", "TwnhsE", "TwnhsE",
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clean_names</span>(<span class="st">"snake"</span>)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>data_all <span class="sc">|&gt;</span> <span class="fu">names</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">clean_names</span>(<span class="st">"snake"</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>data_all <span class="sc">|&gt;</span> <span class="fu">names</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] "sale_price"   "gr_liv_area"  "lot_area"     "year_built"   "overall_qual"
@@ -948,7 +933,7 @@ $ `Bldg Type`    &lt;chr&gt; "1Fam", "1Fam", "1Fam", "1Fam", "TwnhsE", "TwnhsE",
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="sc">|&gt;</span> <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="sc">|&gt;</span> <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>Rows: 1,955
@@ -971,27 +956,27 @@ $ bldg_type    &lt;chr&gt; "1Fam", "1Fam", "1Fam", "1Fam", "TwnhsE", "TwnhsE", "
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="annotated-cell-10"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><a class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-10-1" class="code-annotation-target"><a href="#annotated-cell-10-1" aria-hidden="true" tabindex="-1"></a>oq_levels <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
-<span id="annotated-cell-10-2"><a href="#annotated-cell-10-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-10-3"><a href="#annotated-cell-10-3" aria-hidden="true" tabindex="-1"></a>data_all <span class="ot">&lt;-</span>  data_all <span class="sc">|&gt;</span> </span>
-<span id="annotated-cell-10-4"><a href="#annotated-cell-10-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">factor</span>(overall_qual, </span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-10-5" class="code-annotation-target"><a href="#annotated-cell-10-5" aria-hidden="true" tabindex="-1"></a>                               <span class="at">levels =</span> oq_levels)) <span class="sc">|&gt;</span></span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-10" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-10-6" class="code-annotation-target"><a href="#annotated-cell-10-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.character), factor)) <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-10-7"><a href="#annotated-cell-10-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-9"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-9-1" class="code-annotation-target"><a href="#annotated-cell-9-1" aria-hidden="true" tabindex="-1"></a>oq_levels <span class="ot">&lt;-</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span></span>
+<span id="annotated-cell-9-2"><a href="#annotated-cell-9-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-9-3"><a href="#annotated-cell-9-3" aria-hidden="true" tabindex="-1"></a>data_all <span class="ot">&lt;-</span>  data_all <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-9-4"><a href="#annotated-cell-9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">factor</span>(overall_qual, </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-9-5" class="code-annotation-target"><a href="#annotated-cell-9-5" aria-hidden="true" tabindex="-1"></a>                               <span class="at">levels =</span> oq_levels)) <span class="sc">|&gt;</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-9" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-9-6" class="code-annotation-target"><a href="#annotated-cell-9-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.character), factor)) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-9-7"><a href="#annotated-cell-9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-10" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-10" data-code-lines="1" data-code-annotation="1">It is always best to explicitly set the levels of an ordinal factor in the order you prefer. It is not necessary here because <code>overall_qual</code> was numeric and therefore sorts in the expected order. However, if it had been numbers stored as characters, it could sort incorrectly (e.g., 1, 10, 2, 3, …). And obviously if the orders levels were names, the order would have to be specified.</span>
+<span data-code-cell="annotated-cell-9" data-code-lines="1" data-code-annotation="1">It is always best to explicitly set the levels of an ordinal factor in the order you prefer. It is not necessary here because <code>overall_qual</code> was numeric and therefore sorts in the expected order. However, if it had been numbers stored as characters, it could sort incorrectly (e.g., 1, 10, 2, 3, …). And obviously if the orders levels were names, the order would have to be specified.</span>
 </dd>
-<dt data-target-cell="annotated-cell-10" data-target-annotation="2">2</dt>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-10" data-code-lines="5" data-code-annotation="2">We indicate the levels here.</span>
+<span data-code-cell="annotated-cell-9" data-code-lines="5" data-code-annotation="2">We indicate the levels here.</span>
 </dd>
-<dt data-target-cell="annotated-cell-10" data-target-annotation="3">3</dt>
+<dt data-target-cell="annotated-cell-9" data-target-annotation="3">3</dt>
 <dd>
-<span data-code-cell="annotated-cell-10" data-code-lines="6" data-code-annotation="3">We use a mutate to re-class all character data to factors. I prefer <code>factor()</code> to <code>forcats::fct()</code> because factor orders the levels alphabetically. Be aware that this <em>could</em> change if your code is used in a region of the world where this sorting is different. I still prefer this to the alternative (in <code>fct()</code>) that orders by the order the levels are found in your data.</span>
+<span data-code-cell="annotated-cell-9" data-code-lines="6" data-code-annotation="3">We use a mutate to re-class all character data to factors. I prefer <code>factor()</code> to <code>forcats::fct()</code> because factor orders the levels alphabetically. Be aware that this <em>could</em> change if your code is used in a region of the world where this sorting is different. I still prefer this to the alternative (in <code>fct()</code>) that orders by the order the levels are found in your data.</span>
 </dd>
 </dl>
 </div>
@@ -1025,7 +1010,7 @@ $ bldg_type    &lt;fct&gt; 1Fam, 1Fam, 1Fam, 1Fam, TwnhsE, TwnhsE, TwnhsE, 1Fam,
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>skim_some <span class="ot">&lt;-</span> <span class="fu">skim_with</span>(<span class="at">numeric =</span> <span class="fu">sfl</span>(<span class="at">mean =</span> <span class="cn">NULL</span>, <span class="at">sd =</span> <span class="cn">NULL</span>, <span class="at">p25 =</span> <span class="cn">NULL</span>, <span class="at">p50 =</span> <span class="cn">NULL</span>, <span class="at">p75 =</span> <span class="cn">NULL</span>, <span class="at">hist =</span> <span class="cn">NULL</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>skim_some <span class="ot">&lt;-</span> <span class="fu">skim_with</span>(<span class="at">numeric =</span> <span class="fu">sfl</span>(<span class="at">mean =</span> <span class="cn">NULL</span>, <span class="at">sd =</span> <span class="cn">NULL</span>, <span class="at">p25 =</span> <span class="cn">NULL</span>, <span class="at">p50 =</span> <span class="cn">NULL</span>, <span class="at">p75 =</span> <span class="cn">NULL</span>, <span class="at">hist =</span> <span class="cn">NULL</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <hr>
@@ -1037,8 +1022,8 @@ $ bldg_type    &lt;fct&gt; 1Fam, 1Fam, 1Fam, 1Fam, TwnhsE, TwnhsE, TwnhsE, 1Fam,
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="sc">|&gt;</span> </span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">skim_some</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="sc">|&gt;</span> </span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">skim_some</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -1245,15 +1230,15 @@ Coding sidebar 2
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="annotated-cell-13"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-13-1"><a href="#annotated-cell-13-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="sc">|&gt;</span> </span>
-<span id="annotated-cell-13-2"><a href="#annotated-cell-13-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">skim_some</span>() <span class="sc">|&gt;</span> </span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-13" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-13-3" class="code-annotation-target"><a href="#annotated-cell-13-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(skim_variable, n_missing, complete_rate)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-12"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-12-1"><a href="#annotated-cell-12-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-12-2"><a href="#annotated-cell-12-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">skim_some</span>() <span class="sc">|&gt;</span> </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-12" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-12-3" class="code-annotation-target"><a href="#annotated-cell-12-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(skim_variable, n_missing, complete_rate)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-13" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-12" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-13" data-code-lines="3" data-code-annotation="1"><code>skim_some()</code> returns a dataframe so you can select only the subset of columns to focus its output on what you want. Or just print it all!</span>
+<span data-code-cell="annotated-cell-12" data-code-lines="3" data-code-annotation="1"><code>skim_some()</code> returns a dataframe so you can select only the subset of columns to focus its output on what you want. Or just print it all!</span>
 </dd>
 </dl>
 </div>
@@ -1289,16 +1274,16 @@ Coding sidebar 2
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="annotated-cell-14"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-14-1" class="code-annotation-target"><a href="#annotated-cell-14-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">tibble.width =</span> <span class="cn">Inf</span>, <span class="at">tibble.print_max =</span> <span class="cn">Inf</span>)</span>
-<span id="annotated-cell-14-2"><a href="#annotated-cell-14-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="annotated-cell-14-3"><a href="#annotated-cell-14-3" aria-hidden="true" tabindex="-1"></a>data_all <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="fu">is.na</span>(garage_cars)) <span class="sc">|&gt;</span> </span>
-<span id="annotated-cell-14-4"><a href="#annotated-cell-14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-13"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><a class="code-annotation-anchor" data-target-cell="annotated-cell-13" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-13-1" class="code-annotation-target"><a href="#annotated-cell-13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">tibble.width =</span> <span class="cn">Inf</span>, <span class="at">tibble.print_max =</span> <span class="cn">Inf</span>)</span>
+<span id="annotated-cell-13-2"><a href="#annotated-cell-13-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="annotated-cell-13-3"><a href="#annotated-cell-13-3" aria-hidden="true" tabindex="-1"></a>data_all <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="fu">is.na</span>(garage_cars)) <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-13-4"><a href="#annotated-cell-13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-14" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-13" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-14" data-code-lines="1" data-code-annotation="1">This sets print to print all rows and columns. Note that we set these options at the start of the unit b.c. we like to see our full tibbles. If we want only a subset of the first (or last) rows, we use <code>head()</code> or <code>tail()</code></span>
+<span data-code-cell="annotated-cell-13" data-code-lines="1" data-code-annotation="1">This sets print to print all rows and columns. Note that we set these options at the start of the unit b.c. we like to see our full tibbles. If we want only a subset of the first (or last) rows, we use <code>head()</code> or <code>tail()</code></span>
 </dd>
 </dl>
 </div>
@@ -1323,23 +1308,23 @@ Coding sidebar 2
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="annotated-cell-15"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-15-1"><a href="#annotated-cell-15-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Might want to use height = "100%" if only printing a few rows</span></span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-15-2" class="code-annotation-target"><a href="#annotated-cell-15-2" aria-hidden="true" tabindex="-1"></a>print_kbl <span class="ot">&lt;-</span> <span class="cf">function</span>(data, <span class="at">height =</span> <span class="st">"500px"</span>) {</span>
-<span id="annotated-cell-15-3"><a href="#annotated-cell-15-3" aria-hidden="true" tabindex="-1"></a>  data <span class="sc">|&gt;</span> </span>
-<span id="annotated-cell-15-4"><a href="#annotated-cell-15-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kbl</span>(<span class="at">align =</span> <span class="st">"r"</span>) <span class="sc">|&gt;</span> </span>
-<span id="annotated-cell-15-5"><a href="#annotated-cell-15-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"condensed"</span>)) <span class="sc">|&gt;</span> </span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-15" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-15-6" class="code-annotation-target"><a href="#annotated-cell-15-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scroll_box</span>(<span class="at">height =</span> height, <span class="at">width =</span> <span class="st">"100%"</span>)</span>
-<span id="annotated-cell-15-7"><a href="#annotated-cell-15-7" aria-hidden="true" tabindex="-1"></a>}</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-14"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-14-1"><a href="#annotated-cell-14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Might want to use height = "100%" if only printing a few rows</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-14-2" class="code-annotation-target"><a href="#annotated-cell-14-2" aria-hidden="true" tabindex="-1"></a>print_kbl <span class="ot">&lt;-</span> <span class="cf">function</span>(data, <span class="at">height =</span> <span class="st">"500px"</span>) {</span>
+<span id="annotated-cell-14-3"><a href="#annotated-cell-14-3" aria-hidden="true" tabindex="-1"></a>  data <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-14-4"><a href="#annotated-cell-14-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kbl</span>(<span class="at">align =</span> <span class="st">"r"</span>) <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-14-5"><a href="#annotated-cell-14-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"condensed"</span>)) <span class="sc">|&gt;</span> </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-14" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-14-6" class="code-annotation-target"><a href="#annotated-cell-14-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scroll_box</span>(<span class="at">height =</span> height, <span class="at">width =</span> <span class="st">"100%"</span>)</span>
+<span id="annotated-cell-14-7"><a href="#annotated-cell-14-7" aria-hidden="true" tabindex="-1"></a>}</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-15" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-14" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-15" data-code-lines="2" data-code-annotation="1">Defaults to a output box of height = “500px”. Can set to other values if preferred.</span>
+<span data-code-cell="annotated-cell-14" data-code-lines="2" data-code-annotation="1">Defaults to a output box of height = “500px”. Can set to other values if preferred.</span>
 </dd>
-<dt data-target-cell="annotated-cell-15" data-target-annotation="2">2</dt>
+<dt data-target-cell="annotated-cell-14" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-15" data-code-lines="6" data-code-annotation="2">Might want to use <code>height = "100%"</code> if only printing a few rows.</span>
+<span data-code-cell="annotated-cell-14" data-code-lines="6" data-code-annotation="2">Might want to use <code>height = "100%"</code> if only printing a few rows.</span>
 </dd>
 </dl>
 </div>
@@ -1349,8 +1334,8 @@ Coding sidebar 2
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="fu">is.na</span>(garage_qual)) <span class="sc">|&gt;</span> </span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print_kbl</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="fu">is.na</span>(garage_qual)) <span class="sc">|&gt;</span> </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">print_kbl</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:500px; overflow-x: scroll; width:100%; ">
@@ -2707,10 +2692,10 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="fu">is.na</span>(garage_qual)) <span class="sc">|&gt;</span> </span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(<span class="at">align =</span> <span class="st">"r"</span>) <span class="sc">|&gt;</span> </span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"condensed"</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scroll_box</span>(<span class="at">height =</span> <span class="st">"500px"</span>, <span class="at">width =</span> <span class="st">"100%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="sc">|&gt;</span> <span class="fu">filter</span>(<span class="fu">is.na</span>(garage_qual)) <span class="sc">|&gt;</span> </span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kbl</span>(<span class="at">align =</span> <span class="st">"r"</span>) <span class="sc">|&gt;</span> </span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable_styling</span>(<span class="at">bootstrap_options =</span> <span class="fu">c</span>(<span class="st">"striped"</span>, <span class="st">"condensed"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scroll_box</span>(<span class="at">height =</span> <span class="st">"500px"</span>, <span class="at">width =</span> <span class="st">"100%"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:500px; overflow-x: scroll; width:100%; ">
@@ -4051,19 +4036,19 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="annotated-cell-18"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-18-1"><a href="#annotated-cell-18-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-18" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-18-2" class="code-annotation-target"><a href="#annotated-cell-18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">garage_qual =</span> <span class="fu">fct_expand</span>(garage_qual, <span class="st">"no_garage"</span>),</span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-18" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-18-3" class="code-annotation-target"><a href="#annotated-cell-18-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">garage_qual =</span> <span class="fu">replace_na</span>(garage_qual, <span class="st">"no_garage"</span>))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-17"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-17-1"><a href="#annotated-cell-17-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-17" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-17-2" class="code-annotation-target"><a href="#annotated-cell-17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">garage_qual =</span> <span class="fu">fct_expand</span>(garage_qual, <span class="st">"no_garage"</span>),</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-17" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-17-3" class="code-annotation-target"><a href="#annotated-cell-17-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">garage_qual =</span> <span class="fu">replace_na</span>(garage_qual, <span class="st">"no_garage"</span>))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-18" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-17" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-18" data-code-lines="2" data-code-annotation="1">First add a new level to the factor</span>
+<span data-code-cell="annotated-cell-17" data-code-lines="2" data-code-annotation="1">First add a new level to the factor</span>
 </dd>
-<dt data-target-cell="annotated-cell-18" data-target-annotation="2">2</dt>
+<dt data-target-cell="annotated-cell-17" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-18" data-code-lines="3" data-code-annotation="2">Then recode NA to that new level</span>
+<span data-code-cell="annotated-cell-17" data-code-lines="3" data-code-annotation="2">Then recode NA to that new level</span>
 </dd>
 </dl>
 </div>
@@ -4082,7 +4067,7 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>data_all<span class="sc">$</span>garage_qual <span class="sc">|&gt;</span> <span class="fu">levels</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>data_all<span class="sc">$</span>garage_qual <span class="sc">|&gt;</span> <span class="fu">levels</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code>[1] "Ex"        "Fa"        "Gd"        "Po"        "TA"        "no_garage"</code></pre>
@@ -4092,25 +4077,25 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="annotated-cell-20"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><a class="code-annotation-anchor" data-target-cell="annotated-cell-20" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-20-1" class="code-annotation-target"><a href="#annotated-cell-20-1" aria-hidden="true" tabindex="-1"></a>gq_levels <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"no_garage"</span>, <span class="st">"Po"</span>, <span class="st">"Fa"</span>, <span class="st">"TA"</span>, <span class="st">"Gd"</span>, <span class="st">"Ex"</span>)</span>
-<span id="annotated-cell-20-2"><a href="#annotated-cell-20-2" aria-hidden="true" tabindex="-1"></a>data_all <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-20" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-20-3" class="code-annotation-target"><a href="#annotated-cell-20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">garage_qual =</span> <span class="fu">fct_relevel</span>(garage_qual, gq_levels))</span>
-<span id="annotated-cell-20-4"><a href="#annotated-cell-20-4" aria-hidden="true" tabindex="-1"></a></span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-20" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-20-5" class="code-annotation-target"><a href="#annotated-cell-20-5" aria-hidden="true" tabindex="-1"></a>data_all<span class="sc">$</span>garage_qual <span class="sc">|&gt;</span> <span class="fu">levels</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-19"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><a class="code-annotation-anchor" data-target-cell="annotated-cell-19" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-19-1" class="code-annotation-target"><a href="#annotated-cell-19-1" aria-hidden="true" tabindex="-1"></a>gq_levels <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"no_garage"</span>, <span class="st">"Po"</span>, <span class="st">"Fa"</span>, <span class="st">"TA"</span>, <span class="st">"Gd"</span>, <span class="st">"Ex"</span>)</span>
+<span id="annotated-cell-19-2"><a href="#annotated-cell-19-2" aria-hidden="true" tabindex="-1"></a>data_all <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-19" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-19-3" class="code-annotation-target"><a href="#annotated-cell-19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">garage_qual =</span> <span class="fu">fct_relevel</span>(garage_qual, gq_levels))</span>
+<span id="annotated-cell-19-4"><a href="#annotated-cell-19-4" aria-hidden="true" tabindex="-1"></a></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-19" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-19-5" class="code-annotation-target"><a href="#annotated-cell-19-5" aria-hidden="true" tabindex="-1"></a>data_all<span class="sc">$</span>garage_qual <span class="sc">|&gt;</span> <span class="fu">levels</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-20" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-19" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-20" data-code-lines="1" data-code-annotation="1">Make a vector that indicates the valid levels in order</span>
+<span data-code-cell="annotated-cell-19" data-code-lines="1" data-code-annotation="1">Make a vector that indicates the valid levels in order</span>
 </dd>
-<dt data-target-cell="annotated-cell-20" data-target-annotation="2">2</dt>
+<dt data-target-cell="annotated-cell-19" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-20" data-code-lines="3" data-code-annotation="2">Pass that into <code>fct_relevel()</code>. See <code>?fct_relevel</code> for other ways to adjust the levels of a factor.</span>
+<span data-code-cell="annotated-cell-19" data-code-lines="3" data-code-annotation="2">Pass that into <code>fct_relevel()</code>. See <code>?fct_relevel</code> for other ways to adjust the levels of a factor.</span>
 </dd>
-<dt data-target-cell="annotated-cell-20" data-target-annotation="3">3</dt>
+<dt data-target-cell="annotated-cell-19" data-target-annotation="3">3</dt>
 <dd>
-<span data-code-cell="annotated-cell-20" data-code-lines="5" data-code-annotation="3">Confirm that the levels are now correct</span>
+<span data-code-cell="annotated-cell-19" data-code-lines="5" data-code-annotation="3">Confirm that the levels are now correct</span>
 </dd>
 </dl>
 </div>
@@ -4138,21 +4123,21 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="annotated-cell-21"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-21-1"><a href="#annotated-cell-21-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-21-2"><a href="#annotated-cell-21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">as.numeric</span>(overall_qual)) <span class="sc">|&gt;</span> </span>
-<span id="annotated-cell-21-3"><a href="#annotated-cell-21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">skim_some</span>() <span class="sc">|&gt;</span> </span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-21" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-21-4" class="code-annotation-target"><a href="#annotated-cell-21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(skim_type <span class="sc">==</span> <span class="st">"numeric"</span>) <span class="sc">|&gt;</span></span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-21" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-21-5" class="code-annotation-target"><a href="#annotated-cell-21-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(skim_variable, numeric.p0, numeric.p100)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-20"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-20-1"><a href="#annotated-cell-20-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-20-2"><a href="#annotated-cell-20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">as.numeric</span>(overall_qual)) <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-20-3"><a href="#annotated-cell-20-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">skim_some</span>() <span class="sc">|&gt;</span> </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-20" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-20-4" class="code-annotation-target"><a href="#annotated-cell-20-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(skim_type <span class="sc">==</span> <span class="st">"numeric"</span>) <span class="sc">|&gt;</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-20" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-20-5" class="code-annotation-target"><a href="#annotated-cell-20-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(skim_variable, numeric.p0, numeric.p100)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-21" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-20" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-21" data-code-lines="4" data-code-annotation="1">Select only numeric variables since min/max only apply to them</span>
+<span data-code-cell="annotated-cell-20" data-code-lines="4" data-code-annotation="1">Select only numeric variables since min/max only apply to them</span>
 </dd>
-<dt data-target-cell="annotated-cell-21" data-target-annotation="2">2</dt>
+<dt data-target-cell="annotated-cell-20" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-21" data-code-lines="5" data-code-annotation="2">Select relevant stats (min/max)</span>
+<span data-code-cell="annotated-cell-20" data-code-lines="5" data-code-annotation="2">Select relevant stats (min/max)</span>
 </dd>
 </dl>
 </div>
@@ -4177,9 +4162,9 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb22"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="sc">|&gt;</span> </span>
-<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">where</span>(is.factor)) <span class="sc">|&gt;</span></span>
-<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">walk</span>(\(column) <span class="fu">print</span>(<span class="fu">levels</span>(column)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="sc">|&gt;</span> </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">where</span>(is.factor)) <span class="sc">|&gt;</span></span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">walk</span>(\(column) <span class="fu">print</span>(<span class="fu">levels</span>(column)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] "1"  "2"  "3"  "4"  "5"  "6"  "7"  "8"  "9"  "10"
@@ -4229,21 +4214,21 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>tidy_responses <span class="ot">&lt;-</span> <span class="cf">function</span>(column){</span>
-<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># replace all non-alphanumeric with _</span></span>
-<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  column <span class="ot">&lt;-</span> <span class="fu">fct_relabel</span>(column, \(column) <span class="fu">str_replace_all</span>(column, <span class="st">"</span><span class="sc">\\</span><span class="st">W"</span>, <span class="st">"_"</span>))</span>
-<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># replace whitespace with _</span></span>
-<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  column <span class="ot">&lt;-</span> <span class="fu">fct_relabel</span>(column, \(column) <span class="fu">str_replace_all</span>(column, <span class="st">"</span><span class="sc">\\</span><span class="st">s+"</span>, <span class="st">"_"</span>))</span>
-<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># replace multiple _ with single _</span></span>
-<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>  column <span class="ot">&lt;-</span> <span class="fu">fct_relabel</span>(column, \(column) <span class="fu">str_replace_all</span>(column, <span class="st">"</span><span class="sc">\\</span><span class="st">_+"</span>, <span class="st">"_"</span>))</span>
-<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>  <span class="co">#remove _ at end of string</span></span>
-<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>  column <span class="ot">&lt;-</span> <span class="fu">fct_relabel</span>(column, \(column) <span class="fu">str_replace_all</span>(column, <span class="st">"</span><span class="sc">\\</span><span class="st">_$"</span>, <span class="st">""</span>))</span>
-<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># remove _ at start of string</span></span>
-<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a>  column <span class="ot">&lt;-</span> <span class="fu">fct_relabel</span>(column, \(column) <span class="fu">str_replace_all</span>(column, <span class="st">"</span><span class="sc">\\</span><span class="st">^_"</span>, <span class="st">""</span>))</span>
-<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># convert to lowercase</span></span>
-<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>  column <span class="ot">&lt;-</span> <span class="fu">fct_relabel</span>(column, tolower)</span>
-<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">factor</span>(column)</span>
-<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>tidy_responses <span class="ot">&lt;-</span> <span class="cf">function</span>(column){</span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="co"># replace all non-alphanumeric with _</span></span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  column <span class="ot">&lt;-</span> <span class="fu">fct_relabel</span>(column, \(column) <span class="fu">str_replace_all</span>(column, <span class="st">"</span><span class="sc">\\</span><span class="st">W"</span>, <span class="st">"_"</span>))</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="co"># replace whitespace with _</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  column <span class="ot">&lt;-</span> <span class="fu">fct_relabel</span>(column, \(column) <span class="fu">str_replace_all</span>(column, <span class="st">"</span><span class="sc">\\</span><span class="st">s+"</span>, <span class="st">"_"</span>))</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a>  <span class="co"># replace multiple _ with single _</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a>  column <span class="ot">&lt;-</span> <span class="fu">fct_relabel</span>(column, \(column) <span class="fu">str_replace_all</span>(column, <span class="st">"</span><span class="sc">\\</span><span class="st">_+"</span>, <span class="st">"_"</span>))</span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a>  <span class="co">#remove _ at end of string</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a>  column <span class="ot">&lt;-</span> <span class="fu">fct_relabel</span>(column, \(column) <span class="fu">str_replace_all</span>(column, <span class="st">"</span><span class="sc">\\</span><span class="st">_$"</span>, <span class="st">""</span>))</span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a>  <span class="co"># remove _ at start of string</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a>  column <span class="ot">&lt;-</span> <span class="fu">fct_relabel</span>(column, \(column) <span class="fu">str_replace_all</span>(column, <span class="st">"</span><span class="sc">\\</span><span class="st">^_"</span>, <span class="st">""</span>))</span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a>  <span class="co"># convert to lowercase</span></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a>  column <span class="ot">&lt;-</span> <span class="fu">fct_relabel</span>(column, tolower)</span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">factor</span>(column)</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <hr>
@@ -4251,14 +4236,14 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="annotated-cell-24"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-24-1"><a href="#annotated-cell-24-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-24" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-24-2" class="code-annotation-target"><a href="#annotated-cell-24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.factor), tidy_responses))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-23"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-23-1"><a href="#annotated-cell-23-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-23" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-23-2" class="code-annotation-target"><a href="#annotated-cell-23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.factor), tidy_responses))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-24" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-23" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-24" data-code-lines="2" data-code-annotation="1">We use the tidy selection helper function to limit our mutate to only factors. See <a href="https://tidyselect.r-lib.org/reference/language.html">more details</a> on the tidy selection helpers like <code>all_of()</code> and <code>where()</code></span>
+<span data-code-cell="annotated-cell-23" data-code-lines="2" data-code-annotation="1">We use the tidy selection helper function to limit our mutate to only factors. See <a href="https://tidyselect.r-lib.org/reference/language.html">more details</a> on the tidy selection helpers like <code>all_of()</code> and <code>where()</code></span>
 </dd>
 </dl>
 </div>
@@ -4272,9 +4257,9 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="sc">|&gt;</span> </span>
-<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">where</span>(is.factor)) <span class="sc">|&gt;</span></span>
-<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">walk</span>(\(column) <span class="fu">print</span>(<span class="fu">levels</span>(column)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="sc">|&gt;</span> </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">where</span>(is.factor)) <span class="sc">|&gt;</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">walk</span>(\(column) <span class="fu">print</span>(<span class="fu">levels</span>(column)))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code> [1] "1"  "2"  "3"  "4"  "5"  "6"  "7"  "8"  "9"  "10"
@@ -4289,26 +4274,26 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="annotated-cell-26"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-26-1"><a href="#annotated-cell-26-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
-<span id="annotated-cell-26-2"><a href="#annotated-cell-26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ms_zoning =</span> <span class="fu">fct_recode</span>(ms_zoning,</span>
-<span id="annotated-cell-26-3"><a href="#annotated-cell-26-3" aria-hidden="true" tabindex="-1"></a>                                <span class="at">res_low =</span> <span class="st">"rl"</span>,</span>
-<span id="annotated-cell-26-4"><a href="#annotated-cell-26-4" aria-hidden="true" tabindex="-1"></a>                                <span class="at">res_med =</span> <span class="st">"rm"</span>,</span>
-<span id="annotated-cell-26-5"><a href="#annotated-cell-26-5" aria-hidden="true" tabindex="-1"></a>                                <span class="at">res_high =</span> <span class="st">"rh"</span>,</span>
-<span id="annotated-cell-26-6"><a href="#annotated-cell-26-6" aria-hidden="true" tabindex="-1"></a>                                <span class="at">float =</span> <span class="st">"fv"</span>,</span>
-<span id="annotated-cell-26-7"><a href="#annotated-cell-26-7" aria-hidden="true" tabindex="-1"></a>                                <span class="at">agri =</span> <span class="st">"a_agr"</span>,</span>
-<span id="annotated-cell-26-8"><a href="#annotated-cell-26-8" aria-hidden="true" tabindex="-1"></a>                                <span class="at">indus =</span> <span class="st">"i_all"</span>,</span>
-<span id="annotated-cell-26-9"><a href="#annotated-cell-26-9" aria-hidden="true" tabindex="-1"></a>                                <span class="at">commer =</span> <span class="st">"c_all"</span>),</span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-26" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-26-10" class="code-annotation-target"><a href="#annotated-cell-26-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">bldg_type =</span> <span class="fu">fct_recode</span>(bldg_type,</span>
-<span id="annotated-cell-26-11"><a href="#annotated-cell-26-11" aria-hidden="true" tabindex="-1"></a>                                <span class="at">one_fam =</span> <span class="st">"1fam"</span>,</span>
-<span id="annotated-cell-26-12"><a href="#annotated-cell-26-12" aria-hidden="true" tabindex="-1"></a>                                <span class="at">two_fam =</span> <span class="st">"2fmcon"</span>,</span>
-<span id="annotated-cell-26-13"><a href="#annotated-cell-26-13" aria-hidden="true" tabindex="-1"></a>                                <span class="at">town_end =</span> <span class="st">"twnhse"</span>,</span>
-<span id="annotated-cell-26-14"><a href="#annotated-cell-26-14" aria-hidden="true" tabindex="-1"></a>                                <span class="at">town_inside =</span> <span class="st">"twnhs"</span>))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-25"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-25-1"><a href="#annotated-cell-25-1" aria-hidden="true" tabindex="-1"></a>data_all <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-25-2"><a href="#annotated-cell-25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">ms_zoning =</span> <span class="fu">fct_recode</span>(ms_zoning,</span>
+<span id="annotated-cell-25-3"><a href="#annotated-cell-25-3" aria-hidden="true" tabindex="-1"></a>                                <span class="at">res_low =</span> <span class="st">"rl"</span>,</span>
+<span id="annotated-cell-25-4"><a href="#annotated-cell-25-4" aria-hidden="true" tabindex="-1"></a>                                <span class="at">res_med =</span> <span class="st">"rm"</span>,</span>
+<span id="annotated-cell-25-5"><a href="#annotated-cell-25-5" aria-hidden="true" tabindex="-1"></a>                                <span class="at">res_high =</span> <span class="st">"rh"</span>,</span>
+<span id="annotated-cell-25-6"><a href="#annotated-cell-25-6" aria-hidden="true" tabindex="-1"></a>                                <span class="at">float =</span> <span class="st">"fv"</span>,</span>
+<span id="annotated-cell-25-7"><a href="#annotated-cell-25-7" aria-hidden="true" tabindex="-1"></a>                                <span class="at">agri =</span> <span class="st">"a_agr"</span>,</span>
+<span id="annotated-cell-25-8"><a href="#annotated-cell-25-8" aria-hidden="true" tabindex="-1"></a>                                <span class="at">indus =</span> <span class="st">"i_all"</span>,</span>
+<span id="annotated-cell-25-9"><a href="#annotated-cell-25-9" aria-hidden="true" tabindex="-1"></a>                                <span class="at">commer =</span> <span class="st">"c_all"</span>),</span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-25" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-25-10" class="code-annotation-target"><a href="#annotated-cell-25-10" aria-hidden="true" tabindex="-1"></a>         <span class="at">bldg_type =</span> <span class="fu">fct_recode</span>(bldg_type,</span>
+<span id="annotated-cell-25-11"><a href="#annotated-cell-25-11" aria-hidden="true" tabindex="-1"></a>                                <span class="at">one_fam =</span> <span class="st">"1fam"</span>,</span>
+<span id="annotated-cell-25-12"><a href="#annotated-cell-25-12" aria-hidden="true" tabindex="-1"></a>                                <span class="at">two_fam =</span> <span class="st">"2fmcon"</span>,</span>
+<span id="annotated-cell-25-13"><a href="#annotated-cell-25-13" aria-hidden="true" tabindex="-1"></a>                                <span class="at">town_end =</span> <span class="st">"twnhse"</span>,</span>
+<span id="annotated-cell-25-14"><a href="#annotated-cell-25-14" aria-hidden="true" tabindex="-1"></a>                                <span class="at">town_inside =</span> <span class="st">"twnhs"</span>))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-26" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-25" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-26" data-code-lines="10" data-code-annotation="1">Note that I did not need to list all levels in the recode. Only the levels I wanted to change.</span>
+<span data-code-cell="annotated-cell-25" data-code-lines="10" data-code-annotation="1">Note that I did not need to list all levels in the recode. Only the levels I wanted to change.</span>
 </dd>
 </dl>
 </div>
@@ -4341,9 +4326,9 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">20110522</span>)</span>
-<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>splits <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
-<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">initial_split</span>(<span class="at">prop =</span> <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>, <span class="at">strata =</span> <span class="st">"sale_price"</span>, <span class="at">breaks =</span> <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">20110522</span>)</span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>splits <span class="ot">&lt;-</span> data_all <span class="sc">|&gt;</span> </span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">initial_split</span>(<span class="at">prop =</span> <span class="dv">3</span><span class="sc">/</span><span class="dv">4</span>, <span class="at">strata =</span> <span class="st">"sale_price"</span>, <span class="at">breaks =</span> <span class="dv">4</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <div class="callout callout-style-default callout-tip no-icon callout-titled">
@@ -4368,16 +4353,16 @@ Coding Note
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="annotated-cell-28"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-28-1"><a href="#annotated-cell-28-1" aria-hidden="true" tabindex="-1"></a>splits <span class="sc">|&gt;</span> </span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-28" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-28-2" class="code-annotation-target"><a href="#annotated-cell-28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">analysis</span>() <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-28-3"><a href="#annotated-cell-28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>() <span class="sc">|&gt;</span> </span>
-<span id="annotated-cell-28-4"><a href="#annotated-cell-28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(path_data, <span class="st">"ames_clean_class_trn.csv"</span>))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-27"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-27-1"><a href="#annotated-cell-27-1" aria-hidden="true" tabindex="-1"></a>splits <span class="sc">|&gt;</span> </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-27" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-27-2" class="code-annotation-target"><a href="#annotated-cell-27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">analysis</span>() <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-27-3"><a href="#annotated-cell-27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>() <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-27-4"><a href="#annotated-cell-27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(path_data, <span class="st">"ames_clean_class_trn.csv"</span>))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-28" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-27" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-28" data-code-lines="2" data-code-annotation="1"><code>analysis()</code> pulls out the training set from our splits of <code>data_all</code></span>
+<span data-code-cell="annotated-cell-27" data-code-lines="2" data-code-annotation="1"><code>analysis()</code> pulls out the training set from our splits of <code>data_all</code></span>
 </dd>
 </dl>
 </div>
@@ -4407,16 +4392,16 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, town_inside, town_end, dup
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="annotated-cell-29"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-29-1"><a href="#annotated-cell-29-1" aria-hidden="true" tabindex="-1"></a>splits <span class="sc">|&gt;</span> </span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-29" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-29-2" class="code-annotation-target"><a href="#annotated-cell-29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">assessment</span>() <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-29-3"><a href="#annotated-cell-29-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>() <span class="sc">|&gt;</span> </span>
-<span id="annotated-cell-29-4"><a href="#annotated-cell-29-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(path_data, <span class="st">"ames_clean_class_val.csv"</span>))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-28"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-28-1"><a href="#annotated-cell-28-1" aria-hidden="true" tabindex="-1"></a>splits <span class="sc">|&gt;</span> </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-28" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-28-2" class="code-annotation-target"><a href="#annotated-cell-28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">assessment</span>() <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-28-3"><a href="#annotated-cell-28-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>() <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-28-4"><a href="#annotated-cell-28-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">write_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(path_data, <span class="st">"ames_clean_class_val.csv"</span>))</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-29" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-28" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-29" data-code-lines="2" data-code-annotation="1"><code>assessment()</code> pulls out the validation set from our splits of <code>data_all</code></span>
+<span data-code-cell="annotated-cell-28" data-code-lines="2" data-code-annotation="1"><code>assessment()</code> pulls out the validation set from our splits of <code>data_all</code></span>
 </dd>
 </dl>
 </div>
@@ -4452,8 +4437,8 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, one_fam, town_end, one_fam
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a> data_trn <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(path_data, <span class="st">"ames_clean_class_trn.csv"</span>)) <span class="sc">|&gt;</span> </span>
-<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a> data_trn <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(path_data, <span class="st">"ames_clean_class_trn.csv"</span>)) <span class="sc">|&gt;</span> </span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stderr">
 <pre><code>Rows: 1465 Columns: 10
@@ -4494,32 +4479,32 @@ $ bldg_type    &lt;chr&gt; "one_fam", "one_fam", "one_fam", "town_inside", "town
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="annotated-cell-31"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-31-1"><a href="#annotated-cell-31-1" aria-hidden="true" tabindex="-1"></a> data_trn <span class="ot">&lt;-</span> </span>
-<span id="annotated-cell-31-2"><a href="#annotated-cell-31-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(path_data, <span class="st">"ames_clean_class_trn.csv"</span>), </span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-31" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-31-3" class="code-annotation-target"><a href="#annotated-cell-31-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">col_types =</span> <span class="fu">cols</span>()) <span class="sc">|&gt;</span></span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-31" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-31-4" class="code-annotation-target"><a href="#annotated-cell-31-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.character), factor)) <span class="sc">|&gt;</span></span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-31" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-31-5" class="code-annotation-target"><a href="#annotated-cell-31-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">factor</span>(overall_qual, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>),</span>
-<span id="annotated-cell-31-6"><a href="#annotated-cell-31-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">garage_qual =</span> <span class="fu">fct_relevel</span>(garage_qual, <span class="fu">c</span>(<span class="st">"no_garage"</span>, <span class="st">"po"</span>, <span class="st">"fa"</span>, </span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-31" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-31-7" class="code-annotation-target"><a href="#annotated-cell-31-7" aria-hidden="true" tabindex="-1"></a>                                                  <span class="st">"ta"</span>, <span class="st">"gd"</span>, <span class="st">"ex"</span>))) <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-31-8"><a href="#annotated-cell-31-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-30"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-30-1"><a href="#annotated-cell-30-1" aria-hidden="true" tabindex="-1"></a> data_trn <span class="ot">&lt;-</span> </span>
+<span id="annotated-cell-30-2"><a href="#annotated-cell-30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(path_data, <span class="st">"ames_clean_class_trn.csv"</span>), </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-30" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-30-3" class="code-annotation-target"><a href="#annotated-cell-30-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-30" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-30-4" class="code-annotation-target"><a href="#annotated-cell-30-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.character), factor)) <span class="sc">|&gt;</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-30" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-30-5" class="code-annotation-target"><a href="#annotated-cell-30-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">factor</span>(overall_qual, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>),</span>
+<span id="annotated-cell-30-6"><a href="#annotated-cell-30-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">garage_qual =</span> <span class="fu">fct_relevel</span>(garage_qual, <span class="fu">c</span>(<span class="st">"no_garage"</span>, <span class="st">"po"</span>, <span class="st">"fa"</span>, </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-30" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-30-7" class="code-annotation-target"><a href="#annotated-cell-30-7" aria-hidden="true" tabindex="-1"></a>                                                  <span class="st">"ta"</span>, <span class="st">"gd"</span>, <span class="st">"ex"</span>))) <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-30-8"><a href="#annotated-cell-30-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-31" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-30" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-31" data-code-lines="3" data-code-annotation="1">use col_types = cols() to suppress messages about default class assignments</span>
+<span data-code-cell="annotated-cell-30" data-code-lines="3" data-code-annotation="1">use col_types = cols() to suppress messages about default class assignments</span>
 </dd>
-<dt data-target-cell="annotated-cell-31" data-target-annotation="2">2</dt>
+<dt data-target-cell="annotated-cell-30" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-31" data-code-lines="4" data-code-annotation="2">use <code>mutate()</code> with <code>across()</code> to change all character variables to factors</span>
+<span data-code-cell="annotated-cell-30" data-code-lines="4" data-code-annotation="2">use <code>mutate()</code> with <code>across()</code> to change all character variables to factors</span>
 </dd>
-<dt data-target-cell="annotated-cell-31" data-target-annotation="3">3</dt>
+<dt data-target-cell="annotated-cell-30" data-target-annotation="3">3</dt>
 <dd>
-<span data-code-cell="annotated-cell-31" data-code-lines="5" data-code-annotation="3">use <code>mutate()</code> with <code>factor()</code> to change numeric variable to factor.</span>
+<span data-code-cell="annotated-cell-30" data-code-lines="5" data-code-annotation="3">use <code>mutate()</code> with <code>factor()</code> to change numeric variable to factor.</span>
 </dd>
-<dt data-target-cell="annotated-cell-31" data-target-annotation="4">4</dt>
+<dt data-target-cell="annotated-cell-30" data-target-annotation="4">4</dt>
 <dd>
-<span data-code-cell="annotated-cell-31" data-code-lines="7" data-code-annotation="4">use <code>mutate()</code> with <code>fct_relevel()</code> to explicitly set levels of an ordinal factor. Also notice the warning about the unknown level. Always explore warnings! In this instance, its fine. There were only two observations with ex and neither ended up in the training split. Still best to include this level to note it exists!</span>
+<span data-code-cell="annotated-cell-30" data-code-lines="7" data-code-annotation="4">use <code>mutate()</code> with <code>fct_relevel()</code> to explicitly set levels of an ordinal factor. Also notice the warning about the unknown level. Always explore warnings! In this instance, its fine. There were only two observations with ex and neither ended up in the training split. Still best to include this level to note it exists!</span>
 </dd>
 </dl>
 </div>
@@ -4555,14 +4540,14 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb34"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a>class_ames <span class="ot">&lt;-</span> <span class="cf">function</span>(df){</span>
-<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">|&gt;</span></span>
-<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.character), factor)) <span class="sc">|&gt;</span> </span>
-<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">factor</span>(overall_qual, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>), </span>
-<span id="cb34-6"><a href="#cb34-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">garage_qual =</span> <span class="fu">fct_relevel</span>(garage_qual, <span class="fu">c</span>(<span class="st">"no_garage"</span>, <span class="st">"po"</span>, <span class="st">"fa"</span>, </span>
-<span id="cb34-7"><a href="#cb34-7" aria-hidden="true" tabindex="-1"></a>                                                    <span class="st">"ta"</span>, <span class="st">"gd"</span>, <span class="st">"ex"</span>)))</span>
-<span id="cb34-8"><a href="#cb34-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb33"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a>class_ames <span class="ot">&lt;-</span> <span class="cf">function</span>(df){</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb33-3"><a href="#cb33-3" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">|&gt;</span></span>
+<span id="cb33-4"><a href="#cb33-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">where</span>(is.character), factor)) <span class="sc">|&gt;</span> </span>
+<span id="cb33-5"><a href="#cb33-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">factor</span>(overall_qual, <span class="at">levels =</span> <span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>), </span>
+<span id="cb33-6"><a href="#cb33-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">garage_qual =</span> <span class="fu">fct_relevel</span>(garage_qual, <span class="fu">c</span>(<span class="st">"no_garage"</span>, <span class="st">"po"</span>, <span class="st">"fa"</span>, </span>
+<span id="cb33-7"><a href="#cb33-7" aria-hidden="true" tabindex="-1"></a>                                                    <span class="st">"ta"</span>, <span class="st">"gd"</span>, <span class="st">"ex"</span>)))</span>
+<span id="cb33-8"><a href="#cb33-8" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <hr>
@@ -4570,17 +4555,17 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="annotated-cell-33"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-33-1"><a href="#annotated-cell-33-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="ot">&lt;-</span> </span>
-<span id="annotated-cell-33-2"><a href="#annotated-cell-33-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(path_data, <span class="st">"ames_clean_class_trn.csv"</span>), </span>
-<span id="annotated-cell-33-3"><a href="#annotated-cell-33-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">col_types =</span> <span class="fu">cols</span>()) <span class="sc">|&gt;</span> </span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-33" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-33-4" class="code-annotation-target"><a href="#annotated-cell-33-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class_ames</span>() <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-33-5"><a href="#annotated-cell-33-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-32"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-32-1"><a href="#annotated-cell-32-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="ot">&lt;-</span> </span>
+<span id="annotated-cell-32-2"><a href="#annotated-cell-32-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">read_csv</span>(here<span class="sc">::</span><span class="fu">here</span>(path_data, <span class="st">"ames_clean_class_trn.csv"</span>), </span>
+<span id="annotated-cell-32-3"><a href="#annotated-cell-32-3" aria-hidden="true" tabindex="-1"></a>           <span class="at">show_col_types =</span> <span class="cn">FALSE</span>) <span class="sc">|&gt;</span> </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-32" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-32-4" class="code-annotation-target"><a href="#annotated-cell-32-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class_ames</span>() <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-32-5"><a href="#annotated-cell-32-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-33" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-32" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-33" data-code-lines="4" data-code-annotation="1">Using our new function!</span>
+<span data-code-cell="annotated-cell-32" data-code-lines="4" data-code-annotation="1">Using our new function!</span>
 </dd>
 </dl>
 </div>
@@ -4626,12 +4611,12 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, town_inside, town_end, dup
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>skew_na <span class="ot">&lt;-</span> <span class="fu">partial</span>(e1071<span class="sc">::</span>skewness, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>kurt_na <span class="ot">&lt;-</span> <span class="fu">partial</span>(e1071<span class="sc">::</span>kurtosis, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a>skim_all <span class="ot">&lt;-</span> skimr<span class="sc">::</span><span class="fu">skim_with</span>(<span class="at">numeric =</span> skimr<span class="sc">::</span><span class="fu">sfl</span>(<span class="at">skew =</span> skew_na, </span>
-<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a>                                                  <span class="at">kurtosis =</span> kurt_na, </span>
-<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a>                                                  <span class="at">hist =</span> <span class="cn">NULL</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>skew_na <span class="ot">&lt;-</span> <span class="fu">partial</span>(e1071<span class="sc">::</span>skewness, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>kurt_na <span class="ot">&lt;-</span> <span class="fu">partial</span>(e1071<span class="sc">::</span>kurtosis, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb35-3"><a href="#cb35-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb35-4"><a href="#cb35-4" aria-hidden="true" tabindex="-1"></a>skim_all <span class="ot">&lt;-</span> skimr<span class="sc">::</span><span class="fu">skim_with</span>(<span class="at">numeric =</span> skimr<span class="sc">::</span><span class="fu">sfl</span>(<span class="at">skew =</span> skew_na, </span>
+<span id="cb35-5"><a href="#cb35-5" aria-hidden="true" tabindex="-1"></a>                                                  <span class="at">kurtosis =</span> kurt_na, </span>
+<span id="cb35-6"><a href="#cb35-6" aria-hidden="true" tabindex="-1"></a>                                                  <span class="at">hist =</span> <span class="cn">NULL</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <hr>
@@ -4639,8 +4624,8 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, town_inside, town_end, dup
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> </span>
-<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">skim_all</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb36"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> </span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">skim_all</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
@@ -4872,15 +4857,17 @@ $ bldg_type    &lt;fct&gt; one_fam, one_fam, one_fam, town_inside, town_end, dup
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>plot_bar <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x){</span>
-<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a>  x_label_size <span class="ot">&lt;-</span> <span class="fu">if_else</span>(skimr<span class="sc">::</span><span class="fu">n_unique</span>(df[[x]]) <span class="sc">&lt;</span> <span class="dv">7</span>, <span class="dv">11</span>, <span class="dv">7</span>)</span>
-<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">|&gt;</span></span>
-<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]])) <span class="sc">+</span></span>
-<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bar</span>() <span class="sc">+</span></span>
-<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">size =</span> x_label_size, <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
-<span id="cb38-8"><a href="#cb38-8" aria-hidden="true" tabindex="-1"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
-<span id="cb38-9"><a href="#cb38-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb37"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb37-1"><a href="#cb37-1" aria-hidden="true" tabindex="-1"></a>plot_bar <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x){</span>
+<span id="cb37-2"><a href="#cb37-2" aria-hidden="true" tabindex="-1"></a>  x_label_size <span class="ot">&lt;-</span> <span class="fu">if_else</span>(skimr<span class="sc">::</span><span class="fu">n_unique</span>(df[[x]]) <span class="sc">&lt;</span> <span class="dv">7</span>, <span class="dv">11</span>, <span class="dv">7</span>)</span>
+<span id="cb37-3"><a href="#cb37-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb37-4"><a href="#cb37-4" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">|&gt;</span></span>
+<span id="cb37-5"><a href="#cb37-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]])) <span class="sc">+</span></span>
+<span id="cb37-6"><a href="#cb37-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_bar</span>() <span class="sc">+</span></span>
+<span id="cb37-7"><a href="#cb37-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, </span>
+<span id="cb37-8"><a href="#cb37-8" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">size =</span> x_label_size, <span class="at">vjust =</span> <span class="fl">0.5</span>, </span>
+<span id="cb37-9"><a href="#cb37-9" aria-hidden="true" tabindex="-1"></a>                                     <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb37-10"><a href="#cb37-10" aria-hidden="true" tabindex="-1"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
+<span id="cb37-11"><a href="#cb37-11" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <hr>
@@ -4913,12 +4900,12 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_bar</span>(<span class="st">"bldg_type"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb38"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_bar</span>(<span class="st">"bldg_type"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-37-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-36-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -4931,12 +4918,12 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_bar</span>(<span class="st">"overall_qual"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb39"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_bar</span>(<span class="st">"overall_qual"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-38-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-37-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -4956,36 +4943,36 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="annotated-cell-98"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-98-1"><a href="#annotated-cell-98-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> </span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-98" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-98-2" class="code-annotation-target"><a href="#annotated-cell-98-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">where</span>(is.factor)) <span class="sc">|&gt;</span></span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-98" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-98-3" class="code-annotation-target"><a href="#annotated-cell-98-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>() <span class="sc">|&gt;</span></span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-98" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-98-4" class="code-annotation-target"><a href="#annotated-cell-98-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(name) <span class="fu">plot_bar</span>(<span class="at">df =</span> data_trn, <span class="at">x =</span> name)) <span class="sc">|&gt;</span></span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-98" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-98-5" class="code-annotation-target"><a href="#annotated-cell-98-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_grid</span>(<span class="at">plotlist =</span> _, <span class="at">ncol =</span> <span class="dv">2</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-97"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-97-1"><a href="#annotated-cell-97-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-97" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-97-2" class="code-annotation-target"><a href="#annotated-cell-97-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">where</span>(is.factor)) <span class="sc">|&gt;</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-97" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-97-3" class="code-annotation-target"><a href="#annotated-cell-97-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">names</span>() <span class="sc">|&gt;</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-97" data-target-annotation="3" onclick="event.preventDefault();">3</a><span id="annotated-cell-97-4" class="code-annotation-target"><a href="#annotated-cell-97-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">map</span>(\(name) <span class="fu">plot_bar</span>(<span class="at">df =</span> data_trn, <span class="at">x =</span> name)) <span class="sc">|&gt;</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-97" data-target-annotation="4" onclick="event.preventDefault();">4</a><span id="annotated-cell-97-5" class="code-annotation-target"><a href="#annotated-cell-97-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_grid</span>(<span class="at">plotlist =</span> _, <span class="at">ncol =</span> <span class="dv">2</span>)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-98" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-97" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-98" data-code-lines="2" data-code-annotation="1">Select only the factor columns</span>
+<span data-code-cell="annotated-cell-97" data-code-lines="2" data-code-annotation="1">Select only the factor columns</span>
 </dd>
-<dt data-target-cell="annotated-cell-98" data-target-annotation="2">2</dt>
+<dt data-target-cell="annotated-cell-97" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-98" data-code-lines="3" data-code-annotation="2">Get their names as strings (that is why we use quoted variables in these plot functions</span>
+<span data-code-cell="annotated-cell-97" data-code-lines="3" data-code-annotation="2">Get their names as strings (that is why we use quoted variables in these plot functions</span>
 </dd>
-<dt data-target-cell="annotated-cell-98" data-target-annotation="3">3</dt>
+<dt data-target-cell="annotated-cell-97" data-target-annotation="3">3</dt>
 <dd>
-<span data-code-cell="annotated-cell-98" data-code-lines="4" data-code-annotation="3">Use <code>map()</code> to iterative <code>plot_bar()</code> over every column. (see <a href="https://r4ds.hadley.nz/iteration.html">iteration</a> in <span class="citation" data-cites="RDS">Wickham, Çetinkaya-Rundel, and Grolemund (<a href="#ref-RDS" role="doc-biblioref">2023</a>)</span>)</span>
+<span data-code-cell="annotated-cell-97" data-code-lines="4" data-code-annotation="3">Use <code>map()</code> to iterative <code>plot_bar()</code> over every column. (see <a href="https://r4ds.hadley.nz/iteration.html">iteration</a> in <span class="citation" data-cites="RDS">Wickham, Çetinkaya-Rundel, and Grolemund (<a href="#ref-RDS" role="doc-biblioref">2023</a>)</span>)</span>
 </dd>
-<dt data-target-cell="annotated-cell-98" data-target-annotation="4">4</dt>
+<dt data-target-cell="annotated-cell-97" data-target-annotation="4">4</dt>
 <dd>
-<span data-code-cell="annotated-cell-98" data-code-lines="5" data-code-annotation="4">Use <code>plot_grid()</code> from <code>cowplot</code> package to display the list of plots in a grid</span>
+<span data-code-cell="annotated-cell-97" data-code-lines="5" data-code-annotation="4">Use <code>plot_grid()</code> from <code>cowplot</code> package to display the list of plots in a grid</span>
 </dd>
 </dl>
 </div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-39-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-38-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -5006,10 +4993,10 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>tab <span class="ot">&lt;-</span> <span class="cf">function</span>(df, var, <span class="at">sort =</span> <span class="cn">FALSE</span>) {</span>
-<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">|&gt;</span>  dplyr<span class="sc">::</span><span class="fu">count</span>({{ var }}, <span class="at">sort =</span> sort) <span class="sc">|&gt;</span> </span>
-<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">prop =</span> n <span class="sc">/</span> <span class="fu">sum</span>(n))</span>
-<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>} </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb40"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a>tab <span class="ot">&lt;-</span> <span class="cf">function</span>(df, var, <span class="at">sort =</span> <span class="cn">FALSE</span>) {</span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">|&gt;</span>  dplyr<span class="sc">::</span><span class="fu">count</span>({{ var }}, <span class="at">sort =</span> sort) <span class="sc">|&gt;</span> </span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a>    dplyr<span class="sc">::</span><span class="fu">mutate</span>(<span class="at">prop =</span> n <span class="sc">/</span> <span class="fu">sum</span>(n))</span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a>} </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <hr>
@@ -5021,7 +5008,7 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb42"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb42-1"><a href="#cb42-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">tab</span>(ms_zoning)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb41"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">tab</span>(ms_zoning)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 7 × 3
@@ -5043,7 +5030,7 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb44"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb44-1"><a href="#cb44-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">tab</span>(ms_zoning, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb43"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb43-1"><a href="#cb43-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">tab</span>(ms_zoning, <span class="at">sort =</span> <span class="cn">TRUE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output cell-output-stdout">
 <pre><code># A tibble: 7 × 3
@@ -5063,12 +5050,12 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_bar</span>(<span class="st">"ms_zoning"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb45"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb45-1"><a href="#cb45-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_bar</span>(<span class="st">"ms_zoning"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-43-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-42-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -5087,13 +5074,13 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>plot_hist <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, <span class="at">bins =</span> <span class="dv">100</span>){</span>
-<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">|&gt;</span></span>
-<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]])) <span class="sc">+</span></span>
-<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_histogram</span>(<span class="at">bins =</span> bins) <span class="sc">+</span></span>
-<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>),</span>
-<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
-<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>plot_hist <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, <span class="at">bins =</span> <span class="dv">100</span>){</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">|&gt;</span></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]])) <span class="sc">+</span></span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_histogram</span>(<span class="at">bins =</span> bins) <span class="sc">+</span></span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>),</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <hr>
@@ -5106,12 +5093,12 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_hist</span>(<span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_hist</span>(<span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-45-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-44-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -5127,13 +5114,13 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>plot_freqpoly <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, <span class="at">bins =</span> <span class="dv">50</span>){</span>
-<span id="cb49-2"><a href="#cb49-2" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">|&gt;</span></span>
-<span id="cb49-3"><a href="#cb49-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]])) <span class="sc">+</span></span>
-<span id="cb49-4"><a href="#cb49-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_freqpoly</span>(<span class="at">bins =</span> bins) <span class="sc">+</span></span>
-<span id="cb49-5"><a href="#cb49-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>),</span>
-<span id="cb49-6"><a href="#cb49-6" aria-hidden="true" tabindex="-1"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
-<span id="cb49-7"><a href="#cb49-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>plot_freqpoly <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x, <span class="at">bins =</span> <span class="dv">50</span>){</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">|&gt;</span></span>
+<span id="cb48-3"><a href="#cb48-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]])) <span class="sc">+</span></span>
+<span id="cb48-4"><a href="#cb48-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_freqpoly</span>(<span class="at">bins =</span> bins) <span class="sc">+</span></span>
+<span id="cb48-5"><a href="#cb48-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>),</span>
+<span id="cb48-6"><a href="#cb48-6" aria-hidden="true" tabindex="-1"></a>          <span class="at">axis.text.y =</span> <span class="fu">element_text</span>(<span class="at">size =</span> <span class="dv">11</span>))</span>
+<span id="cb48-7"><a href="#cb48-7" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <hr>
@@ -5143,12 +5130,12 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_freqpoly</span>(<span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb49"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb49-1"><a href="#cb49-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_freqpoly</span>(<span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-47-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-46-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -5168,16 +5155,16 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>plot_boxplot <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x){</span>
-<span id="cb51-2"><a href="#cb51-2" aria-hidden="true" tabindex="-1"></a>  x_label_size <span class="ot">&lt;-</span> <span class="fu">if_else</span>(skimr<span class="sc">::</span><span class="fu">n_unique</span>(df[[x]]) <span class="sc">&lt;</span> <span class="dv">7</span>, <span class="dv">11</span>, <span class="dv">7</span>)</span>
-<span id="cb51-3"><a href="#cb51-3" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb51-4"><a href="#cb51-4" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">|&gt;</span></span>
-<span id="cb51-5"><a href="#cb51-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]])) <span class="sc">+</span></span>
-<span id="cb51-6"><a href="#cb51-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
-<span id="cb51-7"><a href="#cb51-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb51-8"><a href="#cb51-8" aria-hidden="true" tabindex="-1"></a>          <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb51-9"><a href="#cb51-9" aria-hidden="true" tabindex="-1"></a>          <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">size =</span> x_label_size, <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span>
-<span id="cb51-10"><a href="#cb51-10" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>plot_boxplot <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x){</span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>  x_label_size <span class="ot">&lt;-</span> <span class="fu">if_else</span>(skimr<span class="sc">::</span><span class="fu">n_unique</span>(df[[x]]) <span class="sc">&lt;</span> <span class="dv">7</span>, <span class="dv">11</span>, <span class="dv">7</span>)</span>
+<span id="cb50-3"><a href="#cb50-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb50-4"><a href="#cb50-4" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">|&gt;</span></span>
+<span id="cb50-5"><a href="#cb50-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]])) <span class="sc">+</span></span>
+<span id="cb50-6"><a href="#cb50-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_boxplot</span>() <span class="sc">+</span></span>
+<span id="cb50-7"><a href="#cb50-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb50-8"><a href="#cb50-8" aria-hidden="true" tabindex="-1"></a>          <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb50-9"><a href="#cb50-9" aria-hidden="true" tabindex="-1"></a>          <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">size =</span> x_label_size, <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span>
+<span id="cb50-10"><a href="#cb50-10" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <hr>
@@ -5185,12 +5172,12 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_boxplot</span>(<span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb51"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb51-1"><a href="#cb51-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_boxplot</span>(<span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-49-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-48-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -5210,18 +5197,18 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>plot_box_violin <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x){</span>
-<span id="cb53-2"><a href="#cb53-2" aria-hidden="true" tabindex="-1"></a>  x_label_size <span class="ot">&lt;-</span> <span class="fu">if_else</span>(skimr<span class="sc">::</span><span class="fu">n_unique</span>(df[[x]]) <span class="sc">&lt;</span> <span class="dv">7</span>, <span class="dv">11</span>, <span class="dv">7</span>)</span>
-<span id="cb53-3"><a href="#cb53-3" aria-hidden="true" tabindex="-1"></a>  </span>
-<span id="cb53-4"><a href="#cb53-4" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">|&gt;</span></span>
-<span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]])) <span class="sc">+</span></span>
-<span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_violin</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="dv">0</span>), <span class="at">fill =</span> <span class="st">"green"</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
-<span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_boxplot</span>(<span class="at">width =</span> .<span class="dv">1</span>, <span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">lwd =</span> <span class="fl">1.1</span>, <span class="at">fatten =</span> <span class="fl">1.1</span>) <span class="sc">+</span></span>
-<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>          <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a>          <span class="at">axis.title.y =</span> <span class="fu">element_blank</span>(),</span>
-<span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a>          <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">size =</span> x_label_size, <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span>
-<span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a>plot_box_violin <span class="ot">&lt;-</span> <span class="cf">function</span>(df, x){</span>
+<span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>  x_label_size <span class="ot">&lt;-</span> <span class="fu">if_else</span>(skimr<span class="sc">::</span><span class="fu">n_unique</span>(df[[x]]) <span class="sc">&lt;</span> <span class="dv">7</span>, <span class="dv">11</span>, <span class="dv">7</span>)</span>
+<span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a>  df <span class="sc">|&gt;</span></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> .data[[x]])) <span class="sc">+</span></span>
+<span id="cb52-6"><a href="#cb52-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_violin</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="dv">0</span>), <span class="at">fill =</span> <span class="st">"green"</span>, <span class="at">color =</span> <span class="cn">NA</span>) <span class="sc">+</span></span>
+<span id="cb52-7"><a href="#cb52-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_boxplot</span>(<span class="at">width =</span> .<span class="dv">1</span>, <span class="at">fill =</span> <span class="cn">NA</span>, <span class="at">lwd =</span> <span class="fl">1.1</span>, <span class="at">fatten =</span> <span class="fl">1.1</span>) <span class="sc">+</span></span>
+<span id="cb52-8"><a href="#cb52-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme</span>(<span class="at">axis.text.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb52-9"><a href="#cb52-9" aria-hidden="true" tabindex="-1"></a>          <span class="at">axis.ticks.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb52-10"><a href="#cb52-10" aria-hidden="true" tabindex="-1"></a>          <span class="at">axis.title.y =</span> <span class="fu">element_blank</span>(),</span>
+<span id="cb52-11"><a href="#cb52-11" aria-hidden="true" tabindex="-1"></a>          <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">90</span>, <span class="at">size =</span> x_label_size, <span class="at">vjust =</span> <span class="fl">0.5</span>, <span class="at">hjust =</span> <span class="dv">1</span>))</span>
+<span id="cb52-12"><a href="#cb52-12" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
 <hr>
@@ -5232,12 +5219,16 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="cb54"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb54-1"><a href="#cb54-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_box_violin</span>(<span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb53"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb53-1"><a href="#cb53-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> <span class="fu">plot_box_violin</span>(<span class="st">"sale_price"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning: The `fatten` argument of `geom_boxplot()` is deprecated as of ggplot2 4.0.0.
+ℹ Please use the `median.linewidth` argument instead.</code></pre>
+</div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-51-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-50-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -5276,7 +5267,7 @@ Coding sidebar
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-52-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-51-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -5507,7 +5498,7 @@ Coding sidebar
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-55-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-54-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -5522,7 +5513,7 @@ Coding sidebar
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-56-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-55-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -5545,7 +5536,7 @@ Coding sidebar
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-57-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-56-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -5558,7 +5549,7 @@ Coding sidebar
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-57-2.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-56-2.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -5579,7 +5570,7 @@ Coding sidebar
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-58-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-57-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -5606,7 +5597,7 @@ Coding sidebar
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-59-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-58-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -5632,25 +5623,25 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="annotated-cell-58"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-58-1"><a href="#annotated-cell-58-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> </span>
-<span id="annotated-cell-58-2"><a href="#annotated-cell-58-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">as.numeric</span>(overall_qual),</span>
-<span id="annotated-cell-58-3"><a href="#annotated-cell-58-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">garage_qual =</span> <span class="fu">as.numeric</span>(garage_qual)) <span class="sc">|&gt;</span> </span>
-<span id="annotated-cell-58-4"><a href="#annotated-cell-58-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">where</span>(is.numeric)) <span class="sc">|&gt;</span> </span>
-<span id="annotated-cell-58-5"><a href="#annotated-cell-58-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cor</span>(<span class="at">use =</span> <span class="st">"pairwise.complete.obs"</span>) <span class="sc">|&gt;</span> </span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-58" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-58-6" class="code-annotation-target"><a href="#annotated-cell-58-6" aria-hidden="true" tabindex="-1"></a>  corrplot<span class="sc">::</span><span class="fu">corrplot.mixed</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-57"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-57-1"><a href="#annotated-cell-57-1" aria-hidden="true" tabindex="-1"></a>data_trn <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-57-2"><a href="#annotated-cell-57-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">overall_qual =</span> <span class="fu">as.numeric</span>(overall_qual),</span>
+<span id="annotated-cell-57-3"><a href="#annotated-cell-57-3" aria-hidden="true" tabindex="-1"></a>         <span class="at">garage_qual =</span> <span class="fu">as.numeric</span>(garage_qual)) <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-57-4"><a href="#annotated-cell-57-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="fu">where</span>(is.numeric)) <span class="sc">|&gt;</span> </span>
+<span id="annotated-cell-57-5"><a href="#annotated-cell-57-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">cor</span>(<span class="at">use =</span> <span class="st">"pairwise.complete.obs"</span>) <span class="sc">|&gt;</span> </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-57" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-57-6" class="code-annotation-target"><a href="#annotated-cell-57-6" aria-hidden="true" tabindex="-1"></a>  corrplot<span class="sc">::</span><span class="fu">corrplot.mixed</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-58" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-57" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-58" data-code-lines="6" data-code-annotation="1">Note use of namespace (<code>corrplot::corrplot.mixed()</code>) to call this function from <code>corrplot</code> package</span>
+<span data-code-cell="annotated-cell-57" data-code-lines="6" data-code-annotation="1">Note use of namespace (<code>corrplot::corrplot.mixed()</code>) to call this function from <code>corrplot</code> package</span>
 </dd>
 </dl>
 </div>
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-60-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-59-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -5695,7 +5686,7 @@ Coding sidebar
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-62-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-61-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -5714,7 +5705,7 @@ Coding sidebar
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-63-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-62-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -5764,7 +5755,7 @@ Coding sidebar
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-65-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-64-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -5820,7 +5811,7 @@ Coding sidebar
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-67-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-66-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -5833,7 +5824,7 @@ Coding sidebar
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-68-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-67-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -5848,7 +5839,7 @@ Coding sidebar
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-69-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-68-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -5861,7 +5852,7 @@ Coding sidebar
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-70-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-69-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -5891,7 +5882,7 @@ Coding sidebar
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-72-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-71-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -5909,7 +5900,7 @@ Coding sidebar
 <div class="cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-73-1.png" class="img-fluid figure-img" width="672"></p>
+<p><img src="l02_exploratory_data_analysis_files/figure-html/unnamed-chunk-72-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
 </div>
@@ -5986,16 +5977,16 @@ Coding sidebar
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="annotated-cell-73"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-73-1"><a href="#annotated-cell-73-1" aria-hidden="true" tabindex="-1"></a> data_trn <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">file.path</span>(path_data, <span class="st">"ames_clean_class_trn.csv"</span>), </span>
-<span id="annotated-cell-73-2"><a href="#annotated-cell-73-2" aria-hidden="true" tabindex="-1"></a>                      <span class="at">col_types =</span> <span class="fu">cols</span>()) <span class="sc">|&gt;</span> </span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-73" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-73-3" class="code-annotation-target"><a href="#annotated-cell-73-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class_ames</span>() <span class="sc">|&gt;</span></span>
-<span id="annotated-cell-73-4"><a href="#annotated-cell-73-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-72"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><span id="annotated-cell-72-1"><a href="#annotated-cell-72-1" aria-hidden="true" tabindex="-1"></a> data_trn <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="fu">file.path</span>(path_data, <span class="st">"ames_clean_class_trn.csv"</span>), </span>
+<span id="annotated-cell-72-2"><a href="#annotated-cell-72-2" aria-hidden="true" tabindex="-1"></a>                      <span class="at">col_types =</span> <span class="fu">cols</span>()) <span class="sc">|&gt;</span> </span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-72" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-72-3" class="code-annotation-target"><a href="#annotated-cell-72-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">class_ames</span>() <span class="sc">|&gt;</span></span>
+<span id="annotated-cell-72-4"><a href="#annotated-cell-72-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">glimpse</span>()</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-73" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-72" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-73" data-code-lines="3" data-code-annotation="1">Remember our function for classing!</span>
+<span data-code-cell="annotated-cell-72" data-code-lines="3" data-code-annotation="1">Remember our function for classing!</span>
 </dd>
 </dl>
 </div>
@@ -6093,18 +6084,18 @@ predictor: 9</code></pre>
 <div class="cell">
 <details open="" class="code-fold">
 <summary>Code</summary>
-<div class="sourceCode cell-code" id="annotated-cell-76"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><a class="code-annotation-anchor" data-target-cell="annotated-cell-76" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-76-1" class="code-annotation-target"><a href="#annotated-cell-76-1" aria-hidden="true" tabindex="-1"></a>rec_prep <span class="ot">&lt;-</span> rec <span class="sc">|&gt;</span></span>
-<a class="code-annotation-anchor" data-target-cell="annotated-cell-76" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-76-2" class="code-annotation-target"><a href="#annotated-cell-76-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(<span class="at">training =</span> data_trn)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="annotated-cell-75"><pre class="sourceCode r code-annotation-code code-with-copy code-annotated"><code class="sourceCode r"><a class="code-annotation-anchor" data-target-cell="annotated-cell-75" data-target-annotation="1" onclick="event.preventDefault();">1</a><span id="annotated-cell-75-1" class="code-annotation-target"><a href="#annotated-cell-75-1" aria-hidden="true" tabindex="-1"></a>rec_prep <span class="ot">&lt;-</span> rec <span class="sc">|&gt;</span></span>
+<a class="code-annotation-anchor" data-target-cell="annotated-cell-75" data-target-annotation="2" onclick="event.preventDefault();">2</a><span id="annotated-cell-75-2" class="code-annotation-target"><a href="#annotated-cell-75-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prep</span>(<span class="at">training =</span> data_trn)</span><div class="code-annotation-gutter-bg"></div><div class="code-annotation-gutter"></div></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-annotation">
 <dl class="code-annotation-container-grid">
-<dt data-target-cell="annotated-cell-76" data-target-annotation="1">1</dt>
+<dt data-target-cell="annotated-cell-75" data-target-annotation="1">1</dt>
 <dd>
-<span data-code-cell="annotated-cell-76" data-code-lines="1" data-code-annotation="1">We start by prepping our raw/original recipe (<code>rec</code>)</span>
+<span data-code-cell="annotated-cell-75" data-code-lines="1" data-code-annotation="1">We start by prepping our raw/original recipe (<code>rec</code>)</span>
 </dd>
-<dt data-target-cell="annotated-cell-76" data-target-annotation="2">2</dt>
+<dt data-target-cell="annotated-cell-75" data-target-annotation="2">2</dt>
 <dd>
-<span data-code-cell="annotated-cell-76" data-code-lines="2" data-code-annotation="2">We use the <code>prep()</code> function on on the training data. Recipes are ALWAYS prepped using training data. This makes sure that are recipes will always only use information from the training set when making features for any subsequent dataset. As part of the prepping process, <code>prep()</code> calculates and saves the features for the training data for later use</span>
+<span data-code-cell="annotated-cell-75" data-code-lines="2" data-code-annotation="2">We use the <code>prep()</code> function on on the training data. Recipes are ALWAYS prepped using training data. This makes sure that are recipes will always only use information from the training set when making features for any subsequent dataset. As part of the prepping process, <code>prep()</code> calculates and saves the features for the training data for later use</span>
 </dd>
 </dl>
 </div>
