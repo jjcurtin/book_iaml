@@ -7,10 +7,9 @@ editor_options:
 
 ## Course Overview
 
-- Introductions (preferred name, pronouns, program/department and year)
+- Introductions (preferred name, program/department and year; share name and pronouns in Slack)
 
-
-- Structure of course
+- Structure of course (after this short week)
   - Blended course!!
   - Same flow each week
     - Week starts on Thursdays at 12:15 pm (end of Discussion meeting)
@@ -18,10 +17,10 @@ editor_options:
       - Pre-recorded lectures
       - Review of lecture slides (slide deck or book format)
       - Readings (@ISL and other sources;  All free)
-      - Application assignment
+      - Application assignments (due following Friday at 8 pm)
     - Asynchronous discussion and questions on Slack
-    - Lab section on Tuesdays at 11:00 am - address previous week's code
-    - Quiz and application assignments due Wednesdays at 8 pm
+    - Lab section on Tuesdays at 11:00 am - address issues/questions with pending assignment
+    - Quiz due Wednesdays at 8 pm
     - Wrap-up discussion and conceptual questions on Thursdays at 11 am.  Not a lecture
   - Self-paced (except for due dates and discussion)
   - Quizzes used to encourage and assess reading.  Also to guide discussion.
@@ -32,9 +31,9 @@ editor_options:
 
 - Help 
   - Office hours
-    - John - Thursdays, 3 – 4 pm
-    - Zihan - Mondays, 12:30 - 1:30 pm
-    - Coco - Wednesdays, 11 - 12 pm 
+  - John - Thursdays, 1:30 - 2:30 pm
+    - Chris - Thursdays, 12:30 - 1:30 pm
+    - Claire - Wednesdays, 11 - 12 pm 
     - Personal appointments & Slack
 
 
@@ -45,13 +44,13 @@ editor_options:
   - Lecture slides provided in slide deck and book formats
   - Live discussions will be recorded and shared (along with slide deck)
   - Slides/book provides primary source for code examples (all you need for this course)
-  - Readings are also quite important!
+  - Readings are also quite important! (hence the weekly quizzes)
     
 --------------------------------------------------------------------------------
 
 - Course as guided learning
   - Concepts in lectures and readings
-  - Applications in slides and application assignment
+  - Applications in slides, lab, and application assignment
   - Discussion section is discussion/questions (not pre-planned lecture)
   - Slack CAN be a good source for discussion and questions as well
   - Grades are secondary (quizzes, application assignments, exams)
@@ -74,7 +73,6 @@ editor_options:
     - Well-supported and documented ([tidymodels.org](https://www.tidymodels.org/))
     - Be careful with other web documentation (often out of date)
 
-
 - Why me?
 
   - Primary tools in our research program
@@ -95,21 +93,21 @@ editor_options:
 - Exams, Application Assignments and Quizzes
 
   - Approximately weekly quizzes will be administered through Canvas and due each Wednesday at 8 pm (15% of grade)
-  - Approximately weekly application assignments will be submitted via Canvas and due each Wednesday at 8 pm (25% of grade)
-
-  - Midterm application/project exam due March 5th at 8 pm (15% of grade)
-  - Midterm concepts exam in class on March 6th (15% of grade)
-  - Final concepts exam during finals week on May 6th from 11 - 12:15 (15% of grade)
-  - Final application exam due May 9th at 8 pm (15% of grade)
+  - Approximately weekly application assignments will be submitted via Canvas and due each Friday at 8 pm (25% of grade)
+  - Midterm application/project exam due Friday, March 6th at 8 pm (15% of grade)
+  - Midterm concepts exam in class on Thursday, March 6th (15% of grade)
+  - Final concepts exam during finals week on Tuesday, May 5th from 11 - 12:15 (15% of grade)
+  - Final application exam due Friday, May 8th at noon (15% of grade)
 
 --------------------------------------------------------------------------------
 
 - ChatGPT and other LLMs
 
-  - Yay!  May develop into an amazing tool in your workflow
+  - Yay!  useful tool in your workflow
   - Use as tool (like Stack Overflow) for applications (application assignments, application questions on exams)
   - Integrated into RStudio with github student account
   - Check carefully - it can be wrong even when it looks right
+  - Keep code in tidyverse/models (LLMs won't do this by default)
   - Do NOT use for conceptual questions (quizzes, conceptual exam questions).  This type of info needs to be in your head to be effective data scientist.
 
 --------------------------------------------------------------------------------
@@ -123,13 +121,19 @@ editor_options:
 
 ## Association vs. Prediction
 
+We will start with discussion of Yarkoni and Westfall today.  Continue and integrate ISL chapter on thursday
+
+What follows today is mostly my notes on key topics from the paper! Not meant to be a lecture.
+
 ::: {.callout-important}
 # Question 
 What is the difference between association vs. prediction?
 :::
 
 ::: {.fragment .uwred}
-Association quantifies the relationship between variables within a sample (predictors-outcome).  Prediction requires using an established model to predict (future?) outcomes for new ("out-of-sample, "held-out") participants.
+Association quantifies the relationship between variables within a sample (predictors-outcome).  
+
+Prediction requires using an established model to predict (future?) outcomes for new ("out-of-sample, "held-out") participants.
 :::
 
 --------------------------------------------------------------------------------
@@ -138,7 +142,7 @@ Much research in psychology demonstrates association but calls it prediction!
 
 Association (sometimes substantially) overestimates the predictive strength of our models
 
-- Coefficients are derived to mimimize SSE (or maximize $R^2$)
+- Coefficients are derived to minimize SSE (or maximize $R^2$) in sample
 - $R^2$ from GLM (using one sample) indexes how well on average any GLM that is fit to a sample will account for variance in that sample when specific coefficients are estimated in the same sample they are evaluated
 - $R^2$ does NOT tell you how well a specific GLM (including its coefficients) will work with new data for **prediction**
 - $R^2$ itself is positively biased even as estimate of how well a sample specific GLM will predict in that sample (vs. adjusted $R^2$ and other corrections)
@@ -147,11 +151,13 @@ Association (sometimes substantially) overestimates the predictive strength of o
 
 Prediction requires:
 
-- Model trained/fit on data that does NOT include the outcome to be predicted (model already exists)
-- May also predictors to be measured before outcome 
+- Model trained/fit on data that does NOT include the participants/observations to be predicted (model already exists)
+  - training data (held-in sets)
+  - performance evaluated in held-out data (validation/test sets)  
+  
+- Predictors to be measured before outcome (for true prediction)
 
 - Consider how to make a lapse prediction for a new person when implementing prediction model
-
 
 --------------------------------------------------------------------------------
 
@@ -160,20 +166,23 @@ Prediction requires:
 Goal of scientific psychology is to understand human behavior.  It involves both **explaining** behavior (i.e., identifying causes) and **predicting** (yet to be observed) behaviors.
 
 - We overemphasize explanatory goals in this department, IMO
-  
+
+Prediction focuses on questions about: 
+
+- Who, when, under what conditions, what can change outcome?
+- typically used in applications/interventions but that is often goal of explanatory models too!
+- Prediction models can provide insight or tests of explanatory theories (e.g., do causes actually predict in new data; variable importance)
+
 ::: {.callout-important}
 # Question
 Examples of valuable prediction without explanation?
 :::
 
-- Who, when, under what conditions, what can change outcome?
-- Focus typically on applications/interventions but that is often goal of explanatory models too!
-- Prediction models can provide insight or tests of explanatory theories (e.g., do causes actually predict in new data; variable importance)
   
 [Can you have explanation without prediction?]{.red}
 
-- If we can't predict something precisely, do we really understand it?
-- If there is a lot we don't understand (lots of prediction error), our understanding may be limited/wrong
+- If we can't predict something precisely, do we really understand it (is our explanation sufficient)?
+- If there is a lot we don't understand (lots of prediction error), our explanation understanding may be limited/wrong
   
 --------------------------------------------------------------------------------
 
@@ -189,6 +198,8 @@ Supervised vs. unsupervised machine learning?
 Supervised regression vs classification?
 :::
 
+NOTE: We will not discuss reinforcement learning in this course
+
 --------------------------------------------------------------------------------
 
 ## Data Generating Process
@@ -198,15 +209,25 @@ Supervised regression vs classification?
 What is a data generating process?
 :::
 
+::: {.fragment .uwred}
 - $Y = f(X) + \epsilon$
 - both function and Xs are generally unknown
 - $\hat{Y} = \hat{f}(X)$
-
+:::
 
 ::: {.callout-important}
 # Question
 Why do we estimate the data generating process?
 :::
+
+::: {.fragment .uwred}
+Same as use of models in 610
+
+- summarize/describe
+- Predict outcomes (predict)
+- test hypotheses about predictors (explain) 
+:::
+
 --------------------------------------------------------------------------------
 
 ## Cross Validation
@@ -379,7 +400,6 @@ Describe problem of p-hacking with respect to overfitting?
 
 ::: {.fragment .uwred}
 When you p-hack, you are overfitting the training set (your sample).  You try out many, many different model configurations and choose the one you like best rather than what works well in new data.  This model likely capitalizes on noise in your sample.  It won't fit well in another sample.  
-
 
 In other words, your conclusions are not linked to the true DGP and would be different if you used a different sample.  
 
