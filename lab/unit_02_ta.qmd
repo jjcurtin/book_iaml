@@ -1,0 +1,591 @@
+---
+title: "Unit 2 Lab"
+author: "TA Lab Key"
+date: "`r lubridate::today()`"
+format: 
+  html: 
+    embed-resources: true
+    toc: true 
+    toc_depth: 4
+editor_options: 
+  chunk_output_type: console
+---   
+
+## Unit 1: Orienting to Quarto
+
+Welcome to 752! A reminder that you can find information for TA office hours and contact information on the [course website](https://jjcurtin.github.io/book_iaml/).
+
+This script demos some best practices to apply across all application assignments and exams. These practices are well-documented in John's data wrangling in the [tidyverse book](https://jjcurtin.github.io/book_dwvt/).
+
+### Projects and paths
+
+Most application assignments will require you to read in csv files. To avoid problems with paths and working directories, we encourage you all to work from an IAML R Project and use relative paths.   
+
+Let's do this now!
+
+#### Create a new project
+
+Go to `File` --> `New Project` --> `New Directory` --> `New Project`   
+
+Now navigate to where you want the project directory to live and name your directory to whatever you want (e.g., `iaml`, `iaml_2026`, `psych_752`).    
+
+If you open up your file explorer, you should now see that folder with the project in it.    
+
+Let's switch over to our project now! Go to `File` --> `Open Project`  (reopen `unit_02_lab.qmd`) 
+
+Check that your working directory now matches where your project lives. 
+```{r}
+getwd() # check your own working directory
+```
+
+From this location we can now use relative paths with the `here::here()` function. A relative path is simply a path that operates *in relation to* your current working directory. This will prevent you from having to write out full path names when you want to load anything into R.
+
+#### Create directories
+
+Now we are going to create a nested directory structure for working with our application assignments and any lab materials. You should take the time to read more about file and path management [here](https://jjcurtin.github.io/book_dwvt/file_and_path_management.html).    
+
+First, we'll make a lab folder. You're in charge of setting up a folder for your application assignments (but we can always help you out in office hours)!
+```{r}
+dir.create(here::here("lab")) # this creates a folder called "lab" in you ML class folder
+```
+
+Next, we'll make unit subfolders.
+```{r}
+sprintf("%02d", 2:12) |> 
+  purrr::map(\(unit) dir.create(here::here(stringr::str_c("lab/unit_", unit))))
+# Here is an anonymous function mapped to the series of units which is piped to `purrr:map()`
+```
+
+Let's set a path to unit_02 for us to use for the rest of today.
+```{r}
+path_lab <- "2026/lab/unit_02"
+```
+
+Now, if we want to save out or read anything in we can use `here::here(path_lab, "name_of_file")`. We have to use this in conjunction with `here::here()`, otherwise `path_lab` is just a string and nothing more!
+
+For example, let's move this .qmd script to the `unit_02` folder. You can either do this by moving the file to the proper location using the GUI, or you can follow the simple tutorial below.
+
+First, we'll find where our script is currently located. Go to the file, right click on it, and "copy as pathname" (you will need to hold down the "option" key for this to work).
+
+Set path of current location of script - can get this by right clicking on file and copy over to new location
+```{r}
+# Make sure to change this as your own directory for the `.rmd` file
+path_qmd <- "path name here"
+
+file.copy(from = path_qmd,
+          to   = path_lab)
+
+# remove old file - note you will be prompted to close deleted file and then reopen file from new direction
+#file.remove(path_qmd)
+```
+
+
+### How to set up your .qmd files for assignments 
+
+At the beginning of every script you will want to do some basic setup. Below we suggest some basic best practices; however, feel free to modify your setup for what works best for your workflow. If you do modify your setup be sure to keep these best practices in mind!
+
+
+#### Handling conflicts
+
+Function conflicts occur when you load multiple packages using `library()` and these packages contain functions that share identical names. The function in the package loaded last will mask (i.e., override) the identically named previous function. More information on how to handle conflicts appropriately can be found [here](https://jjcurtin.github.io/book_dwvt/conflicts.html).
+
+This can cause errors if you are wanting the function from the first package and don't use the namespace (i.e., reference the function using the name of the package, à la: `janitor::clean_names()` to explicitly call the `clean_names()` function from the `janitor` package). Even worse it might not generate an error and give you inaccurate results without you realizing it!    
+
+In this course we suggest using the following workflow for handling conflicts.  
+
+First and foremost, load full packages sparingly.    
+
+For example, we will be doing our modeling in the tidyverse so we will want to load `tidyverse` and `tidymodels` for every assignment. We will **always** load these in first thing in our script.
+```{r}
+library(tidyverse) 
+library(tidymodels) 
+```
+
+We use this code block to basically say that masking base R functions is okay (i.e., you can override basic functions; if we're loading something special in, we probably care about it more than base R functions!). If you'd like to load in additional packages, load these in **after** specifying this conflicts policy.
+```{r conflict_policy}
+options(conflicts.policy = "depends.ok")
+```
+
+We will also usually want to source some functions in.
+
+Below, we source John's `fun_eda` script, but you are encouraged to modify these functions as you see places for improvement and save them in your own function script. If you choose to do this and have the script locally on your computer (i.e., in your new project folder) you can load your functions using `source("my_fun_script.R)`. **Note that function scripts are an R file not a .qmd file!**
+``` {r}
+# Useful functions for EDA
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+```
+
+For functions from packages outside the tidyverse, you are encouraged to use these in two ways.
+
+1. If you are only going to use the function a couple times, using its namespace before the function. For example when we use the `here()` function from the `here` package we use it as `here::here()`.
+
+2. If you are going to be using a function several times in a script (as may be the case when doing EDA) you should load the function at the top of your script.    
+
+For example, I like using the `tabyl()` function from the `janitor` package when doing EDA. I can opt to only load in that function when calling `library(janitor)` to avoid 1) having to write out the namespace; and 2) potential conflicts that might exist between other functions across this package and others.
+```{r}
+library(janitor, include.only = "tabyl")
+```
+
+
+## Debug Suggestions
+
+We recommend you to try fixing any bugs yourself using the following steps as a guide. If you reach out to the TAs or John for help, we will expect that you've already tried steps 1 and 2.
+
+**Step 1: Read through the error message**
+ - Common bugs are caused by typos, trying to load in a file which does not exist in the directory you are calling, an incorrect path specification, or trying to call a variable name which doesn't exist (this might happen if you reload your environment)
+ - Sometimes, the error message will tell you exactly what's going on and you won't need to undertake further debugging!
+ 
+**Step 2: Search online**
+ - Error messages are not always straightforward. When step 1 fails, it's time to search online!
+ - You can copy the entirety of the error and directly Google it (99.9% of the time, you're not the first person to have encountered a particular error)
+ - Online forums (Stackoverflow, Github) are your best friend!
+ - LLMs might be helpful, but won't always give you the correct answer; you should also keep in mind that we expect you to use *tidy* style coding (AKA best practices put forth by the tidyverse folks)
+  
+**Step 3: Reach out with reproducible examples**
+ - A *reproducible example* (or *reprex*) is a simplified version that *reproduces* an error you are encountering for the purposes of sharing it with others
+ - In this class, we will expect you to create a reprex for TAs/John to review if you are encountering a difficulty
+ - Many online forums also expect you to produce a reprex (AKA if you don't you will be downvoted into eternity)
+
+### Debug-along
+
+Throughout this semester and beyond, you'll see tons of error messages when you code. Here are some examples of errors you'll (probably) encounter. Let's go through each one together and see what steps we might take when our code doesn't work.
+
+*Tip*: an easy way to see how a function works is to `?function_name` in the console to see its documentation.
+
+We'll use the `ames` data as an example.
+
+```{r}
+ames <- read_csv(here::here(path_lab, "ames_raw_class.csv")) |> 
+  select((last_col() - 3):last_col()) |> # let's just take the last four columns for this example
+  janitor::clean_names() # this function formats variables in snake_case, which is best practice
+```
+
+**Example 1**
+```{r}
+# Case sensitivity of R
+ames |> mutate(new_col = Sale_Price * 2)
+
+## FIX: R is case sensitive
+ames |> mutate(new_col = sale_price * 2)
+```
+
+**Example 2**
+```{r}
+# Size compatibility
+ames |> mutate(new_col = c(1:2))
+
+## FIX: mutated column should have same length as the target dataframe 
+ames |> mutate(new_col = c(1:nrow(ames)))
+```
+
+**Example 3**
+```{r}
+# Data type sensitivity
+bind_rows(ames, data.frame(sale_price = c("200000", "220000")))
+
+# FIX: unquote as numeric
+bind_rows(ames, data.frame(sale_price = c(200000, 220000))) |> tail()
+```
+
+**Example 4**
+```{r}
+# Data type requirement for certain functions
+ames |> summarise(mean = mean(sale_condition)) 
+# FIX: 
+# (1) Make sure averaging is the correct operation for the variable
+# (2) `as.numeric()` 
+```
+
+**Example 5**
+```{r}
+# Usage of `group_by`
+ames |> group_by(c("sale_condition", "sale_price"))
+
+# FIX: each variable as the grouping-by criteria takes an individual parameter
+ames |> group_by(sale_condition, sale_price)
+```
+
+**Example 6**
+```{r}
+# Column reference and type change
+# Warning and coerced value change
+ames |> mutate(new_col = as.numeric("sale_condition"))
+# FIX
+# First let's take a look at the dataframe using `glimpse()`
+ames |> mutate(new_col = as.numeric("sale_condition")) |> glimpse()
+# Our first step is to unquote the column name
+ames |> mutate(new_col = as.numeric(sale_condition))
+# We're still getting a coercion warning, so maybe we don't want sale_condition to be numeric...
+ames |> mutate(new_col = as.numeric(sale_condition)) |> glimpse()
+# ...in fact, it's better treated as a factor!
+ames |> mutate(new_col = as.factor(sale_condition)) |> pull(new_col) |> table()
+```
+
+**Example 7**
+```{r}
+# Type compatibility in `if_else`
+ames |> mutate(new_col = if_else(sale_price > 0, "TRUE", 0))
+# FIX
+ames |> mutate(new_col = if_else(sale_price > 0, 1, 0)) |> glimpse()
+# or
+ames |> mutate(new_col = if_else(sale_price > 0, "TRUE", "FALSE")) |> glimpse()
+```
+
+**Example 8**
+```{r}
+# Joining dataframes
+tmp <- data.frame(id = 1:nrow(ames)) |> 
+  mutate(new_col = (1:nrow(ames) * 2))
+
+left_join(ames, tmp, by = "id")
+# FIX: you will encounter this error if you don't have a matching column in both dataframes!
+ames <- ames |> 
+  mutate(id = 1:nrow(ames))
+
+left_join(ames, tmp, by = "id") |> view()
+```
+
+
+### Reproducible Example (Reprex)
+
+If problems do come up during your coding (and they will!) it will be easier for us to help you if you bring us a reproducible example. In making the reprex, you will often likely figure out the problem on your own. We will go through a reprex tutorial now, but you should also take the time to read more about how to create an appropriate reprex [here](https://jjcurtin.github.io/book_dwvt/reproducible_examples.html).
+
+Best practices for generating a reprex:
+1. The reprex should run completely on its own
+2. It should NOT require anyone to source other scripts
+3. It should (almost) never require the person to load data
+4. It should be as sparse as possible (cut out any extra code)
+5. Include only necessary packages
+
+First let's create some example code that produces an error.
+```{r}
+ames |> 
+  mutate(sale_condition_log = log(sale_condition))
+```
+
+Then, sample your data for the reprex. Below, we show how to use both a mock example and
+your current data (if your data are not private and can be shared). You can also use publicly available data through the `modeldata` package.
+```{r}
+# create a small data set (be sure to include packages)
+library(dplyr)
+set.seed(12345) # to make data reproducible if that matters
+d <- tibble (x = rnorm(24), 
+             y = rep(c("group_1", "group_2"), 12), 
+             z = factor(rep(c("1", "2", "3"), 8))) |>  
+  glimpse()
+
+# or use your current data (only if your data is not private and can be shared)
+dput(ames[1:2, ]) # first two rows of our already abridged dataset
+# the console output is what you share in your reprex
+# Put it in the below chunk for `data`
+```
+
+Here's our final reprex! Copy this code, type reprex() in your console, copy the output from the viewer as your reprex.
+```{r}
+library(dplyr)
+
+data <- structure(list(yr_sold = c(2010, 2010), 
+                       sale_type = c("WD", "WD"), 
+                       sale_condition = c("Normal", "Normal"), 
+                       sale_price = c(215000, 105000), id = 1:2), 
+                  row.names = c(NA, -2L), class = c("tbl_df", "tbl", "data.frame"))
+
+data |> 
+  mutate(log_sale_condition = log(sale_condition))
+```
+
+Another way to run `reprex` inline:
+```{r}
+library(reprex)
+reprex({
+  # Copy this code, type reprex() in your console, copy the output from the viewer as your reprex
+  library(dplyr)
+  
+  data = structure(list(yr_sold = c(2010, 2010), sale_type = c("WD", "WD"
+), sale_condition = c("Normal", "Normal"), sale_price = c(215000, 
+105000), id = 1:2), row.names = c(NA, -2L), class = c("tbl_df", 
+"tbl", "data.frame"))
+
+  data |> 
+    mutate(log_sale_condition = log(sale_condition))
+}, venue = "slack") # You can also set the "venue" where you'll share the code to with this parameter
+```
+
+Finally, copy your reprex directly and send it to the TAs and/or John (or post it on a site like Stackoverflow).
+
+### EDA Tutorial
+
+EDA stands for "exploratory data analysis" and is a essential part of much of statistics. Having a better understanding of your data is crucial for good modeling! The focus of your first application assignment will be on EDA.
+
+You should always start with a fresh environment when executing new code.   
+Use menu   Session:Restart R
+
+
+Your first step will always to be to set up your environment, which we've already reviewed above. We'll paste everything again down here since we just cleared our environment.
+```{r}
+# load in our tried and true tidy packages!
+library(tidyverse) 
+library(tidymodels) 
+
+# address conflicts
+options(conflicts.policy = "depends.ok")
+
+# load other packages -- here we add in some extras which are helpful for EDA
+# that are covered in the lecture!
+library(janitor, include.only = "clean_names")
+library(cowplot, include.only = "plot_grid")
+library(kableExtra, exclude = "group_rows")
+
+# source in some helpful scripts that John wrote
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+
+# set some preferences for your environment
+# this will be covered more in lecture
+theme_set(theme_classic())
+options(tibble.width = Inf, tibble.print_max = Inf)
+
+# specify your path
+path_lab <- "2026/lab/unit_01"
+```
+
+#### EDA for Cleaning
+
+Now, let's load in a new example dataframe. We'll use the `modeldata` package for this. **Remember, we do EDA for cleaning on the full dataset!**
+```{r}
+sacramento <- modeldata::Sacramento
+```
+
+Now, your TAs are quickly going to make this a little messier...for learning!!! We will also add in two additional variables.
+```{r}
+# add in some missingness to square footage and type
+set.seed(20220813)
+
+sacramento <- sacramento |> 
+  mutate(
+    sqft = if_else(runif(n()) < 0.08, NA_real_, sqft),
+    type = if_else(runif(n()) < 0.10, NA_character_, type)
+  )
+
+
+# we'll make the column names ugly
+names(sacramento) <- ifelse(
+  runif(length(names(sacramento))) < 0.5,
+  toupper(names(sacramento)),
+  tolower(names(sacramento))
+)
+
+# add in some variables
+sacramento <- sacramento |> 
+  mutate(
+    walkability = case_when(
+      price <= quantile(price, 1/3, na.rm = TRUE) ~ "not",
+      price <= quantile(price, 2/3, na.rm = TRUE) ~ "moderately",
+      TRUE                                        ~ "extremely"
+    ),
+    neighborhood_prestige = case_when(
+      price <= quantile(price, 1/3, na.rm = TRUE) ~ "low",
+      price <= quantile(price, 2/3, na.rm = TRUE) ~ "medium",
+      TRUE                                        ~ "high"
+    )
+  )
+
+```
+
+`glimpse()` will give you a sense of your entire dataframe, and will also clue you in to any columns that you might need to reclass. We probably want to class `type` as a factor, so we'll take care of that now. Our added in variables, `walkability` and `neighborhood_prestige` do appear to have an ordering to them that's important, so we'll take care of that, too.
+```{r}
+sacramento |> glimpse()
+
+walk_levels <- c("not", "moderately", "extremely")
+prestige_levels <- c("low", "medium", "high")
+  
+sacramento <- sacramento |>
+  mutate(walkability = factor(walkability, 
+                               levels = walk_levels),
+         neighborhood_prestige = factor(neighborhood_prestige,
+                                        levels = prestige_levels)) |> 
+  mutate(across(where(is.character), factor))
+  
+
+sacramento |> glimpse()
+```
+
+You'll notice some of our column names are annoyingly formatted (because your TAs added in some mess for practice!). Yuck! We can easily fix this using the `clean_names()` function from the `janitor` package. We can check that this worked using the `names()` function.
+```{r}
+sacramento <- sacramento |> clean_names()
+
+sacramento |> names()
+```
+
+`skim()` from the `skimr` package is another great tool. John has kindly customized a version of this called `skim_some` in the `fun_eda.R` script we loaded in above. You can customize your own version, too!
+```{r}
+sacramento |> skimr::skim()
+
+sacramento |> skim_some()
+```
+
+We can further filter this output down if we want to examine something in particular, like missing data.
+```{r}
+sacramento |> 
+  skim_some() |> 
+  select(skim_variable, n_missing, complete_rate) |> 
+  arrange(complete_rate)
+```
+
+Let's practice creating a simple table to further examine the `sqft` variable, which is missing a few observations. We use John's `print_kbl()` function here. At a quick glance, you can sometimes use this to identify patterns in missingness (not here, because we added in some random noise!). You will learn how to further customize these tables in the lecture.
+```{r}
+sacramento |> 
+  filter(is.na(sqft)) |> 
+  print_kbl()
+```
+
+Another important thing to take a look at for sanity checking is our minimum and maximum values for numeric values.
+```{r}
+sacramento |> 
+  skim_some() |>
+  filter(skim_type == "numeric") |>
+  select(skim_variable, numeric.p0, numeric.p100)
+```
+
+Above, we noticed that variables we expected to be classed as factors seemed to be properly classed. We can examine the *levels* for our factor variables to make sure everything looks as we'd expect. 
+```{r}
+sacramento |> 
+  select(where(is.factor)) |>
+  walk(\(column) print(levels(column)))
+```
+
+Let's fix our city names because, as we know, all caps is certainly not snake_case!!! John has created a nice helper function for you all called `tidy_responses()`.
+```{r}
+sacramento <- sacramento |> 
+  mutate(across(where(is.factor), tidy_responses))
+
+sacramento |> 
+  select(where(is.factor)) |>
+  walk(\(column) print(levels(column)))
+```
+
+#### EDA for Modeling
+
+The last step for preparing our data for modeling is establishing our training and test splits. For our hypothetical modeling example, we're interested in predicting the price of a given home, so we'll specify that in our `strata` argument.
+```{r}
+set.seed(20211121) # set seed for reproducibility!
+splits <- sacramento |> 
+  initial_split(prop = 3/4, strata = "price", breaks = 4)
+```
+
+Our splits object contains both our training set (called using `analysis()` below) and our validation set (which could be called using `assessment()` -- you'll see this in lecture, we won't save it out today since we are just focusing on EDA). **You should only ever do modeling EDA with your training data, and never your validation/testing data in order to prevent data leakage!!**
+
+In this course, we will always save out cleaned files to prevent writing over of original data and so that we can clearly follow our modeling steps. Let's do this now!
+```{r}
+splits |> 
+  analysis() |> 
+  write_csv(here::here(path_lab, "sacramento_clean_trn.csv"))
+```
+
+Let's reload our data. Looks like some things are no longer properly classed! You'll find this happens when you reload in data (even if you're saving it out with the formatting that you'd like).
+```{r}
+sac_trn <- read_csv(here::here(path_lab, "sacramento_clean_trn.csv")) |> 
+  glimpse()
+```
+
+This is a good chance for us to practice reclassing. We mostly care about the variables we'd like to be classed as factors being converted to plain ol' boring character variables -- this means that we're losing important information with respect to levels in our data.
+```{r}
+walk_levels <- c("not", "moderately", "extremely")
+prestige_levels <- c("low", "medium", "high")
+  
+sac_trn <- sac_trn |>
+  mutate(walkability = factor(walkability, 
+                               levels = walk_levels),
+         neighborhood_prestige = factor(neighborhood_prestige,
+                                        levels = prestige_levels)) |> 
+  mutate(across(where(is.character), factor))
+
+sac_trn |>
+  select(where(is.factor)) |>
+  walk(\(column) print(levels(column)))
+```
+
+Now we can start by first exploring an overall summary of our data (again, using one of John's helpful functions!)
+```{r}
+sac_trn |> skim_all()
+```
+
+##### Univariate Distributions
+
+First, we'll review some different ways to examine univariate distributions. A popular first choice is the barplot, which you can use for nominal and ordinal variables.
+```{r}
+sac_trn |> plot_bar("city")
+sac_trn |> plot_bar("type")
+```
+
+Visualizations tend to be nice for EDA, but you could also opt to display some of this information using a table. Let's pick a variable that has an interesting distribution to look at using the `tab()` function.
+```{r}
+sac_trn |> tab(type, sort = TRUE)
+```
+
+For numeric variables, histograms are a popular choice.
+```{r}
+sac_trn |> plot_hist("sqft")
+```
+
+Another way to display this is using frequency polygons.
+```{r}
+sac_trn |> plot_freqpoly("sqft")
+```
+
+Boxplots can be helpful for visualizing outliers. Outliers are represented by dots and are outside of the bound of 1.5 times the interquartile range.
+```{r}
+sac_trn |> plot_boxplot("sqft")
+```
+
+What if we told you there was a way to see the distribution of a variable and also have the benefits of using a boxplot?! Introducing... the violin plot!
+```{r}
+sac_trn |> plot_box_violin("sqft")
+```
+
+We like visualizations, but you can also use a function like `skim_all()` to take a look at your numeric variables.
+
+##### Bivariate Distributions
+
+Let's go ahead and look at some bivariate relationships (i.e., relationships between all of our potential predictors and our outcome variable, `price`). One of the reasons we do this is to see which variables appear to have a strong relationship with our outcome variable.
+
+One way we can examine this is using scatterplots. This will also give us an idea of if we need to potentially carry out any transformations on our data during the modeling process.
+```{r}
+sac_trn |> plot_scatter("sqft", "price")
+```
+
+To get a broad overview of the relationship between numeric variables and our outcome variable we can create a correlation plot (note that you can do this with ordinal variables, too, if you transform them).
+```{r}
+sac_trn |> 
+  select(where(is.numeric)) |> 
+  cor(use = "pairwise.complete.obs") |> 
+  corrplot::corrplot.mixed()
+```
+
+Grouped box and violin plots an be used for categorical and numerical bivariate relationships. Let's pull one of our categorical variables as an example.
+```{r}
+sac_trn |> plot_grouped_box_violin("type", "price")
+```
+
+Another way to learn about the relationship between two categorical variables is by creating stacked barplots. Let's look at the relationship between `zip` and `type`.
+```{r}
+sac_trn |> plot_grouped_barplot_count("type", "zip")
+```
+
+With two ordinal variables, you can create a tile plot or a scatterplot with jitter.
+```{r}
+sac_trn |> plot_tile("walkability", "neighborhood_prestige")
+
+sac_trn |> 
+  mutate(walkability = jitter(as.numeric(walkability)),
+         neighborhood_prestige = as.numeric(neighborhood_prestige)) |> 
+  plot_scatter("walkability", "neighborhood_prestige")
+```
+
+We can also make two-way tables to look at two categorical variables.
+```{r}
+sac_trn |> tab2(type, neighborhood_prestige)
+```
+
+### Wrap Up
+
+This script is now your reference for basic EDA functions! Woohoo!
