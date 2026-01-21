@@ -15,7 +15,7 @@ editor_options:
 
 Welcome to your first homework assignment! Please enter your first and last name at the top of this document where it says "Your name here".
 
-Everything you need to complete this assignment can be downloaded from the course website. This includes:
+Everything you need to complete this assignment can be downloaded from the course web book. This includes:
 
 - **Two markdown files (hw_unit_2_cleaning.qmd and hw_unit_2_modeling.qmd):** To complete this homework (and the other homeworks) type all responses directly into these Quarto markdown files. To learn more about Quarto and working in markdown files, see the Quarto chapter of R for Data Science 2E and [help on markdown]9https://quarto.org/docs/authoring/markdown-basics.html) on the Quarto website
 
@@ -25,7 +25,7 @@ Everything you need to complete this assignment can be downloaded from the cours
 
 ## Some Notes on Formating in Markdown
 
-In markdown, when  you are talking about variables, R functions, etc., you can display that code distinctly (with a grey background) when the script is rendered by surrounding the text with `.  We will use this on the website and in our homework scripts.
+In markdown, when  you are talking about variables, R functions, etc., you can display that code distinctly (with a grey background) when the script is rendered by surrounding the text with `.  We will use this in the web book and our homework scripts 
 
 Note that other mathematical elements in markdown are by convention surrounded by `$` when specifying them inline. This renders the enclosed element in a distinct typeset when rendered. You'll learn more about this notation later, but it is especially useful when composing mathematical elements (like equations) in your notebooks. 
 
@@ -39,39 +39,34 @@ As we describe in the book, you should always use RStudio projects for file and 
 
 ## Packages, Source, Etc
 
-In the application assignment shells, some code chunks, like the `packages` and `conflicts` chunks below, will be pre-filled with code for you to run. Other code chunks will be empty with text instructions above them describing code for you to fill in.  The shells will be more and more empty as the semester advances!
+In the application assignment shells, some code chunks, like the `conflicts` and `packages` chunks below, will be pre-filled with code for you to run. Other code chunks will be empty with text instructions above them describing code for you to fill in.  The shells will be more and more empty as the semseter advances!
 
-This code chunk loads all packages needed for this assignment.
-```{r}
+This code chunk will set up conflict policies to reduce errors associated with function conflicts
+```{r conflicts}
+options(conflicts.policy = "depends.ok")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+tidymodels_conflictRules()
+```
+
+This code chunk loads all packages you will need for this assignment.  Note that we didn't load the `janitor` package here.  You will use its `clean_names()` function but you can use that without loading the package by just pre-pending the namespace when you call it (i.e., `janitor::clean_names()`)
+```{r packages}
 #| message: false
 #| warning: false
-
+library(kableExtra, exclude = "group_rows") # you may or may not use this one!
 library(tidyverse) # for general data wrangling
 library(tidymodels) # for modeling
 ```
 
-This code chunk will set up conflict policies to reduce errors associated with function conflicts.
-```{r}
-options(conflicts.policy = "depends.ok")
-```
-
-If we wanted to load more packages, we would load them in *after* specifying our conflicts policy below. Note that we didn't load the `janitor` package below. You use its `clean_names()` function later but you can use that without loading the package by pre-pending the namespace when calling it (i.e., `janitor::clean_names()`). We load in the `kableExtra` package below, but you might not use it!
-```{r}
-#| message: false
-#| warning: false
-
-library(kableExtra, exclude = "group_rows")
-```
-
 You may also use the EDA and plotting functions that John shares on his `lab_support` repo.  You can source the scripts that contain those functions directly from Github with the code below (note that you may need to install the `devtools` package if you haven't done this previously).
-```{r}
+
+```{r source}
 #| message: false
 #| warning: false
-source("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
-source("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
 ``` 
 
-Set up some other environment settings.
+Set up some other environment settings 
 ```{r}
 options(tibble.width = Inf, tibble.print_max = Inf)
 theme_set(theme_classic()) # maybe you prefer this to classic theme?
@@ -82,14 +77,15 @@ theme_set(theme_classic()) # maybe you prefer this to classic theme?
 
 ### Read Data
 In the chunk below, set the variable `path_data` to the location of your data files. Make sure you have your iaml project open in RStudio.  When you call `here::here()` it will set your root path to be inside of the iaml folder.   Assuming you have a subfolder called homework and a folder within that folder called `unit_02`, `path_data` will work as set.  If you have some other organization, you will need to modify `path_data` to reflect that folder structure.
-```{r}
+
+```{r path}
 path_data <- "homework/unit_02"
 ```
 
 This assignment will use the Ames Housing Prices Dataset (also seen in Unit 2 of the course text).
 
 Read in the `ames_raw_class.csv` data below.
-```{r}
+```{r load-data}
 
 ```
 
@@ -98,7 +94,7 @@ We will explore a different set of variables than those demoed in the course tex
 
 `SalePrice`, `Garage Area`, `Neighborhood`, `MS SubClass`, `Total Bsmt SF`, `Bsmt Qual`, `Central Air`, `TotRms AbvGrd`, `Fireplaces`, and `Fireplace Qu`.
 
-```{r}
+```{r select-data}
 
 ```
 
@@ -107,15 +103,15 @@ We will explore a different set of variables than those demoed in the course tex
 Familiarize yourself with the variables we will be using by looking each one up in the data dictionary downloaded with your homework files. Reference the codebook frequently as you perform cleaning checks below.
 
 ## Exploring the data for cleaning
-This script should only contain EDA steps necessary for cleaning the full dataset (i.e., not subsets of it that will be allocated for train, validation, or test). Be mindful of which aspects of the data set you explore at this stage to prevent information leakage between later training and validation sets (to be saved out as the final step of cleaning in this document). Provide observations at each stage of the process, even if you do not make any changes.
+This script should only contain EDA steps necessary for cleaning the full dataset (i.e., not subsets of it that will be allocated for train, vaidation, or test). Be mindful of which aspects of the data set you explore at this stage to prevent information leakage between later training and validation sets (to be saved out as the final step of cleaning in this document). Provide observations at each stage of the process, even if you do not make any changes.
 
-Remember that you can use `glimpse()`, `skim_some()`, `print()`, `head()`, and/or kable tables to explore and display your data.  Everything that you need to do has been demonstrated on the course website.
+Remember that you can use `glimpse()`, `skim_some()`, `print()`, `head()`, and/or kable tables to explore and display your data.  Everything that you need to do has been demonstrated in the web book.
 
 ### Variable classes
 
 Confirm that all variables are read in as the expected class. Remember that we class nominal and ordinal variables as factors and interval and ratio variables as numeric.  Below the code chunk, type some observations you have about the observed variable classes compared to descriptions in the data dictionary. Make any appropriate adjustments to variable class below using `mutate()`, `factor()`, or `as.numeric()`.
 
-```{r}
+```{r clean-class}
 
 ```
 
@@ -127,7 +123,7 @@ Type your text observation between the two single asterisks (`*`) above. Asteris
 ### Missing data
 Use an appropriate technique to review missing data at this stage. Clearly document missing data ("missingness") across each variable in the dataset. For variables with high missingness, write code that allows you to visually inspect all observations of missing data (for each such variable). Using information from related variables and the data dictionary to guide you, speculate (in prose) why data may be missing. Clean variables with high missingness using `mutate()`, `replace_na()`, and `fct_relevel()` if you believe any of the NAs are not really missing but instead problems with how the data were coded (e.g., see the example of this in the book.)
 
-```{r}
+```{r clean-missing}
 
 ```
 
@@ -138,7 +134,7 @@ Use an appropriate technique to review missing data at this stage. Clearly docum
 
 Explore `min` and `max` values for numeric variables, recording notes on any observations that look suspicious or potentially invalid. Use the data dictionary and associated variables to help you decide whether suspicious observations may represent (in)valid responses.
 
-```{r}
+```{r clean-numeric}
 
 ```
 
@@ -147,9 +143,9 @@ Explore `min` and `max` values for numeric variables, recording notes on any obs
 
 ### Categorical variables
 
-Use `print()` and `levels()` print the levels of each categorical variable. You might consider using `walk()` to do all the categorical variables at once!  You can use `tidy_responses()` (a function from John) to convert all responses to snake_case. Check to make sure all levels converted properly. If needed, correct any response levels with conversion errors using `mutate()` and `fct_recode()`. Document your observations for categorical levels.
+Use `print()` and `levels()` print the levels of each categorical variable. You might consider using `walk()` to do all the categorical variables at once!  You can use `tidy_responses()` (a function from John) to convert all responses to snake_case.   Check to make sure all levels converted properly. If needed, correct any response levels with conversion errors using `mutate()` and `fct_recode()`. Document your observations for categorical levels.
 
-```{r}
+```{r clean-categorical}
 
 ```
 
@@ -163,7 +159,7 @@ Now that we have completed our data cleaning, we will split our data into train 
 ### Generate a train/test split
 Assign 25% of the data to be our validation set. Stratify this split on the `sale_price` variable.
 
-```{r}
+```{r split-train}
 
 ```
 
@@ -171,14 +167,14 @@ Assign 25% of the data to be our validation set. Stratify this split on the `sal
 ### Save cleaned files
 Save out your cleaned train and validation sets as csv files and name them `hw_unit_2_train.csv` and `hw_unit_2_val.csv`.
 
-```{r}
+```{r save-files}
 
 ```
 
 ## Save and render 
 
 ### Save
-Save this `.qmd` file with your last name at the end (e.g. `hw_unit_2_janssen.qmd`)
+Save this `.qmd` file with your last name at the end (e.g. `hw_unit_2_marji.qmd`)
 
 ### Render 
 Click the "render" button at the top of your screen to render the file to html. Upload this html file to Canvas to submit the first part of the assignment. Take care not to rest on your laurels: you have a 2nd part to do (but we are proud of your for getting this far!).

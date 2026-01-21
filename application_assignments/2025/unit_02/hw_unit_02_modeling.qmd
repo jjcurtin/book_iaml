@@ -13,48 +13,46 @@ editor_options:
 
 ## Introduction
 
-Welcome to the second half of the Unit 2 EDA homework. We are glad you are here! As will become the standard, please enter your first and last name at the top of this document in the same way you did on the other part of this assignment.
+Welcome to the second half of the Unit 2 EDA homework. We are glad you are here. As will become the standard, please enter your first and last name at the top of this document in the same way you did on the other part of this assignment.
 
-Now that you've cleaned the data, it is time to start your modeling exploratory data analysis (EDA). Keep in mind that cleaning and EDA are iterative processes -- you may uncover additional data errors at this stage that should be subsequently corrected in your cleaning script. It's worth the effort to keep these scripts separate to avoid accidentally gleaning information that might inappropriately guide transformations or other feature engineering from outside of your training data.
+Now that you've cleaned the data, it is time to start your modeling exploratory data analysis (EDA). Keep in mind that cleaning/ EDA is an iterative process -- you may uncover additional data errors at this stage that should be subsequently corrected in your cleaning script. Its worth the effort to keep these scripts separate to avoid accidentally gleaning information that might inappropriately guide transformations or other feature engineering from outside of your training data.
 
 ## Packages, Source, Etc
 
-This code chunk loads in our tidy packages -- we always load these first.
-```{r}
-library(tidyverse) # for general data wrangling
-library(tidymodels) # for modeling
-```
-
-This code chunk will set up conflict policies to reduce errors associated with function conflicts.
-```{r}
+This code chunk will set up conflict policies to reduce errors associated with function conflicts
+```{r conflicts}
 options(conflicts.policy = "depends.ok")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+tidymodels_conflictRules()
 ```
 
-This code chunk loads all other packages you will need for this assignment.  
-```{r}
+This code chunk loads all packages you will need for this assignment.  
+```{r packages}
 #| message: false
 #| warning: false
 library(kableExtra, exclude = "group_rows") # you may or may not use this one!
 library(cowplot, include.only = c("plot_grid", "theme_half_open"))
 library(corrplot, include.only = "corrplot.mixed") # or just use namespace 
+library(tidyverse) # for general data wrangling
+library(tidymodels) # for modeling
 ```
 
-Source John's function scripts.
-```{r}
+Source John's function scripts
+```{r source}
 #| message: false
 #| warning: false
-source("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
-source("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
 ``` 
 
-Set up some other environment settings.
+Set up some other environment settings 
 ```{r}
 options(tibble.width = Inf, tibble.print_max = Inf)
 theme_set(theme_half_open()) # maybe you prefer this to classic theme?
 ```
 
 In the chunk below, set path_data to the location of your cleaned data files.  
-```{r}
+```{r path}
 path_data <- "homework/unit_02"
 ```
 
@@ -63,14 +61,14 @@ path_data <- "homework/unit_02"
 ### Read data
 
 Load the cleaned training dataset and do skim/glimpse it to get oriented.
-```{r}
+```{r load-data}
 
 ```
 
 ### Set up variable classes 
 
-As before, set up all categorical variables as factors (and confirm order if needed) and set up interval/ration variables as numeric.
-```{r}
+As before, set up all categorical variables as factors (and confirm order if needed) and set up interval/ration variables as numeric
+```{r reclass-predictors}
 
 ```
 
@@ -78,9 +76,9 @@ As before, set up all categorical variables as factors (and confirm order if nee
 
 ### Numeric variables
 
-First examine the univariate distributions of your numeric variables. While you can use multiple strategies to examine these data (quantitative and visual), you must also use `map()` to iterate through all numeric variables and create a `plot_grid` in a single piped chain. Describe what you discover about your data.
+First examine the univariate distributions of your numeric variables. Use `map()` to iterate through all numeric variables and create a `plot_grid` in a single piped chain. Describe what you discover about your data.
 
-```{r}
+```{r univariate-numeric}
 
 ```
 
@@ -90,9 +88,9 @@ First examine the univariate distributions of your numeric variables. While you 
 
 ### Categorical variables
 
-Now examine univariate distributions of your categorical variables. While you can use multiple strategies to examine these data (quantitative and visual), you must also use `map()` to iterate through all categorical variables and create a `plot_grid` in a single piped chain.  Comment below on what stands out to you from these plots. Document the questions that arise from inspecting the data in this way.
+Now examine univariate distributions of your categorical variables. Use `map()` to iterate through all categorical variables and display them together using `plot_grid()`. Comment below on what stands out to you from these plots. Document the questions that arise from inspecting the data in this way.
 
-```{r}
+```{r univariate-cat}
 
 ```
 
@@ -106,7 +104,7 @@ Now examine univariate distributions of your categorical variables. While you ca
 Examine the relationship between numeric predictors and the outcome variable `sale_price`. You can use `map()` again to complete these in a single pipe -- just make sure to specify `sale_price` as your `y` value. 
 
 What relationships appear promising to you? Do you have any ideas about unexpected distributional shapes? Try looking at transformations, filtering the data, or other methods that come to mind.
-```{r}
+```{r bivariate-num}
 
 ```
 
@@ -117,7 +115,7 @@ What relationships appear promising to you? Do you have any ideas about unexpect
 ### Correlations
 
 Convert any ordinal predictors to numeric, `select()` down to numeric variables, and plot all variable correlations with `sale_price`. What correlations stand out to you?
-```{r}
+```{r correlations}
 
 ```
 **Correlation notes:**
@@ -126,7 +124,7 @@ Convert any ordinal predictors to numeric, `select()` down to numeric variables,
 ### Categorical variables
 
 Now choose the best plot(s) to visualize the relationship between your categorical predictors and `sale_price()`. What relationships stand out to you? 
-```{r}
+```{r bivariate-cat}
 
 ```
 
@@ -138,7 +136,7 @@ Now choose the best plot(s) to visualize the relationship between your categoric
 `ms_sub_class` is a mysterious variable -- take a closer look at it's relationship with `sale_price`. Be sure that you are examining both the variable distribution as well as the relationship with `sale_price`. You may also find it helpful to consult the data dictionary to see what types of homes the numeric codes represent. 
 
 Do some types of homes generally sell for more than others? Is there anything surprising to you? (You may find it useful to order your `ms_sub_class` factor based on the values of `sale_price`)
-```{r}
+```{r cat-explore}
 
 ```
 **Guided categorical exploration notes:** 
@@ -148,7 +146,7 @@ Do some types of homes generally sell for more than others? Is there anything su
 ### Categorical/categorical relationships
 
 Use this space to examine how the relationship between `ms_sub_class` and `sale_price` might be related to another categorical variable in our data. You may choose any categorical variable that you think might help you better understand `ms_sub_class`. Are you noticing any patterns across levels?
-```{r}
+```{r cat-cat}
 
 ```
 **Cat/Cat Notes:** 
@@ -162,4 +160,4 @@ Save this `.qmd` file with your last name at the end (e.g. `hw_unit_2_modeling_s
 Render the file to html and upload your html file to Canvas. 
 
 ### Pause
-Pause for a moment. Feel good about what you've done. You have completed your first IAML assignment. This is important and we are proud of you!!!
+Pause for a moment. Feel good about what you've done. You have completed your first IAML assignment. This is important and we are proud of you.
