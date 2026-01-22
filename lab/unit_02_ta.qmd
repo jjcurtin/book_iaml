@@ -247,7 +247,7 @@ left_join(ames, tmp, by = "id") |> view()
 
 ### Reproducible Example (Reprex)
 
-If problems do come up during your coding (and they will!) it will be easier for us to help you if you bring us a reproducible example. In making the reprex, you will often likely figure out the problem on your own. We will go through a reprex tutorial now, but you should also take the time to read more about how to create an appropriate reprex [here](https://jjcurtin.github.io/book_dwvt/reproducible_examples.html).
+If problems do come up during your coding (and they will!) it will be easier for us to help you if you bring us a reproducible example. In making the reprex, you will often likely figure out the problem on your own. We will go through a reprex tutorial now. You can reference this page later [here](https://jjcurtin.github.io/book_dwvt/reproducible_examples.html).
 
 Best practices for generating a reprex:
 1. The reprex should run completely on its own
@@ -256,58 +256,65 @@ Best practices for generating a reprex:
 4. It should be as sparse as possible (cut out any extra code)
 5. Include only necessary packages
 
-First let's create some example code that produces an error.
+Now we'll do a simple example together. In our first error example above, we ran the following code and got an error. We just talked about why this error happens, but let's pretend like we have no idea and create a reproducible example of it.
 ```{r}
-ames |> 
-  mutate(sale_condition_log = log(sale_condition))
+bind_rows(ames, data.frame(sale_price = c("200000", "220000")))
 ```
 
-Then, sample your data for the reprex. Below, we show how to use both a mock example and
-your current data (if your data are not private and can be shared). You can also use publicly available data through the `modeldata` package.
+We want to make a dataset that is as *simple* as possible. If we look at `sale_price`, we can see it is numeric. So, let's generate a dataset that has just numeric variables in one column.
 ```{r}
-# create a small data set (be sure to include packages)
-library(dplyr)
-set.seed(12345) # to make data reproducible if that matters
+set.seed(12345) # to make data reproducible
 d <- tibble (x = rnorm(24), 
              y = rep(c("group_1", "group_2"), 12), 
              z = factor(rep(c("1", "2", "3"), 8))) |>  
   glimpse()
+```
 
-# or use your current data (only if your data is not private and can be shared)
-dput(ames[1:2, ]) # first two rows of our already abridged dataset
-# the console output is what you share in your reprex
-# Put it in the below chunk for `data`
+Now, let's try the same operation above with our new code. Yep -- still gives us an error!
+```{r}
+
 ```
 
 Here's our final reprex! Copy this code, type reprex() in your console, copy the output from the viewer as your reprex.
-```{r}
-library(dplyr)
 
-data <- structure(list(yr_sold = c(2010, 2010), 
+The last magical step to make this into a neatly formatted reprex is to put it all together (with a few additional simple steps).
+```{r}
+library(reprex)
+
+reprex({
+  # first, load in any packages
+  library(dplyr)
+  
+  # then, set a seed if you are creating your own simple dataset
+  
+  # generate your data
+  data <- structure(list(yr_sold = c(2010, 2010), 
                        sale_type = c("WD", "WD"), 
                        sale_condition = c("Normal", "Normal"), 
                        sale_price = c(215000, 105000), id = 1:2), 
                   row.names = c(NA, -2L), class = c("tbl_df", "tbl", "data.frame"))
+  
+  # break your code!
+  data |> 
+    mutate(log_sale_condition = log(sale_condition))  
 
-data |> 
-  mutate(log_sale_condition = log(sale_condition))
+  }, venue = "slack") # this makes it look nice in slack!
+
 ```
 
-Another way to run `reprex` inline:
+Here is a shell that you can use to create your own reprex in the future. When you have entered in all of the necessary components, running this code chunk will create a copy/paste-able reprex.
 ```{r}
 library(reprex)
 reprex({
-  # Copy this code, type reprex() in your console, copy the output from the viewer as your reprex
-  library(dplyr)
+  # first, load in any packages
   
-  data = structure(list(yr_sold = c(2010, 2010), sale_type = c("WD", "WD"
-), sale_condition = c("Normal", "Normal"), sale_price = c(215000, 
-105000), id = 1:2), row.names = c(NA, -2L), class = c("tbl_df", 
-"tbl", "data.frame"))
-
-  data |> 
-    mutate(log_sale_condition = log(sale_condition))
-}, venue = "slack") # You can also set the "venue" where you'll share the code to with this parameter
+  # then, set a seed if you are creating your own simple dataset
+  
+  # generate your data
+  
+  # break your code!
+  
+}, venue = "slack")
 ```
 
 Finally, copy your reprex directly and send it to the TAs and/or John (or post it on a site like Stackoverflow).
@@ -316,9 +323,9 @@ Finally, copy your reprex directly and send it to the TAs and/or John (or post i
 
 EDA stands for "exploratory data analysis" and is a essential part of much of statistics. Having a better understanding of your data is crucial for good modeling! The focus of your first application assignment will be on EDA.
 
-You should always start with a fresh environment when executing new code.   
-Use menu   Session:Restart R
+You should always start with a fresh environment when executing new code:
 
+From the menu, go to --> `Session` --> `Restart R`
 
 Your first step will always to be to set up your environment, which we've already reviewed above. We'll paste everything again down here since we just cleared our environment.
 ```{r}
@@ -344,8 +351,8 @@ source("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
 theme_set(theme_classic())
 options(tibble.width = Inf, tibble.print_max = Inf)
 
-# specify your path
-path_lab <- "2026/lab/unit_01"
+# you would also specify a path here if you were loading in data
+# we will be loading in example data from a package, so no need to do that here!
 ```
 
 #### EDA for Cleaning
