@@ -125,6 +125,16 @@ For example, I like using the `tabyl()` function from the `janitor` package when
 library(janitor, include.only = "tabyl")
 ```
 
+Sometimes, packages will name their functions the same (people can only be so creative, I guess). Later in the semester, we'll use the `MASS` package. `MASS` unfortunately also has a function named `select()`, but we like the tidy `select()` function! Similar to how, above, we loaded in only one function from a package, we can also load in the entirety of a package *except* for a particular function.
+```{r}
+library(MASS, exclude = "select")
+```
+
+You can also include or exclude multiple functions by concatenating.
+```{r}
+# throwback to 610!
+library(stats, include.only = c("mean", "anova"))
+```
 
 ## Debug Suggestions
 
@@ -151,10 +161,18 @@ Throughout this semester and beyond, you'll see tons of error messages when you 
 
 *Tip*: an easy way to see how a function works is to `?function_name` in the console to see its documentation.
 
-We'll use the `ames` data as an example.
+We'll use the `ames` data as an example, which you've started to get a little familiar with in lecture!
 
+We follow a specific path convention in this course (and in our lab!). We'll review this with you briefly.
+
+First, we define a string that tells us what folder we eventually want to be looking in. This path should be written *relative* to where your project is.
 ```{r}
-ames <- read_csv(here::here(path_lab, "ames_raw_class.csv")) |> 
+path_data <- "data/"
+```
+
+Now, if we want to save out or read anything in we can use `here::here(path_data, "name_of_file")`. We have to use this in conjunction with `here::here()`, otherwise `path_data` is just a string and nothing more!
+```{r}
+ames <- read_csv(here::here(path_data, "ames_raw_class.csv")) |> 
   select((last_col() - 3):last_col()) |> # let's just take the last four columns for this example
   janitor::clean_names() # this function formats variables in snake_case, which is best practice
 ```
@@ -256,7 +274,7 @@ Best practices for generating a reprex:
 4. It should be as sparse as possible (cut out any extra code)
 5. Include only necessary packages
 
-Now we'll do a simple example together. In our first error example above, we ran the following code and got an error. We just talked about why this error happens, but let's pretend like we have no idea and create a reproducible example of it.
+Now we'll do a simple example together. In one of our error examples above, we ran the following code and got an error. We just talked about why this error happens, but let's pretend like we have no idea and create a reproducible example of it.
 ```{r}
 bind_rows(ames, data.frame(sale_price = c("200000", "220000")))
 ```
@@ -264,15 +282,15 @@ bind_rows(ames, data.frame(sale_price = c("200000", "220000")))
 We want to make a dataset that is as *simple* as possible. If we look at `sale_price`, we can see it is numeric. So, let's generate a dataset that has just numeric variables in one column.
 ```{r}
 set.seed(12345) # to make data reproducible
-d <- tibble (x = rnorm(24), 
-             y = rep(c("group_1", "group_2"), 12), 
-             z = factor(rep(c("1", "2", "3"), 8))) |>  
+d <- tibble(
+  x = 1:50,
+  y = as.double(sample(100000:200000, 50, replace = TRUE))) |>  
   glimpse()
 ```
 
 Now, let's try the same operation above with our new code. Yep -- still gives us an error!
 ```{r}
-
+bind_rows(d, data.frame(y = c("200000", "220000")))
 ```
 
 Here's our final reprex! Copy this code, type reprex() in your console, copy the output from the viewer as your reprex.
@@ -283,20 +301,23 @@ library(reprex)
 
 reprex({
   # first, load in any packages
+  
+  # dplyr is part of the tidyverse, but we can also load it in separately
+  # for a reprex, you want to be as simple as possible, so no need to load the
+  # entire tidy-suite
   library(dplyr)
   
   # then, set a seed if you are creating your own simple dataset
+  set.seed(12345)
   
   # generate your data
-  data <- structure(list(yr_sold = c(2010, 2010), 
-                       sale_type = c("WD", "WD"), 
-                       sale_condition = c("Normal", "Normal"), 
-                       sale_price = c(215000, 105000), id = 1:2), 
-                  row.names = c(NA, -2L), class = c("tbl_df", "tbl", "data.frame"))
+  d <- tibble(
+    x = 1:50,
+    y = as.double(sample(100000:200000, 50, replace = TRUE))) |>  
+    glimpse()
   
   # break your code!
-  data |> 
-    mutate(log_sale_condition = log(sale_condition))  
+  bind_rows(d, data.frame(y = c("200000", "220000")))
 
   }, venue = "slack") # this makes it look nice in slack!
 
@@ -482,15 +503,21 @@ splits <- sacramento |>
 Our splits object contains both our training set (called using `analysis()` below) and our validation set (which could be called using `assessment()` -- you'll see this in lecture, we won't save it out today since we are just focusing on EDA). **You should only ever do modeling EDA with your training data, and never your validation/testing data in order to prevent data leakage!!**
 
 In this course, we will always save out cleaned files to prevent writing over of original data and so that we can clearly follow our modeling steps. Let's do this now!
+
+You probably don't want to keep this file hanging around. When we're working with files we eventually want to delete, we are in the practice of creating a temporary folder (which we like to call `tmp`). Now let's create this folder using our new terminal skills.
+
+We can specify a new path and save our data out here.
 ```{r}
+path_tmp <- "/tmp"
+
 splits |> 
   analysis() |> 
-  write_csv(here::here(path_lab, "sacramento_clean_trn.csv"))
+  write_csv(here::here(path_tmp, "sacramento_clean_trn.csv"))
 ```
 
 Let's reload our data. Looks like some things are no longer properly classed! You'll find this happens when you reload in data (even if you're saving it out with the formatting that you'd like).
 ```{r}
-sac_trn <- read_csv(here::here(path_lab, "sacramento_clean_trn.csv")) |> 
+sac_trn <- read_csv(here::here(path_tmp, "sacramento_clean_trn.csv")) |> 
   glimpse()
 ```
 
