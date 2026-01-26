@@ -8,19 +8,27 @@ editor_options:
 
 This appendix provides a mini-tutorial on basic shell (command line) commands and Git. These skills are essential for this course because lab materials and course resources are available via a GitHub repository that you will need to clone and periodically pull updates from.
 
+More generally, they are both essential tools for data science that you should being to incorporate into your data/code management and analysis workflows.
+
 ## Opening the Terminal
 
 The **terminal** (also called the command line or shell) is a text-based interface for interacting with your computer.
 
-**macOS:**
+You can open an independent terminal window as follows: 
 
-- Open Spotlight (Cmd + Space) and type "Terminal", then press Enter
-- Or navigate to Applications > Utilities > Terminal
+- macOS
+  - Open Spotlight (Cmd + Space) and type "Terminal", then press Enter
+  - Or navigate to Applications > Utilities > Terminal
 
-**Windows:**
+- Windows:
+  - After installing Git (see [Installing Git for Windows] below), use **Git Bash**
+ - Search for "Git Bash" in the Start menu
 
-- After installing Git (see [Installing Git for Windows] below), use **Git Bash**
-- Search for "Git Bash" in the Start menu
+- Linux
+  - Press Ctrl + Alt + T
+  - Or search for "Terminal" in your applications menu
+ 
+However, the preferred way to use the terminal for this course is via RStudio's built-in terminal tab.  It provides a fully functioning terminal within the RStudio interface.
 
 ## Essential Shell Commands
 
@@ -92,7 +100,7 @@ To create nested folders at once:
 mkdir -p Github/projects/iaml
 ```
 
-### `mv` - Move or Rename
+### `mv` - Move or Rename a folder or file
 
 Moves a file or folder to a new location, or renames it.
 
@@ -102,20 +110,41 @@ mv file.txt Documents/          # Move file to Documents folder
 mv file.txt Documents/newname.txt  # Move and rename
 ```
 
+### `cp` - Copy a folder or file 
+
+Copies a file or folder to a new location or name.  The original file remains unaltered.
+
+```bash
+cp origfile newfile     # copies a file
+cp file.txt Documents/  # copies a file to Documents folder with same file name
+ 
+cp file.txt Documents/newname.txt  # copies a file to Documents with new filename 
+cp -r origfolder newfolder   # copies a folder and its contents 
+```
+
+### `rm` - Remove/Delete a file or folder  
+
+Deletes a file or folder. **Be careful**—this action is permanent and cannot be undone.
+
+```bash
+rm oldname.txt   # deletes a file
+rm -r foldername    # deletes a folder and its contents 
+```
+
 ## Setting Up Your GitHub Folder
 
 We recommend creating a dedicated folder for all your GitHub repositories. This keeps your projects organized and makes navigation easier.
 
 **Step 1:** Open your terminal
 
-**Step 2:** Create a `Github` folder in your home directory:
+**Step 2:** Create a `github` folder in your home directory:
 ```bash
-mkdir ~/Github
+mkdir ~/github
 ```
 
 **Step 3:** Navigate to this folder:
 ```bash
-cd ~/Github
+cd ~/github
 ```
 
 All repositories you clone should go inside this folder.
@@ -156,12 +185,12 @@ Here is the complete workflow for setting up and maintaining your course materia
 
 2. Create your Github folder (if you haven't already):
 ```bash
-mkdir ~/Github
+mkdir ~/github
 ```
 
 3. Navigate to the Github folder:
 ```bash
-cd ~/Github
+cd ~/github
 ```
 
 4. Clone the course repository:
@@ -181,7 +210,7 @@ When instructed to pull new materials:
 
 1. Navigate to the repository:
 ```bash
-cd ~/Github/book_iaml
+cd ~/github/book_iaml
 ```
 
 2. Pull the latest changes:
@@ -196,6 +225,14 @@ You should see a summary of files that were updated, or "Already up to date" if 
 You should **always** pull before working within a repository, especially within a shared repository. This ensures you have the latest version of files and helps avoid merge conflicts.
 :::
 
+## Learning Git
+
+clone and pull are just the start of using git.   To learn more about Git, consider the following resources:
+
+- [A beginnner video](https://www.youtube.com/watch?v=CvUiKWv2-C0AA)
+- [A introductory tutorial](https://www.atlassian.com/git)
+
+
 ## Quick Reference
 
 | Command | Description | Example |
@@ -205,6 +242,8 @@ You should **always** pull before working within a repository, especially within
 | `cd` | Change directory | `cd ~/Github` |
 | `mkdir` | Create folder | `mkdir newfolder` |
 | `mv` | Move/rename | `mv old.txt new.txt` |
+| `cp` | copy | `cp old.txt new.txt` |
+| `rm`` | delete/remove | `rm old.txt` |
 | `git clone` | Download repository | `git clone <url>` |
 | `git pull` | Update repository | `git pull` |
 
@@ -225,7 +264,7 @@ If you are using Windows, you need to install Git to access both Git commands an
 
 Run the downloaded installer. The default options work well for most users, and you can click "Next" through most screens. A few screens worth noting:
 
-- **Default Editor:** I highly recommend using the Nano editor over Vim, especially if you are new to the CLI.
+- **Default Editor:** I recommend using the Nano editor over Vim, when you are new to the CLI.  However, vim is arguably the most powerful text editor available in the terminal and worth learning eventually as you become a power user!!
 - **PATH Environment:** Select "Git from the command line and also from 3rd-party software" (this is the recommended default)
 - **HTTPS Transport Backend:** Use the OpenSSL library. It's bundled with Git, and is simpler and more consistent for your likely use case.
 - **Terminal Emulator:** Select "Use MinTTY" (the default)
