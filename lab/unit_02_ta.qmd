@@ -19,71 +19,31 @@ This script demos some best practices to apply across all application assignment
 
 ### Projects and paths
 
-Most application assignments will require you to read in csv files. To avoid problems with paths and working directories, we encourage you all to work from an IAML R Project and use relative paths.   
+Most application assignments will require you to read in csv files. To avoid problems with paths and working directories, we encourage you all to work from an IAML R Project and use relative paths. In lab, we will always be working from `book_iaml`.   
 
 Let's do this now!
 
 #### Create a new project
 
-Go to `File` --> `New Project` --> `New Directory` --> `New Project`   
+Go to `File` --> `New Project` --> `Existing Directory` --> `Create Project`
 
-Now navigate to where you want the project directory to live and name your directory to whatever you want (e.g., `iaml`, `iaml_2026`, `psych_752`).    
+Note that if you're not working in a version of `book_iaml` that you've cloned, you can also create a new directory.
+
+We consider it best practice to put your project in the root of your folder (in our case, it will be in `book_iaml`). Then, give it whatever name you'd like (e.g., `iaml`, `iaml_2026`, `psych_752`).    
 
 If you open up your file explorer, you should now see that folder with the project in it.    
 
 Let's switch over to our project now! Go to `File` --> `Open Project`  (reopen `unit_02_lab.qmd`) 
 
-Check that your working directory now matches where your project lives. 
-```{r}
-getwd() # check your own working directory
-```
+#### Setting up files and navigating in the terminal
 
-From this location we can now use relative paths with the `here::here()` function. A relative path is simply a path that operates *in relation to* your current working directory. This will prevent you from having to write out full path names when you want to load anything into R.
+We've created a helpful tutorial on how to set up GitHub on your laptop and how to start getting comfortable working in the terminal. This was sent out over Slack, but you can also find it [here](https://jjcurtin.github.io/book_iaml/app_git.html).
 
-#### Create directories
-
-Now we are going to create a nested directory structure for working with our application assignments and any lab materials. You should take the time to read more about file and path management [here](https://jjcurtin.github.io/book_dwvt/file_and_path_management.html).    
-
-First, we'll make a lab folder. You're in charge of setting up a folder for your application assignments (but we can always help you out in office hours)!
-```{r}
-dir.create(here::here("lab")) # this creates a folder called "lab" in you ML class folder
-```
-
-Next, we'll make unit subfolders.
-```{r}
-sprintf("%02d", 2:12) |> 
-  purrr::map(\(unit) dir.create(here::here(stringr::str_c("lab/unit_", unit))))
-# Here is an anonymous function mapped to the series of units which is piped to `purrr:map()`
-```
-
-Let's set a path to unit_02 for us to use for the rest of today.
-```{r}
-path_lab <- "2026/lab/unit_02"
-```
-
-Now, if we want to save out or read anything in we can use `here::here(path_lab, "name_of_file")`. We have to use this in conjunction with `here::here()`, otherwise `path_lab` is just a string and nothing more!
-
-For example, let's move this .qmd script to the `unit_02` folder. You can either do this by moving the file to the proper location using the GUI, or you can follow the simple tutorial below.
-
-First, we'll find where our script is currently located. Go to the file, right click on it, and "copy as pathname" (you will need to hold down the "option" key for this to work).
-
-Set path of current location of script - can get this by right clicking on file and copy over to new location
-```{r}
-# Make sure to change this as your own directory for the `.rmd` file
-path_qmd <- "path name here"
-
-file.copy(from = path_qmd,
-          to   = path_lab)
-
-# remove old file - note you will be prompted to close deleted file and then reopen file from new direction
-#file.remove(path_qmd)
-```
-
+We recommend going through this in your own time. For now, we'll demonstrate how to use a few basic commands, like creating and navigating through directories, and figuring out what directory you're currently in.
 
 ### How to set up your .qmd files for assignments 
 
 At the beginning of every script you will want to do some basic setup. Below we suggest some basic best practices; however, feel free to modify your setup for what works best for your workflow. If you do modify your setup be sure to keep these best practices in mind!
-
 
 #### Handling conflicts
 
@@ -102,7 +62,7 @@ library(tidymodels)
 ```
 
 We use this code block to basically say that masking base R functions is okay (i.e., you can override basic functions; if we're loading something special in, we probably care about it more than base R functions!). If you'd like to load in additional packages, load these in **after** specifying this conflicts policy.
-```{r conflict_policy}
+```{r}
 options(conflicts.policy = "depends.ok")
 ```
 
@@ -293,8 +253,6 @@ Now, let's try the same operation above with our new code. Yep -- still gives us
 bind_rows(d, data.frame(y = c("200000", "220000")))
 ```
 
-Here's our final reprex! Copy this code, type reprex() in your console, copy the output from the viewer as your reprex.
-
 The last magical step to make this into a neatly formatted reprex is to put it all together (with a few additional simple steps).
 ```{r}
 library(reprex)
@@ -342,7 +300,7 @@ Finally, copy your reprex directly and send it to the TAs and/or John (or post i
 
 ### EDA Tutorial
 
-EDA stands for "exploratory data analysis" and is a essential part of much of statistics. Having a better understanding of your data is crucial for good modeling! The focus of your first application assignment will be on EDA.
+EDA stands for "exploratory data analysis" and is an essential part of much of statistics. Having a better understanding of your data is crucial for good modeling! The focus of your first application assignment will be on EDA.
 
 You should always start with a fresh environment when executing new code:
 
