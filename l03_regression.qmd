@@ -31,23 +31,14 @@ Our goal in this unit is to build a machine learning regression model that can a
 
 To begin this project we need to:
 
-- Set up conflicts policies
+- Load the packages we will need.  I am only loading `tidymodels` and `tidyverse` because the other functions we need are only called occasionally (so we will call them by namespace.)
+- Set up conflicts policies (just in case we decide to load other packages later)
 - We will hide this in future units
 ```{r}
-options(conflicts.policy = "depends.ok")
-devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true",
-                     sha1 = "77e91675366f10788c6bcb59fa1cfc9ee0c75281")
-tidymodels_conflictRules()
-```
-
---------------------------------------------------------------------------------
-
-- Load the packages we will need.  I am only loading `tidymodels` and `tidyverse` because the other functions we need are only called occasionally (so we will call them by namespace.)
-```{r}
-#| message: false
-#| warning: false
 library(tidyverse) # for general data wrangling
 library(tidymodels) # for modeling
+
+options(conflicts.policy = "depends.ok")
 ```
 
 --------------------------------------------------------------------------------
@@ -56,10 +47,9 @@ library(tidymodels) # for modeling
 - We will hide this in future units
 - You might consider copying (some) of these functions to your own function library rather than using mine
 ```{r}
-devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true",
-                     sha1 = "c045eee2655a18dc85e715b78182f176327358a7")
-devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true",
-                     sha1 = "def6ce26ed7b2493931fde811adff9287ee8d874")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
 ```
 
 - set display options
@@ -70,7 +60,7 @@ options(tibble.width = Inf)
 ```
 
 - handle paths
-```{r u3-paths}
+```{r}
 path_data <- "./data"
 ``` 
 
@@ -107,7 +97,7 @@ data_trn <-
 
 ```{r}
 data_val <- read_csv(here::here(path_data, "ames_clean_class_val.csv"),
-                     col_types = cols()) |> 
+                     show_col_types = FALSE) |> 
   class_ames() |> 
   glimpse()
 ```
