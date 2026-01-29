@@ -198,6 +198,8 @@ Next we load packages for other functions that we will use regularly.  There are
 library(tidyverse) 
 library(tidymodels) 
 
+options(conflicts.policy = "depends.ok")
+
 library(janitor, include.only = "clean_names") # <1>
 library(cowplot, include.only = "plot_grid") # <2> 
 library(kableExtra, exclude = "group_rows") # <3> 
@@ -247,7 +249,7 @@ data_all <- read_csv(here::here(path_data, "ames_raw_class.csv"),   # <1>
   glimpse() # <3>
 ```
 1. First we read data using a relative path and the `here::here()` function.  This is a replacement for `file.path()` that works better for both interactive use and rendering in Quarto when using projects.
-2.  We use `col_types = cols()` to let R guess the correct class for each column. This suppresses messages that aren't important at this point prior to EDA.
+2.  We use `show_col_types = FALSE` to suppresse messages that aren't important at this point prior to EDA.
 3. It is good practice to always `glimpse()` data after you read it.
 
 --------------------------------------------------------------------------------
@@ -284,8 +286,7 @@ data_all <- data_all |>
 1. Notice that the dataset used non-standard variable names that include spaces. We need to use back-ticks around the variable names to allow us reference those variables. We will fix this during the cleaning process and you should never use spaces in variable names when setting up your own data!!! 
 
 --------------------------------------------------------------------------------
-
-## Exploratory Data Analysis for Data Cleaning
+ Exploratory Data Analysis for Data Cleaning
 
 EDA *could* be done using either `tidyverse` packages and functions or `tidymodels` (mostly using the `recipes` package.)
 
@@ -424,10 +425,9 @@ data_all |>
   
 - Gather useful functions together in a script that you can reuse.
 - All of the reusable functions in this and later units are available to you in one of my [public github repositories](https://github.com/jjcurtin/lab_support). 
-- You can load these functions into your workspace directly from github using `devtools::source_url()`. For example: `devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_modeling.R?raw=true")`
+- You can load these functions into your workspace directly from github using `source()`. For example: `source("https://github.com/jjcurtin/lab_support/blob/main/fun_modeling.R?raw=true")`
 - You should start to gather your favorite custom functions together in your own script(s).  
 - You can save your own scripts in a local file and load them into your workspace using `source()` or you can make your own github repo so you can begin to share your code with others!
-
 :::
 
 --------------------------------------------------------------------------------
@@ -455,7 +455,7 @@ We will show you a few methods to do this in your rendered output
 - Use `kbl()` from `kableExtra` package for formatted tables (two methods below)
 
 
-Don't forget that you can also use `View()` interactively in R Studio
+Don't forget that you can also use `view()` interactively in R Studio
 
 --------------------------------------------------------------------------------
 
@@ -734,7 +734,7 @@ splits <- data_all |>
 # Coding Note
 `initial_split()` is used to create two resamples of your data.  This was used here because we already had a test set held out (outside of the code presented).  We use `analysis()` and `assessment()` to extract these two resamples.   
 
-We will later use `initial_validation_split()` to create 3 resamples: training, validation, and test.  We will extract those three resamples using `training()`, `validation()`, and testing()`
+We will later use `initial_validation_split()` to create 3 resamples: training, validation, and test.  We will extract those three resamples using `training()`, `validation()`, and `testing()`
 :::
 
 --------------------------------------------------------------------------------
