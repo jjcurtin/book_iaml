@@ -1,0 +1,552 @@
+---
+title: "Unit 3 Lab Script"
+author: "TA Script"
+date: "`r lubridate::today()`"
+format:
+  html:
+    embed-resources: true
+    toc: true
+    toc_depth: 4
+editor_options:
+  chunk_output_type: console
+---
+
+## Welcome to Unit 3!
+
+Welcome back! In this lab we will walk through a complete regression modeling workflow using the `tidymodels` framework. We will predict petal length in the iris dataset using both a linear model and a K-Nearest Neighbors (KNN) model.
+
+This script is designed to be a resource you can revisit throughout the semester. Let's get started!
+
+## Set Up Environment
+
+### Load Required Packages
+
+First, we load the two packages we will use in almost every script this semester: `tidyverse` for data wrangling and `tidymodels` for our modeling pipeline.
+
+```{r}
+library(tidyverse) 
+library(tidymodels)
+```
+
+### Set Conflict Policy
+
+We set the conflict policy so that packages loaded after this line can safely mask base R functions. If you'd like a refresher on why we do this, take a look at the Unit 2 lab script.
+
+```{r}
+options(conflicts.policy = "depends.ok")
+```
+
+### Additional Packages
+
+We load a few additional packages. Note that we use `include.only` for `cowplot` to avoid loading unnecessary functions that might conflict with other packages.
+
+```{r}
+library(skimr)
+library(cowplot, include.only = "plot_grid")
+library(kknn)
+```
+
+### Source Scripts from John
+
+These scripts give us access to helper functions for EDA, plotting, and modeling that John has written for the course.
+
+```{r}
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+```
+
+### Other Options
+
+We set a default ggplot theme and tell tibble to print all columns. We also define a path for our data and initialize a tibble to track validation error across models.
+
+```{r}
+theme_set(theme_classic())
+options(tibble.width = Inf)
+
+path_data <- "data"
+
+error_val <- tibble(model = character(), rmse_val = numeric()) |>
+  glimpse()
+```
+
+## Load and Prepare Data
+
+### Load Iris and Clean Names
+
+We start by loading the built-in `iris` dataset and standardizing the column names to snake_case using `janitor::clean_names()`.
+
+```{r}
+data_all <- iris 
+
+data_all |> glimpse() 
+
+#
+
+#
+```
+
+### Introduce Some Messiness
+
+Real-world data is rarely perfectly clean. To practice handling missing values, we will randomly set about 5% of `petal_width` observations to `NA`.
+
+```{r}
+set.seed(4)
+
+data_all <- data_all |>
+  mutate(
+    petal_width = if_else(runif(n()) < 0.05, NA_real_, petal_width)
+  )
+```
+
+Let's confirm that we introduced some missingness.
+
+```{r}
+data_all |>
+  summarize(n_missing_pw = sum(is.na(petal_width)),
+            pct_missing_pw = mean(is.na(petal_width)))
+```
+
+### Define `skim_some()`
+
+We define a custom skim function that drops some of the default numeric summaries to keep output compact. This is the same approach from Unit 2.
+
+```{r}
+skim_some <- skim_with(numeric = sfl(mean = NULL,
+                                     sd = NULL,
+                                     p25 = NULL,
+                                     p50 = NULL,
+                                     p75 = NULL,
+                                     hist = NULL))
+```
+
+```{r}
+skim_some(data_all)
+```
+
+### Split into Train, Validation, and Test
+
+We use `initial_validation_split()` to create a 60/20/20 split, stratified on `petal_length`.
+
+```{r}
+set.seed(4)
+splits <- data_all |>
+  initial_validation_split(prop = c(0.6, 0.2), strata = "petal_length", breaks = 3)
+```
+
+### Write Splits to CSV
+
+We write each split to a CSV file. Notice that `path_data` already includes the full `"unit3/data"` subpath, so we only need to specify the filename.
+
+```{r}
+splits |>
+  training() |>
+  write_csv(here::here(path_data, "iris_train.csv"))
+
+splits |>
+  validation() |>
+  write_csv(here::here(path_data, "iris_val.csv"))
+
+splits |>
+  testing() |>
+  write_csv(here::here(path_data, "iris_test.csv"))
+```
+
+### Read Back Training and Validation Sets
+
+We always re-read our saved files to simulate the workflow you will use in application assignments (where you start from saved CSVs). We use `glimpse()` each time to verify the data loaded correctly.
+
+```{r}
+data_trn <- read_csv(here::here(path_data, "iris_train.csv"),
+                     show_col_types = FALSE) |>
+  glimpse()
+```
+
+```{r}
+data_val <- read_csv(here::here(path_data, "iris_val.csv"),
+                     show_col_types = FALSE) |>
+  glimpse()
+```
+
+### Basic EDA on Training Data
+
+Before modeling, we should always review the training data. `skim_all()` gives us a quick summary of variable types, missingness, and ranges.
+
+```{r}
+data_trn |> skim_all()
+```
+
+```{r}
+data_trn |> names()
+```
+
+Notice that `petal_width` has some missing values from the messiness we introduced earlier. We will handle this with `step_impute_median()` in our recipes.
+
+## Linear Model
+
+### Set Up the Recipe
+
+We create a recipe predicting `petal_length` from three features. We add `step_impute_median()` to handle the missing values in `petal_width`.
+
+```{r}
+rec <- recipe(petal_length ~ sepal_length + sepal_width + petal_width,
+              data = data_trn) |>
+  step_impute_median(petal_width)
+```
+
+### Prep and Bake Training Features
+
+We prep the recipe with training data and then bake to create the training feature matrix.
+
+```{r}
+rec_prep <- rec |>
+  prep(training = data_trn)
+```
+
+```{r}
+feat_trn <- rec_prep |>
+  bake(new_data = NULL)
+```
+
+As John emphasizes, you should always review your feature matrix after baking. Check that the sample size, variables, and missingness look correct.
+
+```{r}
+feat_trn |> skim_all()
+```
+
+### Correlation Matrix
+
+It is good practice to examine the correlations among your features. Highly correlated features can make coefficient estimates unstable in linear models (multicollinearity), and understanding these relationships helps you make more informed modeling decisions.
+
+```{r}
+feat_trn |>
+  cor() |>
+  corrplot::corrplot.mixed()
+```
+
+### Fit the Linear Model
+
+```{r}
+fit_lm <-
+  linear_reg() |>
+  set_engine("lm") |>
+  fit(petal_length ~ ., data = feat_trn)
+```
+
+### Examine the Model
+
+We can use `tidy()` to get the coefficient estimates.
+
+```{r}
+fit_lm |> tidy()
+```
+
+Let's write out the fitted equation to connect with what you learned in 610:
+
+$$
+$$
+
+### Bake Validation Features
+
+We use the same prepped recipe to create features for the validation set.
+
+```{r}
+feat_val <- rec_prep |>
+  bake(new_data = data_val)
+```
+
+```{r}
+feat_val |> skim_all()
+```
+
+### Predictions and Performance
+
+```{r}
+predict(fit_lm, feat_val)
+```
+
+```{r}
+plot_truth(truth = feat_val$petal_length,
+           estimate = predict(fit_lm, feat_val)$.pred)
+```
+
+```{r}
+rmse_vec(truth = feat_val$petal_length,
+         estimate = predict(fit_lm, feat_val)$.pred)
+```
+
+### Log Validation Error
+
+```{r}
+error_val <- bind_rows(error_val,
+                       tibble(model = "Plain LM",
+                              rmse_val = rmse_vec(truth = feat_val$petal_length,
+                                                  estimate = predict(fit_lm, feat_val)$.pred)
+                              )
+                       )
+
+error_val
+```
+
+### Visualize Predictions by Feature
+
+We create individual plots for each feature showing the observed values (gray) and predicted values (blue), then arrange them with `cowplot::plot_grid()`.
+
+```{r}
+p_sepal_length <- data_val |>
+  ggplot(aes(x = sepal_length)) +
+  geom_point(aes(y = petal_length), color = "gray") +
+  geom_point(aes(y = predict(fit_lm, feat_val)$.pred),
+             color = "blue", alpha = 0.5) +
+  ggtitle("sepal_length")
+
+p_sepal_width <- data_val |>
+  ggplot(aes(x = sepal_width)) +
+  geom_point(aes(y = petal_length), color = "gray") +
+  geom_point(aes(y = predict(fit_lm, feat_val)$.pred),
+             color = "blue", alpha = 0.5) +
+  ggtitle("sepal_width")
+
+p_petal_width <- data_val |>
+  ggplot(aes(x = petal_width)) +
+  geom_point(aes(y = petal_length), color = "gray") +
+  geom_point(aes(y = predict(fit_lm, feat_val)$.pred),
+             color = "blue", alpha = 0.5) +
+  ggtitle("petal_width")
+
+plot_grid(p_sepal_length, p_sepal_width, p_petal_width, ncol = 2)
+```
+
+### Final LM: Retrain on Train + Validation
+
+Now that we have selected the LM as a candidate, we retrain on the combined training and validation data, then evaluate on the held-out test set.
+
+```{r}
+data_trn_val <- bind_rows(data_trn, data_val)
+```
+
+```{r}
+data_test <- read_csv(here::here(path_data, "iris_test.csv"),
+                     show_col_types = FALSE) |>
+  glimpse()
+```
+
+```{r}
+rec_final <- recipe(petal_length ~ sepal_length + sepal_width + petal_width,
+                      data = data_trn_val) |>
+  step_impute_median(petal_width) |>
+  prep(training = data_trn_val)
+```
+
+```{r}
+feat_trn_val <- rec_final |>
+  bake(new_data = NULL)
+```
+
+```{r}
+fit_lm_final <-
+  linear_reg() |>
+  set_engine("lm") |>
+  fit(petal_length ~ ., data = feat_trn_val)
+```
+
+```{r}
+feat_test <- rec_final |>
+  bake(new_data = data_test)
+```
+
+```{r}
+predict(fit_lm_final, feat_test)
+```
+
+```{r}
+plot_truth(truth = feat_test$petal_length,
+           estimate = predict(fit_lm_final, feat_test)$.pred)
+```
+
+```{r}
+rmse_vec(truth = feat_test$petal_length,
+         estimate = predict(fit_lm_final, feat_test)$.pred)
+```
+
+> How are we *expecting* this data to perform compared to validation? Why?
+
+```{r}
+error_val <- bind_rows(error_val,
+                       tibble(model = "LM Test Set!",
+                              rmse_val = rmse_vec(truth = feat_test$petal_length,
+                                                  estimate = predict(fit_lm_final, feat_test)$.pred)
+                              )
+                       )
+
+error_val
+```
+
+## KNN Model
+
+KNN is a non-parametric algorithm that predicts an outcome by averaging the outcomes of the *k* nearest observations in the feature space. Because it relies on distances between observations, we need to make sure all features are on the same scale.
+
+### Set Up KNN Recipe
+
+We use `step_scale()` to scale all numeric predictors to have a standard deviation of 1. We also include `step_impute_median()` to handle missingness.
+
+```{r}
+rec_knn <- recipe(petal_length ~ sepal_length + sepal_width + petal_width,
+                  data = data_trn) |>
+  step_impute_median(petal_width) |>
+  step_scale(all_numeric_predictors())
+```
+
+> Scaling in KNN
+
+### Prep and Bake KNN Features
+
+```{r}
+rec_knn_prep <- rec_knn |>
+  prep(training = data_trn)
+```
+
+```{r}
+feat_trn_knn <- rec_knn_prep |>
+  bake(new_data = NULL)
+```
+
+```{r}
+feat_val_knn <- rec_knn_prep |>
+  bake(new_data = data_val)
+```
+
+Let's review the scaled features to confirm that scaling worked as expected.
+
+```{r}
+feat_trn_knn |> skim_all()
+```
+
+```{r}
+feat_val_knn |> skim_all()
+```
+
+### Fit KNN Model
+
+We set `neighbors = 5`, which means the model predicts each observation's petal length by averaging the petal lengths of its 5 nearest neighbors.
+
+```{r}
+fit_knn <- nearest_neighbor(neighbors = 5) |>
+  set_engine("kknn") |>
+  set_mode("regression") |>
+  fit(petal_length ~ ., data = feat_trn_knn)
+```
+
+> **What does k = 5 mean?**
+
+### Predictions and Performance
+
+```{r}
+predict(fit_knn, feat_val_knn)
+```
+
+```{r}
+plot_truth(truth = feat_val_knn$petal_length,
+           estimate = predict(fit_knn, feat_val_knn)$.pred)
+```
+
+```{r}
+rmse_vec(truth = feat_val_knn$petal_length,
+         estimate = predict(fit_knn, feat_val_knn)$.pred)
+```
+
+### Log Validation Error
+
+```{r}
+error_val <- bind_rows(error_val,
+                       tibble(model = "KNN (k = 5)",
+                              rmse_val = rmse_vec(truth = feat_val_knn$petal_length,
+                                                  estimate = predict(fit_knn, feat_val_knn)$.pred)
+                              )
+                       )
+
+error_val
+```
+
+### Visualize KNN Predictions by Feature
+
+```{r}
+p_knn_sepal_length <- data_val |>
+  ggplot(aes(x = sepal_length)) +
+  geom_point(aes(y = petal_length), color = "gray") +
+  geom_point(aes(y = predict(fit_knn, feat_val_knn)$.pred),
+             color = "blue", alpha = 0.5) +
+  ggtitle("sepal_length")
+
+p_knn_sepal_width <- data_val |>
+  ggplot(aes(x = sepal_width)) +
+  geom_point(aes(y = petal_length), color = "gray") +
+  geom_point(aes(y = predict(fit_knn, feat_val_knn)$.pred),
+             color = "blue", alpha = 0.5) +
+  ggtitle("sepal_width")
+
+p_knn_petal_width <- data_val |>
+  ggplot(aes(x = petal_width)) +
+  geom_point(aes(y = petal_length), color = "gray") +
+  geom_point(aes(y = predict(fit_knn, feat_val_knn)$.pred),
+             color = "blue", alpha = 0.5) +
+  ggtitle("petal_width")
+
+plot_grid(p_knn_sepal_length, p_knn_sepal_width, p_knn_petal_width, ncol = 2)
+```
+
+### Final KNN: Retrain on Train + Validation
+
+```{r}
+rec_knn_final <- recipe(petal_length ~ sepal_length + sepal_width + petal_width,
+                        data = data_trn_val) |>
+  step_impute_median(petal_width) |>
+  step_scale(all_numeric_predictors()) |>
+  prep(training = data_trn_val)
+```
+
+```{r}
+feat_trn_val_knn <- rec_knn_final |>
+  bake(new_data = NULL)
+```
+
+```{r}
+fit_knn_final <- nearest_neighbor(neighbors = 5) |>
+  set_engine("kknn") |>
+  set_mode("regression") |>
+  fit(petal_length ~ ., data = feat_trn_val_knn)
+```
+
+```{r}
+feat_test_knn <- rec_knn_final |>
+  bake(new_data = data_test)
+```
+
+```{r}
+predict(fit_knn_final, feat_test_knn)
+```
+
+```{r}
+plot_truth(truth = feat_test_knn$petal_length,
+           estimate = predict(fit_knn_final, feat_test_knn)$.pred)
+```
+
+```{r}
+rmse_vec(truth = feat_test_knn$petal_length,
+         estimate = predict(fit_knn_final, feat_test_knn)$.pred)
+```
+
+```{r}
+error_val <- bind_rows(error_val,
+                       tibble(
+                         model = "KNN Test Set!",
+                         rmse_val = rmse_vec(
+                           truth = feat_test_knn$petal_length,
+                           estimate = predict(fit_knn_final, feat_test_knn)$.pred)
+                         )
+                       )
+
+error_val
+```
+
+> Group discussion!: Compare the LM and KNN validation RMSE values. Why might KNN perform better (or worse) than the linear model for this data? Consider what each algorithm assumes about the relationship between features and the outcome.
