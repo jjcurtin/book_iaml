@@ -1,0 +1,191 @@
+---
+title: 'Unit 4 (Classification): Cleaning EDA'
+author: "Your Name"
+date: "`r lubridate::today()`"
+format: 
+  html: 
+    embed-resources: true
+    toc: true 
+    toc_depth: 4
+editor_options: 
+  chunk_output_type: console
+---
+
+## Assignment overview
+
+To begin, download the following from the course web book (Unit 4):
+
+* Three Quarto (.qmd) files: hw_unit_4_eda_cleaning.qmd, hw_unit_4_fit_knn.qmd, & hw_unit_4_fit_rda.qmd)
+
+* titanic_raw.csv (data to be used for this script to create training & validation)
+
+* titanic_test_cln_no_label.csv (already-cleaned held-out test data with outcome labels removed)
+
+* titanic_data_dictionary.png
+
+The data for this week's assignment (across all scripts) will be the Titanic dataset, which contains survival outcomes and passenger characteristics for the Titanic's passengers. You can find information about the dataset in the data dictionary (available for download from the course website). This is a popular dataset that has been used for machine learning competitions and is noted for being a fun and easy introduction into data science. There is tons of information on how others have worked with this dataset online, and you are encouraged to incorporate knowledge that others have gained if you want! However, only code from the class web book will be needed for full credit on this assignment.
+
+In this script, you will step through cleaning EDA on the full dataset. To keep this assignment to a manageable length, we have included all the code here for cleaning. This script starts with reading in the raw .csv file that you downloaded & finishes with writing out cleaned training and validation files. We have already held out a separate test set for final model evaluation. You will need to run the code in this script to clean the raw data before moving onto modeling EDA. Note that you WILL need to adjust file paths for this script to work for you; those spots in the script are clearly marked. **Do not start working on the fit_knn or fit_rda scripts until you have completed this cleaning script and generated the cleaned training and validation files**
+
+-----
+
+## Packages, Source, Etc
+
+This code chunk loads in our tidy packages and then sets up conflict policies to reduce errors associated with function conflicts.
+```{r}
+library(tidyverse) # for general data wrangling
+library(tidymodels) # for modeling
+
+options(conflicts.policy = "depends.ok")
+```
+
+Next, we load in all of our other packages *after* setting our conflict policy.
+```{r}
+#| message: false
+#| warning: false
+#| 
+library(kableExtra, exclude = "group_rows") # for displaying formatted tables w/ kbl()
+library(janitor, include.only = c("clean_names", "tabyl"))  
+```
+
+Finally, we source some functions...
+```{r}
+#| message: false
+#| warning: false
+
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+``` 
+
+...and set up some other environment settings.
+```{r}
+options(tibble.width = Inf, tibble.print_max = Inf)
+theme_set(theme_classic()) # maybe you prefer this to classic theme?
+```
+
+## Cleaning EDA on Full Dataset
+
+### Read Data
+```{r}
+path_data <- "application_assignments/unit_04"
+```
+
+Read in titanic_raw.csv from your data path using read_csv() and glimpse()
+```{r}
+data_all <- read_csv(here::here(path_data, "titanic_raw.csv"),
+                     col_types = cols()) |>
+  glimpse()
+```
+
+### Review the Data Dictionary
+
+Look at the data dictionary available for download from the course website to understand the different variables. Reference this as needed while you perform cleaning checks below and modeling EDA/feature engineering in future scripts.
+
+### Perform Basic Cleaning
+
+## Variable classes and tidynames 
+Note from our glimpse() above that all variable names are already lower case/snake case, but I'm going to make the names clearer. Specifically, I'm changing sibsp to n_sib_spouse to remind me that this is a count variable of that passenger's siblings and spouses on-board, and I'm changing parch to n_parent_child to remind me that this is a count variable of that passenger's parents and children on-board. 
+```{r}
+data_all <- data_all |>
+  rename(n_sib_spouse = sibsp, n_parent_child = parch) |>
+  mutate(across(where(is.character), factor)) |>
+  mutate(pclass = factor(pclass, levels = c("1", "2", "3"))) |>
+  mutate(survived = factor(survived, levels = c("0", "1"), labels = c("no", "yes"))) |>
+  glimpse()
+
+```
+
+## Skim data
+```{r}
+data_all |> 
+  skim_some() 
+```
+**Variable class notes:**
+*All variables are either of type factor or of type numeric. Some changes were made so that the classes as they were read in match the codebook. The data dictionary also tells us that `pclass` is a character variable that represents ticket class, so we class it as factor. We also classed `survived` as factor with labels 'no' and 'yes'*
+
+### Missing data
+
+Clearly document missing data ("missingness") across each variable in the dataset. For variables with high missingness, write code that allows you to visually inspect all observations of missing data. Clean variables with high missingness using `mutate()`, `replace_na()`, and `fct_relevel()` if you believe any of the NAs are not really missing but instead problems with how the data were coded.
+```{r}
+data_all |> 
+  skim_some() |> 
+  select(skim_variable, n_missing, complete_rate) # view missing variables
+```
+**Missing data notes:**
+*Note the high percentages of missingness for cabin and age. There is also one missing observation for embarked and fare. Here we would review missing data and address any missingness due to errors/coding. However, there is nothing in the data dictionary to suggest that missing values are due to errors.*
+
+### Numeric variables
+
+Explore `min` and `max` values for numeric variables, recording notes on any observations that look suspicious or potentially invalid. Use the data dictionary and associated variables to help you decide whether suspicious observations may represent (in)valid responses.
+```{r}
+# Skim data, looking at numeric min and max values
+data_all |>
+  skim_some() |> 
+  filter(skim_type == "numeric") |>  # Select only numeric variables since min/max only apply to them
+  select(skim_variable, numeric.p0, numeric.p100)
+```
+**Numeric variable notes:**
+*Here, no responses seem out of the ordinary - it's reasonable for age to range from a fraction (a baby; this IS explicitly noted in the data dictionary), for someone to have 8 siblings or 9 children on-board (in fact, those values line up and probably refer to the same family!), and for fares to range up over $500.*
+
+### Categorical variables
+
+Print the levels of each categorical variable. Used `walk()` to do all the categorical variables at once.  If needed, correct response levels with conversion errors using `mutate()` and `fct_recode()`. Document observations for categorical levels.
+```{r}
+# View all categorical response labels
+data_all |> 
+  select(survived, pclass, sex, embarked) |>
+  walk(\(column) print(levels(column)))
+
+# View responses with many levels
+data_all |>
+  select(name, cabin, ticket) |> 
+  head()
+
+# Tidy up embarked
+data_all <- data_all |> 
+  mutate(embarked = factor(str_to_lower(embarked))) # str_to_lower will revert
+                                                    # this back to chr,
+                                                    # so we will reclass it!
+         
+data_all |>
+  select(embarked) |>
+  head()
+```
+**Categorical variable notes:**
+*Because ticket, cabin, and name are variables with a large amount of levels (each family probably has their own cabin and each individual has their own name/ticket), we will explore those differently. We see that there are three passenger classes: 1, 2, and 3, labels for sex at birth (male and female), and three embarkation ports: S (Southampton), C (Cherbourg), and Q (Queenstown). These all line up with the data dictionary. We see that the name variable includes last names, a title, and first/middle names. The cabin variable includes a letter and a number, and sometimes it includes more than one cabin. It appears that those multiple cabins are for groups who have more than one cabin on the same ticket, as indicated by the first three rows where the ticket number and cabins are the same.*
+
+**Tidy response labels for categorical variables:** 
+*We're going to keep name, cabin, and ticket as they are because the formatting is somewhat useful/meaningful (e.g., capital letters and punctuation help the names look like names). The only responses that need to be changed are for the `embarked` variable. We can just use the simpler `str_to_lower()` function to change that (rather than `tidy_responses()`).*
+
+
+## Train test split
+
+Now that we have completed data cleaning, we will split our data into train and test sets and save out the cleaned files. We have already held out a separate test set, so this split will create our training and validation sets.
+
+### Generate a train/test split
+
+We'll set a seed so that the same split can be redone if needed (like if we find more errors during modeling EDA/feature engineering & need to come back to this script). Assign 25% of the data to be our validation set. Stratify this split on the `survived` outcome variable.
+```{r}
+set.seed(11151994)
+
+splits <- data_all |>
+  initial_split(prop = 0.75, strata = "survived", breaks = 4)
+```
+
+### Save cleaned files
+Save out cleaned train and validation sets as csv files and name them `titanic_train_cln.csv` and `titanic_val_cln.csv`.
+```{r}
+splits |> 
+  analysis() |> 
+  glimpse() |> 
+  write_csv(here::here(path_data, "titanic_train_cln.csv"))
+
+splits |> 
+  assessment() |> 
+  glimpse() |> 
+  write_csv(here::here(path_data, "titanic_val_cln.csv"))
+```
+
+### Next steps
+
+Complete modeling EDA on your cleaned training data so that you're able to do good feature engineering & model fitting, then head to the two model fitting homework scripts (hw_unit_4_fit_knn.qmd, hw_unit_4_fit_rda.qmd). Good luck!
