@@ -9,50 +9,18 @@ editor_options:
 
 - Feedback - THANKS!
   - consistent feedback will be implemented (as best I can!)
-  - vocabulary and concepts - developing appendix
-  - you can clone book_iaml.   Render to slides with your notes, render to pdf
-  - Tuning lab and discussion 
-    - Rank order based on frequency and importance
-    - Put some in slack
-    - Can't do all.  Ask in slack, ask in office hours or after discussion/lab
+  - people definitely want summaries of units and comparisons of algorithms
+ 
+- Ames regression due Friday
+  - Winner announced in discussion next week!
   
 - Homework is basically same for unit 4
   - New dataset - titanic
   - Do EDA but we don't need to see it
   - Fit KNN and RDA models (will learn about LDA, QDA and RDA in unit)
   - Submit predictions.  Free lunch!
-  - And for this free lunch....
   
 -----
-
-```{r}
-library(tidyverse)
-devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/print_kbl.R?raw=true",
-                     sha1 = "021a7f7cddc1f0ffcd0613e57b94c81246b84f7b")
-read_csv(here::here("./application_assignments/competitions/2025_unit_03.csv")) |>
-  mutate(rmse_test = round(rmse_test)) |> 
-  print_kbl()
-```
-
------
-
-## Bias and Variance of estimates
-
-Bias and variances- general
-
-- property of any estimate
-- for now, we will focus on model (and its $\hat{Y}$)
-- Describe each
-- Scale example for single measurement
-
-Bias bias and variance - glm vs knn
-
-Bias and variance - k in knn?
-
-Impact of correlated features>
-
-- in GLM
-- in KNN
 
 ## Held-in and held-out data
 
@@ -60,38 +28,38 @@ Connect to training, validation, and test sets
 
 Held in and held out data 
 
-- fit models vs calculate performance metric
+- fit models 
+- select best configurations
+- calculate performance metric
 
 Why need held-out
 
 - Example: Selecting best k - train vs validation data
 
------
-
-## Performance metrics
-
-- SSE, MSE, RMSE, MAE, R2
-- How else are SSE class of metrics used in glm?
-
 --------------------------------------------------------------------------------
 
-## KNN 
+## KNN Overview
+
+View slides
 
 - How does KNN use training data to make predictions
 - What is k and how does it get used when making predictions?
 - What is the impact of k on bias and variance/overfitting?
 - k=1: performance in train? in val?
 - Distance measures: use Euclidean (default in kknn)!
-- Tuning K:  stay "tuned"
+- Tuning K efficiently:  stay "tuned"
 
------
+--------------------------------------------------------------------------------
 
 ## Interaction in KNN - Consider bias first (but also variance) in this example
 
 - Simulate data
 - Fit models for lm and knn with and without interaction
 - Took some shortcuts (no recipe, predict back into train)
+
 ```{r}
+#| code-fold: true
+
 library(tidymodels)
 n <- 200
 set.seed(5433)
@@ -130,11 +98,13 @@ d <- d |>
          pred_knn_int = predict(fit_knn_int, d)$.pred)
 ```
 
------
+--------------------------------------------------------------------------------
 
 - Predictions from linear model with and without interaction
   - You NEED interaction features with LM
 ```{r}
+#| code-fold: true
+
 d |> 
   ggplot(aes(x = x1, group = factor(x2), color = factor(x2))) +
     geom_line(aes(y = pred_lm)) +
@@ -152,12 +122,15 @@ d |>
     scale_color_discrete(name = "x2")
 ```
 
------
+
+--------------------------------------------------------------------------------
 
 - Predictions from KNN with and without interaction
   - You do NOT need interaction features with KNN!
     
 ```{r}
+#| code-fold: true
+
 d |> 
   ggplot(aes(x = x1, group = factor(x2), color = factor(x2))) +
     geom_line(aes(y = pred_knn)) +
@@ -175,20 +148,23 @@ d |>
     scale_color_discrete(name = "x2")
 ```
 
------
+--------------------------------------------------------------------------------
 
-## LM vs. KNN better with some predictors or overall?
+## KNN assumptions
 
-- "Why do some features seem to improve performance more in linear models or only in KNNs?"
-- "What are some contexts where KNN doesn't work well? In other words, what are the advantages/disadvantages of using KNN?"
-  - Always comes down to bias vs. variance
-  - Flexibility and N are key moderators of these two key factors.  
-  - k? - impact on bias, variance?
-- KNN for explanation?
-  - Visualizations (think of interaction plot above) make clear the effect
-  - Will learn more (better visualizations, variable importance, model comparisons) in later unit
+Euclidean distance assumes:
 
------
+- Each feature is independent
+- Each dimension contributes new, unique information
+- Moving one unit along any axis is equally meaningful
+
+KNN also makes locality (smoothness) assumption
+
+KNN also requires sufficient data density (i.e., covers the feature space)
+
+KNN works best with low dimensional data (few features) because distance becomes less meaningful/discriminating in high dimensions.  PCA can help.
+
+--------------------------------------------------------------------------------
 
 ## GLM assumptions
 
@@ -202,19 +178,71 @@ d |>
 - Independent
 
 - Normal
+  - Consequence: lm parameter estimates still unbiased (for linear DGP) but more "efficient" solutions exist
+  - Bad for prediction b/c higher variance than other solutions
+  - May suggest omission of variables
 
 - Constant
+  - Consequence: Inefficient and inaccurate standard errors.
+  - Statistical tests wrong
+  - Poor prediction for some (where larger variance of residuals) $\hat{y}$
+  - higher variance overall than other solutions - bad again for prediction
 
 - Linear
-
+  - Residuals do not have mean of 0 for every $\hat{y}$
+  - Consequence: biased parameter estimates.  Linear is bad DGP
+  - Also bad test of questions RE the predictor (underestimate? misinform)
+  
+  
+Use of `plot_truth()` [predicted vs. observed] to assess latter three assumptions
 :::
 
+## Transformations of numeric predictors
 
-## Normalizing transformations - Yeo Johnson
-  - when needed for lm?
-  - when needed for knn?
+Normalizing transformations - Yeo Johnson
 
------
+- when needed for lm?
+- when needed for knn?
+
+- Transformation of outcome?  
+  - metric
+  - back to raw predictions
+
+--------------------------------------------------------------------------------
+
+## Bias and Variance of estimates
+
+Bias and variance- general
+
+- property of any estimate
+- for now, we will focus on model (and its $\hat{Y}$)
+- Describe each
+
+Bias bias and variance - glm vs knn
+
+Bias and variance - k in knn?
+
+Impact of correlated features
+
+- in GLM
+- in KNN
+- PCA?  Drop correlated features?
+
+--------------------------------------------------------------------------------
+
+## LM vs. KNN better with some predictors or overall?
+
+- "Why do some features seem to improve performance more in linear models or only in KNNs?"
+- "What are some contexts where KNN doesn't work well? In other words, what are the advantages/disadvantages of using KNN?"
+  - Always comes down to bias vs. variance
+  - Flexibility and N are key moderators of these two key factors.  
+  - k? - impact on bias, variance?
+- KNN for explanation?
+  - Visualizations (think of interaction plot above) make clear the effect
+  - Will learn more (better visualizations, variable importance, model comparisons) in later unit
+
+
+--------------------------------------------------------------------------------
 
 ## Categorical coding
 
@@ -223,9 +251,19 @@ d |>
 - Why these values? In other words, how can you interpret the effect of a dummy coded feature?
 - "Dummy variable trap"
 - How is it different from one-hot coding.  When to use or not use one-hot coding? 
-- Target encoding
+- Other methods
+  - Ordinal coding
+  - Target (mean) encoding
+  - frequency coding
 
------
+--------------------------------------------------------------------------------
+
+## Performance metrics
+
+- SSE, MSE, RMSE, MAE, R2
+- How else are SSE class of metrics used in glm?
+
+--------------------------------------------------------------------------------
 
 ## Exploration 
 
@@ -238,7 +276,7 @@ d |>
     - Good documentation - QMD as analysis notebook
   - Some overfitting to validation will occur? Consequence?  Solutions?
 
------
+--------------------------------------------------------------------------------
 
 ## "Curse of dimensionality" - Bias vs. variance
 
@@ -249,30 +287,7 @@ d |>
   - Flexible models often need more N holding features constant
   - Regularization (unit 6) will work well when lots of features 
 
------
-
-## Transformations of numeric predictors
-
-- Use of `plot_truth()` [predicted vs. observed]
-
-- Residuals do not have mean of 0 for every $\hat{y}$
-  - Consequence: biased parameter estimates.  Linear is bad DGP
-  - Also bad test of questions RE the predictor (underestimate? misinform)
-    
-- Non-normal residuals
-  - Consequence: lm parameter estimates still unbiased (for linear DGP) but more "efficient" solutions exist
-  - Bad for prediction b/c higher variance than other solutions
-  - May suggest omission of variables
-  
-- Heteroscasticity
-  - Consequence: Inefficient and inaccurate standard errors.
-  - Statistical tests wrong
-  - Poor prediction for some (where larger variance of residuals) $\hat{y}$
-  - higher variance overall than other solutions - bad again for prediction
-  
-- Transformation of outcome?  
-  - metric
-  - back to raw predictions
+--------------------------------------------------------------------------------
 
 -----
 
