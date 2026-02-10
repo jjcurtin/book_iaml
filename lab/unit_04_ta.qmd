@@ -77,7 +77,8 @@ them.
 2)  Code away! Work on what you need to work on!
 
 3)  *git add* -- of the files you modified, select which ones you want
-    to *stage* (AKA prepare) to be pushed up.
+    to *stage* (AKA prepare) to be pushed up. This is me making a change
+    to lab as a test!
 
 4)  *git commit* -- the last step to commit your changes, once you've
     staged all of your files. Here, you can also use the *-m* tag to add
@@ -506,11 +507,11 @@ rec_prep_lr <- rec_lr |>
 
 We included `step_mutate()` in our recipe. It is appropriate to use
 `step_mutate()` when you are collapsing across levels of a categorical
-variable, but you should **NOT** use this for computed
-transformations (like calculating means, windsorization, etc.). Remember
-that our feature engineering steps are occurring after our
-pre-processing is done, and therefore can inadvertently introduce data
-leakage by using information from our validation set.
+variable, but you should **NOT** use this for computed transformations
+(like calculating means, windsorization, etc.). Remember that our
+feature engineering steps are occurring after our pre-processing is
+done, and therefore can inadvertently introduce data leakage by using
+information from our validation set.
 
 **But why does this happen, when other steps are clearly saving out
 information?!**
@@ -828,11 +829,17 @@ implications.**
 
 ## Generating test predictions for assignments
 
-A number of students had difficulty generating test predictions for the last assignment -- this is normal on your first try! Generating predictions can be hard!
+A number of students had difficulty generating test predictions for the
+last assignment -- this is normal on your first try! Generating
+predictions can be hard!
 
-We only set up training and validation sets for this example, but let's demo how to assign our different objects so that we could generate test predictions on an assignment.
+We only set up training and validation sets for this example, but let's
+demo how to assign our different objects so that we could generate test
+predictions on an assignment.
 
-At the end of your assignment, you'll see this code chunk where you are asked to put in your best model, best recipe, and your last name.
+At the end of your assignment, you'll see this code chunk where you are
+asked to put in your best model, best recipe, and your last name.
+
 ```{r}
 best_model <- NULL
 best_rec <- NA # best recipe
@@ -840,6 +847,7 @@ last_name <- ""
 ```
 
 Let's fill this out for our best model above.
+
 ```{r}
 best_model <- discrim_linear() |> # WHAT model
   set_engine("MASS") |> # WHAT engine
@@ -864,13 +872,21 @@ best_rec <- recipe(status ~ seniority + marital + job + amount + income + home, 
 last_name <- "janssen"
 ```
 
-We can also simply reference our objects by names instead of rewriting them above.
+We can also simply reference our objects by names instead of rewriting
+them above.
+
 ```{r}
 best_model <- fit_lda
 best_rec <- rec_rda
 last_name <- "janssen"
 ```
 
-Then, all you will need to do is to run the loop we have written for you on the assignment. :^)
+Then, all you will need to do is to run the loop we have written for you
+on the assignment. :\^)
 
-You also have the option of rerunning your best model across both your training and validation sets (using `bind_rows()`) instead of only training (so that you are using all of the data you have available!). This is not required for your assignments, but is something you would likely do in the real world. See the lab 3 script for the demonstration of how to do this.
+You also have the option of rerunning your best model across both your
+training and validation sets (using `bind_rows()`) instead of only
+training (so that you are using all of the data you have available!).
+This is not required for your assignments, but is something you would
+likely do in the real world. See the lab 3 script for the demonstration
+of how to do this.
