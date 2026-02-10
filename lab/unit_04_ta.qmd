@@ -1,0 +1,834 @@
+---
+title: "Unit 4 Lab"
+author: "TA Lab Key"
+date: "`r lubridate::today()`"
+format: 
+  html: 
+    embed-resources: true
+    toc: true 
+    toc_depth: 4
+editor_options: 
+  chunk_output_type: console
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+# Unit 4: Classification
+
+Happy Tuesday! It's a great day to practice those machine learning
+skills!
+
+PSA to always clean your workspace before you start lab or an assignment
+-- let's practice this now.
+
+## Quiz Questions
+
+Thank you all for your great topic suggestions for lab this week! Some
+questions we will try to answer throughout lab (i.e., while coding),
+while others are more discussion-based. We'll start with some
+big-picture questions you all had before we get into the meat of the lab
+for today.
+
+**General topics of interest!**
+
+-   Technical difficulties
+
+-   GitHub
+
+-   Efficiency
+
+-   Coding in Python versus scripting in R
+
+### Technical difficulties
+
+Please come chat with us before/after class or during our office hours
+if you need help with anything like updating R, etc.! We are happy to
+help!
+
+### GitHub
+
+There were a few questions of how to use GitHub with classwork and how
+to get practice using it.
+
+For this class, you are *cloning* (AKA making a copy of) our repository
+for the course. It's a one-way relationship! What this means is that you
+can *pull* changes (AKA bring changes down from GitHub onto your local
+machine).
+
+**How can I practice using git in this class?**
+
+As you've noticed, we put all assignments and labs up on the course
+website. Another way to access these materials is by using the *git
+pull* command to make sure you have the most updated version of the
+assignment or lab you are looking for, and then opening it from your
+GitHub folder. This is an alternative to manually downloading
+assignments through links.
+
+In a real workflow with collaborators, you would also be making your own
+changes and *pushing* them up so that your collaborators can access
+them.
+
+**Here's what that workflow typically looks like:**
+
+1)  *git pull* -- before you work on anything with a collaborator, make
+    sure you have the most updated file!
+
+2)  Code away! Work on what you need to work on!
+
+3)  *git add* -- of the files you modified, select which ones you want
+    to *stage* (AKA prepare) to be pushed up.
+
+4)  *git commit* -- the last step to commit your changes, once you've
+    staged all of your files. Here, you can also use the *-m* tag to add
+    a message. Usually you write something brief but informative here.
+
+    **Here's an example:**
+
+> git commit -m "added git tutorial"
+
+5)  *git push* -- the final step to put your updates up on your shared
+    repository!
+
+There are more complicated workflows than this (like ones that involve
+branching), but that's outside of the scope of this introduction.
+
+One very helpful practice to get in the habit of when working with
+collaborators is to *always* commit your changes at the end of a work
+session! (We are all guilty of forgetting this...)
+
+### Efficiency
+
+Many of you have astutely noted how complicated modeling can get *very*
+quickly! We will cover how to get more and more efficient with testing
+different model configurations as you progress through this course.
+
+#### Some good news!
+
+There are plenty of ways to make your modeling more efficient.
+
+We will cover parallel processing in Unit 5, along with fitting
+different model and hyperparameter configurations. In short, you can run
+processes "in parallel" (AKA at the same time) to speed up some of these
+computations.
+
+In the real world, there are other solutions like using the Center for
+High Throughput Computing (CHTC) on campus (this is what our lab does to
+run models with hundreds of features and many different
+configurations!). You can read about high throughput computing here:
+https://chtc.cs.wisc.edu/htc.html. **Critically, you do not need to and
+should not be using something like CHTC for this class!!**
+
+One drawback is that the more you automate processes, the more "black
+box-y" they become -- it can be easy to miss simple errors because you
+are no longer stepping through the code line by line.
+
+#### Some bad news!
+
+Although we will several of the topics above as we go through this
+course, there is not a magical formula that will get you to the "best
+recipe" each and every time. Your best recipe will be unique in for
+every data set that you work with because the underlying DGP will be
+unique!
+
+Doing thorough, thoughtful EDA can help you save *a lot* of time with
+feature engineering. It can give you insights into transformations,
+interactions, and things you might need to handle (like missing data).
+
+### Machine Learning in Python
+
+While we will complete this course in R, Python is another popular
+choice for machine learning. We aren't very familiar with machine
+learning in Python, but `scikit-learn`
+(https://scikit-learn.org/stable/) is a popular choice. One of the
+benefits of `tidymodels` is that it breaks things down into explicit
+stages -- this is very beneficial for learning the ins and outs!
+
+## Example
+
+### Set-up
+
+We'll quickly review our set up. It's important to know that there is
+not a pre-determined set of packages you will need for any giving
+modeling problem you are tackling (AKA we cannot give you the magic
+combination of packages that you will always, without fail, use). In
+this course, you should **always** load `tidyverse` and `tidymodels`.
+Remember that our goal is to load in the *least amount* of packages
+possible to avoid conflicts.
+
+This code chunk loads in our tidy packages and then sets up conflict
+policies to reduce errors associated with function conflicts.
+
+```{r}
+library(tidyverse) # for general data wrangling
+library(tidymodels) # for modeling
+
+options(conflicts.policy = "depends.ok")
+```
+
+Next, we load in all of our other packages *after* setting our conflict
+policy.
+
+```{r}
+#| message: false
+#| warning: false
+
+library(discrim, exclude = "smoothness")
+library(kableExtra, exclude = "group_rows") # for displaying formatted tables w/ kbl()
+library(janitor, include.only = c("clean_names", "tabyl"))  
+```
+
+Finally, we source some functions. Some of you pointed out that there is
+no help information that comes up when you look for help on John's
+custom functions using the `?` operator. This is because the functions
+we have you load are not coming to you in a formal package with
+documentation (like `tidymodels`). `source()` is simply loading in an R
+file that has many different functions in it. Let's take a look at one
+of these files to make this concrete!
+
+These functions are created for ease of use in the course, but we don't
+intend for them to be used moving forward in your careers! Instead, we
+encourage you to create your own set of functions that will be most
+useful to you (eventually). Some downsides of relying on functions from
+an R script as opposed to using functions in a library is that R script
+functions often have less extensive documentation and are not maintained
+as regularly.
+
+```{r}
+#| message: false
+#| warning: false
+
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+```
+
+Lastly, some environment settings!
+
+```{r}
+options(tibble.width = Inf, tibble.print_max = Inf)
+theme_set(theme_bw())
+```
+
+### Cleaning EDA
+
+Let's start by loading in our data. Today, we will be working with an
+example dataset called `credit_data`. We can pull up more information
+about this dataset using the `?` operator. *Note that the TAs have
+modified this dataset below to have a balanced outcome. We will cover
+how to work with unbalanced outcomes later in the course.*
+
+```{r}
+?credit_data
+
+set.seed(123)
+
+data_complete <- modeldata::credit_data
+
+n_min <- data_complete |> 
+  count(Status) |> 
+  summarise(n = min(n)) |> 
+  pull(n)
+
+data_raw <- data_complete |> 
+  group_by(Status) |> 
+  slice_sample(n = n_min) |> 
+  ungroup()
+```
+
+Our goal with this dataset will be to try to predict whether or not
+someone has good or bad credit based on a variety of personal
+characteristics, including recent loan data. We have reproduced the data
+dictionary for you below (since calling the `?` operator only gives us a
+GitHub link, anyways!).
+
+| Variable  | Description               |
+|-----------|---------------------------|
+| Status    | Credit status             |
+| Seniority | Job seniority (years)     |
+| Home      | Type of home ownership    |
+| Time      | Time of requested loan    |
+| Age       | Client's age              |
+| Marital   | Marital status            |
+| Records   | Existence of records      |
+| Job       | Type of job               |
+| Expenses  | Amount of expenses        |
+| Income    | Amount of income          |
+| Assets    | Amount of assets          |
+| Debt      | Amount of debt            |
+| Amount    | Amount requested for loan |
+| Price     | Price of good             |
+
+Because these are example data, they are thankfully already quite clean
+for us. **What are some steps we should take as part of the cleaning
+process? Don't peek!!!**
+
+Before we do that, let's skim our data (a strategically placed skim to
+prevent you from scrolling too far and seeing potential answers to the
+above question...)
+
+```{r}
+data_raw |> 
+  skim_some()
+```
+
+As a first step, we'll clean up our variable names.
+
+```{r}
+data_raw <- data_raw |>
+  janitor::clean_names() |> 
+  glimpse()
+```
+
+Our variables look like they do not have any funky naming and classing
+looks appropriate. Let's check the levels of our factors.
+
+```{r}
+data_raw |> 
+  select(where(is.factor)) |>
+  walk(\(column) print(levels(column)))
+```
+
+Here is some more information about `home`, because some of the levels
+are not intuitive:
+
+| Level   | Meaning                           |
+|---------|-----------------------------------|
+| ignore  | Missing or unknown housing status |
+| owner   | Owns home or has a mortgage       |
+| rent    | Rents housing                     |
+| parents | Lives with parents                |
+| priv    | Private housing arrangement       |
+| other   | Other housing situations          |
+
+The level `ignore` might be better classified as `NA`, since it appears
+to represent if someone skipped ("ignored") the question on this
+particular questionnaire altogether. We will set those particular values
+to be `NA`, and then we will drop that level.
+
+**Why are we choosing to drop this level now that we have completed this
+conversion?**
+
+```{r}
+data_raw <- data_raw |> 
+  mutate(home = na_if(home, "ignore")) |> 
+  mutate(home = droplevels(home))
+
+data_raw |> 
+  pull(home) |> 
+  levels()
+```
+
+::: callout-tip
+## A note on trade-offs between recoding ordinal variables
+
+Someone pointed out that it can be confusing to know when to choose to
+treat ordinal variables as either nominal (dummy coding) or interval
+during feature engineering.
+
+Dummy coding won't preserve your ordering and simple numeric encoding
+will assume equal spacing between categories. Treating your ordinal
+variables as interval is helpful assuming you know the spacing between
+categories, but we don't always know that!
+
+The decision you make will largely depend on context.
+:::
+
+Now that we have fixed that labeling, let's take a look at our missing
+values.
+
+```{r}
+data_raw |> 
+  skim_some() |> 
+  select(skim_variable, n_missing, complete_rate)
+```
+
+Let's also check out the minima and maxima of numeric values.
+
+```{r}
+data_raw |>
+  skim_some() |> 
+  filter(skim_type == "numeric") |>
+  select(skim_variable, numeric.p0, numeric.p100)
+```
+
+In the real world, we want a training, validation, and test set (as you
+saw demo'd in last week's lab). Today, we're going to just practice
+selecting using the best model using a training and validation set, and
+not rigorously evaluating it, so we will use the `initial_split()`
+function. **Pop quiz! Who can explain the arguments we've already put in
+for `initial_split()`? What do they represent?**
+
+A clearer overview of when to use each dataset split in model
+development, along with brief clarification of the variable names
+created during preprocessing and modeling.
+
+```{r}
+set.seed(20211121) 
+
+splits <- data_raw |> 
+  initial_split(prop = .75, strata = "status")
+
+data_trn <- splits |> analysis()
+
+data_val <- splits |> assessment()
+```
+
+These data are pretty clean because it's model data, but some folks were
+wondering how to make other cleaning decisions (like removing outliers).
+Usually this is a combination of domain or dataset expertise/codebook
+knowledge and "standard" statistical decision rules (like 1.5 x IQR for
+detecting outliers). Remember that in statistics there are often no
+hard-and-fast rules for removing datapoints. Ideally, you will have
+preregistered your analyses and will have already decided on some
+decision rules with your research team.
+
+### Modeling EDA
+
+We'll do some very abbreviated modeling EDA to see if there are any
+interesting relationships between our features.
+
+The first thing that we'll do is check the balancing of our outcome.
+Modeling with an unbalanced outcome poses more challenges which we will
+talk about in a later unit.
+
+```{r}
+data_trn |> plot_bar("status")
+```
+
+Let's take a quick look at some violin plots by `status`.
+
+```{r}
+data_trn |> 
+  select(where(is.numeric)) |> 
+  names() |> 
+  map(\(name) plot_grouped_box_violin(df = data_trn, x = "status", y = name)) |> 
+  cowplot::plot_grid(plotlist = _, ncol = 2)
+```
+
+Next, a series of bar plots! **What do you notice??**
+
+```{r}
+data_trn |> 
+  plot_grouped_barplot_percent(x = "home", y = "status")
+
+data_trn |> 
+  plot_grouped_barplot_percent(x = "marital", y = "status")
+
+data_trn |> 
+  plot_grouped_barplot_percent(x = "job", y = "status")
+
+data_trn |> 
+  plot_grouped_barplot_percent(x = "records", y = "status")
+```
+
+Based on what we've seen in our bar plots, I want to take a closer look
+at the relationship between being married, owning a home, having a fixed
+income, and credit status. This might give me some ideas for feature
+engineering.
+
+```{r}
+data_trn |>
+  mutate(married = if_else(marital == "married", 1, 0),
+         owner = if_else(home == "owner", 1, 0),
+         fixed = if_else(job == "fixed", 1, 0),
+         status_bad = if_else(status == "bad", 1, 0)) |> 
+  select(where(is.numeric)) |> 
+  cor(use = "pairwise.complete.obs") |> 
+  corrplot::corrplot.mixed() 
+```
+
+Now, we'll create our tracking tibble.
+
+```{r}
+error_val <- tibble(model = character(), accuracy = numeric()) |> 
+  glimpse()
+```
+
+### Logistic Regression
+
+We will start by going through logistic regression, making sure that we
+spend time going through each step of the `tidymodels` process
+(`recipe()`, `prep()`, and `bake()`).
+
+First, let's talk about `recipe()`. First, let's pull up the help menu
+for this function. Like the name suggests, our recipe is just a list of
+steps that we want to apply to our data before modeling. We are stating
+the predictors we want to use and any preprocessing steps like
+imputation that we want carried out. If we type `rec` into the console,
+we'll see that it's literally just a list of instructions!
+
+```{r}
+rec <- recipe(status ~ seniority + marital + job + amount + income + home, data = data_trn) |>
+  step_mutate(
+    # Student question: how do we decide what to collapse when merging factor categories?
+    # What if a low baserate category is actually super important?
+    home = fct_collapse(home,
+                        owned = "owner",
+                        not_owned = c("priv", "rent", "parents", "other")),
+    marital = fct_collapse(marital,
+                           married = "married",
+                           not_married = c("single", "divorced", "widow", 
+                                           "separated")),
+    job = fct_collapse(job,
+                       fixed = "fixed",
+                       not_fixed = c("freelance", "others", "partime"))
+  ) |>
+  step_impute_median(all_numeric_predictors()) |>
+  step_impute_mode(all_nominal_predictors())
+```
+
+::: callout-tip
+## A brief aside on interactions, while we are working on creating our recipe:
+
+Remember that : represents only the interaction, while \* represents the
+interaction and lower-order terms. You do not define interactions when
+you set up the basics of your recipe. Instead, they are defined using
+`step_interact()`. Conceptually, it might help to think about how
+creating this new interaction term is really just another step in
+feature engineering.
+:::
+
+Now, let's look at the help menu for `prep()`. We use this function to
+estimate parameters from our training data. It estimates them and keeps
+them for later for us! If we look at our recipe above, that means that
+it is computing and storing, for example, the medians of our numeric
+predictors and the modes of our nominal predictors. We aren't fitting a
+model here! Let's print `rec_prep` in the console.
+
+```{r}
+rec_prep <- rec |> 
+  prep(data_trn)
+```
+
+::: callout-tip
+## Tips on using `step_mutate()`:
+
+We included `step_mutate()` in our recipe. It is appropriate to use
+`step_mutate()` when you are collapsing across levels of a categorical
+variable, but you should exercise caution when using this for computed
+transformations (like calculating means, windsorization, etc.). Remember
+that our feature engineering steps are occurring after our
+pre-processing is done, and therefore can inadvertently introduce data
+leakage by using information from our validation set.
+
+**But why does this happen, when other steps are clearly saving out
+information?!**
+
+To understand this, we can actually pull out and see what is stored in
+each step in our `rec_prep` object. If we run the below code, we can see
+all of our operations laid out.
+
+```{r}
+rec_prep |> tidy()
+```
+
+The secret is to look at each operation separately! You can see that all
+is saved for `step_mutate()` is just the R code itself, with no specific
+values. If you are doing any mathematical computations in this step,
+therefore, it will be recalculated for your training, validation, and
+test, leading to data leakage.
+
+```{r}
+rec_prep |> tidy(number = 1) # mutate
+
+rec_prep |> tidy(number = 2) # impute_median
+
+rec_prep |> tidy(number = 3) # impute_mode
+```
+:::
+
+The next step is `bake()`. All we are doing here is applying our
+prepared recipe to our data in order to make our features. We aren't
+estimating anything here! We are taking the quantities stored in
+`rec_prep` and are applying them to our data. Remember that we have
+stored parameters above based on our training data. For a concrete
+example, here we will put in the median of all numeric predictors in our
+**training data** in for our validation data.
+
+```{r}
+feat_trn <- rec_prep |> 
+  bake(NULL) # pop quiz: why do we write NULL here?
+
+feat_val <- rec_prep |> 
+  bake(data_val)
+```
+
+Now, let's take a look at what these features look like. You can tell
+that the estimates derived from `rec_prep` have been applied because we
+have no missing data! This is a great way to sanity check yourself (and
+why we encourage always skimming your features).
+
+```{r}
+feat_trn |> skim_all()
+```
+
+Now, let's fit our logistic regression. Here is where we are training
+our model for real!
+
+```{r}
+fit_lr <- 
+  logistic_reg() |> # specify WHAT model we are running
+  set_engine("glm") |> # specify WHAT engine we want to use to run that model
+  fit(status ~ ., data = feat_trn) # this is where our model is ACTUALLY fit
+# pop quiz: what does the . operator mean?
+```
+
+Now, let's generate *predictions* in our validation set.
+
+```{r}
+error_val <- bind_rows(error_val, 
+                       tibble(model = "logistic reg", 
+                              accuracy = accuracy_vec(feat_val$status,
+                                                          predict(fit_lr,
+                                                                  feat_val,
+                                                                  type = "class")$.pred_class)))
+error_val
+```
+
+Let's quickly walk through this step by step.
+
+The first step is to generate our actual predictions:
+
+```{r}
+predict(fit_lr,feat_val, type = "class")
+```
+
+Next, we are adding `$.pred_class` -- this is just pulling out these
+observations as a vector:
+
+```{r}
+predict(fit_lr,feat_val, type = "class")$.pred_class
+```
+
+On the lefthand side of the `accuracy_vec` function, we have our ground
+truth observations:
+
+```{r}
+feat_val$status
+```
+
+Putting this all together is what gives us our accuracy estimate.
+`accuracy_vec()` is just comparing what we are predicting to what is
+actually true!
+
+```{r}
+accuracy_vec(feat_val$status,predict(fit_lr, feat_val, type = "class")$.pred_class)
+```
+
+### KNN
+
+Next, we'll fit a KNN model. Last week, we covered KNN in a regression
+context, but as you're learning this week, KNN can also be applied to
+classification problems. Remember that KNN is excellent for modeling
+much more complex decision boundaries! It is much more flexible than
+logistic regression.
+
+Our recipe looks very similar, but now we are dummy coding our nominal
+predictors and scaling our numeric predictors.
+
+```{r}
+rec <- recipe(status ~ seniority + marital + job + amount + income + home, data = data_trn) |>
+    step_mutate(
+    home = fct_collapse(home,
+                        owned = "owner",
+                        not_owned = c("priv", "rent", "parents", "other")),
+    marital = fct_collapse(marital,
+                           married = "married",
+                           not_married = c("single", "divorced", "widow", 
+                                           "separated")),
+    job = fct_collapse(job,
+                       fixed = "fixed",
+                       not_fixed = c("freelance", "others", "partime"))
+  ) |>
+  step_impute_median(all_numeric_predictors()) |>
+  step_impute_mode(all_nominal_predictors()) |> 
+  step_dummy(all_nominal_predictors()) |>
+  step_scale(all_numeric_predictors())
+```
+
+Now, let's run through our prep and bake stages again, and look at our
+KNN features. Notice how the names look a bit different than before --
+this is because we have dummy coded our nominal predictors.
+
+```{r}
+rec_prep <- rec |> 
+  prep(data = data_trn)
+
+feat_trn <- rec_prep |> 
+  bake(NULL)
+
+feat_val <- rec_prep |> 
+  bake(data_val)
+
+feat_trn |> skim_all()
+```
+
+Like we alluded to at the beginning of class, you will learn in the next
+unit how to more efficiently test a wide range of hyperparameters (like
+k), instead of having to write them out individually. For now, we'll
+write them one by one!
+
+```{r}
+fit_5nn <- 
+  nearest_neighbor(neighbors = 5) |> 
+  set_engine("kknn") |>
+  set_mode("classification") |> # remember to set this explicitly!!!
+  fit(status ~ ., data = feat_trn)
+
+fit_10nn <- 
+  nearest_neighbor(neighbors = 10) |> 
+  set_engine("kknn") |> 
+  set_mode("classification") |>   
+  fit(status ~ ., data = feat_trn)
+
+fit_20nn <- 
+  nearest_neighbor(neighbors = 20) |> 
+  set_engine("kknn") |> 
+  set_mode("classification") |>   
+  fit(status ~ ., data = feat_trn)
+```
+
+We reviewed the inner workings of `accuracy_vec()` above. **But how come
+we aren't just overwriting `error_val` every time?** Let's look at the
+`bind_rows()` function.
+
+```{r}
+error_val <- bind_rows(error_val, # take errror_val, and append the following:
+                       tibble(model = "5nn", # what we want in our model column
+                              accuracy = accuracy_vec(feat_val$status, # what we want in our accuracy column
+                                                          predict(fit_5nn,
+                                                                  feat_val,
+                                                                  type = "class")$.pred_class)))
+error_val <- bind_rows(error_val, 
+                       tibble(model = "10nn", 
+                              accuracy = accuracy_vec(feat_val$status,
+                                                          predict(fit_10nn,
+                                                                  feat_val,
+                                                                  type = "class")$.pred_class)))
+error_val <- bind_rows(error_val, 
+                       tibble(model = "20nn", 
+                              accuracy = accuracy_vec(feat_val$status,
+                                                          predict(fit_20nn,
+                                                                  feat_val,
+                                                                  type = "class")$.pred_class)))
+
+error_val
+```
+
+### LDA & QDA
+
+Last but not least, we'll review some code for LDA and QDA, paying
+special attention to the differences. Recall from lecture that LDA
+models the distributions for every feature for every class of your
+outcome variable (in our case, the distribution of seniority, marital
+status, job status, amount, income, and home ownership status will be
+modeled separately for both good and bad credit).
+
+First, we'll set up our recipe as we had it before.
+
+```{r}
+rec <- recipe(status ~ seniority + marital + job + amount + income + home, data = data_trn) |>
+  step_mutate(
+    home = fct_collapse(home,
+                        owned = "owner",
+                        not_owned = c("priv", "rent", "parents", "other")),
+    marital = fct_collapse(marital,
+                           married = "married",
+                           not_married = c("single", "divorced", "widow", 
+                                           "separated")),
+    job = fct_collapse(job,
+                       fixed = "fixed",
+                       not_fixed = c("freelance", "others", "partime"))
+  ) |>
+  step_impute_median(all_numeric_predictors()) |>
+  step_impute_mode(all_nominal_predictors())
+```
+
+Let's prep and bake and then take a look at our features.
+
+```{r}
+rec_prep <- rec |> 
+  prep(data_trn)
+
+feat_trn <- rec_prep |> 
+  bake(NULL)
+
+feat_val <- rec_prep |> 
+  bake(data_val)
+
+feat_trn |> skim_all()
+```
+
+We fit our LDA and QDA models right next to each other so we can
+appreciate the differences between the two of them. LDA and QDA are
+quite similar, but QDA is less strict than LDA.
+
+**LDA assumes** -\> all features are multivariate normal and the
+covariance matrix is the same across all classes
+
+**QDA says** -\> well, I still assume all features are multivariate
+normal, but the covariance matrix does not need to be the same across
+all classes (each class can have its own covariance matrix!)
+
+Here we show code for two different engines you can use to can run LDA
+(and one way to run QDA). Note our two hyperparameters here,
+`frac_common_cov` and `frac_identity`. You could tune on these
+hyperparameters to get some blend of LDA and QDA (both can range
+anywhere between 0 and 1).
+
+```{r}
+fit_lda <- 
+  discrim_linear() |> # WHAT model
+  set_engine("MASS") |> # WHAT engine
+  fit(status ~ ., data = feat_trn)
+
+fit_lda_2 <- 
+  discrim_regularized(frac_common_cov = 1, frac_identity = 0) |> # WHAT model
+  set_engine("klaR") |> # WHAT engine
+  fit(status ~ ., data = feat_trn)
+
+fit_qda <- 
+  discrim_regularized(frac_common_cov = 0, frac_identity = 0) |> # WHAT model
+  set_engine("klaR") |>  # WHAT engine
+  fit(status ~ ., data = feat_trn)
+```
+
+Finally, let's see how these two models do! We put both LDA versions
+here as an example, but you would not typically compare the same
+algorithm across engines.
+
+```{r}
+error_val <- bind_rows(error_val, 
+                       tibble(model = "lda", 
+                              accuracy = accuracy_vec(feat_val$status,
+                                                      predict(fit_lda,
+                                                              feat_val)$.pred_class)))
+
+error_val <- bind_rows(error_val, 
+                       tibble(model = "lda_2", 
+                              accuracy = accuracy_vec(feat_val$status,
+                                                      predict(fit_lda_2,
+                                                              feat_val)$.pred_class)))
+
+error_val <- bind_rows(error_val, 
+                       tibble(model = "qda", 
+                              accuracy = accuracy_vec(feat_val$status,
+                                                      predict(fit_qda,
+                                                              feat_val)$.pred_class)))
+
+error_val
+```
+
+It looks like LDA is doing the best, but we would need to evaluate this
+in new data to really be certain. **Why might I pick my logistic
+regression model over my LDA model, even though my LDA model has
+slightly better performance in validation? Hint: think about practical
+implications.**
+
+## Generating test predictions for assignments
+
+Let's pivot over to looking at our assignment that was due last week.
+We'll take a look at the key and walk through how to generate
+predictions, because a number of folks had difficulty generating these
+files!
