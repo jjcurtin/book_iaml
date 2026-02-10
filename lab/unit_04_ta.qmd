@@ -459,7 +459,7 @@ imputation that we want carried out. If we type `rec` into the console,
 we'll see that it's literally just a list of instructions!
 
 ```{r}
-rec <- recipe(status ~ seniority + marital + job + amount + income + home, data = data_trn) |>
+rec_lr <- recipe(status ~ seniority + marital + job + amount + income + home, data = data_trn) |>
   step_mutate(
     # Student question: how do we decide what to collapse when merging factor categories?
     # What if a low baserate category is actually super important?
@@ -497,7 +497,7 @@ predictors and the modes of our nominal predictors. We aren't fitting a
 model here! Let's print `rec_prep` in the console.
 
 ```{r}
-rec_prep <- rec |> 
+rec_prep_lr <- rec_lr |> 
   prep(data_trn)
 ```
 
@@ -520,7 +520,7 @@ each step in our `rec_prep` object. If we run the below code, we can see
 all of our operations laid out.
 
 ```{r}
-rec_prep |> tidy()
+rec_prep_lr |> tidy()
 ```
 
 The secret is to look at each operation separately! You can see that all
@@ -530,11 +530,11 @@ therefore, it will be recalculated for your training, validation, and
 test, leading to data leakage.
 
 ```{r}
-rec_prep |> tidy(number = 1) # mutate
+rec_prep_lr |> tidy(number = 1) # mutate
 
-rec_prep |> tidy(number = 2) # impute_median
+rec_prep_lr |> tidy(number = 2) # impute_median
 
-rec_prep |> tidy(number = 3) # impute_mode
+rec_prep_lr |> tidy(number = 3) # impute_mode
 ```
 :::
 
@@ -547,10 +547,10 @@ example, here we will put in the median of all numeric predictors in our
 **training data** in for our validation data.
 
 ```{r}
-feat_trn <- rec_prep |> 
+feat_trn_lr <- rec_prep_lr |> 
   bake(NULL) # pop quiz: why do we write NULL here?
 
-feat_val <- rec_prep |> 
+feat_val_lr <- rec_prep_lr |> 
   bake(data_val)
 ```
 
@@ -560,7 +560,7 @@ have no missing data! This is a great way to sanity check yourself (and
 why we encourage always skimming your features).
 
 ```{r}
-feat_trn |> skim_all()
+feat_trn_lr |> skim_all()
 ```
 
 Now, let's fit our logistic regression. Here is where we are training
@@ -570,7 +570,7 @@ our model for real!
 fit_lr <- 
   logistic_reg() |> # specify WHAT model we are running
   set_engine("glm") |> # specify WHAT engine we want to use to run that model
-  fit(status ~ ., data = feat_trn) # this is where our model is ACTUALLY fit
+  fit(status ~ ., data = feat_trn_lr) # this is where our model is ACTUALLY fit
 # pop quiz: what does the . operator mean?
 ```
 
@@ -579,9 +579,9 @@ Now, let's generate *predictions* in our validation set.
 ```{r}
 error_val <- bind_rows(error_val, 
                        tibble(model = "logistic reg", 
-                              accuracy = accuracy_vec(feat_val$status,
+                              accuracy = accuracy_vec(feat_val_lr$status,
                                                           predict(fit_lr,
-                                                                  feat_val,
+                                                                  feat_val_lr,
                                                                   type = "class")$.pred_class)))
 error_val
 ```
@@ -591,21 +591,21 @@ Let's quickly walk through this step by step.
 The first step is to generate our actual predictions:
 
 ```{r}
-predict(fit_lr,feat_val, type = "class")
+predict(fit_lr,feat_val_lr, type = "class")
 ```
 
 Next, we are adding `$.pred_class` -- this is just pulling out these
 observations as a vector:
 
 ```{r}
-predict(fit_lr,feat_val, type = "class")$.pred_class
+predict(fit_lr, feat_val_lr, type = "class")$.pred_class
 ```
 
 On the lefthand side of the `accuracy_vec` function, we have our ground
 truth observations:
 
 ```{r}
-feat_val$status
+feat_val_lr$status
 ```
 
 Putting this all together is what gives us our accuracy estimate.
@@ -613,7 +613,7 @@ Putting this all together is what gives us our accuracy estimate.
 actually true!
 
 ```{r}
-accuracy_vec(feat_val$status,predict(fit_lr, feat_val, type = "class")$.pred_class)
+accuracy_vec(feat_val_lr$status,predict(fit_lr, feat_val_lr, type = "class")$.pred_class)
 ```
 
 ### KNN
@@ -628,7 +628,7 @@ Our recipe looks very similar, but now we are dummy coding our nominal
 predictors and scaling our numeric predictors.
 
 ```{r}
-rec <- recipe(status ~ seniority + marital + job + amount + income + home, data = data_trn) |>
+rec_knn <- recipe(status ~ seniority + marital + job + amount + income + home, data = data_trn) |>
     step_mutate(
     home = fct_collapse(home,
                         owned = "owner",
@@ -652,16 +652,16 @@ KNN features. Notice how the names look a bit different than before --
 this is because we have dummy coded our nominal predictors.
 
 ```{r}
-rec_prep <- rec |> 
+rec_prep_knn <- rec_knn |> 
   prep(data = data_trn)
 
-feat_trn <- rec_prep |> 
+feat_trn_knn <- rec_prep_knn |> 
   bake(NULL)
 
-feat_val <- rec_prep |> 
+feat_val_knn <- rec_prep_knn |> 
   bake(data_val)
 
-feat_trn |> skim_all()
+feat_trn_knn |> skim_all()
 ```
 
 Like we alluded to at the beginning of class, you will learn in the next
@@ -674,19 +674,19 @@ fit_5nn <-
   nearest_neighbor(neighbors = 5) |> 
   set_engine("kknn") |>
   set_mode("classification") |> # remember to set this explicitly!!!
-  fit(status ~ ., data = feat_trn)
+  fit(status ~ ., data = feat_trn_knn)
 
 fit_10nn <- 
   nearest_neighbor(neighbors = 10) |> 
   set_engine("kknn") |> 
   set_mode("classification") |>   
-  fit(status ~ ., data = feat_trn)
+  fit(status ~ ., data = feat_trn_knn)
 
 fit_20nn <- 
   nearest_neighbor(neighbors = 20) |> 
   set_engine("kknn") |> 
   set_mode("classification") |>   
-  fit(status ~ ., data = feat_trn)
+  fit(status ~ ., data = feat_trn_knn)
 ```
 
 We reviewed the inner workings of `accuracy_vec()` above. **But how come
@@ -696,21 +696,21 @@ we aren't just overwriting `error_val` every time?** Let's look at the
 ```{r}
 error_val <- bind_rows(error_val, # take errror_val, and append the following:
                        tibble(model = "5nn", # what we want in our model column
-                              accuracy = accuracy_vec(feat_val$status, # what we want in our accuracy column
+                              accuracy = accuracy_vec(feat_val_knn$status, # what we want in our accuracy column
                                                           predict(fit_5nn,
-                                                                  feat_val,
+                                                                  feat_val_knn,
                                                                   type = "class")$.pred_class)))
 error_val <- bind_rows(error_val, 
                        tibble(model = "10nn", 
-                              accuracy = accuracy_vec(feat_val$status,
+                              accuracy = accuracy_vec(feat_val_knn$status,
                                                           predict(fit_10nn,
-                                                                  feat_val,
+                                                                  feat_val_knn,
                                                                   type = "class")$.pred_class)))
 error_val <- bind_rows(error_val, 
                        tibble(model = "20nn", 
-                              accuracy = accuracy_vec(feat_val$status,
+                              accuracy = accuracy_vec(feat_val_knn$status,
                                                           predict(fit_20nn,
-                                                                  feat_val,
+                                                                  feat_val_knn,
                                                                   type = "class")$.pred_class)))
 
 error_val
@@ -728,7 +728,7 @@ modeled separately for both good and bad credit).
 First, we'll set up our recipe as we had it before.
 
 ```{r}
-rec <- recipe(status ~ seniority + marital + job + amount + income + home, data = data_trn) |>
+rec_rda <- recipe(status ~ seniority + marital + job + amount + income + home, data = data_trn) |>
   step_mutate(
     home = fct_collapse(home,
                         owned = "owner",
@@ -748,16 +748,16 @@ rec <- recipe(status ~ seniority + marital + job + amount + income + home, data 
 Let's prep and bake and then take a look at our features.
 
 ```{r}
-rec_prep <- rec |> 
+rec_prep_rda <- rec_rda |> 
   prep(data_trn)
 
-feat_trn <- rec_prep |> 
+feat_trn_rda <- rec_prep_rda |> 
   bake(NULL)
 
-feat_val <- rec_prep |> 
+feat_val_rda <- rec_prep_rda |> 
   bake(data_val)
 
-feat_trn |> skim_all()
+feat_trn_rda |> skim_all()
 ```
 
 We fit our LDA and QDA models right next to each other so we can
@@ -781,17 +781,17 @@ anywhere between 0 and 1).
 fit_lda <- 
   discrim_linear() |> # WHAT model
   set_engine("MASS") |> # WHAT engine
-  fit(status ~ ., data = feat_trn)
+  fit(status ~ ., data = feat_trn_rda)
 
 fit_lda_2 <- 
   discrim_regularized(frac_common_cov = 1, frac_identity = 0) |> # WHAT model
   set_engine("klaR") |> # WHAT engine
-  fit(status ~ ., data = feat_trn)
+  fit(status ~ ., data = feat_trn_rda)
 
 fit_qda <- 
   discrim_regularized(frac_common_cov = 0, frac_identity = 0) |> # WHAT model
   set_engine("klaR") |>  # WHAT engine
-  fit(status ~ ., data = feat_trn)
+  fit(status ~ ., data = feat_trn_rda)
 ```
 
 Finally, let's see how these two models do! We put both LDA versions
@@ -801,21 +801,21 @@ algorithm across engines.
 ```{r}
 error_val <- bind_rows(error_val, 
                        tibble(model = "lda", 
-                              accuracy = accuracy_vec(feat_val$status,
+                              accuracy = accuracy_vec(feat_val_rda$status,
                                                       predict(fit_lda,
-                                                              feat_val)$.pred_class)))
+                                                              feat_val_rda)$.pred_class)))
 
 error_val <- bind_rows(error_val, 
                        tibble(model = "lda_2", 
-                              accuracy = accuracy_vec(feat_val$status,
+                              accuracy = accuracy_vec(feat_val_rda$status,
                                                       predict(fit_lda_2,
-                                                              feat_val)$.pred_class)))
+                                                              feat_val_rda)$.pred_class)))
 
 error_val <- bind_rows(error_val, 
                        tibble(model = "qda", 
-                              accuracy = accuracy_vec(feat_val$status,
+                              accuracy = accuracy_vec(feat_val_rda$status,
                                                       predict(fit_qda,
-                                                              feat_val)$.pred_class)))
+                                                              feat_val_rda)$.pred_class)))
 
 error_val
 ```
@@ -828,7 +828,47 @@ implications.**
 
 ## Generating test predictions for assignments
 
-Let's pivot over to looking at our assignment that was due last week.
-We'll take a look at the key and walk through how to generate
-predictions, because a number of folks had difficulty generating these
-files!
+A number of students had difficulty generating test predictions for the last assignment -- this is normal on your first try! Generating predictions can be hard!
+
+We only set up training and validation sets for this example, but let's demo how to assign our different objects so that we could generate test predictions on an assignment.
+
+At the end of your assignment, you'll see this code chunk where you are asked to put in your best model, best recipe, and your last name.
+```{r}
+best_model <- NULL
+best_rec <- NA # best recipe
+last_name <- ""
+```
+
+Let's fill this out for our best model above.
+```{r}
+best_model <- discrim_linear() |> # WHAT model
+  set_engine("MASS") |> # WHAT engine
+  fit(status ~ ., data = feat_trn_rda)
+
+best_rec <- recipe(status ~ seniority + marital + job + amount + income + home, data = data_trn) |>
+  step_mutate(
+    home = fct_collapse(home,
+                        owned = "owner",
+                        not_owned = c("priv", "rent", "parents", "other")),
+    marital = fct_collapse(marital,
+                           married = "married",
+                           not_married = c("single", "divorced", "widow", 
+                                           "separated")),
+    job = fct_collapse(job,
+                       fixed = "fixed",
+                       not_fixed = c("freelance", "others", "partime"))
+  ) |>
+  step_impute_median(all_numeric_predictors()) |>
+  step_impute_mode(all_nominal_predictors())
+
+last_name <- "janssen"
+```
+
+We can also simply reference our objects by names instead of rewriting them above.
+```{r}
+best_model <- fit_lda
+best_rec <- rec_rda
+last_name <- "janssen"
+```
+
+Then, all you will need to do is to run the loop we have written for you on the assignment. :^)
