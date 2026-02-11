@@ -2418,12 +2418,12 @@ rec <-
            overall_qual + ms_zoning, data = data_trn) |> 
   step_impute_median(garage_cars) |> 
   step_mutate(overall_qual = as.numeric(overall_qual)) |> 
+  step_scale(all_numeric_predictors()) |>  # done before dummy coding avoid scaling binary features 
   step_mutate(ms_zoning = fct_collapse(ms_zoning,
                                  "residential" = c("res_high", "res_med", "res_low"),
                                  "commercial" = c("agri", "commer", "indus"),
                                  "floating" = "float")) |>
-  step_dummy(ms_zoning) |> 
-  step_scale(all_numeric_predictors())
+  step_dummy(ms_zoning) 
 ```
 
 --------------------------------------------------------------------------------
