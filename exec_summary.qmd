@@ -9,17 +9,21 @@ editor_options:
 
 ## Algorithms
 
-### General linear model
+### General Linear Model
 
-- is a parametric model
+- is a parametric model that can be used for regression problems
+- requires numeric features.
+- does not have any hyper-parameters to tune
+- does not natively include regularization (but see LASSO, Ridge, and GLMNet) or other characteristics (e.g., hyper-parameters) that can be used to impact the bias-variance trade-off.  
+
 - parameters are estimated to minimize the sum of squared errors in training data
-- requires numeric features
-- does not have any hyperparameters to tune
-- is a natively more interpretable algorithm;  More so, if the number of features is low and the features are not highly correlated.  Can use the parameter estimates to understand the relative importance of features and the direction of their relationship with the outcome. Interpretation is often improved further by scaling the features.  
-- does not natively accommodate interactions between interactions can be added through feature engineering. 
-- does not natively include regularization (but see LASSO, Ridge, and GLMNet)
-- variance is  relatively unless number of features is high or ratio of features to N is high.  Correlations among features (multicollinearity) can also increase variance.
-- bias can be relatively high unless the true DGP is linear on the features.   Feature engineering (typically power transformations) can be used to allow the linear model to accommodate simple monotonic relationships.
+- is a **natively more interpretable** algorithm;  More so, if the number of features is low and the features are not highly correlated.  Can use the parameter estimates to understand the relative importance of features and the direction of their relationship with the outcome. Interpretation is often improved further by scaling the features. The use of parameter estimates and their standard errors for inferential testing also helps with explanation and interpretability.
+
+- does **not natively accommodate interactions** among features.  Interactions can be accommodated by explicit feature engineering to include them (i.e., product terms)
+- does **not natively accommodate non-linear relationships** between features and the outcome.  Power transformations of features during feature engineering can accommodate simple monotonic non-linear relationships.  More complex non-linear relationships can be accommodated by adding more complex power transformations of features (e.g., splines) but this can make the model less interpretable. 
+
+- **variance** is relatively low unless number of features is high or ratio of features to N is high.  Correlations among features (multicollinearity) can also increase variance.
+- **bias** can be relatively high unless the true DGP is linear on the features or feature engineering (e.g., power transformations) can be used to make the relationships linear.   
 
 Typical feature engineering steps include:
 
@@ -28,13 +32,50 @@ Typical feature engineering steps include:
 - collapsing infrequent levels of nominal predictors to reduce the number of parameters (if using dummy coding or similar approaches)
 - dummy coding or other methods to accommodate nominal predictors  
 - creating selective product features to allow for interactions between features 
-- scaling features to make the parameter estimates more interpretabe 
+- scaling features to make the parameter estimates more interpretable 
 - principal components analysis or similar dimensionality reduction techniques to reduce the number of features and/or multicollinearity among features.  However, use of PCA can make the model less interpretable.
-
 
 
 ### KNN
 
+- is a non-parametric model that can be used for regression or classification problems
+- requires numeric features
+- numeric features must be scaled similarly to allow for distance calculations.  Scaling by the standard deviation of each feature is often used.  Can also scale by the range (but more sensitive to outliers).
+- includes one primary hyper-parameter to tune (k) that can be used to impact the bias-variance trade-off.  Larger values of k will generally reduce variance but increase bias.  Smaller values of k will generally reduce bias but increase variance.
+
+- does not formally "fit" a model per se;  instead, it makes predictions for a new observation by identifying the k most similar observations (based on distance; see below) in the training data.  The algorithm then uses the outcomes for those k similar training observations to make its outcome prediction for the new observation.  If the outcome is numeric (a regression problem), the algorithm predicts the mean outcome across the k training observations.  If the outcome is categorical (a classification problem), the algorithm predicts the most frequent outcome category across the k training observations.  Category probabilities can also be obtained based on the proportion of each category across the k training observations.  
+- is **not natively interpretable**;  Interpretation is done using visualization and feature importance approaches. 
+
+- **natively accommodates non-linear relationships** between features and outcome without additional feature engineering.  
+- **natively accommodates interactions** among features without additional feature engineering.   
+
+- **variance** is  relatively high due to its flexibility.  Requires relatively large N to reduce variance.  Requirements for N are greater still if there are many features because the training data needs to "fill" the full multidimensional feature space with sufficient observations that are similar/near to any observation for prediction. Correlations among features further increases variance in part due to inflating the number of features needed for prediction (given redundancy among features). Higer values of k can be used to reduce model variance (but again, need sufficient N to have k observations near any observation for prediction).
+- **bias** is generally low because the algorighm can natively accommodate any DGP.  Correlations among features can increase bias because it distor ts the calculation of distance between observations.  Higher values of k will also increase bias.
+
+Calculating distance in KNN:
+
+- KNN uses distance calculations to identify the k most similar observations in the training data for making predictions for new observation(s)
+- The most common distance metric is Euclidean distance, which is the straight-line distance between two points in multidimensional space.  This is calculated using the L2 norm (the sum of the squared differences across features between the two observations).  It is historically the most common distanc metric because it an intuitive way to measure distance (straight line between points) and works well with well behaved numeric features that are scaled similarly, normally distributed, and uncorrelated.  
+- Other distance metrics include Manhattan distance (L1 norm; sum of absolute differences across features), Minkowski distance (a generalization of Euclidean and Manhattan distances), and Gower (not implemented in tidymodels)
+- The choice of distance metric can impact model performance and can be tuned by training knn model configurations with different distance metrics and comparing their performance in validation sets. 
+- Although Euclidean is the most common metric for KNN, there are several situations where Manhattan is expected to perform better: 
+    - Manhattan is more robust to outliers than Euclidean because it does not square the differences across features.  
+    - Manhattan may work better than Euclidean when the features are correlated (Euclidean assumes orthongonal features - think about hypotenuse in right angle triangle).
+    - Manhattan may work better than Euclidean when the there are many features or the data are sparse.
+    - Manhattan may work better than Euclidean if the features are not normally distributed (e.g., skewed distributions) because the squaring of differences in Euclidean can give more weight to outliers and extreme values.
+- Gower distance (not natively available in tidymodels) is a distance metric that may better accommodate both numeric and nominal features.
+
+
+Typical feature engineering steps for KNN include:
+
+- imputing missing values
+- collapsing infrequent levels of nominal predictors to reduce the number of features  (if using dummy coding or similar approaches)
+- dummy coding or other methods to accommodate nominal predictors  
+- scaling features to allow for distance calculations
+- principal components analysis or similar dimensionality reduction techniques to reduce the number of features and/or multicollinearity among features.  However, use of PCA can make the model even less interpretable.
+- If using Euclidean distance, power transformations of features that arent normally distributed may improve the calculation of distances.   Alternatively, use Manhattan distance.
+
+ 
 ### Logistic Regression
 
 ### LDA and QDA
