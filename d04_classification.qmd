@@ -80,9 +80,9 @@ QDA relaxes one restrictive assumption of LDA
 - This makes it:
   - More flexible
   - Able to model non-linear decision boundaries including 2-way interactions (see formula for discriminant in @ISL)
-  - How handle interactions by relaxing common $\sum$? 
+  - Accommodates X*X (both quadradic and two way interactions) 
   - But requires substantial increase in parameter estimation (more potential to overfit)
-- Still problems with dummy features (not normal; product terms?)
+- Still problems with dummy features
 - Can natively handle more than 2 levels of outcome like LDA
 - Compare to LDA and Logistic Regression on bias-variance trade off?
 
@@ -312,19 +312,32 @@ data_val |>
   - Can manually do it with our current resampling
   - See `step_lencode_*()` in [embed package](https://embed.tidymodels.org/)
   
---------------------------------------------------------------------------------
-
-## DGP and Errors
-
-- DGP on probability
-- what is irreducible error for classification?
-- DGP on X1 - draw it with varying degrees of error  
 
 --------------------------------------------------------------------------------
 
-- DGP and error on two features
+KNN and distance measures
 
-![](figs/unit4_two_class_decision_boundry.png){height=4in}
+- L2 vs. L1 distance
+- outliers
+- correlated features
+- sparsity (low N or high dimensionality)
+- non-normal features
+
+--------------------------------------------------------------------------------
+
+KNN and scaling
+
+- don't generally scale binary features (already 0/1; match/mismatch; SD is based on proportion of categories) 
+- scale numeric features with Euclidean distance (L2)
+- range correct numeric features with Manhattan distance (L1)
+- range correct if mixing numeric and binary features (less bias toward numeric)
+
+--------------------------------------------------------------------------------
+
+PCA
+
+- https://setosa.io/ev/principal-component-analysis/
+- https://www.cs.cmu.edu/~elaw/papers/pca.pdf
 
 --------------------------------------------------------------------------------
 
@@ -347,16 +360,3 @@ The Bayes classifier provides the minimum error rate for test data
 - This is the irreducible error for classification problems
 - This is a theoretical model b/c (except for simulated data), we don't know the conditional probabilities based on X
 - Many classification models try to estimate these conditionals
-
-
---------------------------------------------------------------------------------
-
-- Probability vs. odds vs. log-odds
-- How to interpret parameter estimates (effects of X)
-
---------------------------------------------------------------------------------
-
-PCA
-
-- https://setosa.io/ev/principal-component-analysis/
-- https://www.cs.cmu.edu/~elaw/papers/pca.pdf
