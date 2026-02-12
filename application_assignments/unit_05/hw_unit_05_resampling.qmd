@@ -1,0 +1,442 @@
+---
+title: "Homework Unit 5: Resampling"
+author: "Your Name"
+date: "`r lubridate::today()`"
+format: 
+  html: 
+    embed-resources: true
+    toc: true 
+    toc_depth: 4
+editor_options: 
+  chunk_output_type: console
+---   
+
+
+## Introduction
+
+In this assignment, you will select among model configurations using resampling methods. This includes training models with 2 different feature sets (specified in your recipe) and tuning hyperparameters (`k` in KNN).
+
+-----
+
+## Set up
+
+### Load required packages 
+```{r}
+#| message: false
+
+library(tidyverse) 
+library(tidymodels)
+```
+
+### Handle conflicts
+```{r}
+#| message: false
+
+options(conflicts.policy = "depends.ok")
+```
+
+### Load in additional packages (only what you need)
+```{r}
+library(xfun, include.only = "cache_rds")
+```
+
+
+### Source function scripts (John's or your own)
+```{r}
+#| message: false
+
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+```
+
+### Specify other global settings
+Since we are going to use `cache_rds()`, we are also going to include `rerun_setting <- FALSE` in this chunk
+```{r}
+theme_set(theme_bw())
+options(tibble.width = Inf, dplyr.print_max=Inf)
+rerun_setting <- FALSE
+```
+
+### Paths
+```{r}
+path_data <- "application_assignments/unit_05"
+```
+
+### Set up parallel processing
+Note you can type `cl` into your console to see how many cores your computer has. 
+```{r}
+cl <- parallel::makePSOCKcluster(parallel::detectCores(logical = FALSE))
+doParallel::registerDoParallel(cl)
+```
+
+
+## Read in data
+
+Read in the `smoking_ema.csv` data file.   
+Note you can set column types (`col_types = cols()`) or set `show_col_types = FALSE` if you don't want the `read_csv()` output which is redundant with some of the `glimpse()` output!
+
+```{r}
+data_all <- 
+```
+
+Lets skim the data to check mins, maxs, and missing values.
+```{r}
+
+```
+
+
+Next we are going to use the data dictionary to class variables   
+We are doing this on the whole dataset prior to splitting it, so no need for a function (i.e., we are only using this code once!)
+```{r}
+valence_labels <- c("not at all", "mildly", "moderately", "very", "extremely")
+event_labels <- c("no", "mild", "moderate", "very", "extreme")
+
+data_all <- data_all |> 
+  mutate(cigs = factor(cigs, levels = 0:1, labels = c("no", "yes")),
+         across(c(craving, anxious, irritable, sad, happy), 
+                ~ factor(.x, levels = 0:4, labels = valence_labels)),
+         across(contains("_event"),
+                ~ factor(.x, levels = 0:4, labels = event_labels)),
+         txt = factor(txt, levels = c("placebo", "nrt")),
+         prior_cigs = factor(prior_cigs, levels = 0:1, labels = c("no", "yes"))) |> 
+  glimpse()
+```
+
+Lets skim again to check our new variables   
+```{r}
+
+```
+
+Hmm now we have missing data - Lets investigate     
+
+If we re-read in the raw data we can look at the different values for our factor variables
+```{r}
+data_all <- read_csv(here::here(path_data, "smoking_ema.csv"),
+                     show_col_types = FALSE) 
+
+data_all |>
+  select(craving:positive_event) |> 
+  map(janitor::tabyl)
+```
+
+So now we see some of our ordinal variables have levels not in the data dictionary (i.e., they are not 0, 1, 2, 3, or 4).   
+
+What should we do? Are these errors that need to be corrected? Well thats up to you, the data scientist, to figure out!  If you had access to the researchers who collected these data, you might start by discussing this with them.  Otherwise, you may need to decide on your own  how to proceed.
+
+Some possibilities include, but are not limited to:    
+
+- Treat the real (non-integer) numbers as errors, set them to NA, and add a step in your recipe to impute them.    
+- Keep the variables in their raw numeric form.    
+- Round the variables to the nearest whole number and then convert to factor.
+
+For example you could use the following code
+```{r}
+data_round <- data_all |> 
+  mutate(across(craving:happy, round))
+
+data_round |>
+  select(craving:happy) |> 
+  map(janitor::tabyl)
+```
+
+
+There might be no right answer in cases like this and you have to make your best guess. Luckily, we know the people that collected this data. It turns out these scores were averaged across different survey responses and as a result non-integer numbers were introduced. Since, we know that these values are valid we are going to proceed by treating them as numeric variables in our models. We are still going to keep `stressful_event` and `positive_event` as ordinal variables since they have no non-integer values and class our other character variables as before.
+
+```{r}
+data_all <- data_all |> 
+  mutate(cigs = factor(cigs, levels = 0:1, labels = c("no", "yes")),
+         across(contains("_event"),
+                ~ factor(.x, levels = 0:4, labels = event_labels)),
+         txt = factor(txt, levels = c("placebo", "nrt")),
+         prior_cigs = factor(prior_cigs, levels = 0:1, labels = c("no", "yes"))) |> 
+  glimpse()
+```
+
+Lets skim the data one more time to be sure everything looks good.
+```{r}
+data_all |> 
+  skim_some()
+```
+
+
+----
+
+## Part 1: Selecting among model configurations with k-fold cross-validation
+
+
+### Split data
+Split your data into 10 folds, stratified on `cigs`. Don't forget to set a seed!
+```{r}
+
+```
+
+### Feature Set 1
+
+Build a recipe with the following specifications: 
+
+- Use `cigs` as the outcome variable regressed on `craving`.  
+- Set up the outcome as a factor with the positive class ("yes") as the second level.
+- Use craving as a feature by simply transforming this ordinal predictor to numeric based on the order of its scores.
+
+*Note we already set our outcome variable up as factor with positive class as second level when we classed our data so we aren't repeating that here. Also we have decided to keep craving as a numeric variable so we don't have to do any manipulations here either.*
+
+```{r}
+
+```
+
+As a double check you can `prep` and `bake` your recipe on the full data set to see if the variables look correct.
+```{r}
+
+```
+
+
+Fit the model with k-fold cross-validation. Use logistic regression as your statistical algorithm, `rec_kfold_1` as your recipe, and `accuracy` as your metric. 
+
+We are going to also use `cache_rds` as we fit our models. *Hint: wrap your `fit_resamples()` call inside `cache_rds(expr = { ... }, dir = "cache/", file = "meaningful_name", rerun = rerun_setting)`. See the web book for an example.*
+```{r}
+
+```
+
+Examine performance estimates. Use the `collect_metrics()` function to make a table of the held-out performance estimates from the 10 folds.
+```{r}
+
+```
+
+Plot a histogram of the performance estimates. *Hint: you can use `plot_hist()` from `fun_plots.R`.*
+```{r}
+
+```
+
+Print the average performance over folds with the `summarize = TRUE` argument.
+```{r}
+
+```
+
+
+### Feature Set 2
+
+Build a second recipe with the following specifications:   
+
+- Use `cigs` as the outcome variable regressed on all variables.  
+- Set up the outcome as a factor with the positive class ("yes") as the second level.
+- Set up other variables as factors where needed.
+- Apply dummy coding.
+- Create an interaction between `stressful_event` and `lag`.
+- Remove the `subid` variable with `step_rm()`
+
+*Note we already classed our character variables as factors when we read the data in so we don't need to do this again*
+
+```{r}
+
+```
+
+Again check that your recipe is creating features how you expect it should.
+```{r}
+
+```
+
+
+Fit the model with k-fold cross-validation. Use logistic regression as your statistical algorithm, `rec_kfold_2` as your recipe, and `accuracy` as your metric.
+```{r}
+
+```
+
+Examine performance estimates. Use the `collect_metrics()` function to make a table of the held-out performance estimates.
+```{r}
+
+```
+
+Plot a histogram of the performance estimates.
+```{r}
+
+```
+
+Print the average performance over folds with the `summarize = TRUE` argument.
+```{r}
+
+```
+
+
+### Selecting the best model configuration
+
+Looking back at your two average performance estimates (one from each feature set), which model configuration would you select and why?
+
+----
+
+## Part 2: Tuning hyperparameters with bootstrap resampling
+
+### Split data
+
+Split your data using bootstrap. Stratify on `cigs` and use 100 bootstraps. Don't forget to set a seed!
+```{r}
+
+```
+
+### Set up hyperparameter grid
+
+Create a tibble with all values of the hyperparameter (`k`) you will consider. Remember that this dataset has a lot of observations in it (~6000), so starting with some higher k-values than we're used to testing may be helpful.
+```{r}
+
+```
+
+### Feature Set 1
+
+Build a recipe with the following specifications: 
+
+- Use `cigs` as the outcome variable regressed on `craving`.  
+- Set up the outcome as a factor with the positive class ("yes") as the second level.
+- Use the same numeric transformation of craving as before
+
+This is the same recipe as earlier so you can just re-assign it here (e.g., `rec_boot_1 <- rec_kfold_1`). Also remember even though this is going to be used in a KNN model, we don't have to scale or range correct if there is only one predictor!
+```{r}
+
+```
+
+Tune the model with bootstrapping for cross-validation. Use KNN classification as your statistical algorithm, `rec_boot_1` as your recipe, `hyper_grid` as your tuning grid, and `accuracy` as your metric. *Hint: use `tune_grid()` instead of `fit_resamples()`, and specify `neighbors = tune()` in your algorithm. Don't forget to pass `grid = hyper_grid`.*
+```{r}
+
+```
+
+Examine performance estimates across the OOB held-out sets. Remember that you will now see one estimate per hyperparameter value, averaged across bootstraps.
+```{r}
+
+```
+
+Plot the average performance by hyperparameter value. *Hint: you can use `plot_hyperparameters()` from `fun_ml.R`, specifying `hp1` and `metric` arguments.*
+```{r}
+
+```
+
+Comment on what you see in the hyperparameter plot. Does performance change across values of k? What might this tell you about the model?
+
+Print the performance of your best model configuration with the `show_best()` function.
+```{r}
+
+```
+
+
+### Feature Set 2
+
+Build a second recipe with the following specifications:   
+
+- Use `cigs` as the outcome variable regressed on all variables.  
+- Set up the outcome as a factor with the positive class ("yes") as the second level.
+- Set up other variables as factors where needed.
+- Apply dummy coding.
+- Create an interaction between `stressful_event` and `lag`.
+- Remove the `subid` variable with `step_rm()`
+- **Take appropriate scaling steps for features to be able to fit KNN requirements.** *Hint: you can build on `rec_kfold_2` and add `step_range(all_numeric_predictors())` for range correction.*
+
+```{r}
+
+```
+
+Tune the model with bootstrapping for cross-validation. Use KNN classification as your statistical algorithm, `rec_boot_2` as your recipe, `hyper_grid` as your tuning grid, and `accuracy` as your metric.
+```{r}
+
+```
+
+Examine performance estimates. Remember that you will now see one estimate per hyperparameter value, averaged across bootstraps.
+```{r}
+
+```
+
+Plot the average performance by hyperparameter value.
+```{r}
+
+```
+
+Comment on what you see in the hyperparameter plot. Does the plot suggest you've considered a sufficient range of k-values?
+
+Print the performance of your best model configuration with the `show_best()` function.
+```{r}
+
+```
+
+
+----
+
+## Part 3: Selecting among model configurations with grouped k-fold cross-validation
+
+In the final part of this assignment, you will use grouped k-fold cross-validation to match the data structure. 
+
+### Split data
+
+Split your data into 10 folds using the `group_vfold_cv()` function. Use the grouping argument (`group = "subid"`). 
+
+For this example, we asked you to not stratify on `cigs`. As a note, if you ever want to stratify on your outcome (e.g., `cigs`) within a grouping variable (e.g., `subid`), you need to create a new variable capturing the distribution of the outcome within each subject (in this case, the mean number of positive cases of `cigs` within each subject). This allows the splitting to attempt to assign different `subid` groups to analysis and assessment sets within each fold in combinations that will yield roughly the same proportion of positive cases on the outcome across all folds.     
+
+Try implementing this approach below. You will need to:
+
+1. Create a new `strata` variable that captures the proportion of positive cases of `cigs` within each `subid` (hint: `group_by(subid)`, then `mutate()` with `mean(as.numeric(cigs))`, then `ungroup()`)
+2. Use `group_vfold_cv()` with `group = "subid"`, `v = 10`, `repeats = 1`, and `strata = "strata"`
+
+Don't forget to set a seed!
+
+```{r}
+
+```
+
+### Feature Set 1
+
+Fit the first set of models with grouped k-fold cross-validation. Use logistic regression as your statistical algorithm, `rec_kfold_1` as your recipe (doesn't need to change from above!), and `accuracy` as your metric.
+```{r}
+
+```
+
+Examine performance estimates on held out samples.
+```{r}
+
+```
+
+Plot a histogram of the performance estimates.
+```{r}
+
+```
+
+Print the average performance over folds with the `summarize = TRUE` argument.
+```{r}
+
+```
+
+### Feature Set 2
+
+Fit the second model with grouped k-fold cross-validation. Use logistic regression as your statistical algorithm, `rec_kfold_2` as your recipe (doesn't need to change from above!), and `accuracy` as your metric.
+```{r}
+
+```
+
+Examine performance estimates on held out samples.
+```{r}
+
+```
+
+Plot a histogram of the performance estimates.
+```{r}
+
+```
+
+Print the average performance over folds with the `summarize = TRUE` argument.
+```{r}
+
+```
+
+### Selecting the best model configuration
+
+Looking back at your two average performance estimates (one from each feature set), which model configuration would you select and why?
+
+
+**Remember, once your best model is chosen and evaluated you would then want to refit it once on all the data before deploying it for use!**
+
+
+----
+
+## Save, Render, Upload
+
+### Save
+Save this `.qmd` file with your last name at the end (e.g., `hw_unit_05_resampling_punturieri.qmd`).
+Make sure you changed "Your Name" at the top of the file to be your own name.
+
+### Render
+Render the file to html and upload !ONLY! your rendered html file to Canvas.
