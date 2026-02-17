@@ -1,0 +1,475 @@
+---
+title: "Unit 05 Lab: Resampling Methods"
+date: "02/23/2026"
+format:
+  html:
+    embed-resources: true
+    toc: true
+    toc_depth: 4
+editor_options:
+  chunk_output_type: console
+---
+
+Roadmap:
+
+We are now in the process of building up to a complete, principled workflow for model selection and evaluation. To get there, we are going to work through four resampling methods in order -- getting better with each new technique (kind of).
+
+1.  Single validation set: the simplest approach, and its flaws
+2.  K-fold cross-validation: more stable, uses all available data
+3.  Repeated k-fold: even more stable, at a computational cost
+4.  Bootstrap: lowest variance, best for *selecting* between models
+5.  Hyperparameter tuning: using bootstrap to find the best K for KNN
+6.  Combined selection + evaluation: putting it all together with a held-out test set
+
+### 1. Setup & Data Introduction
+
+```{r}
+#| include: false
+
+library(tidyverse)
+library(tidymodels)
+
+options(conflicts.policy = "depends.ok")
+
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+
+theme_set(theme_classic())
+options(tibble.width = Inf)
+```
+
+#### Parallel Processing
+
+This is the first unit where resampling gets computationally expensive -- we'll be fitting the same model many times across different splits of the data. Since each of these fits is independent (the order doesn't matter and they don't depend on each other), we can run them in parallel across multiple CPU cores. This code sets that up:
+
+```{r}
+cl <- parallel::makePSOCKcluster(parallel::detectCores(logical = FALSE))
+doParallel::registerDoParallel(cl)
+```
+
+`detectCores(logical = FALSE)` checks how many physical cores your machine has, and `makePSOCKcluster()` creates a cluster of workers to distribute the computation. Once registered, tidymodels functions like `fit_resamples()` and `tune_grid()` will automatically use these cores.
+
+#### Caching
+
+Even with parallel processing, resampling can take a while -- especially on laptops with fewer cores. Caching lets us save the results of expensive computations to disk so we don't have to re-run them every time we render or restart.
+
+We'll use `xfun::cache_rds()` for this. The idea is simple: wrap your slow code in `cache_rds()`, and it saves the result as an `.rds` file. Next time you run the script, it loads the saved result instead of recalculating.
+
+```{r}
+library(xfun, include.only = "cache_rds")
+rerun_setting <- FALSE
+```
+
+We set `rerun_setting <- FALSE` during development so cached results are reused. If you change something that affects the cached computation (e.g., your recipe or your splits), you need to set this to `TRUE` temporarily to invalidate the cache and force a recalculation. Be careful -- stale cache is a common source of confusing bugs!
+
+#### The Data
+
+Today we're using the [Palmer Penguins](https://allisonhorst.github.io/palmerpenguins/) dataset -- measurements of penguins from three species (Adelie, Chinstrap, Gentoo) collected at Palmer Station, Antarctica. The measurements include bill length, bill depth, flipper length, and body mass, along with the island and sex of each penguin.
+
+We'll focus on classifying **Adelie vs. Chinstrap**. We're excluding Gentoo because they're much larger and easily separable -- Adelie and Chinstrap overlap on most measurements, which gives us a more realistic (and interesting) classification problem.
+
+Note: we access the data directly with `palmerpenguins::penguins` (namespacing) rather than loading the whole package, which avoids library conflicts.
+
+```{r}
+data_all <- palmerpenguins::penguins |>
+  filter(species %in% c("Adelie", "Chinstrap")) |>
+  mutate(species = factor(species)) |>
+  drop_na() |>
+  glimpse()
+```
+
+Quick skim of our data:
+
+```{r}
+data_all |> skim_all()
+```
+
+We have ~214 observations after filtering and dropping missing values. Our outcome is `species` (Adelie or Chinstrap) and we have both numeric predictors (bill dimensions, flipper length, body mass) and categorical predictors (island, sex).
+
+### 2. Review: Single Validation Set
+
+Let's start with the simplest resampling approach: a single validation set.
+
+First, we create our split. `validation_split()` is similar to `initial_split()` which you've seen before, but it returns a resampling object that works directly with `fit_resamples()` -- so we don't need to manually separate training/test data, prep recipes, and bake features in separate steps. `prop = 0.75` means 75% training, 25% held-out. We stratify on our outcome to maintain balanced class proportions in both sets.
+
+```{r}
+set.seed(19690127)
+splits_validate <- data_all |>
+  validation_split(prop = 0.75, strata = "species")
+```
+
+Now our recipe. We'll use only the four numeric predictors for a clean demonstration:
+
+```{r}
+rec_lr <- recipe(species ~ bill_length_mm + bill_depth_mm +
+                   flipper_length_mm + body_mass_g, data = data_all)
+```
+
+Now we fit logistic regression across the split. A quick note on `set_engine()` since this came up a lot on the quiz -- it specifies *which package/implementation* to use for the algorithm. Think of it like choosing which library a function comes from. `"glm"` uses base R's generalized linear model for logistic regression; KNN will use `"kknn"` later.
+
+`fit_resamples()` handles the full pipeline internally: it preps the recipe on the training data, bakes features for both sets, fits the model, and calculates performance metrics in the held-out set.
+
+```{r}
+fits_lr <-
+  logistic_reg() |>
+  set_engine("glm") |>
+  fit_resamples(preprocessor = rec_lr,
+                resamples = splits_validate,
+                metrics = metric_set(accuracy))
+```
+
+You may see a convergence warning here -- this is normal with logistic regression when classes are nearly separable. The results are still usable.
+
+We only get one performance estimate, no standard error:
+
+```{r}
+collect_metrics(fits_lr, summarize = FALSE)
+```
+
+**Discussion:** What are the limitations of a single held-out set?
+
+-   We get only one estimate of performance -- no way to quantify uncertainty (no SE)
+-   The estimate depends heavily on the random split
+-   We're only using 75% of data for training and 25% for evaluation
+
+### 3. K-Fold Cross-Validation
+
+Now let's use 10-fold cross-validation. Every observation gets to be in the held-out set exactly once.
+
+```{r}
+set.seed(19690127)
+splits_kfold <- data_all |>
+  vfold_cv(v = 10, repeats = 1, strata = "species")
+
+splits_kfold
+```
+
+Here's our first use of `cache_rds()` in practice. The code inside `expr = { }` is the expensive computation. `dir` and `file` tell it where to save the result. After the first run, this chunk will load instantly from cache instead of refitting 10 models:
+
+```{r}
+fits_lr_kfold <- cache_rds(
+  expr = {
+    logistic_reg() |>
+      set_engine("glm") |>
+      fit_resamples(preprocessor = rec_lr,
+                    resamples = splits_kfold,
+                    metrics = metric_set(accuracy))
+  },
+  dir = "cache/",
+  file = "fits_lr_kfold",
+  rerun = rerun_setting)
+```
+
+Now we have 10 fold-level estimates:
+
+```{r}
+metrics_kfold <- collect_metrics(fits_lr_kfold, summarize = FALSE)
+
+metrics_kfold
+```
+
+We can visualize the distribution of performance estimates, though it's sparse with only 10 points:
+
+```{r}
+metrics_kfold |> plot_hist(".estimate")
+```
+
+The mean accuracy and its standard error:
+
+```{r}
+collect_metrics(fits_lr_kfold, summarize = TRUE)
+```
+
+**Discussion:** Compare to the single validation set. Now we have:
+
+-   A standard error to quantify uncertainty in our estimate
+-   All data used as test data at some point
+-   But only 10 estimates -- still a coarse picture of the performance distribution
+
+### 4. Repeated K-Fold
+
+We can repeat the 10-fold procedure 10 times with different random splits, giving us 100 estimates.
+
+```{r}
+set.seed(19690127)
+splits_kfold10x <- data_all |>
+  vfold_cv(v = 10, repeats = 10, strata = "species")
+
+splits_kfold10x
+```
+
+```{r}
+fits_lr_kfold10x <- cache_rds(
+  expr = {
+    logistic_reg() |>
+      set_engine("glm") |>
+      fit_resamples(preprocessor = rec_lr,
+                    resamples = splits_kfold10x,
+                    metrics = metric_set(accuracy))
+  },
+  dir = "cache/",
+  file = "fits_lr_kfold10x",
+  rerun = rerun_setting)
+```
+
+100 fold-level estimates:
+
+```{r}
+metrics_kfold10x <- collect_metrics(fits_lr_kfold10x, summarize = FALSE)
+
+metrics_kfold10x 
+```
+
+The histogram is much more informative with 100 points:
+
+```{r}
+metrics_kfold10x |> plot_hist(".estimate", bins = 10)
+```
+
+Average performance and SE:
+
+```{r}
+collect_metrics(fits_lr_kfold10x, summarize = TRUE)
+```
+
+**Discussion:** Compare the SE to single k-fold.
+
+-   Same bias (still fitting models with 9/10ths of data)
+-   Lower variance — more stable estimate because we're averaging over 100 folds instead of 10
+-   Better view of the performance distribution
+-   Cost: 10x computation
+
+### 5. Bootstrap Resampling
+
+Bootstrap resampling draws samples with replacement. \~63.2% of observations end up in each bootstrap sample; the remaining \~36.8% are the "out of bag" (OOB) test cases.
+
+```{r}
+set.seed(19690127)
+splits_boot <- data_all |>
+  bootstraps(times = 100, strata = "species")
+
+splits_boot
+```
+
+```{r}
+fits_lr_boot <- cache_rds(
+  expr = {
+    logistic_reg() |>
+      set_engine("glm") |>
+      fit_resamples(preprocessor = rec_lr,
+                    resamples = splits_boot,
+                    metrics = metric_set(accuracy))
+  },
+  dir = "cache/",
+  file = "fits_lr_boot",
+  rerun = rerun_setting)
+```
+
+100 OOB performance estimates:
+
+```{r}
+metrics_boot <- collect_metrics(fits_lr_boot, summarize = FALSE)
+
+metrics_boot
+```
+
+```{r}
+metrics_boot |> plot_hist(".estimate", bins = 10)
+```
+
+```{r}
+collect_metrics(fits_lr_boot, summarize = TRUE)
+```
+
+**Discussion:** Compare the SE to k-fold approaches.
+
+-   Bootstrap SE should be lower than both k-fold and repeated k-fold
+-   Higher bias than k-fold (equivalent to about k = 2 because only \~63% unique observations in each training set)
+-   Lower variance makes it useful for **model selection** -- we just want a precise ranking
+-   Preferred for "inner loop" of nested resampling and when you care more about selecting the best configuration than getting an unbiased estimate
+
+### 6. Hyperparameter Tuning with KNN
+
+Now let's use bootstrap resampling to tune the hyperparameter K in K-nearest neighbors.
+
+KNN requires scaled features, so we add `step_range()`:
+
+```{r}
+rec_knn <- recipe(species ~ bill_length_mm + bill_depth_mm +
+                    flipper_length_mm + body_mass_g, data = data_all) |>
+  step_range(all_numeric_predictors())
+```
+
+Set up a grid of odd K values (odd to avoid ties in binary classification):
+
+```{r}
+hyper_grid <- expand.grid(neighbors = seq(1, 101, by = 2))
+hyper_grid
+```
+
+Tune KNN across the bootstrap resamples:
+
+```{r}
+fits_knn_boot <- cache_rds(
+  expr = {
+    nearest_neighbor(neighbors = tune()) |>
+      set_engine("kknn") |>
+      set_mode("classification") |>
+      tune_grid(preprocessor = rec_knn,
+                resamples = splits_boot,
+                grid = hyper_grid,
+                metrics = metric_set(accuracy))
+  },
+  dir = "cache/",
+  file = "fits_knn_boot",
+  rerun = rerun_setting)
+```
+
+Plot accuracy as a function of K. If `plot_hyperparameters()` doesn't render, you can use `collect_metrics(fits_knn_boot, summarize = TRUE) |> ggplot(aes(x = neighbors, y = mean)) + geom_line()` as a fallback.
+
+Plot accuracy as a function of K:
+
+```{r}
+plot_hyperparameters(fits_knn_boot, hp1 = "neighbors", metric = "accuracy")
+```
+
+The best K value:
+
+```{r}
+show_best(fits_knn_boot, n = 10)
+
+select_best(fits_knn_boot, metric = "accuracy")
+```
+
+The 1-SE rule selects the simplest model within one SE of the best, favoring parsimony:
+
+```{r}
+select_by_one_std_err(fits_knn_boot, desc(neighbors), metric = "accuracy")
+```
+
+**Discussion:** Interpreting the bias-variance tradeoff curve.
+
+-   Small K = low bias, high variance (very flexible, overfits)
+-   Large K = high bias, low variance (too smooth, underfits)
+-   The peak represents the best tradeoff
+-   The 1-SE rule picks a simpler (higher K) model that performs nearly as well -- this guards against overfitting to the validation data
+
+### 7. Combined Selection + Evaluation
+
+So far, we've used resampling either to evaluate a single configuration OR to select among configurations. But we can't use the same held-out data for both, that would introduce **optimization bias**.
+
+Strategy: hold out a test set first, then use bootstrap resampling within the training set for model selection.
+
+```{r}
+set.seed(123456)
+splits_test <- data_all |>
+  initial_split(prop = 2/3, strata = "species")
+
+data_trn <- splits_test |>
+  analysis()
+
+data_test <- splits_test |>
+  assessment()
+```
+
+Bootstrap resamples within the training set:
+
+```{r}
+splits_boot_trn <- data_trn |>
+  bootstraps(times = 100, strata = "species")
+```
+
+Tune KNN in the training bootstraps:
+
+```{r}
+fits_knn_boot_trn <- cache_rds(
+  expr = {
+    nearest_neighbor(neighbors = tune()) |>
+      set_engine("kknn") |>
+      set_mode("classification") |>
+      tune_grid(preprocessor = rec_knn,
+                resamples = splits_boot_trn,
+                grid = hyper_grid,
+                metrics = metric_set(accuracy))
+  },
+  dir = "cache/",
+  file = "fits_knn_boot_trn",
+  rerun = rerun_setting)
+```
+
+Select the best K:
+
+```{r}
+show_best(fits_knn_boot_trn, n = 10)
+
+select_best(fits_knn_boot_trn, metric = "accuracy")
+```
+
+Now fit the best model in the full training set and evaluate in the held-out test set. This is the first time in the lab where we manually prep and bake -- earlier, `fit_resamples()` and `tune_grid()` handled this internally.
+
+A reminder: we `prep()` the recipe on the training data so that all learned transformations (like the range scaling in `step_range()`) are based only on training statistics. When we `bake(NULL)`, `NULL` is shorthand for "apply to the same data used in prep" -- i.e., produce training features. We then `bake(data_test)` to apply those same training-derived transformations to the test set. This prevents data leakage.
+
+```{r}
+rec_prep <- rec_knn |>
+  prep(data_trn)
+
+feat_trn <- rec_prep |>
+  bake(NULL)
+
+feat_test <- rec_prep |>
+  bake(data_test)
+
+fit_knn_best <-
+  nearest_neighbor(neighbors = select_best(fits_knn_boot_trn)$neighbors) |>
+  set_engine("kknn") |>
+  set_mode("classification") |>
+  fit(species ~ ., data = feat_trn)
+```
+
+Test set accuracy! This is our unbiased estimate of performance:
+
+```{r}
+accuracy_vec(feat_test$species,
+             predict(fit_knn_best, feat_test)$.pred_class)
+```
+
+Finally, refit the best configuration on ALL available data for deployment:
+
+```{r}
+rec_prep <- rec_knn |>
+  prep(data_all)
+
+feat_all <- rec_prep |>
+  bake(NULL)
+
+fit_knn_final <-
+  nearest_neighbor(neighbors = select_best(fits_knn_boot_trn)$neighbors) |>
+  set_engine("kknn") |>
+  set_mode("classification") |>
+  fit(species ~ ., data = feat_all)
+```
+
+**Discussion:** Why can't we use bootstrap performance as the final estimate?
+
+-   We compared many model configurations (values of K) and selected the best -- this introduces optimization bias
+-   The test set gives us an **independent** estimate free from this bias
+-   The final model trained on ALL data is what we'd deploy -- its performance should be at least as good as the test set estimate (likely better, since it uses more data)
+-   The test set estimate is a lower bound on the final model's true performance
+
+### 8. Wrap-up
+
+**Summary of resampling methods:**
+
+| Method                | Bias              | Variance |
+|-----------------------|-------------------|----------|
+| Single validation set | Higher            | Higher   |
+| K-fold CV             | Moderate          | Moderate |
+| Repeated K-fold       | Moderate          | Lower    |
+| Bootstrap             | Higher (\~2-fold) | Lowest   |
+
+**Key takeaways:**
+
+-   Every resampling method involves a bias-variance tradeoff in the **performance estimate** (not the model itself)
+-   Bootstrap is preferred for selection (low variance); k-fold is better for evaluation (lower bias)
+-   When you need to both select AND evaluate, you need separate held-out data (test set or nested resampling)
