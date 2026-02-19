@@ -47,7 +47,8 @@ Let's get started!
 
 ### Set up your conflicts policy
 ```{r}
-
+options(conflicts.policy = "depends.ok")
+conflictRules("Matrix", mask.ok = c("expand", "pack", "unpack")) # we need to add this in today, too!
 ```
 
 ### Load additional packages
@@ -123,8 +124,6 @@ You will build one recipe that can be used across three model fits. Please follo
 * Use `step_impute_median()` to impute the median for any missing values in numeric predictors
 
 * Use `step_impute_mode()` to impute the mode for any missing values in the factor predictors
-
-* Use `step_YeoJohnson()` to apply Yeo-Johnson transformations to all numeric predictors
 
 * Use `step_normalize()` to normalize all numeric predictors (**necessary for regularized models**)
 
@@ -206,7 +205,7 @@ track_rmse
 
 In the LASSO, the mixture hyperparameter ($\alpha$) will be set to 1, but we'll need to tune the penalty hyperparameter ($\lambda$). 
 ```{r}
-grid_penalty <- expand_grid(penalty = exp(seq(-6, 8, length.out = 500)))
+grid_penalty <- expand_grid(penalty = exp(seq(-6, 8, length.out = 100)))
 ```
 
 ### Tune a LASSO regression
