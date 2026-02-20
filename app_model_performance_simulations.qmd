@@ -7,7 +7,6 @@ editor_options:
 # Appendix 2: Simulations of Model Performance Bias and Variance by Resampling Techniques { .unnumbered}
 
 
-
 ## General Setup
 
 Load libraries
@@ -27,14 +26,14 @@ Function to generate `n_obs` of simulated observations
 * y is simple sum such that all coefficients = 1
 * features are correlated based on `sigma`
 ```{r}
-simulate_DGP <- function (n_obs, n_features, irr_err, mu, sigma){
+simulate_DGP <- function (n_obs, n_features, irr_err, mu, sigma, b){
 
   x <- MASS::mvrnorm(n_obs, mu = mu, Sigma = sigma) |> 
     magrittr::set_colnames(str_c("x", 1:n_features)) |> 
     as_tibble()
   
   x |> 
-     mutate(y = rowSums(t(t(x)*b)) + rnorm(n_obs, 
+     mutate(y = rowSums(t(t(x) * b)) + rnorm(n_obs, 
                                         mean = 0, 
                                         sd = irr_err))
 }
@@ -44,51 +43,65 @@ simulate_DGP <- function (n_obs, n_features, irr_err, mu, sigma){
 ## Simulation settings
 ```{r}
 n_sims <- 1000  # number of simulations
-n_obs <- 300 # number of observations
+n_obs <- 200 # number of observations
 
-n_features <- 20
+n_features <- 10
+n_effects <- 2 # number of features with non-zero effects.  Only several to increase model variance
 mu <- rep(0, n_features)
+
+# correlated features to increase model variance
 sigma <- matrix(.3, nrow = n_features, ncol = n_features)
 diag(sigma) <- 1
 irr_err <- 10
-b <- rep(0.5, n_features) # no b0 so set to 0
+b <- c(rep(0.5, n_effects), rep(0, n_features - n_effects))
   
 set.seed(123456)
 # first call so that we can set up recipe
-df <- simulate_DGP(n_obs, n_features, irr_err, mu, sigma) 
+df <- simulate_DGP(n_obs, n_features, irr_err, mu, sigma, b) 
 rec <- recipe(y ~ ., data = df)
 
 rmse_combined = NULL  # to store RMSE for all methods
 ```
 
+Parallel processing for resampling methods with `fit_resamples()`
+```{r}
+cl <- parallel::makePSOCKcluster(parallel::detectCores(logical = FALSE))
+doParallel::registerDoParallel(cl)
+```
+
 
 ## Get simulation dfs
-
 ```{r}
+#| label: gen_dfs
+
 dfs <- rep(n_obs, n_sims) |>
-  map(\(n_obs) simulate_DGP(n_obs, n_features, irr_err, mu, sigma))
+  map(\(n_obs) simulate_DGP(n_obs, n_features, irr_err, mu, sigma, b))
 ```
 
 
 ## What is the TRUE model performance
 
-The irreducible error is set to 10 but our model will have some reducible error too so the true performance of our model will be worse than 10
+The irreducible error is set to 10 but our model will have some reducible error too so the true performance of our model will be worse than 10. 
 
 * The DGP is linear 
 * but we only have `r n_obs` observations 
 * and we have 20 features
 
-Lets fit many models of n = `r n_obs` (the size of our final model) and assess performance in really big samples of new data (ah the luxury of simulated data!)
+Lets fit many models of n = `r n_obs` (the size of our final model) and assess performance in really big samples of new data (ah the luxury of simulated data!) to get a "TRUE" estimate of how well our model trained with full N performs in a low variance (very big) sample of new data.
 ```{r}
 
 # models based on full n for each simulation run
+# use KNN with small K to get high variance models (to better reveal differences among resampling approaches)
 models <- dfs |> 
-  map(\(df) linear_reg() |> fit(y ~ ., data = df))
+  # map(\(df) linear_reg() |> fit(y ~ ., data = df))
+  map (\(df) nearest_neighbor() |> 
+             set_engine("kknn") |> set_mode("regression") |>
+             fit(y ~ ., data = df))
 
 # big samples of held out data for high precision assessment of models
 # 1 for each model
 outs <- rep(10000, n_sims) |> 
-  map(\(n_obs) simulate_DGP(n_obs, n_features, irr_err, mu, sigma))
+  map(\(n_obs) simulate_DGP(n_obs, n_features, irr_err, mu, sigma, b))
 
 # list of predictions for out from each model
 preds <- map2(models, outs, \(model, out) predict(model, out))
@@ -102,11 +115,6 @@ rmse_true <- map2_dbl(outs, preds, \(out, pred)  rmse_vec(out$y,
 message("True RMSE = ", rmse_true)
 ```
 
-Parallel processing for resampling methods with `fit_resamples()`
-```{r}
-cl <- parallel::makePSOCKcluster(parallel::detectCores(logical = FALSE))
-doParallel::registerDoParallel(cl)
-```
 
 ## Validation set
 
@@ -115,12 +123,17 @@ doParallel::registerDoParallel(cl)
 
 Here we simulate repeated use of the validation set approach to assess our model performance
 ```{r}
+#| label: val_set_80_20
+
 rmse_combined <- dfs |> 
   map(\(df) validation_split(df, prop = .80)) |>   # validation set split
-  map(\(split) linear_reg() |> fit_resamples(resamples = split, 
-                                              preprocessor = rec,
-                                              metrics = metric_set(rmse))) |> 
-  map(\(fits) collect_metrics(fits, summarise = TRUE)) |> 
+  map(\(split) nearest_neighbor() |>
+               set_engine("kknn") |> 
+               set_mode("regression") |>
+               fit_resamples(resamples = split, 
+                             preprocessor = rec,
+                             metrics = metric_set(rmse))) |> 
+  map(\(fits) collect_metrics(fits, summarize = TRUE)) |> 
   list_rbind() |> 
   mutate(method = "val_set_80") |>       # label results in df
   bind_rows(rmse_combined)
@@ -130,11 +143,16 @@ rmse_combined <- dfs |>
 
 Here we simulate repeated use of the validation set approach to assess our model performance
 ```{r}
+#| label: val_set_50_50
+
 rmse_combined <- dfs |> 
   map(\(df) validation_split(df, prop = .50)) |>   # validation set split
-  map(\(split) linear_reg() |> fit_resamples(resamples = split, 
-                                              preprocessor = rec,
-                                              metrics = metric_set(rmse))) |> 
+  map(\(split) nearest_neighbor() |>
+               set_engine("kknn") |> 
+               set_mode("regression") |>
+               fit_resamples(resamples = split, 
+                             preprocessor = rec,
+                             metrics = metric_set(rmse))) |> 
   map(\(fits) collect_metrics(fits, summarize = TRUE)) |> 
   list_rbind() |> 
   mutate(method = "val_set_50") |>       # label results in df
@@ -145,11 +163,16 @@ rmse_combined <- dfs |>
 
 ### Simple 5-fold
 ```{r}
+#| label: 5fold
+
 rmse_combined <- dfs |> 
   map(\(df) vfold_cv(df, v = 5)) |>   # 5-fold
-  map(\(split) linear_reg() |> fit_resamples(resamples = split, 
-                                              preprocessor = rec,
-                                              metrics = metric_set(rmse))) |> 
+  map(\(split) nearest_neighbor() |>
+               set_engine("kknn") |> 
+               set_mode("regression") |>
+               fit_resamples(resamples = split, 
+                             preprocessor = rec,
+                             metrics = metric_set(rmse))) |> 
   map(\(fits) collect_metrics(fits, summarize = TRUE)) |> 
   list_rbind() |> 
   mutate(method = "5-fold") |>       # label results in df
@@ -158,11 +181,16 @@ rmse_combined <- dfs |>
 
 ### Simple 10-fold
 ```{r}
+#| label: 10fold
+
 rmse_combined <- dfs |> 
   map(\(df) vfold_cv(df, v = 10)) |>   # 10-fold
-  map(\(split) linear_reg() |> fit_resamples(resamples = split, 
-                                              preprocessor = rec,
-                                              metrics = metric_set(rmse))) |> 
+  map(\(split) nearest_neighbor() |>
+               set_engine("kknn") |> 
+               set_mode("regression") |>
+               fit_resamples(resamples = split, 
+                             preprocessor = rec,
+                             metrics = metric_set(rmse))) |> 
   map(\(fits) collect_metrics(fits, summarize = TRUE)) |> 
   list_rbind() |> 
   mutate(method = "10-fold") |>       # label results in df
@@ -172,11 +200,16 @@ rmse_combined <- dfs |>
 
 ### 3x 10-Fold
 ```{r}
+#| label: 3x10fold
+
 rmse_combined <- dfs |> 
   map(\(df) vfold_cv(df, v = 10, repeats = 3)) |>   # 3x10-fold
-  map(\(split) linear_reg() |> fit_resamples(resamples = split, 
-                                              preprocessor = rec,
-                                              metrics = metric_set(rmse))) |> 
+  map(\(split) nearest_neighbor() |>
+               set_engine("kknn") |> 
+               set_mode("regression") |>
+               fit_resamples(resamples = split, 
+                             preprocessor = rec,
+                             metrics = metric_set(rmse))) |> 
   map(\(fits) collect_metrics(fits, summarize = TRUE)) |> 
   list_rbind() |> 
   mutate(method = "3x10-fold") |> # label results in df
@@ -184,17 +217,21 @@ rmse_combined <- dfs |>
 ```
 
 
-
 ## Bootstrap Resampling
 
 ### 10 resamples
 
 ```{r}
+#| label: boot10
+
 rmse_combined <- dfs |> 
   map(\(df) bootstraps(df, times = 10)) |>   # 10 boots
-  map(\(split) linear_reg() |> fit_resamples(resamples = split, 
-                                              preprocessor = rec,
-                                              metrics = metric_set(rmse))) |> 
+  map(\(split) nearest_neighbor() |>
+               set_engine("kknn") |> 
+               set_mode("regression") |>
+               fit_resamples(resamples = split, 
+                             preprocessor = rec,
+                             metrics = metric_set(rmse))) |> 
   map(\(fits) collect_metrics(fits, summarize = TRUE)) |> 
   list_rbind() |> 
   mutate(method = "boot_10") |>       # label results in df
@@ -203,43 +240,35 @@ rmse_combined <- dfs |>
 
 ### 100 resamples
 ```{r}
+#| label: boot100
+
 rmse_combined <- dfs |> 
   map(\(df) bootstraps(df, times = 100)) |>   # 100 boots
-  map(\(split) linear_reg() |> fit_resamples(resamples = split, 
-                                              preprocessor = rec,
-                                              metrics = metric_set(rmse))) |> 
+  map(\(split) nearest_neighbor() |>
+               set_engine("kknn") |> 
+               set_mode("regression") |>
+               fit_resamples(resamples = split, 
+                             preprocessor = rec,
+                             metrics = metric_set(rmse))) |> 
   map(\(fits) collect_metrics(fits, summarize = TRUE)) |> 
   list_rbind() |> 
   mutate(method = "boot_100") |>       # label results in df
   bind_rows(rmse_combined)
 ```
 
-### 1000 resamples
-```{r}
-rmse_combined <- dfs |> 
-  map(\(df) bootstraps(df, times = 1000)) |>   # 1000 boots
-  map(\(split) linear_reg() |> fit_resamples(resamples = split, 
-                                              preprocessor = rec,
-                                              metrics = metric_set(rmse))) |> 
-  map(\(fits) collect_metrics(fits, summarize = TRUE)) |> 
-  list_rbind() |> 
-  mutate(method = "boot_1000") |>       # label results in df
-  bind_rows(rmse_combined)
-```
-
 
 ## Summarize
-```{r a102-summary}
+```{r}
 rmse_combined |> 
   group_by(method) |> 
-  summarize(rmse_mean = mean(mean),
-            rmse_sd = sd(mean),
+  summarize(rmse_mean = round(mean(mean), 3),
+            rmse_sd = round(sd(mean), 3),
             n = n())
 ```
 
 
 ##  Plot sampling distributions
-```{r a102-plot}
+```{r}
 rmse_combined |> 
   ggplot(aes(x = mean, color = method)) + 
   geom_density() +
