@@ -97,6 +97,40 @@ Typical feature engineering steps for KNN include:
 
 ## Cross Validation
 
+We typically need
+
+  - training set(s) to fit (often many) model configurations
+  - validation set(s) to select the best model configuration
+  - test set(s) to evaluate the performance of that best model configuration without optimization bias
+
+We have several cross validation strategies to consider:
+
+- **Single validation set with a test set** approach, which provides one training, one validation and one test set.  This approach is often used when you have VERY BIG data because issues of bias and variance of the performance estimate are minimized with big data and this approach has the lowest computational costs.
+
+- **Leave one out cross validation (LOOCV) with a test set**, which provides N training and validation sets with each validation set containing 1 participant.  This approach is useful to understand key concepts about cross-validation but is almost never the best choice for actual use.
+
+- **K-fold with a test set**, which provides K training and validation sets and one test set.  We can also do R repeats of K-fold to increase the number of training and validation sets to R x K.  This is often the best strategy with moderate sized data sets (though nested resampling may be better still).
+
+- **Bootstrap cross-validation with a test set**, which provides B (number of bootstraps) training and validation sets and one test set.  The bootstrap resample is size N and is used as the training set. It will contain approximately 63% unique observations with the remaining observations as duplicates.  The Out of Bag (OOB) sample is used as the validation set and it will contain approximately 37% of the N, all unique and none included in the bootstrap resample.  Bootstrap cross validation error (from validation sets) is often more pessimistically biased than K-fold validation error. However, in some circumstances, it is lower variance than K-fold error.  
+
+-  **Nested cross validation** provides multiple test sets which can reduce the variance of the test error metric.  It requires that you specify a CV method for both the inner and outer loops.   K-fold is a good choice for the outer loop.  The inner loop can also be k-fold or bootstrap CV.  The number of training, validation, and tests sets that are provided are dependent on choices for CV on the inner and outer loops.  
+
+Other considerations
+
+- It is common to create the resampling splits by first stratifying on the outcome variable.  This will make sure the distribution of the outcome variable is similar across splits.
+
+- If there are repeated observations for the same individual or other nested structures to the data, you should used grouped CV (often as part of k-fold) to make sure that all observations from a participate are always held-in or held-out together.
+
+
+The choice of CV method has implications for both the bias and the variance of the performance metric.   There are several guuding principles/intuitions that can help you understand the impact of DV decisions on the bias/variance of your performance metric.
+
+- Smaller held-out sets (validation or test) will yield higher variance performance estimates
+- The variance of the performance estimate can be lowered by averaging across multiple held-out sets (e.g., as with K-fold and bootstrap CV).
+- However, averaging is only effective if the performance estimates that are being averaged are not highly related/correlated with each other.  For example, this is why averaging is not very effective in LOOCV.
+- Biased performance estimates results from having training set sizes that are smaller than the full sample size.  The larger this discrepancy, the bigger the bias.
+- There is often a tension between the size of training sets vs. held-out (validation or test) sets.  As you put more data into training, you will have smaller validation or test sets.   This yields a bias-variance trade-off.
+
+
 ## Performance metics
 
 ## Feature Importance
