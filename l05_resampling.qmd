@@ -1159,9 +1159,9 @@ K (neighbors) is affecting the bias-variance trade-off.  As K increases, model b
 The simplest way to select among model configurations (e.g., hyperparameters) is to choose the model configuration with the best performance
 
 ```{r}
-show_best(fits_knn_boot, n = 10)
+show_best(fits_knn_boot, n = 10, metric = "accuracy")
 
-select_best(fits_knn_boot)
+select_best(fits_knn_boot, metric = "accuracy")
 ```
 
 -----
@@ -1172,7 +1172,8 @@ The next most common is to choose the simplest (least flexible) model that has p
 - Sort performance results from least to most flexible (e.g., `desc(neighbors)`)
 ```{r}
 select_by_one_std_err(fits_knn_boot, 
-                      desc(neighbors))
+                      desc(neighbors), 
+                      metric = "accuracy")
 ```
 
 -----
@@ -1196,7 +1197,8 @@ feat_all <- rec_prep |>
 
 ```{r}
 fit_knn_best <-
-  nearest_neighbor(neighbors = select_best(fits_knn_boot)$neighbors) |> 
+  nearest_neighbor(neighbors = select_best(fits_knn_boot, 
+                                           metric = "accuracy")$neighbors) |> 
   set_engine("kknn") |> 
   set_mode("classification") |>
   fit(disease ~ ., data = feat_all)
@@ -1319,19 +1321,19 @@ fits_knn_boot_trn <- cache_rds(
 
 
 ```{r}
-show_best(fits_knn_boot_trn, n = 10)
+show_best(fits_knn_boot_trn, n = 10, metric = "accuracy")
 ```
 
 -----
 
 - show exact means
 ```{r}
-show_best(fits_knn_boot_trn, n = 10)$mean
+show_best(fits_knn_boot_trn, n = 10, metric = "accuracy")$mean
 ```
 
 - select best
 ```{r}
-select_best(fits_knn_boot_trn)
+select_best(fits_knn_boot_trn, metric = "accuracy")
 ```
 
 -----
@@ -1349,7 +1351,8 @@ feat_test <- rec_prep |>
   bake(data_test)
 
 fit_knn_best <-
-  nearest_neighbor(neighbors = select_best(fits_knn_boot_trn)$neighbors) |> 
+  nearest_neighbor(neighbors = select_best(fits_knn_boot_trn), 
+                   metric = "accuracy"$neighbors) |> 
   set_engine("kknn") |> 
   set_mode("classification") |>
   fit(disease ~ ., data = feat_trn)
@@ -1365,7 +1368,7 @@ accuracy_vec(feat_test$disease, predict(fit_knn_best, feat_test)$.pred_class)
 
 -----
 
-Our best estimate of how accurate a model with k = `r select_best(fits_knn_boot_trn)$neighbors` would be in new data is `r accuracy_vec(feat_test$disease, predict(fit_knn_best, feat_test)$.pred_class)`.   
+Our best estimate of how accurate a model with k = `r select_best(fits_knn_boot_trn, metric = "accuracy")$neighbors` would be in new data is `r accuracy_vec(feat_test$disease, predict(fit_knn_best, feat_test)$.pred_class)`.   
 
 - However, it was only fit with n = 203 (the training set).  
 - If we truly want the best model, we should now train once again with all of our data.  
