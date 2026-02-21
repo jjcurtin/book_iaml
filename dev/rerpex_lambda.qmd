@@ -1,0 +1,133 @@
+I am finding that when I use `tune_grid()` to tune a glment over a large number of values of lambda, the models fit much more slowly than when there are fewer values of lambda.  This seems wrong to me given my understanding of warm starts for lambda within glmnet.   
+
+I do not encounter this problem when directly using `fit()` with different number of values for lambda. I can fit very long sequences of specific values of lambda by passing in `path_values` and there is no increase in fit time as the number of values increases.  It is only true when using `tune_grid()`
+
+Below, I demonstrate several ways I have tried to get warm starts when tuning lambda with either a simple grid or using `path_values`.  Can someone help me understand what I am doing wrong or perhaps `tune_grid()` does not support warm starts with specific values of lambda?
+  
+  A complete demonstration of these issues follows:
+ 
+ 1. Load libraries, data, recipe and splits
+
+
+``` r
+library(tidyverse)
+library(tidymodels)
+library(tictoc)
+
+d <- ames |> 
+  select(where(is.numeric)) |>
+  drop_na() 
+
+rec <- recipe(Sale_Price ~ ., data = d) |> 
+  step_normalize(all_predictors())
+
+# 5-fold CV
+splits <- d |> 
+  vfold_cv(v = 5)
+```
+---
+
+2.  Set a benchmark for timing with a small number of values of lambda
+
+- ~ 7 seconds on my computer
+- 30 total values of lambda and alpha evaluated 
+
+```{r}
+alpha <- seq(0, 1, length.out = 3)
+lambda_small <- seq(0, 1, length.out = 10)
+
+# grid with 30 values
+grid_small <- expand_grid(penalty = lambda_small,
+                          mixture = alpha)
+
+tic()
+fits_baseline <- linear_reg(penalty = tune(), mixture = tune()) |> 
+  set_engine("glmnet") |> 
+  tune_grid(preprocessor = rec, 
+            resamples = splits, grid = grid_small, 
+            metrics = metric_set(rmse))
+toc()
+#> 7.275 sec elapsed
+
+metrics_baseline <- collect_metrics(fits_baseline)
+nrow(metrics_baseline)
+#> [1] 30
+```
+
+---
+
+3.  Now I tune a grid with many more values of lambda using just the basic `tune_grid()` approach and setting `grid = grid_large `
+
+- this takes 137 seconds!   Obviously no warm starts
+- it does evaluate the 600 values of lambda/alpha
+
+```{r}
+lambda_large <- seq(0, 1, length.out = 200)
+
+# grid with 600 values
+grid_large <- expand_grid(penalty = lambda_large,
+                          mixture = alpha)
+
+tic()
+fits_1 <- linear_reg(penalty = tune(), mixture = tune()) |> 
+  set_engine("glmnet") |> 
+  tune_grid(preprocessor = rec, 
+            resamples = splits, grid = grid_large, 
+            metrics = metric_set(rmse))
+toc()
+#> 136.766 sec elapsed
+
+metrics_1 <- collect_metrics(fits_1)
+nrow(metrics_1)
+#> [1] 600
+```
+
+4. Now I explicitly pass in `path_values` into `set engine()` as per this [documentation](https://parsnip.tidymodels.org/reference/glmnet-details.html) but still use a grid with the same values of lambda
+
+- this takes 137 seconds.  No warm starts
+- it does evaluate the 600 values 
+
+```{r}
+tic()
+fits_2 <- linear_reg(penalty = tune(), mixture = tune()) |>  
+  set_engine("glmnet", path_values = !!lambda_large) |>  
+  tune_grid(preprocessor = rec, 
+            resamples = splits, grid = grid_large, 
+            metrics = metric_set(rmse))
+toc()
+#> 137.01 sec elapsed
+
+metrics_2 <- collect_metrics(fits_2)
+nrow(metrics_2)
+#> [1] 600
+```
+
+
+5. Next I tried using a grid with alpha and only one value of lambda but I still passed in full regularization path with `path_values`
+
+- Fast.  1 second.
+- But ignored path_values and only tuned one value of lambda  (the one in the grid) for each value of alpha
+
+```{r}
+grid_lambda1 <- expand_grid(penalty = 1,
+                            mixture = alpha)
+
+tic()
+fits_3 <- linear_reg(penalty = tune(), mixture = tune()) |>  
+  set_engine("glmnet", path_values = !!lambda_large) |>  
+  tune_grid(preprocessor = rec, 
+            resamples = splits, grid = grid_lambda1, 
+            metrics = metric_set(rmse))
+toc()
+#> 1.008 sec elapsed
+
+metrics_3 <- collect_metrics(fits_3)
+nrow(metrics_3)
+#> [1] 3
+```
+
+I've also tried a variety of other options (not including penalty in grid, setting penalty = 1 in linear_reg, etc) but they all produced errors.
+
+Is it possible to train a long sequence of lambda values with warm starts using tune_grid?  If so, how do I do it?  Thanks for any help!
+
+<sup>Created on 2026-02-21 with [reprex v2.1.1](https://reprex.tidyverse.org)</sup>
