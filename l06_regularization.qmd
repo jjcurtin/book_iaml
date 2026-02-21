@@ -415,19 +415,20 @@ The grid needs to have crossed values of both `penalty` ($lambda$) and `mixture`
 
 # set up environment.  Now hidden from view
 
-options(conflicts.policy = "depends.ok")
-devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
-tidymodels_conflictRules()
 
 library(tidyverse) # for general data wrangling
 library(tidymodels) # for modeling
+options(conflicts.policy = "depends.ok")
+
 library(xfun, include.only = "cache_rds")
 
-cl <- parallel::makePSOCKcluster(parallel::detectCores(logical = FALSE))
-doParallel::registerDoParallel(cl)
+# parallel processing
+library(future)
+plan(multisession, workers = parallel::detectCores(logical = FALSE))
 
-devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
-devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
 
 theme_set(theme_classic())
 options(tibble.width = Inf)
@@ -593,7 +594,7 @@ We need to tune $\lambda$ (tidymodels calls this `penalty`)
 - Could also use `cv.glmnet()` directly in `glmnet` package to find good values.  See `get_lamdas()` in fun_modeling.R
 
 ```{r}
-grid_lasso <- expand_grid(penalty = exp(seq(-4, 4, length.out = 500)))
+grid_lasso <- expand_grid(penalty = exp(seq(-4, 4, length.out = 100)))
 ```
 
 ```{r}
@@ -689,11 +690,11 @@ Fit Ridge algorithm
 - Evaluate model configurations in OOB validation sets
 
 ```{r}
-grid_ridge <- expand_grid(penalty = exp(seq(-1, 7, length.out = 500)))
+grid_ridge <- expand_grid(penalty = exp(seq(-1, 7, length.out = 100)))
 ```
 
 ```{r}
-grid_ridge <- expand_grid(penalty = exp(seq(-1, 7, length.out = 500)))
+grid_ridge <- expand_grid(penalty = exp(seq(-1, 7, length.out = 100)))
 ```
 
 ```{r}
@@ -767,7 +768,7 @@ Now we need to tune both
 - Warm starts across $\lambda$
 
 ```{r}
-grid_glmnet <- expand_grid(penalty = exp(seq(-1, 7, length.out = 500)),
+grid_glmnet <- expand_grid(penalty = exp(seq(-1, 7, length.out = 100)),
                            mixture = seq(0, 1, length.out = 6))
 ```
 

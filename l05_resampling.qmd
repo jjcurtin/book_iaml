@@ -65,11 +65,24 @@ To do this in R, we need to set up a parallel processing backend
 
 -----
 
-TLDR - copy the following code chunk into your scripts after you load your other libraries (e.g., tidyverse and tidymodels)
+TLDR -  Use this code chunk into your scripts after you load your other libraries (e.g., tidyverse and tidymodels)
+
 ```{r}
 #| eval: false
-cl <- parallel::makePSOCKcluster(parallel::detectCores(logical = FALSE))
-doParallel::registerDoParallel(cl)
+
+# load ther libraries, etc
+
+library(future) # include among other packages that you load at top of script
+
+# set plan to multisession in a code chunk when ready to begin parallel processing.  
+plan(multisession, workers = parallel::detectCores(logical = FALSE))
+
+#
+# do your parallel processing here and in later code chunks
+#
+
+# end parallel processing when done by putting this in a code chunk 
+plan(sequential) 
 ```
 
 -----
@@ -178,8 +191,9 @@ options(conflicts.policy = "depends.ok")
 
 library(xfun, include.only = "cache_rds")
 
-cl <- parallel::makePSOCKcluster(parallel::detectCores(logical = FALSE))
-doParallel::registerDoParallel(cl)
+# parallel processing
+library(future)
+plan(multisession, workers = parallel::detectCores(logical = FALSE))
 
 source("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
 source("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
