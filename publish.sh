@@ -54,7 +54,7 @@ if [ "$FORMAT" = "slides_local" ];  then
   git add .
   git commit -m "render slides"
   git push
-  cp *.html ~/stage/
+  cp *.html ~/stage/ 
   cp -r *_files ~/stage/  
   git checkout gh-pages
   cp -r ~/stage/* .
