@@ -17,30 +17,6 @@ if [ "$FORMAT" = "book" ]; then
   rm -r _book
 fi
 
- 
-if [ "$FORMAT" = "slides" ];  then
-  echo ""
-	echo "Publishing $FILE to standard slides on quarto-pub"
-  echo ""
-  cp _quarto_slides.yml _quarto.yml
-  quarto publish quarto-pub "$FILE" --no-browser
-  rm _quarto.yml
-  # rm -r *_files
-  # rm *.html
-fi
- 
-if [ "$FORMAT" = "slides_wide" ];  then
-  echo ""
-	echo "Publishing $FILE to wide slides on quarto-pub"
-  echo ""
-  cp _quarto_slides_wide.yml _quarto.yml
-  quarto publish quarto-pub "$FILE" --no-browser
-  rm _quarto.yml
-  # rm -r *_files
-  # rm *.html
-fi
-
-
 if [ "$FORMAT" = "slides_local" ];  then
   echo ""
 	echo "Publishing $FILE to standard slides locally"
@@ -74,3 +50,28 @@ if [ "$FORMAT" = "slides_local" ];  then
   # rm -r *_files
   # rm *.html
 fi
+
+ 
+if [ "$FORMAT" = "slides" ];  then
+  echo ""
+	echo "Publishing $FILE to standard slides on quarto-pub"
+  echo ""
+  cp _quarto_slides.yml _quarto.yml
+  quarto publish quarto-pub "$FILE" --no-browser
+  rm _quarto.yml
+  # rm -r *_files
+  # rm *.html
+fi
+ 
+if [ "$FORMAT" = "slides_wide" ];  then
+  echo ""
+	echo "Publishing $FILE to wide slides on quarto-pub"
+  echo ""
+  cp _quarto_slides_wide.yml _quarto.yml
+  quarto publish quarto-pub "$FILE" --no-browser
+  rm _quarto.yml
+  # rm -r *_files
+  # rm *.html
+fi
+
+
