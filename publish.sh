@@ -31,15 +31,15 @@ if [ "$FORMAT" = "slides_local" ];  then
   git commit -m "render slides"
   git push
   mkdir ~/stage/
-  cp *.html ~/stage/ 
-  cp -r *_files ~/stage/  
-  cp uwlogo.png ~/stage/
-  cp slides_teaching.css ~/stage/
+  cp -a *.html ~/stage/ 
+  cp -ar *_files ~/stage/  
+  cp -a uwlogo.png ~/stage/
+  cp -a slides_teaching.css ~/stage/
   mkdir ~/tmp/
-  cp -r .Rproj.user ~/tmp/
-  cp book_iaml.Rproj ~/tmp/
+  cp -ar .Rproj.user ~/tmp/
+  cp -a book_iaml.Rproj ~/tmp/
   git checkout gh-pages
-  cp -r ~/stage/. .
+  cp -ar ~/stage/. .
   rm -r ~/stage
   git add .
   git commit -m "publish slides"
