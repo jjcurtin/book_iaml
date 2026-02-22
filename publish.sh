@@ -57,7 +57,7 @@ if [ "$FORMAT" = "slides_local" ];  then
   cp *.html ~/stage/
   cp -r *_files ~/stage/  
   git checkout gh-pages
-  cp ~/stage/* .
+  cp -r ~/stage/* .
   git add .
   git commit -m "publish slides"
   git push
