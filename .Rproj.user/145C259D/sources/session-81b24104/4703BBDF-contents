@@ -1,0 +1,308 @@
+---
+editor_options: 
+  chunk_output_type: console
+---
+
+# IAML Unit 3: Dicussion
+
+## Announcements
+
+- Feedback - THANKS!
+  - consistent feedback will be implemented (as best I can!)
+  - people definitely want summaries of units and comparisons of algorithms
+ 
+- Ames regression due Friday
+  - Winner announced in discussion next week!
+  
+- Homework is basically same for unit 4
+  - New dataset - titanic
+  - Do EDA but we don't need to see it
+  - Fit KNN and RDA models (will learn about LDA, QDA and RDA in unit)
+  - Submit predictions.  Free lunch!
+  
+-----
+
+## Held-in and held-out data
+
+Connect to training, validation, and test sets
+
+Held in and held out data 
+
+- fit models 
+- select best configurations
+- calculate performance metric
+
+Why need held-out
+
+- Example: Selecting best k - train vs validation data
+
+--------------------------------------------------------------------------------
+
+## KNN Overview
+
+View slides
+
+- How does KNN use training data to make predictions
+- What is k and how does it get used when making predictions?
+- What is the impact of k on bias and variance/overfitting?
+- k=1: performance in train? in val?
+- Distance measures: use Euclidean (default in kknn)!
+- Tuning K efficiently:  stay "tuned"
+
+--------------------------------------------------------------------------------
+
+## Interaction in KNN - Consider bias first (but also variance) in this example
+
+- Simulate data
+- Fit models for lm and knn with and without interaction
+- Took some shortcuts (no recipe, predict back into train)
+
+```{r}
+#| code-fold: true
+
+library(tidymodels)
+n <- 200
+set.seed(5433)
+
+d <- tibble(x1 = runif(n, 0,100), # uniform
+               x2 = rep(c(0,1), n/2), # dichotomous
+               x1_x2 = x1*x2, # interaction
+               y = rnorm(n, 0 + 1*x1 + 10*x2 + 10* x1_x2, 20)) #DGP + noise
+
+fit_lm <- 
+  linear_reg() |>   
+  set_engine("lm") |>   
+  fit(y ~ x1 + x2, data = d)
+
+fit_lm_int <- 
+  linear_reg() |>   
+  set_engine("lm") |>   
+  fit(y ~ x1 + x2 + x1_x2, data = d)
+
+fit_knn <- 
+  nearest_neighbor(neighbors = 20) |>   
+  set_engine("kknn") |>   
+  set_mode("regression") |> 
+  fit(y ~ x1 + x2, data = d)
+
+fit_knn_int <- 
+  nearest_neighbor(neighbors = 20) |>   
+  set_engine("kknn") |>   
+  set_mode("regression") |> 
+  fit(y ~ x1 + x2 + x1_x2, data = d)
+
+d <- d |> 
+  mutate(pred_lm = predict(fit_lm, d)$.pred,
+         pred_lm_int = predict(fit_lm_int, d)$.pred,
+         pred_knn = predict(fit_knn, d)$.pred,
+         pred_knn_int = predict(fit_knn_int, d)$.pred)
+```
+
+--------------------------------------------------------------------------------
+
+- Predictions from linear model with and without interaction
+  - You NEED interaction features with LM
+```{r}
+#| code-fold: true
+
+d |> 
+  ggplot(aes(x = x1, group = factor(x2), color = factor(x2))) +
+    geom_line(aes(y = pred_lm)) +
+    geom_point(aes(y = y)) +
+    ggtitle("lm without interaction") +
+    ylab("y") +
+    scale_color_discrete(name = "x2")
+
+d |> 
+  ggplot(aes(x = x1, group = factor(x2), color = factor(x2))) +
+    geom_line(aes(y = pred_lm_int)) +
+    geom_point(aes(y = y)) +
+    ggtitle("lm with interaction") +
+    ylab("y") +
+    scale_color_discrete(name = "x2")
+```
+
+
+--------------------------------------------------------------------------------
+
+- Predictions from KNN with and without interaction
+  - You do NOT need interaction features with KNN!
+    
+```{r}
+#| code-fold: true
+
+d |> 
+  ggplot(aes(x = x1, group = factor(x2), color = factor(x2))) +
+    geom_line(aes(y = pred_knn)) +
+    geom_point(aes(y = y)) +
+    ggtitle("KNN without interaction") +
+    ylab("y") +
+    scale_color_discrete(name = "x2")
+
+d |> 
+  ggplot(aes(x = x1, group = factor(x2), color = factor(x2))) +
+    geom_line(aes(y = pred_knn_int)) +
+    geom_point(aes(y = y)) +
+    ggtitle("KNN with interaction") +
+    ylab("y") +
+    scale_color_discrete(name = "x2")
+```
+
+--------------------------------------------------------------------------------
+
+## KNN assumptions
+
+Euclidean distance assumes:
+
+- Each feature is independent
+- Each dimension contributes new, unique information
+- Moving one unit along any axis is equally meaningful
+
+KNN also makes locality (smoothness) assumption
+
+KNN also requires sufficient data density (i.e., covers the feature space)
+
+KNN works best with low dimensional data (few features) because distance becomes less meaningful/discriminating in high dimensions.  PCA can help.
+
+--------------------------------------------------------------------------------
+
+## GLM assumptions
+
+:::{.callout-important}
+# What are GLM assumptions and what happens if violated
+:::
+
+::: {.fragment .uwred}
+- Measurement error
+
+- Independent
+
+- Normal
+  - Consequence: lm parameter estimates still unbiased (for linear DGP) but more "efficient" solutions exist
+  - Bad for prediction b/c higher variance than other solutions
+  - May suggest omission of variables
+
+- Constant
+  - Consequence: Inefficient and inaccurate standard errors.
+  - Statistical tests wrong
+  - Poor prediction for some (where larger variance of residuals) $\hat{y}$
+  - higher variance overall than other solutions - bad again for prediction
+
+- Linear
+  - Residuals do not have mean of 0 for every $\hat{y}$
+  - Consequence: biased parameter estimates.  Linear is bad DGP
+  - Also bad test of questions RE the predictor (underestimate? misinform)
+  
+  
+Use of `plot_truth()` [predicted vs. observed] to assess latter three assumptions
+:::
+
+## Transformations of numeric predictors
+
+Normalizing transformations - Yeo Johnson
+
+- when needed for lm?
+- when needed for knn?
+
+- Transformation of outcome?  
+  - metric
+  - back to raw predictions
+
+--------------------------------------------------------------------------------
+
+## Bias and Variance of estimates
+
+Bias and variance- general
+
+- property of any estimate
+- for now, we will focus on model (and its $\hat{Y}$)
+- Describe each
+
+Bias bias and variance - glm vs knn
+
+Bias and variance - k in knn?
+
+Impact of correlated features
+
+- in GLM
+- in KNN
+- PCA?  Drop correlated features?
+
+--------------------------------------------------------------------------------
+
+## LM vs. KNN better with some predictors or overall?
+
+- "Why do some features seem to improve performance more in linear models or only in KNNs?"
+- "What are some contexts where KNN doesn't work well? In other words, what are the advantages/disadvantages of using KNN?"
+  - Always comes down to bias vs. variance
+  - Flexibility and N are key moderators of these two key factors.  
+  - k? - impact on bias, variance?
+- KNN for explanation?
+  - Visualizations (think of interaction plot above) make clear the effect
+  - Will learn more (better visualizations, variable importance, model comparisons) in later unit
+
+
+--------------------------------------------------------------------------------
+
+## Categorical coding
+
+- Why do we do it? (Not need for every  algorithm!)
+- Describe the values assigned to the dummy coded features
+- Why these values? In other words, how can you interpret the effect of a dummy coded feature?
+- "Dummy variable trap"
+- How is it different from one-hot coding.  When to use or not use one-hot coding? 
+- Other methods
+  - Ordinal coding
+  - Target (mean) encoding
+  - frequency coding
+
+--------------------------------------------------------------------------------
+
+## Performance metrics
+
+- SSE, MSE, RMSE, MAE, R2
+- How else are SSE class of metrics used in glm?
+
+--------------------------------------------------------------------------------
+
+## Exploration 
+
+- "I feel that I can come up with models that decrease the RMSE, but I don't have good priors on whether adding any particular variable or observation will result in an improved model. I still feel a little weird just adding and dropping variables into a KNN and seeing what gets the validation RMSE the lowest (even though because we're using validation techniques it's a fine technique)"
+  - Exploration is learning.  This is research.  If you knew the answer you wouldn't be doing the study
+  - Domain knowledge is still VERY important
+  - Some algorithms (LASSO, glmnet) will help with feature selection
+  - staying organized
+    - Script structure
+    - Good documentation - QMD as analysis notebook
+  - Some overfitting to validation will occur? Consequence?  Solutions?
+
+--------------------------------------------------------------------------------
+
+## "Curse of dimensionality" - Bias vs. variance
+
+- Missing features produce biased models.
+- Unnecessary features or even many features relative to N produce variance
+- Does your available N in your algorithm support the features you need to have low bias. 
+  - Mostly an empirical question - can't really tell otherwise outside of simulated data. Validation set is critical!
+  - Flexible models often need more N holding features constant
+  - Regularization (unit 6) will work well when lots of features 
+
+--------------------------------------------------------------------------------
+
+-----
+
+## Sources of error
+
+- What are two broad sources of error?
+- What are two broad sources of reducible error.  Describe what they are and factors that affect them?
+- Why do we need independent validation data to select the best model configuration? 
+- Why do we need test data if we used validation data to select among many model configurations
+- What is RMSE?  Connect it to metric you already know?  How is it being used in lm (two ways)?; in knn (one way)?
+- How does bias and variance manifest when you look at your performance metric (RMSE) in training and validation sets?
+- Will the addition of new features to a (lm?) model always reduce RMSE in train? in validation?  Connect to concepts of bias and variance
+
+--------------------------------------------------------------------------------
+
+## "In GLM, why correlation/collinearity among predictors will cause larger variance? Is it because of overfitting?"
+
+## KNN (black box) for explanatory purposes
