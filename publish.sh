@@ -54,14 +54,22 @@ if [ "$FORMAT" = "slides_local" ];  then
   git add .
   git commit -m "render slides"
   git push
+  mkdir ~/stage/
   cp *.html ~/stage/ 
   cp -r *_files ~/stage/  
+  mkdir ~/tmp/
+  cp -r .Rproj.user ~/tmp/
+  cp book_iaml.Rproj ~/tmp/
   git checkout gh-pages
   cp -r ~/stage/* .
+  rm -r ~/stage
   git add .
   git commit -m "publish slides"
   git push
   git checkout main
+  cp ~/tmp/.Rproj.user .
+  cp ~/tmp/book_iaml.Rproj .
+  rm -r ~/tmp
   # rm -r *_files
   # rm *.html
 fi
