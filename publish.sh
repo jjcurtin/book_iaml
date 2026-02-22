@@ -46,7 +46,7 @@ if [ "$FORMAT" = "slides_local" ];  then
 	echo "Publishing $FILE to standard slides locally"
   echo ""
   cp _quarto_slides.yml _quarto.yml
-  quarto render "$FILE" --no-browser
+  quarto render "$FILE"
   cp _quarto_book.yml _quarto.yml
   quarto publish gh-pages --no-browser 
   rm -r _book
