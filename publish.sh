@@ -57,6 +57,8 @@ if [ "$FORMAT" = "slides_local" ];  then
   mkdir ~/stage/
   cp *.html ~/stage/ 
   cp -r *_files ~/stage/  
+  cp uwlogo.png ~/stage/
+  cp slides_teaching.css ~/stage/
   mkdir ~/tmp/
   cp -r .Rproj.user ~/tmp/
   cp book_iaml.Rproj ~/tmp/
