@@ -63,14 +63,13 @@ if [ "$FORMAT" = "slides_local" ];  then
   cp -r .Rproj.user ~/tmp/
   cp book_iaml.Rproj ~/tmp/
   git checkout gh-pages
-  cp -r ~/stage/* .
+  cp -r ~/stage/. .
   rm -r ~/stage
   git add .
   git commit -m "publish slides"
   git push
   git checkout main
-  cp ~/tmp/.Rproj.user .
-  cp ~/tmp/book_iaml.Rproj .
+  cp -r ~/tmp/. .
   rm -r ~/tmp
   # rm -r *_files
   # rm *.html
