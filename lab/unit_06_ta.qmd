@@ -1,0 +1,582 @@
+---
+title: "Unit 6 Lab TA"
+format: html
+editor_options: 
+  chunk_output_type: console
+---
+
+## Happy Tuesday! Welcome back!
+
+Welcome to your Unit 6 lab!
+
+## Housekeeping/Announcements
+
+### Exams
+
+This week, you have a regular application assignment due on Friday on regularization.
+
+After class on Thursday, you'll be assigned an application exam, which will be very similar to your application assignments -- just a bit longer and we won't be able to answer as many in-depth questions. **This is due noon on Friday, March 7th**
+
+The conceptual exam will be held on **Thursday, March 6th**. Lab next week (**Tuesday, March 4th**) will be a review for the conceptual exam.
+
+## Quiz questions
+
+### Parallel processing
+
+A number of you pointed out that, even with implementing parallel processing, your code was taking a long time to run. We did some digging, and it appears that the tidy folks have changed parallel processing out from under us! John wrote up a short [tutorial](https://jjcurtin.github.io/book_dwvt/parallel_processing.html) on how to implement this new method, but we will add in a short tutorial here.
+
+While loading in your important packages, you will now include the following package in your set-up.
+```{r, eval=FALSE}
+library(future)
+```
+
+When you're ready to run your parallel processing, you'll frame your code as follows:
+```{r, eval=FALSE}
+plan(multisession, workers = parallel::detectCores(logical = FALSE))
+
+# here you'll put any code you want to be run in parallel
+# for example, hyperparameter tuning!
+
+plan(sequential) # switches you back to sequential processing
+```
+
+We'll include another example of parallel processing in this lab so you can get used to this new workflow.
+
+*An important takeaway from this is that code often updates underneath you!*
+
+### Caching
+
+In short, caching stores R objects in a folder for you. This can be helpful when you are working with computationally expensive code that takes awhile to run (e.g., large dataset + complicated modeling). When you rerun a chunk of code that is within the caching function, all R does is load that object into your environment. This saves you time because it skips all of the calculations!
+
+Some best practices to keep in mind:
+ - Caching can save you time, but make sure you know when your code is and isn't rerunning. There are certainly times you want your cache to update (for example, you altered something in your recipe)! This is probably the biggest pitfall of caching -- you might accidentally forget to change your rerun settings and be loading in an old object as opposed to carrying out a new, updated computation!
+ - Caching doesn't save you time on the first go around! The first time you run something within a cache function, it will still need to carry out the plain ol' computation.
+ - You can store a cached file for as long as you need it. For assignments in this class, you probably don't need to keep cached files beyond when you turn in your assignment to us. If you are working with very highly dimensional data, odds are your lab or employer will have a server with a lot of storage space for you to keep things like that (keep in mind an object like model fits will likely almost always be smaller than the size of your raw data in any case).
+
+We will also include another example of caching in this lab so you can get more exposure to using it!
+
+## Short exercise
+
+We are going to have you all complete a short exercise. You may work individually or with a partner.
+
+You should think of this as a diagnostic exercise -- notice the points where you get stuck or where your code errors out, and then come to office hours so we can help get you up to speed before the application exam.
+
+**Ideally, you will complete this without using an LLM -- try to only use course materials to better gauge your understanding.**
+
+For this exercise, you will be loading in the `attrition` dataset. We will be predicting `attrition` (whether or not someone left their job at a company) from a few simple variables.
+
+Here's a basic data dictionary to guide you:
+| Variable         | Type     | Description |
+|------------------|----------|-------------|
+| Attrition        | Factor   | Whether the employee left the company ("Yes" or "No") |
+| OverTime         | Factor   | Whether the employee works overtime ("Yes" or "No") |
+| MonthlyIncome    | Numeric  | Employee’s monthly salary in US dollars |
+| JobLevel         | Factor   | Job seniority level from 1 (entry-level) to 5 (executive) |
+| JobSatisfaction  | Factor   | Employee’s reported job satisfaction level ("Low", "Medium", "High", "Very_High") |
+| Age              | Numeric  | Employee age in years |
+| HourlyRate       | Numeric  | Employee’s hourly rate of pay |
+
+You will run through a basic exercise where you load in the data and run a simple model.
+
+First, complete all of your initial set up in the code chunk below. This should include loading basic packages, setting a conflicts policy, sourcing any functions, and setting paths.
+```{r}
+
+```
+
+Next, load in your data which is called `attrition.csv`. You will load in your data either from the `data` folder in GitHub or by downloading the provided dataset and loading it in from a local folder. Use `here::here()` and relative paths.
+```{r}
+data_all <-
+```
+
+Carry out any appropriate basic cleaning and reclassing below.
+```{r}
+
+```
+
+We are going to use resampling for both model selection and evaluation. You may wish to use the [website](https://jjcurtin.github.io/book_iaml/l05_resampling.html#resampling-for-both-model-selection-and-evaluation) or the previous lab (section header #7) as reference code.
+
+Use `initial_split()` to define your first train/test split. We have included a seed for you to use.
+```{r}
+set.seed(20220813) # adoption day of claire's cat, buck :^)
+splits_test <- 
+
+data_trn <- 
+
+data_test <- 
+```
+
+Next, you will use your training set for model selection using bootstrap resampling. Use 100 resamples.
+
+::: {.callout-tip title="How many bootstrap iterations should I use?"}
+There is no set rule for how many bootstrap iterations you should use. Oftentimes in assignments, we'll tell you what to use in this class.
+
+We also tend to give smaller numbers than you might use in the real world so that it doesn't take you forever to run!
+
+While we might instruct you to use 100 samples, in the real world you might use somewhere between 500-1000.
+:::
+
+```{r}
+splits_boot_trn <- 
+```
+
+Set up a hyperparameter grid that sequences from 1 to 101 in increments of 2.
+
+::: {.callout-tip title="How do I pick my hyperparameter grid values (both the range and steps)?"}
+Picking a wider steps might cause you to miss the optimal value of your hyperparameter -- but picking steps that are too narrow can be computationally inefficient! It's a good idea to start with a broader range (as we've done below), but if you pick bigger steps, it's possible that you could accidentally miss the optimal *k* value.
+
+For example, imagine looking at a hyperparameter plot of values *k* 1, 50, 100, 150. Let's say your optimal value is 75 -- your plot might falsely give you the impression that 50 or 100 could be just as good.
+
+You could always try a multi-staged approach where first you start with a wider range and then narrow in on a smaller range!
+:::
+
+```{r}
+hyper_grid <- 
+```
+
+Define a recipe that predicts `attrition` (AKA whether or not an employee left the company) from `over_time` (AKA is the employee working overtime), `monthly_income`, `job_level` (higher number = more seniority in company), and `job_satisfaction` (higher number = greater satisfaction). **Make this recipe as basic as possible, only including what is required for KNN.**
+
+::: {.callout-tip title="I need recipe help!! What ordering of steps should I follow?!"}
+The tidy folks put out [this](https://recipes.tidymodels.org/articles/Ordering.html) helpful resource for modeling steps that you can use as a basic guide. However, you should know that there isn't really *one* be-all-end-all formula for recipes steps. There are certainly a few things you *cannot* or *should not* do, like normalizing (e.g., scaling, etc.) before you impute -- this would error out. Other steps, however, you can switch around, but be aware that it might change the meaning. For example, `step_pca()` before any normalization will lead to components which are heavily weighted towards input values of greater magnitude. Although it's standard to normalize before `step_pca()`, you could make an argument to generate components that are weighted by variance.
+
+You should walk through each step sequentially and think about what it is doing to your data. Ask yourself, "Does it make sense for this operation to come before or after the next computation?"
+:::
+
+```{r}
+rec_knn <- 
+```
+
+::: {.callout-tip title="How much missing data is too much missing data?"}
+The amount of missing data can impact how useful it might be in your model. Remember, even with the more sophisticated forms of imputation, you're still just predicting what values seem most likely to be in there rather than knowing them for sure! There is no threshold for how much missing data is too much missing data. Just know that a feature that is 80% missing which you median impute is unlikely to add much predictive value to your model.
+:::
+
+Tune across bootstrap resamples (we recommend practicing caching here). We are going to use parallel processing here, so write your code in between the two `plan()` lines -- this follows new practices from the tidy folks. Set accuracy as your training metric.
+
+When I run this without parallel processing, it takes about 10 minutes. When I run this with parallel processing, it takes about 2! (If you want to try timing code, look into the `tictoc` package!)
+```{r}
+plan(multisession, workers = parallel::detectCores(logical = FALSE))
+
+# fits code here!
+
+plan(sequential)
+```
+
+Select the best *k*. Print the 5 best fits (`show_best()`) and then select the best model (`select_best()`).
+```{r}
+
+```
+
+Fit best model using the full training set. **What is the difference between `prep()` and `bake()`?**
+```{r}
+
+```
+
+Get test set accuracy.
+```{r}
+
+```
+
+Lastly, you would complete a final model fit with all available data. We won't do this in this practice example for time.
+
+## Regularization and penalized models
+
+*Restart your R session and run the set-up code below!*
+
+```{r}
+library(tidyverse)
+library(tidymodels)
+
+options(conflicts.policy = "depends.ok")
+
+library(future) # for new parallel processing workflow
+library(xfun, include.only = "cache_rds")
+conflictRules("Matrix", mask.ok = c("expand", "pack", "unpack"))
+
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+
+path_data <- "data/"
+
+theme_set(theme_classic())
+options(tibble.width = Inf)
+
+rerun_setting <- TRUE
+
+set.seed(123)
+data_all <- read_csv(here::here(path_data, "concrete.csv"),
+                     show_col_types = FALSE) |>
+  janitor::clean_names() |> 
+  glimpse()
+
+data_all <- data_all |> 
+    mutate(
+    cement_dup = cement,
+    water_dup = water * 1.01,
+    noise1 = rnorm(nrow(data_all)),
+    noise2 = rnorm(nrow(data_all)),
+    cement_cor = cement + rnorm(nrow(data_all), 0, 0.1)
+  )
+```
+
+Your assignment this week focuses on regularization and penalized models. We'll go through some practical coding examples for the three regularization approaches we cover in this class: Ridge, LASSO, and Elastic Net (also called GLMNet) and compare them with OLS.
+
+We are going to be reviewing some basic code for this using the very exciting... concrete compressive strength dataset!
+
+From the README file:
+> Concrete is the most important material in civil engineering. The concrete compressive strength is a highly nonlinear function of age and ingredients. These ingredients include cement, blast furnace slag, fly ash, water, superplasticizer, coarse aggregate, and fine aggregate.
+
+...wow! How exciting! We have also added some noise into this dataset to demonstrate regularization.
+
+A quick hyperparameter primer:
+ - $\alpha$: called *mixture* in `tidymodels`; represents the mix we want between LASSO and Ridge in Elastic Net/GLMNet (these are held at constant values for LASSO and Ridge, as you can note in the table belows)
+ - $\lambda$: called *penalty* in `tidymodels`; represents the strength of our regularization; the combination of $\alpha$ = 1  with a penalty is what allows less features to be dropped in LASSO, whereas the $\alpha$ = 0 in Ridge with a penalty makes less important features instead very small (close to 0)
+ 
+**What hyperparameters do I tune for each model?!**
+
+| Model              | Alpha | Lambda |
+|--------------------|-------|--------|
+| Elastic Net/GLMNet |   X   |   X    |
+| LASSO              |   1   |   X    |
+| Ridge              |   0   |   X    |
+| OLS                |   0   |   0    |
+: X represents the parameter that is tuned in that model.
+
+### Setting Up
+
+::: {.callout-tip title="Setting seeds🌱"}
+Some of you noticed that sometimes setting the same seed doesn't give you the *exact same numbers* across your splits. This can happen when stratifying if you have an *odd* number of rows across strata. `initial_split()` might round differently for different folks in this scenario.
+
+It should not make much difference in your modeling. Because you have set a seed, the difference between your split and your neighbor's split will only be one row. Most importantly, check that you have the same total as your full dataset!
+
+**Example:**
+
+Total rows: 303
+
+Person 1: 150/153 split
+
+Person 2: 151/152 split
+:::
+
+First, we'll set our seed generate some initial splits.
+```{r}
+set.seed(20220813)
+
+splits_test_2 <- data_all |> 
+  initial_split(prop = 0.75, strata = "concrete_compressive_strength")
+
+data_trn_2 <- splits_test_2 |> 
+  analysis()
+
+data_test_2 <- splits_test_2 |> 
+  assessment()
+```
+
+Now, we'll bootstrap 100 times (note that this would probably be a higher number IRL as discussed earlier) from our training data for the purposes of model comparison. Let's print what the first row of this object looks like for our understanding!
+```{r}
+splits_boot_2 <- data_trn_2 |> 
+  bootstraps(times = 100, strata = "concrete_compressive_strength")
+
+splits_boot_2$splits[[1]]
+```
+
+Next, we'll set up our recipe and prep and bake our features.
+```{r}
+rec_2 <- recipe(concrete_compressive_strength ~ ., data = data_trn_2) |> 
+  step_normalize(all_predictors())
+
+rec_prep_2 <- rec_2 |> 
+  prep(data_trn_2)
+
+feat_trn_2 <- rec_prep_2 |> 
+  bake(NULL)
+
+feat_test_2 <- rec_prep_2 |> 
+  bake(data_test_2)
+```
+
+Now, create our tracking tibble.
+```{r}
+track_rmse <- tibble(model = character(),
+                     rmse_test = numeric(),
+                     n_features = numeric())
+```
+
+### OLS
+
+::: {.callout-tip title="A note on `set_engine()`!"}
+Remember that `set_engine()` is like picking the library you want to load your function from. Typically, you'll probably be choosing your model type and then work backwards from there (oftentimes picking a popular engine with good documentation/support to make your life easier, or perhaps you have specific hyperparameters you'd like to tune like creating a LDA/QDA blend using `klaR`).
+:::
+
+For OLS, we don't need to carry out any feature engineering (we'll put in `data_trn_2` in for our data argument instead of our baked features). There's also no tuning needed here (OLS has no hyperparameters).
+```{r}
+fit_lin <- linear_reg() |> 
+  set_engine("lm") |>
+  fit(concrete_compressive_strength ~ ., data = data_trn_2)
+```
+
+Note that we get an error here because we have some perfectly collinear columns! We have 13 predictor variables, but two are exact duplicates. OLS cannot handle these duplicates so one is dropped, leaving us with 11 final features.
+```{r}
+lin_test_rmse <- rmse_vec(truth = data_test_2$concrete_compressive_strength,
+                           estimate = predict(fit_lin, data_test_2)$.pred)
+```
+
+Below, we count the number of features that are retained.
+```{r}
+lin_n_feat <- fit_lin |> 
+  tidy() |> 
+  filter(estimate != 0 & term != "(Intercept)") |> 
+  nrow()
+```
+
+And finally, add it to your RMSE tracking tibble!
+```{r}
+track_rmse <- add_row(track_rmse,
+                      model = "OLS",
+                      rmse_test = lin_test_rmse,
+                      n_features = lin_n_feat)
+
+track_rmse
+```
+
+### Ridge
+
+In Ridge regression, we want to tune $\lamba$ (`penalty`), so we'll create a grid of possible values to test out. Let's take a look at what that looks like. Keep in mind that the `exp()` function means we are sequencing 50 values from $e^{-2}$ to $e^{2}$.
+```{r}
+grid_penalty <- expand_grid(penalty = exp(seq(-2, 2, length.out = 50)))
+grid_penalty |> view()
+```
+
+::: {.callout-tip title="A catch-all aside on some popular resampling questions!"}
+Keep in mind that different situations will call for different resampling methods (e.g., kfold is great if you want an estimate of a single model configuration). Nested resampling is a good choice, for instance, when you want to select among model configurations and then evaluate the best model (making it a popular, albeit complicated, real-world tool).
+
+If you're curious, you can try out LOOCV by replacing `loo_cv()` in the code in [this](https://jjcurtin.github.io/book_iaml/l05_resampling.html#k-fold-cross-validation) example.
+
+`group_vfold_cv()` is important to use if you want to keep data instances together (for example, all of a given subject's data). Why is this important? Because a subject's data will predict better into itself! You will not get an accurate estimate of how your models are doing if you are grouping them altogether. Of course, you could have a different grouping variable other than subject ID -- as long as it is the source of non-independence in your data. Think of this as similar to accounting for non-independence of data in linear mixed effects models (shoutout to Markus!).
+
+Keeping your model configuration and evaluation processes separate can be helpful at first (particularly for understanding conceptually each process). In this course, we will explicitly tell you how we'd like you to complete your assignments -- so don't worry, you'll never be left in the dark!
+:::
+
+Let's iterate through these different model configurations.
+```{r}
+plan(multisession, workers = parallel::detectCores(logical = FALSE))
+
+fits_ridge <- cache_rds(
+  expr = {
+    linear_reg(penalty = tune(),
+                         mixture = 0) |> # mixture set to 0 for pure Ridge
+    set_engine("glmnet") |> 
+    tune_grid(preprocessor = rec_2, # prepare our data according to the recipe
+              resamples = splits_boot_2, # fit models over all 100 bootstrapped samples
+              grid = grid_penalty, # evaluate all 50 potential values we have for lambda
+              metrics = metric_set(rmse)) # collect RMSE so we can evaluate which fit is best averaged over resamples
+  }, 
+  dir = "cache/",
+  file = "fit_ridge",
+  rerun = TRUE)
+
+plan(sequential)
+```
+
+Now, we'll select our best value for $\lambda$ and fit that model so that we can test it.
+```{r}
+fit_ridge <- linear_reg(penalty = select_best(fits_ridge)$penalty,
+                        mixture = 0) |> 
+  set_engine("glmnet") |> 
+  fit(concrete_compressive_strength ~ ., data = feat_trn_2)
+```
+
+Let's look at how this is doing in test.
+```{r}
+ridge_rmse_test <- rmse_vec(truth = feat_test_2$concrete_compressive_strength,
+         estimate = predict(fit_ridge, feat_test_2)$.pred)
+```
+
+And pull our # of features!
+```{r}
+ridge_n_feat <- fit_ridge |> 
+  tidy() |> 
+  filter(estimate != 0 & term != "(Intercept)") |> 
+  nrow()
+```
+
+And put it all in our tracking tibble!
+```{r}
+track_rmse <- add_row(track_rmse,
+                      model = "Ridge",
+                      rmse_test = ridge_rmse_test,
+                      n_features = ridge_n_feat)
+
+track_rmse
+```
+
+### LASSO
+
+We want to tune $\lamba$ (`penalty`) again for LASSO, so we'll keep the same tuning grid as above. This time, we'll be setting $\alpha$ (`mixture`) to 1.
+```{r}
+plan(multisession, workers = parallel::detectCores(logical = FALSE))
+
+fits_lasso <- cache_rds(
+  expr = {
+    linear_reg(penalty = tune(),
+                         mixture = 1) |> # mixture set to 1 for pure LASSO
+    set_engine("glmnet") |> 
+    tune_grid(preprocessor = rec_2, # prepare our data according to the recipe
+              resamples = splits_boot_2, # fit models over all 100 bootstrapped samples
+              grid = grid_penalty, # evaluate all 50 potential values we have for lambda
+              metrics = metric_set(rmse)) # collect RMSE so we can evaluate which fit is best averaged over resamples
+  }, 
+  dir = "cache/",
+  file = "fit_lasso",
+  rerun = TRUE)
+
+plan(sequential)
+```
+
+Select the best value for $\lambda$ (`penalty`) and run that over our training data.
+```{r}
+fit_lasso <- linear_reg(penalty = select_best(fits_lasso)$penalty,
+                        mixture = 1) |> 
+  set_engine("glmnet") |> 
+  fit(concrete_compressive_strength  ~ ., data = feat_trn_2)
+```
+
+::: {.callout-tip title="Which way to select the best?"}
+Last unit, we covered two ways of selecting the best models from which to pull hyperparameters -- `select_best()` and `select_by_one_std_err()`.
+
+As a refresher:
+ - `select_best()`: picks the model with the lowest RMSE
+ - `select_by_one_std_error()`: picks the simplest model that is within one SE of the model with the lowest RMSE
+ 
+*But what if they return two different values?*
+
+In fact, it's likely that they may return slightly different values because these functions will pull different models. In the real world, you'd pick between these based on what the goals are of your model. Maybe you want the simplest model for implementation (`select_by_one_std_error()` might be your best bet) or maybe you are only interested in pure prediction (`select_best()`). In assignments and on exams, we'll typically be using `select_best()` unless otherwise explicitly stated.
+:::
+
+Pull out RMSE!
+```{r}
+lasso_rmse_test <- rmse_vec(truth = feat_test_2$concrete_compressive_strength,
+         estimate = predict(fit_lasso, feat_test_2)$.pred)
+```
+
+Get number of features.
+```{r}
+lasso_n_feat <- fit_lasso |> 
+  tidy() |> 
+  filter(estimate != 0 & term != "(Intercept)") |> 
+  nrow()
+```
+
+Add to the tracking tibble.
+```{r}
+track_rmse <- add_row(track_rmse,
+                      model = "LASSO",
+                      rmse_test = lasso_rmse_test,
+                      n_features = lasso_n_feat)
+
+track_rmse
+```
+
+### Elastic Net/GLMNet
+
+Now, we want to tune both of our hyperparameters! Let's take a look at what our new grid looks like. You'd certainly run this over a larger range of values (see the website for an example), but we want to keep lab moving so we've set it to be the same size as our previous grid.
+```{r}
+grid_glmnet <- expand_grid(
+  penalty = exp(seq(-2, 2, length.out = 10)),
+  mixture = c(0, 0.25, 0.5, 0.75, 1)
+)
+
+grid_glmnet |> view()
+```
+
+Again, run our model fits.
+```{r}
+plan(multisession, workers = parallel::detectCores(logical = FALSE))
+
+fits_glmnet <- cache_rds(
+  expr = {
+    # notice how we tune both hyperparameters now!
+    linear_reg(penalty = tune(),
+                          mixture = tune()) |> 
+    set_engine("glmnet") |> 
+    tune_grid(preprocessor = rec_2,
+              resamples = splits_boot_2,
+              grid = grid_glmnet,
+              metrics = metric_set(rmse))
+  }, 
+  dir = "cache/",
+  file = "fit_glmnet",
+  rerun = TRUE)
+
+plan(sequential)
+```
+
+Let's select our best model. **Is our best model closer to pure Ridge or LASSO?**
+```{r}
+fit_glmnet <- linear_reg(penalty = select_best(fits_glmnet)$penalty,
+                        mixture = select_best(fits_glmnet)$mixture) |> 
+  set_engine("glmnet") |> 
+  fit(concrete_compressive_strength ~ ., data = feat_trn_2)
+
+select_best(fits_glmnet)$penalty
+select_best(fits_glmnet)$mixture
+```
+
+Let's get our performance in test.
+```{r}
+glmnet_rmse_test <- rmse_vec(truth = feat_test_2$concrete_compressive_strength,
+         estimate = predict(fit_glmnet, feat_test_2)$.pred)
+```
+
+And number of features!
+```{r}
+glmnet_n_feat <- fit_glmnet |> 
+  tidy() |> 
+  filter(estimate != 0 & term != "(Intercept)") |> 
+  nrow()
+```
+
+And add it all to our tracking tibble!
+```{r}
+track_rmse <- add_row(track_rmse,
+                      model = "GLMnet",
+                      rmse_test = glmnet_rmse_test,
+                      n_features = glmnet_n_feat)
+
+track_rmse
+```
+
+### Summary
+
+Let's run the code below to check out our estimates side-by-side. **What do you notice?**
+```{r}
+tidy_fit_lin   <- fit_lin   |> tidy() |> mutate(model = "OLS")
+tidy_fit_ridge <- fit_ridge |> tidy() |> mutate(model = "Ridge")
+tidy_fit_lasso <- fit_lasso |> tidy() |> mutate(model = "LASSO")
+tidy_fit_glmnet <- fit_glmnet |> tidy() |> mutate(model = "GLMNet")
+
+combined_table <- bind_rows(
+  tidy_fit_lin,
+  tidy_fit_ridge,
+  tidy_fit_lasso,
+  tidy_fit_glmnet
+)
+
+combined_wide <- combined_table |>
+  select(model, term, estimate) |>
+  pivot_wider(names_from = model, values_from = estimate)
+
+combined_wide
+```
+
+## How to read tidy documentation more effectively
+
+Sometimes, you might notice that R documentation seems...less than helpful and a bit vague!
+```{r}
+?fit_resamples
+```
+
+Sometimes, you may have to click further into the help file to get more information. Let's practice doing this with the `control` argument.
+
+You might find it easier to use the actual [tidymodels](https://www.tidymodels.org/find/all/) website. This is a searchable link that pulls up the documentation for any tidymodels function you desire!
+
+
