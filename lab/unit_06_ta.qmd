@@ -228,8 +228,8 @@ From the README file:
 ...wow! How exciting! We have also added some noise into this dataset to demonstrate regularization.
 
 A quick hyperparameter primer:
- - $\alpha$: called *mixture* in `tidymodels`; represents the mix we want between LASSO and Ridge in Elastic Net/GLMNet (these are held at constant values for LASSO and Ridge, as you can note in the table belows)
- - $\lambda$: called *penalty* in `tidymodels`; represents the strength of our regularization; the combination of $\alpha$ = 1  with a penalty is what allows less features to be dropped in LASSO, whereas the $\alpha$ = 0 in Ridge with a penalty makes less important features instead very small (close to 0)
+ - $\alpha$: called *mixture* in `tidymodels`; represents the mix we want between LASSO and Ridge in Elastic Net/GLMNet (these are held at constant values for LASSO and Ridge, as you can note in the table below)
+ - $\lambda$: called *penalty* in `tidymodels`; represents the strength of our regularization; the combination of $\alpha$ = 1  with a penalty is what allows less important features to be dropped (set to 0) in LASSO, whereas the $\alpha$ = 0 in Ridge with a penalty makes less important features instead very small (close to 0)
  
 **What hyperparameters do I tune for each model?!**
 
@@ -279,10 +279,20 @@ splits_boot_2 <- data_trn_2 |>
 splits_boot_2$splits[[1]]
 ```
 
+::: {.callout-tip title="Where are those numbers coming from?"}
+**Analysis:** Amount in our training set
+
+**Assess:** Amount in our test set
+
+**Total:** The total number of rows from which we sampled from (look at the number of rows in `data_trn_2`)
+
+Bootstrap samples with replacement. The 770 rows we end up in analysis are from `data_trn_2`, and some of them are duplicated. 283 in our test set represents the rows that *didn't* get sampled (out-of-bag or OOB), and are therefore not in our analysis (train) set, during bootstrapping.
+:::
+
 Next, we'll set up our recipe and prep and bake our features.
 ```{r}
 rec_2 <- recipe(concrete_compressive_strength ~ ., data = data_trn_2) |> 
-  step_normalize(all_predictors())
+  step_normalize(all_predictors()) # pop quiz: why do we have to normalize here?
 
 rec_prep_2 <- rec_2 |> 
   prep(data_trn_2)
@@ -314,7 +324,7 @@ fit_lin <- linear_reg() |>
   fit(concrete_compressive_strength ~ ., data = data_trn_2)
 ```
 
-Note that we get an error here because we have some perfectly collinear columns! We have 13 predictor variables, but two are exact duplicates. OLS cannot handle these duplicates so one is dropped, leaving us with 11 final features.
+Note that we get an error here because we have some perfectly correlated columns! We have 13 predictor variables, but two are exact duplicates. OLS cannot handle these duplicates so one is dropped, leaving us with 11 final features.
 ```{r}
 lin_test_rmse <- rmse_vec(truth = data_test_2$concrete_compressive_strength,
                            estimate = predict(fit_lin, data_test_2)$.pred)
@@ -340,7 +350,7 @@ track_rmse
 
 ### Ridge
 
-In Ridge regression, we want to tune $\lamba$ (`penalty`), so we'll create a grid of possible values to test out. Let's take a look at what that looks like. Keep in mind that the `exp()` function means we are sequencing 50 values from $e^{-2}$ to $e^{2}$.
+In Ridge regression, we want to tune $\lambda$ (`penalty`), so we'll create a grid of possible values to test out. Let's take a look at what that looks like. Keep in mind that the `exp()` function means we are sequencing 50 values from $e^{-2}$ to $e^{2}$.
 ```{r}
 grid_penalty <- expand_grid(penalty = exp(seq(-2, 2, length.out = 50)))
 grid_penalty |> view()
@@ -411,7 +421,7 @@ track_rmse
 
 ### LASSO
 
-We want to tune $\lamba$ (`penalty`) again for LASSO, so we'll keep the same tuning grid as above. This time, we'll be setting $\alpha$ (`mixture`) to 1.
+We want to tune $\lambda$ (`penalty`) again for LASSO, so we'll keep the same tuning grid as above. This time, we'll be setting $\alpha$ (`mixture`) to 1.
 ```{r}
 plan(multisession, workers = parallel::detectCores(logical = FALSE))
 
