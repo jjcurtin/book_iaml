@@ -1,0 +1,192 @@
+---
+title: "Lab 6 Exercise Key"
+format: html
+---
+
+## Short exercise
+
+We are going to have you all complete a short exercise. You may work individually or with a partner.
+
+You should think of this as a diagnostic exercise -- notice the points where you get stuck or where your code errors out, and then come to office hours so we can help get you up to speed before the application exam.
+
+**Ideally, you will complete this without using an LLM -- try to only use course materials to better gauge your understanding.**
+
+For this exercise, you will be loading in the `attrition` dataset. We will be predicting `attrition` (whether or not someone left their job at a company) from a few simple variables.
+
+Here's a basic data dictionary to guide you:
+| Variable         | Type     | Description |
+|------------------|----------|-------------|
+| Attrition        | Factor   | Whether the employee left the company ("Yes" or "No") |
+| OverTime         | Factor   | Whether the employee works overtime ("Yes" or "No") |
+| MonthlyIncome    | Numeric  | Employee’s monthly salary in US dollars |
+| JobLevel         | Factor   | Job seniority level from 1 (entry-level) to 5 (executive) |
+| JobSatisfaction  | Factor   | Employee’s reported job satisfaction level ("Low", "Medium", "High", "Very_High") |
+| Age              | Numeric  | Employee age in years |
+| HourlyRate       | Numeric  | Employee’s hourly rate of pay |
+
+You will run through a basic exercise where you load in the data and run a simple model.
+
+First, complete all of your initial set up in the code chunk below. This should include loading basic packages, setting a conflicts policy, sourcing any functions, and setting paths.
+```{r}
+library(tidyverse)
+library(tidymodels)
+
+options(conflicts.policy = "depends.ok")
+
+library(future) # for new parallel processing workflow
+library(xfun, include.only = "cache_rds")
+
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+
+path_data <- "data/"
+
+theme_set(theme_classic())
+options(tibble.width = Inf)
+
+rerun_setting <- TRUE
+```
+
+Next, load in your data. You will load in your data either from the `data` folder in GitHub or by downloading the provided dataset and loading it in from a local folder. Use `here::here()` and relative paths.
+```{r}
+data_all <- read_csv(here::here(path_data, "attrition.csv"),
+                     show_col_types = FALSE) |> 
+  glimpse()
+```
+
+Carry out any appropriate basic cleaning and reclassing below.
+```{r}
+jl_levels <- 1:5
+
+data_all <- data_all |>
+  janitor::clean_names() |>
+  mutate(attrition = factor(attrition, levels = c("No", "Yes")),
+         over_time = factor(over_time, levels = c("No", "Yes")),
+         job_level = factor(job_level, 
+                               levels = jl_levels),
+         job_satisfaction = factor(job_satisfaction,
+                                   levels = c("Low", "Medium",
+                                              "High", "Very_High"))) |>
+  mutate(across(where(is.factor), tidy_responses)) |> 
+  glimpse()
+```
+
+We are going to use resampling for both model selection and evaluation. You may wish to use the [website](https://jjcurtin.github.io/book_iaml/l05_resampling.html#resampling-for-both-model-selection-and-evaluation) or the previous lab (section header #7) as reference code.
+
+Use `initial_split()` to define your first train/test split. We have included a seed for you to use.
+```{r}
+set.seed(20220813) # adoption day of claire's cat, buck :^)
+splits_test <- data_all |>
+  initial_split(prop = 2/3, strata = "attrition")
+
+data_trn <- splits_test |>
+  analysis()
+
+data_test <- splits_test |>
+  assessment()
+```
+
+Next, you will use your training set for model selection using bootstrap resampling. Use 100 resamples.
+
+::: {.callout-tip title="How many bootstrap iterations should I use?"}
+There is no set rule for how many bootstrap iterations you should use. Oftentimes in assignments, we'll tell you what to use in this class.
+
+We also tend to give smaller numbers than you might use in the real world so that it doesn't take you forever to run!
+
+While we might instruct you to use 100 samples, in the real world you might use somewhere between 500-1000.
+:::
+
+```{r}
+splits_boot_trn <- data_trn |> 
+  bootstraps(times = 100, strata = "attrition") 
+```
+
+Set up a hyperparameter grid that sequences from 1 to 101 in increments of 2.
+
+::: {.callout-tip title="How do I pick my hyperparameter grid values (both the range and steps)?"}
+Picking a wider steps might cause you to miss the optimal value of your hyperparameter -- but picking steps that are too narrow can be computationally inefficient! It's a good idea to start with a broader range (as we've done below), but if you pick bigger steps, it's possible that you could accidentally miss the optimal *k* value.
+
+For example, imagine looking at a hyperparameter plot of values *k* 1, 50, 100, 150. Let's say your optimal value is 75 -- your plot might falsely give you the impression that 50 or 100 could be just as good.
+
+You could always try a multi-staged approach where first you start with a wider range and then narrow in on a smaller range!
+:::
+
+```{r}
+hyper_grid <- expand.grid(neighbors = seq(1, 101, by = 2))
+```
+
+Define a recipe that predicts `attrition` (AKA whether or not an employee left the company) from `over_time` (AKA is the employee working overtime), `monthly_income`, `job_level` (higher number = more seniority in company), and `job_satisfaction` (higher number = greater satisfaction). **Make this recipe as basic as possible, only including what is required for KNN.**
+
+::: {.callout-tip title="I need recipe help!! What ordering of steps should I follow?!"}
+The tidy folks put out [this](https://recipes.tidymodels.org/articles/Ordering.html) helpful resource for modeling steps that you can use as a basic guide. However, you should know that there isn't really *one* be-all-end-all formula for recipes steps. There are certainly a few things you *cannot* or *should not* do, like normalizing (e.g., scaling, etc.) before you impute -- this would error out. Other steps, however, you can switch around, but be aware that it might change the meaning. For example, `step_pca()` before any normalization will lead to components which are heavily weighted towards input values of greater magnitude. Although it's standard to normalize before `step_pca()`, you could make an argument to generate components that are weighted by variance.
+
+You should walk through each step sequentially and think about what it is doing to your data. Ask yourself, "Does it make sense for this operation to come before or after the next computation?"
+:::
+
+```{r}
+rec_knn <- recipe(attrition ~ over_time + monthly_income + job_level + job_satisfaction, data = data_trn) |> 
+  step_impute_median(all_numeric_predictors()) |> 
+  step_range(all_numeric_predictors()) |> 
+  step_dummy(all_nominal_predictors())
+```
+
+::: {.callout-tip title="How much missing data is too much missing data?"}
+The amount of missing data can impact how useful that feature might be in your model. Remember, even with the more sophisticated forms of imputation, you're still just predicting what values seem most likely to be in there rather than knowing them for sure! There is no threshold for how much missing data is too much missing data. Just know that a feature that is 80% missing which you median impute is unlikely to add much predictive value to your model.
+:::
+
+Tune across bootstrap resamples (we recommend practicing caching here). We are going to use parallel processing here, so write your code in between the two `plan()` lines -- this follows new practices from the tidy folks. Set accuracy as your training metric.
+
+When I run this without parallel processing, it takes about 10 minutes. When I run this with parallel processing, it takes about 2! (If you want to try timing code, look into the `tictoc` package!)
+```{r}
+plan(multisession, workers = parallel::detectCores(logical = FALSE))
+
+fits_knn_boot_trn <- cache_rds(
+  expr = {
+    nearest_neighbor(neighbors = tune()) |>
+      set_engine("kknn") |>
+      set_mode("classification") |>
+      tune_grid(preprocessor = rec_knn,
+                resamples = splits_boot_trn,
+                grid = hyper_grid,
+                metrics = metric_set(accuracy))
+  },
+  dir = "cache/",
+  file = "fits_knn_boot",
+  rerun = rerun_setting)
+
+plan(sequential)
+```
+
+Select the best *k*. Print the 5 best fits (`show_best()`) and then select the best model (`select_best()`).
+```{r}
+show_best(fits_knn_boot_trn, n = 5)
+
+select_best(fits_knn_boot_trn, metric = "accuracy")
+```
+
+Fit best model using the full training set. **What is the difference between `prep()` and `bake()`?**
+```{r}
+rec_prep <- rec_knn |>
+  prep(data_trn)
+
+feat_trn <- rec_prep |>
+  bake(NULL)
+
+feat_test <- rec_prep |>
+  bake(data_test)
+
+fit_knn_best <-
+  nearest_neighbor(neighbors = select_best(fits_knn_boot_trn)$neighbors) |>
+  set_engine("kknn") |>
+  set_mode("classification") |>
+  fit(attrition ~ ., data = feat_trn)
+```
+
+Get test set accuracy.
+```{r}
+accuracy_vec(feat_test$attrition,
+             predict(fit_knn_best, feat_test)$.pred_class)
+```
+
+Lastly, you would complete a final model fit with all available data. We won't do this in this practice example for time.
