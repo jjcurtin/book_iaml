@@ -53,7 +53,7 @@ conflictRules("Matrix", mask.ok = c("expand", "pack", "unpack")) # we need to ad
 
 ### Load additional packages
 ```{r}
-
+library(future)
 ```
 
 ### Source function scripts (John's or your own)
@@ -71,11 +71,6 @@ If you are going to use `cache_rds()`, you might include `rerun_setting <- FALSE
 ### Paths
 ```{r}
 path_data <- 
-```
-
-### Set up parallel processing
-```{r}
-
 ```
 
 ### Read in data
@@ -212,7 +207,11 @@ grid_penalty <- expand_grid(penalty = exp(seq(-6, 8, length.out = 100)))
 
 Use `linear_reg()`, `set_engine("glmnet")`, and `tune_grid()` to fit your LASSO models.
 ```{r}
+plan(multisession, workers = parallel::detectCores(logical = FALSE))
+
 fits_lasso <- 
+  
+plan(sequential)
 ```
 
 ### Plot performance in the validation sets by hyperparameter
@@ -284,7 +283,11 @@ grid_glmnet <- expand_grid(penalty = exp(seq(-10, 11, length.out = 250)),
 
 Use `linear_reg()`, `set_engine("glmnet")`, and `tune_grid()` to fit your LASSO models.
 ```{r}
+plan(multisession, workers = parallel::detectCores(logical = FALSE))
+
 fits_glmnet <- 
+  
+plan(sequential)
 ```
 
 ### Plot performance in the validation sets by hyperparameter
