@@ -8,7 +8,7 @@
 <link href="d06_regularization_files/libs/quarto-html/light-border.css" rel="stylesheet">
 <link href="d06_regularization_files/libs/quarto-html/quarto-html.min.css" rel="stylesheet" data-mode="light">
 <link href="d06_regularization_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles"><meta charset="utf-8">
-  <meta name="generator" content="quarto-1.5.57">
+  <meta name="generator" content="quarto-1.4.551">
 
   <title>d06_regularization</title>
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -338,35 +338,9 @@
 <h2>Announcements</h2>
 <p>Midterm</p>
 <ul>
-<li>Application exam available now. Due NEXT friday at noon</li>
+<li>Application exam available now. Due NEXT friday at 8pm</li>
 <li>Concepts exam in discussion section next thursday</li>
 <li>Review for concepts exam next tuesday in Lab (w/ me)</li>
-</ul>
-</section>
-<section id="feedback" class="slide level2">
-<h2>Feedback</h2>
-<ul>
-<li>Noise in discussion videos</li>
-<li>Quiz</li>
-<li>Interactive (ask your questions, answer my questions; groups?)</li>
-<li>Slides are just to organize my thoughts (often wont cover all topics; Flexible based on where discussion goes)</li>
-</ul>
-</section>
-<section id="bias-and-variance---the-most-fundamental-issues-in-inferential-statistics" class="slide level2">
-<h2>Bias and Variance - The MOST Fundamental Issues in Inferential Statistics</h2>
-<p>Describe these two properties of estimates in general</p>
-<ul>
-<li>need to think about repeated estimation of something (<span class="math inline">\(\hat{f}\)</span>, <span class="math inline">\(\hat{DGP}\)</span>; <span class="math inline">\(\hat{accuracy}\)</span>, <span class="math inline">\(\hat{rmse}\)</span>)</li>
-</ul>
-<p>Describe bias and variance associated with developing models (estimates of the DGP)</p>
-<ul>
-<li>Examples for our models (<span class="math inline">\(\hat{f}\)</span>, <span class="math inline">\(\hat{DGP}\)</span>)</li>
-<li>What factors affect each?</li>
-</ul>
-<p>Describe bias and variance of our performance estimates</p>
-<ul>
-<li>Examples for our performance estimates (<span class="math inline">\(\hat{accuracy}\)</span>, <span class="math inline">\(\hat{rmse}\)</span>)</li>
-<li>What factors affect each?</li>
 </ul>
 </section>
 <section id="curse-of-dimensionality" class="slide level2">
@@ -405,7 +379,7 @@
 <ul>
 <li>Lower computational costs than best subset</li>
 <li>Wont always find best model (3 X example)</li>
-<li>Can be used with p &gt; n</li>
+<li>Can be used with p &gt; n (stop when p &lt; n)</li>
 </ul></li>
 <li>Backward stepwise
 <ul>
@@ -429,6 +403,18 @@
 <p>LASSO</p>
 <ul>
 <li><span class="math inline">\(\frac{1}{n}([\sum_{i = 1}^{n} (Y_i - \hat{Y_i})^{2}] + [\:\lambda\sum_{j = 1}^{p} |\beta_j|\:])\)</span></li>
+</ul>
+<div class="callout callout-important no-icon callout-style-simple">
+<div class="callout-body">
+<div class="callout-content">
+<p>ADVANCED: Where else have you seend L1 and L2 norms before? (hint, you have seen them twice before)</p>
+</div>
+</div>
+</div>
+<p>:::{.fragment .uwred} - Euclidean distance is the L2 norm and Manhattan distance is the L1 norm.</p>
+<ul>
+<li><p>OLS regression vs.&nbsp;robust regression (fit with sum of absolute errors) is another example of L2 vs.&nbsp;L1 norms.</p></li>
+<li><p>L1 and L2 norms calculate the magnitude of a vector. We used magnitude to calculate the distance of the vector between two points in n dimensional space. We mimimized the magnitude of a vector composed of the errors in regression. Here we are calculating the magnitude of a vector composed of all the parameter estimates (to apply a penalty based on that magnitude)</p></li>
 </ul>
 </section>
 <section id="lambda" class="slide level2">
@@ -497,6 +483,9 @@
 <li>Still prefer ridge generally</li>
 </ul>
 <p>All do dimensionality reduction but NOT feature selection. Still need to measure all predictors</p>
+<ul>
+<li>Interpretation is reduced with these methods because the features are linear combinations of the original predictors. So we can’t say anything about the importance of the original predictors in these models.</li>
+</ul>
 <div class="quarto-auto-generated-content">
 <p><img src="uwlogo.png" class="slide-logo"></p>
 <div class="footer footer-default">
@@ -748,7 +737,18 @@
         }
         return false;
       }
-      const onCopySuccess = function(e) {
+      const clipboard = new window.ClipboardJS('.code-copy-button', {
+        text: function(trigger) {
+          const codeEl = trigger.previousElementSibling.cloneNode(true);
+          for (const childEl of codeEl.children) {
+            if (isCodeAnnotation(childEl)) {
+              childEl.remove();
+            }
+          }
+          return codeEl.innerText;
+        }
+      });
+      clipboard.on('success', function(e) {
         // button target
         const button = e.trigger;
         // don't keep focus
@@ -780,29 +780,7 @@
         }, 1000);
         // clear code selection
         e.clearSelection();
-      }
-      const getTextToCopy = function(trigger) {
-          const codeEl = trigger.previousElementSibling.cloneNode(true);
-          for (const childEl of codeEl.children) {
-            if (isCodeAnnotation(childEl)) {
-              childEl.remove();
-            }
-          }
-          return codeEl.innerText;
-      }
-      const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
-        text: getTextToCopy
       });
-      clipboard.on('success', onCopySuccess);
-      if (window.document.getElementById('quarto-embedded-source-code-modal')) {
-        // For code content inside modals, clipBoardJS needs to be initialized with a container option
-        // TODO: Check when it could be a function (https://github.com/zenorocha/clipboard.js/issues/860)
-        const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
-          text: getTextToCopy,
-          container: window.document.getElementById('quarto-embedded-source-code-modal')
-        });
-        clipboardModal.on('success', onCopySuccess);
-      }
         var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
         var mailtoRegex = new RegExp(/^mailto:/);
           var filterRegex = new RegExp('/' + window.location.host + '/');
@@ -810,7 +788,7 @@
             return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
         }
         // Inspect non-navigation links and adorn them if external
-     	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+     	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool)');
         for (var i=0; i<links.length; i++) {
           const link = links[i];
           if (!isInternal(link.href)) {
