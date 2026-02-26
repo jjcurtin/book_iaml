@@ -23,32 +23,11 @@ if [ "$FORMAT" = "slides_local" ];  then
   echo ""
   cp _quarto_slides.yml _quarto.yml
   quarto render "$FILE"
-  cp _quarto_book.yml _quarto.yml
-  quarto publish gh-pages --no-browser 
-  rm -r _book
   rm _quarto.yml
-  git add .
-  git commit -m "render slides"
-  git push
-  mkdir ~/stage/
-  cp -a *.html ~/stage/ 
-  cp -ar *_files ~/stage/  
-  cp -a uwlogo.png ~/stage/
-  cp -a slides_teaching.css ~/stage/
-  mkdir ~/tmp/
-  cp -ar .Rproj.user ~/tmp/
-  cp -a book_iaml.Rproj ~/tmp/
-  git checkout gh-pages
-  cp -ar ~/stage/. .
-  rm -r ~/stage
-  git add .
-  git commit -m "publish slides"
-  git push
-  git checkout main
-  cp -r ~/tmp/. .
-  rm -r ~/tmp
-  # rm -r *_files
-  # rm *.html
+  cp *.html ~/mnt/web/iaml/slides/ 
+  cp -r *_files ~/mnt/web/iaml/slides/
+  rm *.html
+  rm -r *_files
 fi
 
  
