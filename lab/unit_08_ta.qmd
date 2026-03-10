@@ -1,0 +1,666 @@
+---
+title: "Unit 08 Lab: Advanced Performance Metrics"
+date: "03/09/2026"
+format:
+  html:
+    embed-resources: true
+    toc: true
+    toc_depth: 4
+editor_options:
+  chunk_output_type: console
+---
+
+**Roadmap**
+
+We're revisiting the attrition dataset from Lab 6, so you already know the cleaning and basic workflow. Last time we used accuracy as our only metric. Today we expose why that was a problem, and build out the full performance metrics toolkit. By the end of this lab, you will have working code templates for:
+
+1.  Building and reading a confusion matrix
+2.  Sensitivity, specificity, PPV, NPV, balanced accuracy, F1, and Kappa
+3.  The ROC curve and auROC
+4.  Model selection using auROC instead of accuracy
+5.  Adjusting the classification threshold
+6.  Three approaches to class imbalance: up-sampling, down-sampling, and SMOTE
+
+------------------------------------------------------------------------
+
+### 1. Setup
+
+```{r}
+#| include: false
+
+library(tidyverse)
+library(tidymodels)
+options(conflicts.policy = "depends.ok")
+
+library(future)
+library(xfun, include.only = "cache_rds")
+
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+
+theme_set(theme_bw())
+options(tibble.width = Inf)
+
+path_data <- "data/"
+rerun_setting <- FALSE
+```
+
+A note on the `themis` package: it provides the sampling steps we'll use today (`step_upsample()`, `step_downsample()`, `step_smote()`). We'll call these with the `themis::` namespace rather than loading the full package to avoid conflicts.
+
+------------------------------------------------------------------------
+
+### 2. Data Introduction
+
+We're using the same attrition dataset from Lab 6. One critical difference: we're setting **`Yes` as the first (positive) level** of our outcome.
+
+This matters because `yardstick` (the metrics package inside `tidymodels`) assumes the first level is the positive class when computing sensitivity, specificity, PPV, NPV, and auROC. If you get this wrong, your sensitivity and specificity will be swapped.
+
+```{r}
+data_all <- read_csv(here::here(path_data, "attrition.csv"),
+                     show_col_types = FALSE) |>
+  janitor::clean_names() |>
+  glimpse()
+```
+
+Recode the outcome and key factors, with `Yes` first:
+
+```{r}
+data_all <- data_all |>
+  mutate(attrition = factor(attrition, levels = c("Yes", "No")),
+         over_time = factor(over_time, levels = c("Yes", "No")),
+         job_level = factor(job_level, levels = 1:5),
+         job_satisfaction = factor(job_satisfaction,
+                                   levels = c("Low", "Medium",
+                                              "High", "Very_High"))) |>
+  mutate(across(where(is.factor), tidy_responses)) |>
+  glimpse()
+```
+
+Check the class distribution:
+
+```{r}
+data_all |> tab(attrition)
+```
+
+::: callout-important
+Only \~16% of employees left (`yes`). The other \~84% stayed (`no`). A model that predicts **"no" for every single observation** would already achieve \~84% accuracy, without developing any meaningful insight.
+
+This is the core problem with accuracy on imbalanced outcomes.
+:::
+
+------------------------------------------------------------------------
+
+### 3. Train/Test Split + Bootstrap Splits
+
+Hold out 1/3 of the data as a test set. We'll use the same seed as Lab 6 so the splits are identical.
+
+```{r}
+set.seed(20220813)
+splits_test <- data_all |>
+  initial_split(prop = 2/3, strata = "attrition")
+
+data_trn <- splits_test |> analysis()
+data_test <- splits_test |> assessment()
+```
+
+Create 100 bootstrap resamples from the training set. We'll use these for model selection later (Section 7):
+
+```{r}
+set.seed(8675309)
+splits_boot <- data_trn |>
+  bootstraps(times = 100, strata = "attrition")
+```
+
+------------------------------------------------------------------------
+
+### 4. Baseline Model: Accuracy and Its Limits
+
+Build a recipe for logistic regression. We include median imputation for numeric predictors, as the attrition dataset has some missingness in variables like `monthly_income`, and we want consistent recipes across all models today:
+
+```{r}
+rec_glm <- recipe(attrition ~ ., data = data_trn) |>
+  step_impute_median(all_numeric_predictors()) |>
+  step_dummy(all_nominal_predictors()) |>
+  step_normalize(all_numeric_predictors())
+```
+
+Prep and bake feature matrices:
+
+```{r}
+rec_prep <- rec_glm |> prep(data_trn)
+
+feat_trn <- rec_prep |> bake(NULL)
+# wow chris you used bake(NULL) here that's really cool why did you do that
+feat_test <- rec_prep |> bake(data_test)
+```
+
+Fit logistic regression to the training data:
+
+```{r}
+fit_glm <- logistic_reg() |>
+  set_engine("glm") |>
+  fit(attrition ~ ., data = feat_trn)
+```
+
+Get test set accuracy:
+
+```{r}
+accuracy_vec(feat_test$attrition,
+             predict(fit_glm, feat_test)$.pred_class)
+```
+
+That returns \~84.3%. But let's compare to the null model:
+
+```{r}
+feat_test |> tab(attrition)
+```
+
+**Discussion:** The null model (predicting "no" for every single observation without looking at any predictors) would get \~83.9% accuracy. Our fitted logistic regression, after all that work, performs at essentially the *same level*. Accuracy is completely hiding this.
+
+------------------------------------------------------------------------
+
+### 5. The Confusion Matrix
+
+The confusion matrix breaks down our predictions by type of error. Build it by passing a tibble of `truth` and `estimate` into `conf_mat()`:
+
+```{r}
+cm <- tibble(truth    = feat_test$attrition,
+             estimate = predict(fit_glm, feat_test)$.pred_class) |>
+  conf_mat(truth, estimate)
+
+cm
+```
+
+Visualize it two ways:
+
+```{r}
+autoplot(cm)  # mosaic plot (default), good for sensitivity/specificity
+```
+
+```{r}
+autoplot(cm, type = "heatmap")  # heatmap, good for PPV/NPV
+```
+
+The columns are ground truth; the rows are predictions. Correct predictions fall on the top-left to bottom-right diagonal.
+
+#### 5.1 Full Metrics Summary
+
+`summary()` on a `conf_mat` object gives you everything at once:
+
+```{r}
+cm |> summary()
+```
+
+Let's look at the metric groups that matter most.
+
+#### 5.2 Sensitivity, Specificity, and Balanced Accuracy
+
+These are **column-specific accuracies** -- they focus on what's true for each group of patients (or employees, here).
+
+```{r}
+cm |>
+  summary() |>
+  filter(.metric %in% c("sens", "spec", "bal_accuracy")) |>
+  select(-.estimator)
+```
+
+`%in%` is R's membership operator: it returns `TRUE` for each element on the left that appears anywhere in the right-hand vector, and is a cleaner alternative to chaining multiple `==` conditions with `|`. We'll use it throughout to pull specific metrics out of the full `summary()` output.
+
+-   **Sensitivity** (`sens`): Of all true positives (employees who actually left), what fraction did we correctly identify? This is our "catch rate" for the positive class.
+-   **Specificity** (`spec`): Of all true negatives (employees who stayed), what fraction did we correctly identify?
+-   **Balanced accuracy**: The arithmetic mean of sensitivity and specificity. More informative than raw accuracy when classes are unbalanced.
+
+::: callout-note
+Even though our accuracy (\~84.3%) roughly matches the null model, our sensitivity is very low. We're not catching most of the employees who actually leave, clients would refund our model because it's so bad, probably.
+:::
+
+#### 5.3 PPV and NPV
+
+These are **row-specific accuracies**: they focus on the utility of our model's predictions from the perspective of someone receiving the result.
+
+```{r}
+cm |>
+  summary() |>
+  filter(.metric %in% c("ppv", "npv")) |>
+  select(-.estimator)
+```
+
+-   **PPV** (Positive Predictive Value / Precision): When the model predicts "yes" (attrition), how often is it right?
+-   **NPV** (Negative Predictive Value): When the model predicts "no" (no attrition), how often is it right?
+
+PPV is heavily influenced by the **prevalence** of the positive class - and this is often counter-intuitive.
+
+Imagine a COVID test with 95% sensitivity and 95% specificity. If you test 1,000 people from the general public when COVID prevalence is 1%, only about 10 people actually have it. The test will catch \~9.5 of them (TP) but also flag \~50 of the 990 healthy people (FP).
+
+That gives PPV ≈ 9.5 / (9.5 + 50) ≈ **16%**, even with a "95% accurate" test, a positive result is "wrong" 84% of the time.
+
+Now run the same test in a symptomatic clinic where prevalence is 50%: PPV jumps to \~95%. Same test, same sensitivity, same specificity, but a completely different PPV because the prevalence changed.
+
+This is why PPV should always be interpreted alongside sensitivity, specificity, and the base rate of the positive class in the population being tested.
+
+#### 5.4 Precision, Recall, and F1
+
+Precision = PPV; Recall = Sensitivity. F1 is their harmonic mean -- a single metric that keeps the focus on the positive class.
+
+```{r}
+cm |>
+  summary() |>
+  filter(.metric %in% c("precision", "recall", "f_meas")) |>
+  select(-.estimator)
+```
+
+$F1 = 2 \cdot \frac{Precision \cdot Recall}{Precision + Recall}$
+
+The key property of F1 is that it is pulled strongly toward whichever value is lower. Consider a degenerate classifier that predicts "yes" (attrition) for every single observation: recall = 1.0 (it catches every true positive) but precision ≈ 0.16 (only 16% of its positive predictions are correct, since that's the base rate). The arithmetic mean would give (1.0 + 0.16) / 2 = 0.58, which sounds passable. F1 gives 2 \* (1.0 \* 0.16) / (1.0 + 0.16) = **0.28**, which correctly reflects that this classifier is useless.
+
+#### 5.5 Kappa
+
+Kappa compares observed accuracy to the accuracy we'd expect by chance given the base rates.
+
+```{r}
+cm |>
+  summary() |>
+  filter(.metric == "kap") |>
+  select(-.estimator)
+```
+
+$\kappa = \frac{observed - expected}{1 - expected}$
+
+-   $\kappa = 0$: no better than chance
+-   $\kappa = 1$: perfect agreement
+-   Rough benchmarks:
+    -   \< 0.20 = slight
+    -   0.21–0.40 = fair
+    -   0.41–0.60 = moderate
+    -   0.61–0.80 = substantial
+
+------------------------------------------------------------------------
+
+### 6. The ROC Curve and auROC
+
+Our model outputs a **probability** for each observation before it applies the 50% classification threshold. The ROC curve shows us how sensitivity and specificity trade off at every possible threshold simultaneously.
+
+First, let's visualize the predicted probabilities for the true positive and true negative classes separately:
+
+```{r}
+preds <- tibble(truth = feat_test$attrition,
+                prob  = predict(fit_glm, feat_test, type = "prob")$.pred_yes)
+
+ggplot(preds, aes(x = prob)) +
+  geom_histogram(bins = 15) +
+  facet_wrap(vars(truth), nrow = 2) +
+  xlab("Pr(Attrition = Yes)")
+```
+
+**Discussion:**
+
+> The **"no" panel** (bottom) looks like a well-behaved classifier: the model assigns low probabilities to most employees who stayed, with the distribution heavily concentrated near 0.
+>
+> The **"yes" panel** (top) is the problem: the probabilities are spread nearly flat across the full range, with most mass below 0.2. The model essentially has no idea who is going to leave: it's assigning low attrition probabilities to most employees regardless of whether they actually left or not.
+
+Exercise!
+
+WHERE WOULD YOU PUT A VERTICAL LINE TO SEPERATE THE TWO CLASSES NEATLY?(SPOILER: THIS WILL BE VERY HARD)
+
+Build the ROC curve data and plot it:
+
+```{r}
+roc_data <- preds |>
+  roc_curve(prob, truth = truth)
+
+autoplot(roc_data)
+```
+
+Or with manual `ggplot()` for more control:
+
+```{r}
+roc_data |>
+  ggplot(aes(x = 1 - specificity, y = sensitivity)) +
+  geom_path(linewidth = 0.5) +
+  geom_abline(lty = 3) +
+  coord_fixed(xlim = c(0, 1), ylim = c(0, 1)) +
+  labs(x = "1 - Specificity (FPR)",
+       y = "Sensitivity (TPR)")
+```
+
+-   The **dotted diagonal** represents a random classifier (50/50 guessing)
+-   A **perfect classifier** would hug the top-left corner (sensitivity = 1, FPR = 0)
+-   The further the curve bows toward the top-left, the better the classifier
+
+Calculate the area under the ROC curve (auROC):
+
+```{r}
+preds |> roc_auc(prob, truth = truth)
+```
+
+auROC interpretation:
+
+-   \~0.5: no better than random
+-   0.70–0.80: fair discrimination
+-   0.80–0.90: good
+-   \< 0.90: excellent
+
+auROC has a useful probabilistic interpretation: **it is the probability that the model will assign a higher predicted probability to a randomly selected true positive than to a randomly selected true negative.**
+
+------------------------------------------------------------------------
+
+### 7. Model Selection with auROC
+
+When we have hyperparameters to tune (like K in KNN, or penalty in glmnet), the metric we use for selection matters. With an imbalanced outcome, using accuracy as the selection metric tends to favor configurations that predict the majority class -- which inflates accuracy without actually learning the positive class.
+
+Here we demonstrate what it looks like to use `metric_set(roc_auc)` in `fit_resamples()`:
+
+```{r}
+fits_glm_auc <- cache_rds(
+  expr = {
+    plan(multisession, workers = parallel::detectCores(logical = FALSE))
+    result <- logistic_reg() |>
+      set_engine("glm") |>
+      fit_resamples(preprocessor = rec_glm,
+                    resamples = splits_boot,
+                    metrics = metric_set(roc_auc))
+    plan(sequential)
+    result
+  },
+  dir = "cache/008/",
+  file = "fits_glm_auc",
+  rerun = rerun_setting)
+```
+
+```{r}
+collect_metrics(fits_glm_auc)
+```
+
+::: callout-note
+For a plain logistic regression with no hyper-parameters, changing the metric in `fit_resamples()` doesn't change the final model -- there's nothing to select between. The metric matters when you pass it to `tune_grid()` to compare configurations (e.g., different values of `neighbors` in KNN). In the homework, you will use `metric_set(roc_auc)` inside `tune_grid()` so that the winning K or penalty is the one with the best auROC -- not the one that best predicts the majority class.
+:::
+
+------------------------------------------------------------------------
+
+### 8. Classification Threshold Adjustment
+
+The default 50% threshold maximizes overall accuracy (the Bayes classifier). But we can lower it to trade some specificity for more sensitivity -- useful when the cost of a false negative (missing someone who will leave) is higher than the cost of a false positive (flagging someone who won't leave).
+
+Let's see what happens at a 35% threshold:
+
+```{r}
+preds_thresh <- tibble(
+  truth       = feat_test$attrition,
+  prob        = predict(fit_glm, feat_test, type = "prob")$.pred_yes,
+  estimate_35 = factor(if_else(prob >= .35, "yes", "no"),
+                       levels = c("yes", "no"))
+)
+
+preds_thresh
+```
+
+`if_else(prob >= .35, "yes", "no")` converts the raw probability into a class label using our new threshold, so that anyone above 35% gets predicted "yes". We immediately wrap it in `factor(..., levels = c("yes", "no"))` to ensure "yes" stays the first (positive) level, since `if_else` returns a plain character vector.
+
+Build the new confusion matrix:
+
+```{r}
+cm_35 <- preds_thresh |>
+  conf_mat(truth = truth, estimate = estimate_35)
+
+cm_35
+autoplot(cm_35, type = "heatmap")
+```
+
+Compare metrics at 35% vs. 50%:
+
+```{r}
+# 35% threshold
+cm_35 |>
+  summary() |>
+  filter(.metric %in% c("accuracy", "sens", "spec", "ppv", "npv")) |>
+  select(-.estimator)
+```
+
+```{r}
+# 50% threshold (original)
+cm |>
+  summary() |>
+  filter(.metric %in% c("accuracy", "sens", "spec", "ppv", "npv")) |>
+  select(-.estimator)
+```
+
+**Discussion:** let's walk through all these interpretations (yes all of them)
+
+|             | 50%  | 35%  |
+|-------------|------|------|
+| Sensitivity | .203 | .304 |
+| Specificity | .966 | .905 |
+| PPV         | .533 | .381 |
+| NPV         | .863 | .871 |
+| Accuracy    | .843 | .808 |
+
+The direction of every change follows from the confusion matrix structure. Whether the trade-off is worth it depends entirely on the relative costs of false positives and false negatives in your application.
+
+::: callout-important
+**Key constraint**: If you want to use your data to *select* the optimal threshold, you need a separate held-out set -- you can't use the same test data for both threshold selection and final evaluation. That would introduce optimization bias, and we can't have that of course.
+:::
+
+------------------------------------------------------------------------
+
+### 9. Addressing Class Imbalance
+
+When the minority class is rare, models struggle to learn from it. The training data is dominated by negative examples, so the model is rarely "rewarded" for correct positive predictions. We have three post-hoc tools:
+
+1.  **Up-sampling**: Duplicate minority class observations until the classes are balanced
+2.  **Down-sampling**: Remove majority class observations until the classes are balanced
+3.  **SMOTE**: Synthesize new minority class observations by interpolating between existing ones
+
+::: callout-important
+**Critical rule**: These steps should **only affect training data**. Never apply them to your test set, as it must reflect the true class distribution you'll encounter in deployment. The `themis` sampling functions handle this automatically: `step_upsample()`, `step_downsample()`, and `step_smote()` are automatically skipped when `bake()` is called on new data. This is why you must use `bake(new_data = NULL)` to get training features when your recipe includes a sampling step.
+:::
+
+------------------------------------------------------------------------
+
+#### 9a. Up-Sampling
+
+`step_upsample()` samples minority class observations *with replacement* until the classes are balanced. It simply duplicates existing observations -- no new information is added.
+
+```{r}
+rec_up <- recipe(attrition ~ ., data = data_trn) |>
+  step_impute_median(all_numeric_predictors()) |>
+  step_dummy(all_nominal_predictors()) |>
+  themis::step_upsample(attrition, over_ratio = 1) |>  # over_ratio = 1 duplicates minority observations until minority:majority = 1:1; set lower (e.g., 0.5) for partial balancing
+  step_normalize(all_numeric_predictors())
+```
+
+Prep and bake. Note `bake(new_data = NULL)` for training -- this tells `bake()` to apply the recipe to the data that was used in `prep()` (including the upsampling), rather than new data:
+
+```{r}
+rec_up_prep <- rec_up |> prep(data_trn)
+
+feat_trn_up  <- rec_up_prep |> bake(new_data = NULL)
+feat_test_up <- rec_up_prep |> bake(data_test)  # test: NOT upsampled
+```
+
+Verify the training data is now balanced:
+
+```{r}
+feat_trn_up |> tab(attrition)
+```
+
+Fit and evaluate:
+
+```{r}
+fit_up <- logistic_reg() |>
+  set_engine("glm") |>
+  fit(attrition ~ ., data = feat_trn_up)
+
+cm_up <- tibble(truth    = feat_test_up$attrition,
+                estimate = predict(fit_up, feat_test_up)$.pred_class) |>
+  conf_mat(truth, estimate)
+
+cm_up
+autoplot(cm_up, type = "heatmap")
+```
+
+```{r}
+cm_up |>
+  summary() |>
+  filter(.metric %in% c("accuracy", "sens", "spec", "bal_accuracy", "ppv", "npv")) |>
+  select(-.estimator)
+```
+
+------------------------------------------------------------------------
+
+#### 9b. Down-Sampling
+
+`step_downsample()` removes majority class observations at random until the classes are balanced. This reduces training data size but creates a balanced dataset from what remains.
+
+```{r}
+rec_down <- recipe(attrition ~ ., data = data_trn) |>
+  step_impute_median(all_numeric_predictors()) |>
+  step_dummy(all_nominal_predictors()) |>
+  themis::step_downsample(attrition, under_ratio = 1) |>  # under_ratio = 1 removes majority observations until majority:minority = 1:1; higher values retain more of the majority class
+  step_normalize(all_numeric_predictors())
+```
+
+```{r}
+rec_down_prep <- rec_down |> prep(data_trn)
+
+feat_trn_down  <- rec_down_prep |> bake(new_data = NULL)
+feat_test_down <- rec_down_prep |> bake(data_test)
+```
+
+Verify -- training data is balanced but smaller:
+
+```{r}
+feat_trn_down |> tab(attrition)
+```
+
+Fit and evaluate:
+
+```{r}
+fit_down <- logistic_reg() |>
+  set_engine("glm") |>
+  fit(attrition ~ ., data = feat_trn_down)
+
+cm_down <- tibble(truth    = feat_test_down$attrition,
+                  estimate = predict(fit_down, feat_test_down)$.pred_class) |>
+  conf_mat(truth, estimate)
+
+cm_down
+autoplot(cm_down, type = "heatmap")
+```
+
+```{r}
+cm_down |>
+  summary() |>
+  filter(.metric %in% c("accuracy", "sens", "spec", "bal_accuracy", "ppv", "npv")) |>
+  select(-.estimator)
+```
+
+------------------------------------------------------------------------
+
+#### 9c. SMOTE
+
+SMOTE (Synthetic Minority Over-Sampling Technique) synthesizes **new** minority class observations rather than just duplicating them. It works by:
+
+1.  Randomly selecting a minority class observation
+2.  Finding its K nearest neighbors (among other minority class observations)
+3.  Creating a new synthetic observation with the same outcome but interpolated predictor values
+
+Because SMOTE uses distances between observations, it requires features to be on a comparable scale **before** synthesizing. Add `step_range()` before `step_smote()`:
+
+```{r}
+rec_smote <- recipe(attrition ~ ., data = data_trn) |>
+  step_impute_median(all_numeric_predictors()) |>  # SMOTE errors on NAs
+  step_dummy(all_nominal_predictors()) |>
+  step_range(all_predictors()) |>               # scale to [0,1] for distance calcs
+  themis::step_smote(attrition, over_ratio = 1, neighbors = 5) |>  # over_ratio = 1 means synthesize until minority:majority = 1:1; neighbors = 5 controls how many nearby minority observations are used to generate each synthetic point
+  step_normalize(all_numeric_predictors())
+```
+
+```{r}
+rec_smote_prep <- rec_smote |> prep(data_trn)
+
+feat_trn_smote  <- rec_smote_prep |> bake(new_data = NULL)
+feat_test_smote <- rec_smote_prep |> bake(data_test)
+```
+
+Verify -- balanced training data with synthetic observations:
+
+```{r}
+feat_trn_smote |> tab(attrition)
+```
+
+Fit and evaluate:
+
+```{r}
+fit_smote <- logistic_reg() |>
+  set_engine("glm") |>
+  fit(attrition ~ ., data = feat_trn_smote)
+
+cm_smote <- tibble(truth    = feat_test_smote$attrition,
+                   estimate = predict(fit_smote, feat_test_smote)$.pred_class) |>
+  conf_mat(truth, estimate)
+
+cm_smote
+autoplot(cm_smote, type = "heatmap")
+```
+
+```{r}
+cm_smote |>
+  summary() |>
+  filter(.metric %in% c("accuracy", "sens", "spec", "bal_accuracy", "ppv", "npv")) |>
+  select(-.estimator)
+```
+
+------------------------------------------------------------------------
+
+#### 9d. Summary Comparison
+
+Let's pull the key metrics from each approach side-by-side:
+
+```{r}
+get_key_metrics <- function(cm, label) {
+  cm |>
+    summary() |>
+    filter(.metric %in% c("sens", "spec", "bal_accuracy", "ppv")) |>
+    select(.metric, .estimate) |>
+    mutate(model = label)
+}
+
+bind_rows(
+  get_key_metrics(cm,       "Baseline (no sampling)"),
+  get_key_metrics(cm_up,    "Up-sampling"),
+  get_key_metrics(cm_down,  "Down-sampling"),
+  get_key_metrics(cm_smote, "SMOTE")
+) |>
+  pivot_wider(names_from = model, values_from = .estimate)
+```
+
+**Discussion:** All three sampling approaches boost sensitivity at the cost of some specificity -- this is the fundamental trade-off when we balance training data. Down-sampling tends to lose the most, since it throws away majority class data. SMOTE often offers the best balance because it adds diversity to the minority class rather than duplicating existing observations.
+
+Which approach is "best" depends on:
+
+-   The relative costs of false positives vs. false negatives in your application
+-   How many minority class observations you have to work with
+-   Whether you care more about discrimination (auROC) or calibrated predictions
+
+In the homework, you'll use SMOTE with `step_smote()` and evaluate whether it improves model performance for the breast cancer dataset.
+
+------------------------------------------------------------------------
+
+### Wrap-Up
+
+Here's a summary of the tools we covered and when to use each:
+
+| Tool | When to use |
+|----|----|
+| **Accuracy** | Balanced classes; when all errors cost the same |
+| **Sensitivity / Specificity** | When FP and FN have different costs; medical / clinical contexts |
+| **PPV / NPV** | When prevalence matters; interpreting what a prediction means for an individual |
+| **Balanced accuracy** | Single metric for imbalanced outcomes; model selection |
+| **F1** | When you care about positive class performance; information retrieval contexts |
+| **Kappa** | Normalizes for class imbalance in accuracy |
+| **auROC** | Threshold-independent; best for model selection with imbalanced outcomes |
+| **Threshold adjustment** | When you need to tune sensitivity/specificity trade-off for deployment |
+| **Up-sampling** | Simple; works when minority class is small; adds no new info |
+| **Down-sampling** | Simple; works when data is plentiful; loses information |
+| **SMOTE** | Adds diversity; usually preferred over simple up/down-sampling |
