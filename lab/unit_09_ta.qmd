@@ -1,0 +1,715 @@
+---
+title: "Unit 9 Lab TA"
+format: html
+editor_options: 
+  chunk_output_type: console
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+## Happy Tuesday! Welcome to your Unit 9 Lab!
+
+## Practicing with Tree-based Algorithms
+
+Today we'll be going over the code for different tree-based algorithms, with each algorithm getting slightly more complex.
+
+For your assignment this week, you'll need to work with both basic decision trees and random forest (but not bagged trees, which you can think of as kind of "intermediate" between the other two). All of these are considered tree-based algorithms.
+
+The key idea behind all of these tree-based methods is that they partition the data into groups with similar outcomes based on predictor variables. This is done repeatedly (recursively) until specific stopping criteria are reached (which you either manually define or tune). We'll work on implementing this practically in lab today! Below is a table summarizing the three types reviewed in lecture.
+
+| Method | What does it do | Hyperparameters |
+|----|----|----|
+| Decision tree | "Base" method using one tree, partitions data into groups with similar outcomes | tree_depth, min_n, cost_complexity |
+| Bagged (bootstrap aggregated) trees | "Ensemble" method that fits many trees on bootstrap samples and then aggregates predictions | tree_depth, min_n, cost_complexity |
+| Random forest | "Ensemble" method that fits many trees on bootstrap samples and then aggregates predictions, but also adds in some randomness by randomly selecting a subset of predictors at each split | mtry, trees, min_n |
+
+We will cover each of these hyperparameters as we go through this lab together.
+
+### Introduction to the data and set-up
+
+We'll be using a dataset from Kaggle today that your TAs have taken some liberty with to modify. Let's read the brief synopsis together:
+
+> Imagine that you are a medical researcher compiling data for a study. You have collected data from a set of patients, all of whom suffer from the same illness. This is a Phase II clinical trial with a single arm, so every patient is receiving the same experimental drug.
+>
+> Your job is to build a model to find out whether or not a future patient with the same illness will response to this new drug. The features of this dataset are Age, Sex, Blood Pressure, Cholesterol, and Sodium/Potassium Blood Concentrations of the patients, and the target is whether or not the patient responded to the drug (i.e., had significant clinical improvement).
+
+Let's throw in our usual set-up chunk and get started!
+
+```{r}
+#| include: false
+
+library(tidyverse)
+library(tidymodels)
+options(conflicts.policy = "depends.ok")
+
+library(future)
+library(xfun, include.only = "cache_rds")
+library(ranger)
+library(baguette)
+
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+
+theme_set(theme_bw())
+options(tibble.width = Inf)
+
+path_data <- "data"
+rerun_setting <- TRUE
+
+plan(multisession, workers = parallel::detectCores(logical = FALSE))
+```
+
+Let's load in our data and take a look at it.
+```{r}
+data_all <- read_csv(here::here(path_data, "drug_response.csv"))
+
+data_all |> glimpse()
+```
+
+```{r}
+data_all <- data_all |>
+  mutate(response = factor(response, levels = c("yes", "no")),
+         bp = factor(bp, levels = c("low", "normal", "high")),
+         cholesterol = factor(cholesterol, levels = c("low", "normal", "high"))) |>
+  mutate(across(where(is.character), factor))
+
+data_all |> glimpse()
+```
+
+Let's check and see if we have any missing data. This is important because random forest doesn't natively handle missing data (important note: this is because we use the `ranger` engine, not an inherent limitation of the algorithm; the engine we use for base decision trees and bagged trees in this course *can* handle missing data using surrogate splits).
+```{r}
+data_all |> skim_all()
+```
+
+Let's set up our splits.
+```{r}
+set.seed(11212021)
+splits_test <- data_all |> 
+  initial_split(prop = 2/3, strata = "response")
+
+data_trn <- splits_test |> 
+  analysis()
+
+data_test <- splits_test |> 
+  assessment()
+```
+
+Create a basic recipe. Since we have no missing data, which means we can use the same recipe for all three of the tree-based models we'll be trying out today. Feature engineering can certainly still help your model performance, but there are relatively few required feature engineering steps in decision trees (and our features are relatively simple in this example), so we'll keep it as basic as possible for now.
+```{r}
+rec <- recipe(response ~ ., data = data_trn)
+ 
+rec_prep <- rec |> 
+  prep(data_trn)
+
+feat_trn <- rec_prep |> 
+  bake(NULL)
+
+feat_trn |> skim_some()
+```
+
+::: {.callout-tip}
+#### Much ado about NULL
+
+When we prep our training data, it saves a version of our existing preprocessed training data into the `template` slot of our recipe. Let's take a look at our rec_prep object.
+```{r}
+#| eval: false
+View(rec_prep)
+```
+
+When we call `bake(NULL)`, it is retrieving that saved version of our training data which has already been preprocessed and using that to create our features. Putting in your training data here will cause everything to be recalculated.
+
+We have you always set this to NULL even if you aren't using a procedure like resampling because it causes a critical error when you do use resampling -- because it will *reapply* resampling, thus altering class balances and breaking reproducibility.
+
+*Okay...but I'm not really understanding why this matters?*
+
+Let's think practically about the different steps where we use `rec_prep`. Specifically, consider when you're evaluating your final model:
+
+`feat_test <- rec_prep |> bake(new_data = data_test)`
+
+If `rec_prep` and `feat_trn` have different parameters, then you can probably intuit how that's a problem -- it makes your evaluation in test not actually a true one-to-one comparison because your features will be mismatched. Your evaluation in test won't actually be an accurate assessment of how your model is performing.
+
+**NULL is the safest default to use, even if not using resampling, because it builds good habits!!! There are also other steps in your recipe that may end up being recalculated other than resampling procedures, too, so this could break your code in a number of ways (think if your preprocessing is trying to impute with the mode and there are multiple modes).**
+
+:::
+
+Before we get into things, let's generate our bootstrap resamples. Remember that you want a number bigger than 10 in the real world, but I think we'd all be cranky if we sat here in lab for 30 minutes just waiting for things to run. :^)
+```{r}
+set.seed(11212021)
+splits_boot <- data_trn |>
+  bootstraps(times = 10, strata = "response")
+
+splits_boot
+```
+
+### Decision Tree
+
+We'll start with the most basic decision tree.
+
+Let's take a look at our new hyperparameter grid.
+```{r}
+grid_tree <- grid_regular(cost_complexity(), tree_depth(), min_n(), levels = 4)
+
+grid_tree
+```
+
+We have three hyperparameters here:
+
+ - `cost_complexity()`: post-hoc pruning that helps penalize very complex trees
+ - `tree_depth()`: maximum number of splits that a tree can have
+ - `min_n()`: the minimum number of data points in a node required for the node to be split further (e.g., at what point will the algorithm decide it doesn't make sense to keep partitioning observations)
+ 
+`levels` specified how many values to pick for each hyperparameter. These values are chosen across the probable range of each hyperparameter by default. Here, we're saying "pick four evenly spaced values of all of our hyperparameters". 4 x 4 x 4 = 64 possible combinations, which we can see when we print our tibble. The math is mathing!
+```{r}
+fits_tree <- decision_tree(cost_complexity = tune(),
+                tree_depth = tune(),
+                min_n = tune()) |>
+    set_engine("rpart") |> # our new engine!
+    set_mode("classification") |> # be mindful that we can do regression or classification w/ trees
+    tune_grid(preprocessor = rec, 
+              resamples = splits_boot, 
+              grid = grid_tree, 
+              metrics = metric_set(roc_auc))
+```
+
+::: {.callout-tip}
+#### Picking an evaluation metric -- what to use when?!
+
+
+
+:::
+
+Let's look and see if we picked a sufficient range of hyperparameters to evaluate. `autoplot()` will show us how combinations of different parameters influences our chosen metric. Typically, in these plots we're looking for *peaks*.
+```{r}
+autoplot(fits_tree)
+```
+
+**What values for minimal node size (`min_n()`) and tree depth (`tree_depth()`) would you pick based off of looking at these plots?**
+
+Let's print our best configurations to see if we're right. Nice job!
+```{r}
+show_best(fits_tree)
+```
+
+Let's fit our best decision tree model.
+```{r}
+best_decision_tree <-   
+  decision_tree(cost_complexity = select_best(fits_tree)$cost_complexity,
+                tree_depth = select_best(fits_tree)$tree_depth,
+                min_n = select_best(fits_tree)$min_n) |>
+  set_engine("rpart", model = TRUE) |>
+  set_mode("classification") |>  
+  fit(response ~ ., data = feat_trn)
+```
+
+One of the benefits of decision trees (at least, this very simple version!) is that they are quite easy to visualize and understand. Let's walk through what all of these points mean on our diagram.
+```{r}
+best_decision_tree$fit |> rpart.plot::rpart.plot(fallen.leaves = FALSE)
+```
+
+It looks like the features driving our splits are sodium/potassium values, blood pressure, and age. Let's step through this tree together to make sure we understand it!
+
+Let's orient ourselves first:
+
+ - Remember that `yes` represents drug response and `no` represents non-response
+ - The percentage points indicate the percentage of our sample which is each node
+ - The top box is our **root node** (which has all of our training data)
+ - Subgroups which do not result in any more subsequent partitions are **terminal nodes** or **leaves**
+ - The connections between are branches
+ 
+1) **Root split**
+
+  - Feature: sodium/potassium ratio >= 15
+  - Outcome:
+    - 45% of the sample is classified as responders (yes)
+    - 55% of the sample is classified as non-responders (no)
+  - This split partitions the data into two subgroups for further splitting
+
+2) **Second split (internal node)**
+
+  - Feature: blood pressure = high
+  - Outcome:
+    - 19% of the sample is classified as responders (yes)
+    - 36% of the sample is classified as non-responders (no)
+
+3) **Third split (internal node)**
+
+  - Feature: age < 49
+  - Outcome:
+    - 11% of the sample is classified as responders (yes)
+    - 9% of the sample is classified as non-responders (no)
+
+4) **Fourth split (internal node)**
+
+  - Feature: sodium/potassium ratio < 9.8
+  - Outcome:
+    - 2% of the sample is classified as responders (yes)
+    - 7% of the sample is classified as non-responders (no)
+
+This clearly illustrates the decision-rule process that tree-based algorithms follow and underscores their appeal in terms of interpretability. :^)
+
+### Bagged Trees
+
+Now, let's fit some bootstrap aggregating (bagging) models!
+
+Instead of fitting one tree, like we did above, we are going to fit multiple versions of trees and then average them together. Pretty neat!
+
+This is and random forest are called "ensemble" approaches because they both combine individual models into one prediction; similarly, the decision tree we fit above is considered a "base" learner because it is just one tree.
+
+**What's the benefit of using an ensemble approach?**
+
+We have the same hyperparameters, bootstrap splits, and tuning parameter grid as we did before. However, you can see that now we have a new argument called `times`. We have set this to 5 for the sake of time, but you typically would want to set it to be much higher.
+
+Recall how we have 10 bootstrap resamples. By setting `times = 5`, we are instructing the engine to fit 5 models for each of the 10 bootstraps.
+```{r}
+fits_bagged <- bag_tree(cost_complexity = tune(),
+           tree_depth = tune(),
+           min_n = tune()) |>
+    set_engine("rpart", times = 5) |> # new argument "times"!
+    set_mode("classification") |> 
+    tune_grid(preprocessor = rec, 
+              resamples = splits_boot, 
+              grid = grid_tree, 
+              metrics = metric_set(roc_auc))
+```
+
+Let's check our hyperparameter plot again. **Which combination looks the most promising?**
+```{r}
+autoplot(fits_bagged)
+```
+ 
+Now let's print our results.
+```{r}
+show_best(fits_bagged)
+```
+
+Nice! It looks like we're doing better than our basic decision tree model. Let's fit our best model configuration in case this ends up being the model we want to evaluate in test.
+```{r}
+best_bagged_tree <-   
+  decision_tree(cost_complexity = select_best(fits_bagged)$cost_complexity,
+                tree_depth = select_best(fits_bagged)$tree_depth,
+                min_n = select_best(fits_bagged)$min_n) |>
+  set_engine("rpart", model = TRUE) |>
+  set_mode("classification") |>  
+  fit(response ~ ., data = feat_trn)
+```
+
+### Random Forest
+
+The final extension of tree-based models we'll be covering in this unit is random forest. Random forest does everything that bagged models do, but inserts a little more randomness into the process to reduce how correlated the base learners are with each other.
+
+*How does it do this, you might ask?*
+
+Random forest varies the number of features that are evaluated at each split (`mtry`). This ends up creating trees that are more different from each other, therefore reducing their correlation.
+
+Let's review our hyperparameters for random forest:
+ - `trees`: the number of different trees we're going to "grow"
+ - `mtry`: the number of features to randomly select on for each split
+ - `min_n`: minimum number of observations in a new node (**this is different than `min_n` above**)
+
+```{r}
+grid_rf <- expand_grid(trees = c(50, 100, 150, 200, 250), 
+                       mtry = c(3, 4, 5), # highest is number of features you have
+                       min_n = c(30, 40, 50, 60, 70, 80))
+```
+
+Let's run our random forest configurations now! Let's take a minute to review what's new here compared to our previous configuration.
+```{r}
+fits_rf <- rand_forest(trees = tune(),
+              mtry = tune(),
+              min_n = tune()) |>
+    set_engine("ranger",
+               respect.unordered.factors = "order", # will order our factors per tidy folks recommendations
+               oob.error = FALSE, # set to false to save some computational time
+               seed = 102030) |> # let's keep things reproducible
+    set_mode("classification") |> 
+    tune_grid(preprocessor = rec, 
+              resamples = splits_boot, 
+              grid = grid_rf, 
+              # including multiple metrics to demo selecting based on one metric!
+              metrics = metric_set(roc_auc, ppv, npv, bal_accuracy))
+```
+
+It's that time again! **Which configuration looks the most promising?**
+```{r}
+autoplot(fits_rf, metric = "roc_auc") # here I specify the metric I want to look at
+```
+
+::: {.callout-tip}
+#### Tracking tibble for performance metrics?
+
+Some folks were wondering how they can visualize performance metrics across a variety of metrics at the same time (similar to how we saved out information earlier in the course into a tracking tibble). Luckily, the `collect_metrics()` function can help us do that!
+
+```{r}
+fits_rf |> collect_metrics()
+```
+
+:::
+
+You can use the `metric` argument in `show_best()` to specify which metric you'd like to evaluate your model on. We'll keep things consistent and use `roc_auc`.
+```{r}
+show_best(fits_rf, metric = "roc_auc")
+```
+
+You can see here that we can also use this argument in `select_best()`!
+```{r}
+best_rf_tree <- 
+  rand_forest(trees = select_best(fits_rf, metric = "roc_auc")$trees,
+                mtry = select_best(fits_rf, metric = "roc_auc")$mtry,
+                min_n = select_best(fits_rf, metric = "roc_auc")$min_n) |>
+  set_engine("ranger", 
+             respect.unordered.factors = "order", 
+             oob.error = FALSE,
+             seed = 102030) |>
+  set_mode("classification") |>  
+  fit(response ~ ., data = feat_trn)
+```
+
+::: {.callout-tip}
+#### What's the point of using multiple performance metrics if we're only selecting based on just one?
+
+This is a great question! Remember that different metrics capture different aspects of model performance. While there might be one "headline" metric you wish to report, having other metrics can be useful for characterizing your model. For example, we might pick auROC if we have a class imbalance because we know it will give us the best "overall" understanding of how our model is doing, but we might still wish to understand things like sensitivity and specificity. Stay tuned for later in lab!
+:::
+
+### Evaluating in Test
+
+Our best model appeared to be just the bagged tree model. Let's evaluate our best bagged tree model configuration.
+```{r}
+feat_test <- rec_prep |>
+  bake(data_test)
+
+tibble(truth = feat_test$response,
+       prob = predict(best_bagged_tree, feat_test, type = "prob")$.pred_yes) |> 
+  roc_auc(prob, truth = truth)
+```
+
+::: {.callout-tip}
+#### An aside on the `predict()` function: what else can I do with it?
+
+We have been using the predict function to ascertain probabilities in this lab, but there are additional arguments that you can specify in this function that make it a pretty versatile tool.
+
+We request probabilities in the `type` argument because it's relevant for our work with auROC today, but you can also request predicted class labels (`type = "class"`) or raw outputs (like log-odds). Some models also allow you to get confidence or prediction intervals (which correspond to uncertainty about the average response or uncertainty about a single new response, respectively).
+
+Not all engines enable you to look at confidence intervals, for example. You should always read the documentation to learn more about what the engine you're specifying will let you calculate!
+
+This is helpful to keep in mind as you move forward in different work environments!
+:::
+
+## Applying our Unit 8 skills to Unit 9
+
+### Understanding auROC
+
+Let's create a ROC curve.
+```{r}
+(tibble(truth = feat_test$response,
+         prob = predict(best_bagged_tree,
+                        feat_test,
+                        type = "prob")$.pred_yes)) |> 
+  roc_curve(prob, truth = truth) |> 
+  ggplot(aes(x = 1 - specificity, y = sensitivity)) +
+  geom_path() +
+  geom_abline(lty = 3) +
+  coord_equal() +
+  labs(x = "1 - Specificity (FPR)",
+       y = "Sensitivity (TPR)")
+```
+
+The area under the receiver operating characteristic curve (auROC), in this instance, is measuring how well our model is distinguishing between patients who will and won't respond to a drug.
+
+It is the probability that the model assigns a higher predicted probability of response to a randomly selected patient who truly responds than to a randomly selected patient who does not respond (i.e., if we pick two random patients, one who truly responds and one who does not, how likely it is that the true responder will be assigned a higher predicted probability of response than the non-responder).
+
+Recall above that our auROC was 83.5%. This means that if we randomly selected one patient who truly responds to the drug and one who does not, the model would correctly rank the true responder as more likely to respond to the drug 83.5% of the time.
+
+### Reviewing the confusion matrix
+
+```{r}
+cm <- 
+  tibble(truth = feat_test$response,
+         estimate = predict(best_bagged_tree, feat_test)$.pred_class) |> 
+  conf_mat(truth, estimate)
+
+cm |> 
+  summary()
+```
+
+::: {.callout-tip}
+#### How the heck are we getting all of these values from the same object?
+
+`conf_mat()` does some simple math for us under the hood on the tibble we are providing to it. Recall that many of the metrics we discussed last week are just permutations of each other.
+
+Let's print our simple tibble to see what `conf_mat()` is working with.
+```{r}
+tibble(truth = feat_test$response,
+         estimate = predict(best_bagged_tree, feat_test)$.pred_class)
+```
+
+We can see that we are just giving the `conf_mat()` function information about the ground truth (i.e., whether or not a given patient in our dataset was a responder to the drug) and what our model predicted for each patient (response or non-response).
+
+If we print our `cm` object from above, you can see it's just a tabulation.
+```{r}
+cm
+```
+
+:::
+
+Let's take a look at our confusion matrix (I'm specifying it as a heatmap so folks in the back of the room can actually read it -- you're welcome!!).
+```{r}
+autoplot(cm, type = "heatmap")
+```
+
+
+::: {.callout-tip}
+#### What if I have a multiclass outcome? How do I make a confusion matrix?
+
+It's your lucky day! The `conf_mat()` function can actually natively handle a multiclass outcome. Then, you can just compute your metrics conditionally.
+
+Here we demo creating predictions for some fake patients. Now, we are deciding if someone is a responder to Drug A, Drug B, or neither.
+```{r}
+preds_multi <- tibble(
+  truth    = c("drug_a", "drug_a", "drug_a", 
+               "drug_b", "drug_b", "drug_b", 
+               "neither", "neither", "neither", 
+               "drug_a", "drug_b", "neither"),
+  estimate = c("drug_a", "drug_b", "neither", 
+               "drug_b", "drug_a", "drug_b", 
+               "neither", "drug_a", "drug_b",
+               "drug_a", "drug_b", "neither")
+)
+
+levels_order <- c("drug_a", "drug_b", "neither")
+
+preds_multi <- preds_multi |> 
+  mutate(
+    truth = factor(truth, levels = levels_order),
+    estimate = factor(estimate, levels = levels_order)
+  )
+```
+
+Now, we can create a new confusion matrix for this multiclass outcome.
+```{r}
+cm_multi <- conf_mat(preds_multi, truth = truth, estimate = estimate)
+
+cm_multi
+```
+
+Beware that summary will give you "macro" metrics now -- summarized across all classes!
+```{r}
+cm_multi |> summary()
+```
+
+If you want to compute for a particular class, you can use the `_vec()` functions we've discussed in this class.
+:::
+
+Recall that our default classification threshold is 50%. If we take a look at our sensitivity and specificity values, we can see that we are better at identifying responders than non-responders at this threshold. Our model correctly identifies 87.2% of true responders, but only 69.4% of true non-responders.
+```{r}
+cm |> 
+  summary() |> 
+  filter(.metric == "sens" | .metric == "spec") |> 
+  select(-.estimator)
+```
+
+**How do we calculate sensitivity and specificity from the confusion matrix?**
+
+Sensitivity: TP / TP + FN = 163 / 163 + 24 = 0.872
+
+Specificity: TN / TN + FP = 102 / 102 + 45 = 0.694
+
+### Adjusting the decision threshold
+
+Let's say the research team finds out that there are significant, life threatening side effects to this new experimental drug. If the drug works, the care team and patient would probably decide that it is worth these risks given the severity of the disease in the real world. But, if the drug doesn't work, the care team would like to avoid jeopardizing the quality of life of their patient. **Choosing a decision threshold is an example of using other metrics to inform your model other than the metric you are using for model selection (in this case, we will look at sensitivity and specificity even though we picked our best model based on auROC)**.
+
+**What if we wanted this to be more principled?** We know that our auROC plot above shows us relative tradeoffs between sensitivity and specificity. In this case, we'd want to make a principled decision comparing across different thresholds **using another set of data to select what the best threshold is.** We can't select our best threshold in test and then evaluate that model also in test!
+
+Let's manually adjust our decision threshold such that it is stricter about assigning "yes". **Should we increase or decrease our decision threshold (relative to 50%) and why?**
+
+First, let's pull out our probabilities.
+```{r}
+preds <- tibble(truth = feat_test$response,
+                prob = predict(best_bagged_tree, feat_test, type = "prob")$.pred_yes)
+
+preds
+```
+
+We'll increase our threshold to 80%. A higher threshold here means that we are asking the model to be more cautious when tagging someone as a "responder". Remember, we can't evaluate what the best threshold is based off of our test data. In this mock example, 80% is the gold standard decision threshold that the pharmaceutical company funding the trial would like us to adhere to (because it minimizes the chance of them getting sued).
+```{r}
+preds <- preds |> 
+  mutate(estimate_80 = if_else(prob >= .80, "yes", "no"),
+         estimate_80 = factor(estimate_80, levels = c("yes", "no"))) |> 
+  print()
+```
+
+Let's regenerate our confusion matrix and then plot it for comparison to our original threshold.
+```{r}
+cm_80 <- preds |> 
+  conf_mat(truth = truth, estimate = estimate_80)
+
+cm_80
+
+autoplot(cm_80, type = "heatmap")
+```
+
+We can see that our sensitivity went down a bit, but our specificity went up by quite a lot. This is an example of a real-world trade-off someone might make when implementing a model when the scenario is high stakes -- like classifying presence of a deadly disease, recommending someone take a medication with many side effects, predicting storm trajectories (as in catastrophe modeling), or suggesting major organizational changes in a Fortune 500 company.
+```{r}
+cm_80 |> 
+  summary() |> 
+  filter(.metric == "sens" | .metric == "spec") |> 
+  select(-.estimator)
+```
+
+::: {.callout-tip}
+#### Systematically comparing across multiple classification thresholds
+
+You can compare across multiple classification thresholds, but as mentioned above, this should be done with a validation set to minimize optimization bias.
+
+To do this, you'd simply take your predictions (the `preds` object above) from your validation set and repeat the workflow above across different thresholds (you could also put it in a loop to make it run more efficiently). All you would need to do would be to define a sequence of thresholds, kind of like how we define sequences when creating our tuning grids:
+
+```{r}
+thresholds <- seq(0.1, 0.9, by = 0.05)
+
+thresholds
+```
+
+Recall that using `summary()` on our `cm` object above printed out estimates for every metric, enabling you to evaluate these across different thresholds.
+:::
+
+### Revisiting resampling
+
+Many of your questions on the quiz this week had to do with resampling. The following code serves as an example workflow of resampling.
+
+First, let's generate a simple imbalanced dataset.
+```{r}
+set.seed(11212021)
+
+n <- 1000
+
+data_imb <- tibble(
+  x1 = rnorm(n),
+  x2 = rnorm(n)
+) |>
+  # let's add in some things to make there be a real relationship here!
+  mutate(
+    lin_pred = -1.4 + 1.5*x1 - 1*x2,
+    prob = plogis(lin_pred),
+    class = factor(
+      rbinom(n, 1, prob),
+      labels = c("negative", "positive")
+    )
+  ) |>
+  select(-lin_pred, -prob) |>
+  mutate(class = fct_relevel(class, "positive"))
+```
+
+Let's take a look. Nice and imbalanced! B)
+```{r}
+janitor::tabyl(data_imb$class)
+```
+
+We'll set up our basic splits...
+```{r}
+set.seed(11212021)
+splits_test_imb <- data_imb |> 
+  initial_split(prop = 2/3, strata = "class")
+
+data_trn_imb <- splits_test_imb |> 
+  analysis()
+
+data_test_imb <- splits_test_imb |> 
+  assessment()
+```
+
+...and our bootstrap resamples.
+```{r}
+set.seed(11212021)
+splits_boot_2 <- data_trn_imb |> 
+   bootstraps(times = 10, strata = "class")  
+```
+
+Let's set up our basic recipe. We're going to be using upsampling here.
+```{r}
+rec_imb_1 <- recipe(class ~ ., data = data_trn_imb) |>
+  themis::step_upsample(class, over_ratio = 1) |> 
+  step_normalize(all_predictors())
+```
+
+Let's talk a little bit more about our `over_ratio` argument. This argument controls how much the *minority class* (class that is under-represented) gets upsampled. As a reminder, upsampling will duplicate minority class observations with replacement until the target ratio is reached. Here, we're specifying a 1:1 ratio. Recall that our positive class has 287 observations and our negative class has 713 observations. This means that the positive class will be upsampled until it also has 713 observations.
+
+**What are some of the pros and cons?**
+
+ - Smaller ratios are closer to the original data, which means that the model may still struggle to learn minority class patterns (but may also be less prone to overfitting of duplicated observations)
+ - A 1:1 ratio means equal exposure to both classes, but...
+ - ...if we increase it too much (> 1), we run the risk of increasing the number of false positives we get
+ 
+This is why it can be a good idea to tune on your `over_ratio` parameter. You can do this like tuning a hyperparameter.
+
+Let's do a quick demo.
+```{r}
+rec_imb_2 <- recipe(class ~ ., data = data_trn_imb) |>
+  themis::step_upsample(class, over_ratio = tune()) |> 
+  step_normalize(all_predictors())
+```
+
+We can create a tuning grid just like we've done previously for hyperparameters. For the sake of simplicity (and not tuning a million things at once), we'll just tune lambda and run a LASSO.
+```{r}
+grid_ratio <- grid_regular(penalty(), over_ratio(range = c(0.5, 1.25)), levels = 4)
+
+grid_ratio
+```
+
+Let's run our model configurations...
+```{r}
+fits_glmnet_up <- 
+    logistic_reg(penalty = tune(),
+                 mixture = 1) |> 
+      set_engine("glmnet") |> 
+      set_mode("classification") |> 
+      tune_grid(preprocessor = rec_imb_2, 
+                resamples = splits_boot_2, grid = grid_ratio, 
+                metrics = metric_set(roc_auc))
+```
+
+...and see how things are looking!
+```{r}
+show_best(fits_glmnet_up)
+```
+
+Now we can fit and evaluate our best model. Notice how I am creating a recipe that uses my best `over_ratio` value.
+```{r}
+rec_imb_3 <- recipe(class ~ ., data = data_trn_imb) |>
+  themis::step_upsample(class, over_ratio = select_best(fits_glmnet_up, metric = "roc_auc")$over_ratio) |> 
+  step_normalize(all_predictors())
+```
+
+Then, we're ready to create my best fit model. Remember our discussion about `NULL` from the beginning of lab!!!!
+```{r}
+rec_prep_imb <- rec_imb_3 |> 
+  prep(data_trn_imb)
+
+feat_trn_imb <- rec_prep_imb |> 
+  bake(NULL)
+
+fit_glmnet_best <-   
+  logistic_reg(penalty = select_best(fits_glmnet_up, metric = "roc_auc")$penalty, 
+               mixture = 1) |> 
+  set_engine("glmnet") |> 
+  set_mode("classification") |> 
+  fit(class ~ ., data = feat_trn_imb)
+```
+
+Of course, after this, you want to evaluate it in test!
+```{r}
+feat_test_imb <- rec_prep_imb |> 
+  bake(data_test_imb)
+
+tibble(truth = feat_test_imb$class,
+       prob = predict(fit_glmnet_best, feat_test_imb, type = "prob")$.pred_positive) |> 
+  roc_auc(prob, truth = truth)
+```
+
+## Wrap-up!
+
+Have a great rest of your week! Let's switch back to sequential processing now that we're done with lab. :^)
+
+```{r}
+plan(sequential)
+```
