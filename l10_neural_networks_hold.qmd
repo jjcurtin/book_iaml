@@ -100,11 +100,11 @@ options(conflicts.policy = "depends.ok")
 
 library(xfun, include.only = "cache_rds")
 
-library(future) # include among other packages that you load at top of script
+cl <- parallel::makePSOCKcluster(parallel::detectCores(logical = FALSE))
+doParallel::registerDoParallel(cl)
 
-
-source("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
-source("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+devtools::source_url("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
 
 theme_set(theme_classic())
 options(tibble.width = Inf)
@@ -114,7 +114,7 @@ rerun_setting <- FALSE
 ``` 
 
 ```{r}
-# library(keras, exclude = "get_weights")
+library(keras, exclude = "get_weights")
 library(magrittr, exclude = c("set_names", "extract"))
 ```
 
@@ -369,8 +369,6 @@ The default activation for the hidden units when using Keras through tidymodels 
 
 --------------------------------------------------------------------------------
 
-DROP???
-
 We will adjust `seeds` from the start
 
 There are a number of points in the fitting process where random numbers needed by Keras
@@ -390,8 +388,6 @@ fit_seeds <- sample.int(10^5, size = 3)  # c(87591, 536, 27860)
 
 --------------------------------------------------------------------------------
 
-DROP????
-
 We will also set verbose = 0 for now
 
 - This turns off messages and plots about epoch level performance
@@ -408,21 +404,14 @@ Let's fit this first model configuration in training set
 ```{r}
 #| label: fit_1
 
-# set plan when ready to begin parallel processing.  
-plan(multisession, workers = parallel::detectCores(logical = FALSE))
-
 fit_1 <-
     mlp() |>
     set_mode("classification") |> 
-    set_engine("brulee", 
-               #verbose = 0, 
-               #seeds = fit_seeds
-               ) |>
+    set_engine("keras", 
+               verbose = 0, 
+               seeds = fit_seeds) |>
     fit(y ~ ., data = feat_trn)
 ```
-
-EDIT???
-
 
 NOTE: The first model fit with Keras in each new session will generate those warnings/errors about GPU. You can ignore them.
 
@@ -530,7 +519,7 @@ Let's fit and evaluate this new feature set with no other changes to the model c
 fit_2 <-
   mlp() |>
   set_mode("classification") |> 
-  set_engine("brulee") |> #, verbose = 0, seeds = fit_seeds) |>
+  set_engine("keras", verbose = 0, seeds = fit_seeds) |>
   fit(y ~ ., data = feat_trn)
 ```
 
@@ -563,11 +552,11 @@ It is not surprising that a model configuration with only one hidden layer and 5
 Let's try 30 units (cheating based on the book chapter!! ;-)
 
 ```{r}
-#| label: fit_30units
+#| label: fit_5units
 
-fit_30units <- mlp(hidden_units = 30) |>
+fit_5units <- mlp(hidden_units = 30) |>
     set_mode("classification") |> 
-    set_engine("brulee") |>  #, verbose = 0, seeds = fit_seeds) |>
+    set_engine("keras", verbose = 0, seeds = fit_seeds) |>
     fit(y ~ ., data = feat_trn)
 ```
 
@@ -577,7 +566,7 @@ fit_30units <- mlp(hidden_units = 30) |>
 - We could see if even more units works better still but I won't follow that through here for sake of simplicity
 
 ```{r}
-accuracy_vec(feat_test$y, predict(fit_30units, feat_test)$.pred_class)
+accuracy_vec(feat_test$y, predict(fit_5units, feat_test)$.pred_class)
 ```
 
 --------------------------------------------------------------------------------
@@ -590,7 +579,7 @@ Let's see how to use other activation functions and if this one helps.
 
 fit_relu <- mlp(hidden_units = 30, activation = "relu") |>
   set_mode("classification") |> 
-  set_engine("brulee") |>  #, verbose = 0, seeds = fit_seeds) |>
+  set_engine("keras", verbose = 0, seeds = fit_seeds) |>
   fit(y ~ ., data = feat_trn)
 ```
 
@@ -653,7 +642,7 @@ Let's set `penalty = .0001`.
 
 fit_penalty <- mlp(hidden_units = 30, activation = "relu", penalty = .0001) |>
   set_mode("classification") |> 
-  set_engine("brulee") |>  #, verbose = 0, seeds = fit_seeds) |>
+  set_engine("keras", verbose = 0, seeds = fit_seeds) |>
   fit(y ~ ., data = feat_trn)
 ```
 
