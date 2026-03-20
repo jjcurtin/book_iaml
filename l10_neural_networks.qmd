@@ -29,13 +29,17 @@ editor_options:
 
 --------------------------------------------------------------------------------
 
-## Introduction to Nerual Networks with Keras in R
+## Introduction to Nerual Networks with brulee package
 
-We will be using the `keras` engine to fit our neural networks in R.
+We will be using the `brulee` engine to fit our neural networks in tidymodels.
 
-The `keras` [package](https://cran.r-project.org/web/packages/keras/index.html) provides an [R Interface](https://keras.rstudio.com/) to the [Keras API in Python](https://keras.io/).
+brulee gives us access to 3 layer (single hidden layer) and 4 layer (two hidden layer using brulee_two_layer engine) MLP neural networks.  In our opinion, these are sufficient for many/most feed forward networks in the social sciences.  
+
+Yay!!
 
 --------------------------------------------------------------------------------
+
+That said, the `keras` [package](https://cran.r-project.org/web/packages/keras/index.html) provides an [R Interface](https://keras.rstudio.com/) to the [Keras API in Python](https://keras.io/).
 
 From the website:
 
@@ -57,66 +61,41 @@ Keras is actually a wrapper around an even more extensive open source platform, 
 
 --------------------------------------------------------------------------------
 
-If you are serious about focusing primarily or exclusively on neural networks, you will probably work directly within Keras in R or Python. However, tidymodels gives us access to 3 layer (single hidden layer) MLP neural networks through the `keras` engine.  This allows us to fit simple (but still powerful) neural networks using all the tools (and code/syntax) that you already know.  Yay! 
+Tidymodels does provide an interface to keras but its not that good and brulee is much better.
 
-If you plan to use Keras directly in R, you might start with this [book](https://www.manning.com/books/deep-learning-with-r?utm_source=google&utm_medium=shopping&utm_campaign=shopping1&gclid=Cj0KCQjwo-aCBhC-ARIsAAkNQivtssXhY1RdFiYXSwu8eRWRXLUqveHkzyhdJU48W-jTU7O-qeKmONsaAmePEALw_wcB).  I've actually found it useful even in thinking about how to interface with Keras through tidymodels.
+However, if you need the power of Keras for more complicated models (more than 2 hidden layers, more complex configurations like recursive networks, etc) you might start with this [book](https://www.manning.com/books/deep-learning-with-r?utm_source=google&utm_medium=shopping&utm_campaign=shopping1&gclid=Cj0KCQjwo-aCBhC-ARIsAAkNQivtssXhY1RdFiYXSwu8eRWRXLUqveHkzyhdJU48W-jTU7O-qeKmONsaAmePEALw_wcB) to learn how to use Keras directly in R outside of tidymodels. 
 
---------------------------------------------------------------------------------
-
-Getting tidymodels configured to use the `keras` engine can take a  little bit of upfront effort.
+Getting `keras` set up can take a  little bit of upfront effort.
 
 We provide [an appendix](https://jjcurtin.github.io/book_iaml/app_keras.html) to guide you through this process
 
-If you havent already set this up, please do so immediately so that you can reach out to us for support if you need it
-
-Once you have completed this one-time installation, you can now use the `keras` engine through tidymodels like any other engine.  No need to do anything different from your normal tidymodeling workflow.
-
---------------------------------------------------------------------------------
-
-You should also know that Keras is configured to use GPUs rather than CPU (GPUs allow for highly parallel fitting of neural networks).  
-
-- However, it works fine with just a CPU as well.  
-- It will generate some errors to tell you that you aren't set up with a GPU (and then it will tell you to ignore those error messages). 
-- This is an instance where you can ignore the messages!
+But we think `brulee` inside of tidymodels will likely meet many of your needs
 
 --------------------------------------------------------------------------------
 
 ## Setting up our Environment 
 
-Now lets start fresh
+Now lets get started
 
-- We load our normal environment including source files, parallel  processing and cache support if we plan to use it (code not displayed)
-- keras will work with R without loading it or other packages (beyond what we always load).  However, there will be some function conflicts.
-  - So we will load keras and exclude the conflict
-  - We also need to load magrittr and exclude two of its conflicting functions
   
 ```{r}
-#| include: false
-
-# set up environment.  Now hidden from view
+# set up environment. 
 library(tidyverse) # for general data wrangling
 library(tidymodels) # for modeling
 options(conflicts.policy = "depends.ok")
 
+library(magrittr, exclude = c("set_names", "extract"))
 library(xfun, include.only = "cache_rds")
-
-library(future) # include among other packages that you load at top of script
-
 
 source("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
 source("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
-
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
 theme_set(theme_classic())
 options(tibble.width = Inf)
 path_data <- "./data"
 
 rerun_setting <- FALSE 
 ``` 
-
-```{r}
-# library(keras, exclude = "get_weights")
-library(magrittr, exclude = c("set_names", "extract"))
-```
 
 --------------------------------------------------------------------------------
 
@@ -301,7 +280,7 @@ data_trn |>
 ## Fitting Neural Networks
 
 Let's train some models to understand some basics about neural networks and the use of
-Keras within tidymodels
+brulee within tidymodels
 
 - We will fit some configurations in the full training set and evaluate their performance in test
 
@@ -314,6 +293,38 @@ algorithm
 - We will build up to more complex (and better) configurations
 
 - We will end with a demonstration of the use of the single validation set approach to select among model configurations
+
+
+--------------------------------------------------------------------------------
+
+The default activation for the hidden units when using brulee through tidymodels is `relu` not sigmoid as per the basic models discussed in the book and videos.
+
+- The activation for the output layer will always be `softmax` for classification problems when using brulee through tidymodels
+  - This is likely a good choice
+  - It provides scores that function like probabilities for each categorical response
+- The activation for the output layer will always be 'linear' for regression problems.  
+  - Also a generally good choice
+- The hidden units can have a variety of different activation functions.  These are the options for hidden units in brulee
+
+```{r}
+brulee::brulee_activations()
+```
+
+--------------------------------------------------------------------------------
+
+There are a number of points in the fitting process for neural networks where random numbers needed
+
+- initializing weights for hidden and output layers
+- selecting units for `dropout`
+- selecting batches within epochs
+- allocation between train and validation for early stopping
+
+If you want these steps to be reproducible, you should set a seed before fitting the model.  We will do that for all our models below using the same seed each time
+
+
+```{r}
+set.seed(1234567)
+```
 
 --------------------------------------------------------------------------------
 
@@ -343,94 +354,48 @@ feat_test <-rec_min_prep |>
 
 --------------------------------------------------------------------------------
 
-And let's use a mostly out of the box (defaults) 3 layer (1 hidden layer) using Keras engine
+Lets set up a 3 layer (one hidden layer) as per the book and videos
 
-Defaults:
+Lets start with a configuration that approximates the basic models we have been discussing in the book and videos (with a few parameters set to their defaults in brulee rather than the defaults in the book and videos).
 
-- hidden units = 5
-- penalty = 0
-- dropout = 0
-- activation = "softmax" for hidden units layer
-- epochs = 20
-- seeds = sample.int(10^5, size = 3)
+Some of these are NOT the defaults for brulee in tidymodels so we will explicitly set them either inside of `mlp()` or `set_engine()`
 
---------------------------------------------------------------------------------
+We will show defaults for these arguments when we override them.   Most of these defaults as sensible places to start BUT they should all likely be considered for tuning if you want the best performance!
 
-The default activation for the hidden units when using Keras through tidymodels is `softmax` not sigmoid as per the basic models discussed in the book and lectures.
+For more details about the many arguments that can be explored (and their default values) see the following documetation
 
-- The activation for the output layer will always be `softmax` for classification problems when using Keras through tidymodels
-  - This is likely a good choice
-  - It provides scores that function like probabilities for each categorical response
-- The activation for the output layer will always be 'linear' for regression problems.  
-  - Also a generally good choice
-- The hidden units can have a variety of different activation functions
-  - `linear`, `softmax`, `relu`, and `elu` through tidymodels
-  - Additional activation functions (and many other "dials") are available in Keras directly
-
---------------------------------------------------------------------------------
-
-DROP???
-
-We will adjust `seeds` from the start
-
-There are a number of points in the fitting process where random numbers needed by Keras
-
-- initializing weights for hidden and output layers
-- selecting units for `dropout`
-- selecting batches within epochs
-
-`tidymodels` lets us provide three seeds to make the first two bullet points more reproducible.  
-
-There seems to still be some randomness across runs due to batch selection (and possibly other opaque steps)
-
-```{r}
-set.seed(1234567)
-fit_seeds <- sample.int(10^5, size = 3)  # c(87591, 536, 27860)
-```
-
---------------------------------------------------------------------------------
-
-DROP????
-
-We will also set verbose = 0 for now
-
-- This turns off messages and plots about epoch level performance
-- At this point, verbose would only report performance in the training data, which isn't that informative
-- We will turn it on later when we learn how to get performance in a validation set
-- Nonetheless, you might still turn it on if you just want feedback on how long it will take for the fit to complete.
+- https://parsnip.tidymodels.org/reference/mlp.html
+- https://parsnip.tidymodels.org/reference/details_mlp_brulee.html
+- https://parsnip.tidymodels.org/reference/details_mlp_brulee_two_layer.html
+- https://brulee.tidymodels.org/
 
 --------------------------------------------------------------------------------
 
 Let's fit this first model configuration in training set
 
-- `verbose = 0`
-- `seeds = fit_seeds`
 ```{r}
 #| label: fit_1
 
-# set plan when ready to begin parallel processing.  
-plan(multisession, workers = parallel::detectCores(logical = FALSE))
-
-fit_1 <-
-    mlp() |>
+set.seed(1234567)
+fit_1 <- mlp(activation = "sigmoid",   # from book, default in brulee = "relu" 
+             epochs = 30, # default = 100 (set to 30 to speed things up for now)
+             hidden_units = 3, # default = 3,
+             learn_rate = 0.01, # default = .01
+             penalty = 0,  # from book, default = .001 (and mixture defaults to 0)
+             dropout = 0) |>   # from book, default = 0 
     set_mode("classification") |> 
     set_engine("brulee", 
-               #verbose = 0, 
-               #seeds = fit_seeds
-               ) |>
+               verbose = TRUE,    # default = FALSE (output loss for each epoch)
+               validation = 0,    # from book, default = .1 (if 0, calculate loss in training)
+               stop_iter = 5) |>  # default = 5 (stop early after loss increases this many times) 
     fit(y ~ ., data = feat_trn)
 ```
-
-EDIT???
-
-
-NOTE: The first model fit with Keras in each new session will generate those warnings/errors about GPU. You can ignore them.
 
 --------------------------------------------------------------------------------
 
 Here is this model's performance in test
 
-It's not that great ([What would you expect by chance?]{.red})
+It's not that great but not horrible ([What would you expect by chance?]{.red})
 ```{r}
 accuracy_vec(feat_test$y, predict(fit_1, feat_test)$.pred_class)
 ```
@@ -527,11 +492,19 @@ Let's fit and evaluate this new feature set with no other changes to the model c
 ```{r}
 #| label: fit_2
 
-fit_2 <-
-  mlp() |>
-  set_mode("classification") |> 
-  set_engine("brulee") |> #, verbose = 0, seeds = fit_seeds) |>
-  fit(y ~ ., data = feat_trn)
+set.seed(1234567)
+fit_2 <- mlp(activation = "sigmoid",   # from book, default in brulee = "relu" 
+             epochs = 30, # default = 100 (set to 30 to speed things up for now)
+             hidden_units = 3, # default = 3,
+             learn_rate = 0.01, # default = .01
+             penalty = 0,  # from book, default = .001 (and mixture defaults to 0)
+             dropout = 0) |>   # from book, default = 0 
+    set_mode("classification") |> 
+    set_engine("brulee", 
+               verbose = TRUE,    # default = FALSE (output loss for each epoch)
+               validation = 0,    # from book, default = .1 (if 0, calculate loss in training)
+               stop_iter = 5) |>  # default = 5 (stop early after loss increases this many times) 
+    fit(y ~ ., data = feat_trn)
 ```
 
 
@@ -563,12 +536,22 @@ It is not surprising that a model configuration with only one hidden layer and 5
 Let's try 30 units (cheating based on the book chapter!! ;-)
 
 ```{r}
-#| label: fit_30units
+#| label: fit_3
 
-fit_30units <- mlp(hidden_units = 30) |>
+set.seed(1234567)
+fit_3 <- mlp(activation = "sigmoid",   # from book, default in brulee = "relu" 
+             epochs = 30, # default = 100 (set to 30 to speed things up for now)
+             hidden_units = 30, # default = 3,
+             learn_rate = 0.01, # default = .01
+             penalty = 0,  # from book, default = .001 (and mixture defaults to 0)
+             dropout = 0) |>   # from book, default = 0 
     set_mode("classification") |> 
-    set_engine("brulee") |>  #, verbose = 0, seeds = fit_seeds) |>
+    set_engine("brulee", 
+               verbose = TRUE,    # default = FALSE (output loss for each epoch)
+               validation = 0,    # from book, default = .1 (if 0, calculate loss in training)
+               stop_iter = 5) |>  # default = 5 (stop early after loss increases this many times) 
     fit(y ~ ., data = feat_trn)
+
 ```
 
 --------------------------------------------------------------------------------
@@ -577,7 +560,7 @@ fit_30units <- mlp(hidden_units = 30) |>
 - We could see if even more units works better still but I won't follow that through here for sake of simplicity
 
 ```{r}
-accuracy_vec(feat_test$y, predict(fit_30units, feat_test)$.pred_class)
+accuracy_vec(feat_test$y, predict(fit_3, feat_test)$.pred_class)
 ```
 
 --------------------------------------------------------------------------------
@@ -588,14 +571,23 @@ Let's see how to use other activation functions and if this one helps.
 ```{r}
 #| label: fit_relu
 
-fit_relu <- mlp(hidden_units = 30, activation = "relu") |>
-  set_mode("classification") |> 
-  set_engine("brulee") |>  #, verbose = 0, seeds = fit_seeds) |>
-  fit(y ~ ., data = feat_trn)
+set.seed(1234567)
+fit_4 <- mlp(activation = "relu",   # default in brulee = "relu" 
+             epochs = 30, # default = 100 (set to 30 to speed things up for now)
+             hidden_units = 30, # default = 3,
+             learn_rate = 0.01, # default = .01
+             penalty = 0,  # from book, default = .001 (and mixture defaults to 0)
+             dropout = 0) |>   # from book, default = 0 
+    set_mode("classification") |> 
+    set_engine("brulee", 
+               verbose = TRUE,    # default = FALSE (output loss for each epoch)
+               validation = 0,    # from book, default = .1 (if 0, calculate loss in training)
+               stop_iter = 5) |>  # default = 5 (stop early after loss increases this many times) 
+    fit(y ~ ., data = feat_trn)
 ```
 
 ```{r}
-accuracy_vec(feat_test$y, predict(fit_relu, feat_test)$.pred_class)
+accuracy_vec(feat_test$y, predict(fit_4, feat_test)$.pred_class)
 ```
 
 --------------------------------------------------------------------------------
@@ -608,7 +600,7 @@ As you might imagine, given the number of weights to be fit in even a modest neu
 - 21,540 for hidden layer (717 * 30 weight + 30 biases)
 - 310 for output layer (30 * 10 weights, + 10 biases)
 ```{r}
-fit_relu
+fit_4
 ```
 
 This will be an even bigger problem if you aren't using "big" data
@@ -618,53 +610,66 @@ This will be an even bigger problem if you aren't using "big" data
 There are a number of different methods available to reduce potential overfitting
 
 - Simplify the network architecture (fewer units, fewer layers)
-- L2 regularization 
+- L1 and L2 regularization (including mixtures of both penalties)
 - Dropout
-- Early stopping or monitoring validation error to prevent too many epochs
+- Early stopping by monitoring validation error to prevent too many epochs
 
 --------------------------------------------------------------------------------
 
 ### Regularization or Weight Decay
 
-L2 regularization is implemented in essentially the same fashion as you have seen 
+L1 and L2 regularization is implemented in essentially the same fashion as you have seen 
 it previously (e.g., glmnet)
 
-The cost function is expanded to include a penalty based on the sum of the squared weights multiplied by $\lambda$.  
+The cost function is expanded to include a penalty based on the sum of the absolute value or squared weights multiplied by $\lambda$.  
 
-In the tidymodels implementation of Keras:
+In the tidymodels implementation of brulee:
 
 - $\lambda$ is called `penalty` and is set and/or (ideally) tuned via the 
-`penalty` argument in `mlp()`
-
-- Common values for the L2 `penalty` to tune a neural network are often on a logarithmic scale between 0 and 0.1, such as 0.1, 0.001, 0.0001, etc.
-
-- `penalty = 0` (the default) means no L2 regularization
-
-- Keras implements other penalties (L1, and a mixture) but not currently through tidymodels
+`penalty` argument in `mlp()`.  
+  - $penalty$ = .001 is the default in brulee
+  - `penalty = 0` means no regularization
+  - Common values for the `penalty` to tune a neural network are often on a logarithmic scale between 0 and 0.1, such as 0.1, 0.001, 0.0001, etc.
+  
+- $mixture$ is used to blend L1 and L2 ($mixture$ = 1 for L1, = 0 for L2, and intermediate values for blends)
+  - $mixture$ = 0 (L2) is default
 
 - [Here](https://machinelearningmastery.com/how-to-reduce-overfitting-in-deep-learning-with-weight-regularization/) is a starting point for more reading on regularization in neural networks
 
 --------------------------------------------------------------------------------
 
-Let's set `penalty = .0001`.   
+Let's set `penalty = .001`. 
+
+We are setting it explicitly below for clarity but since it is the default, this is the default behavior you would get if you did not include the penalty argument in `mlp()`
 
 ```{r}
 #| label: fit_penalty
 
-fit_penalty <- mlp(hidden_units = 30, activation = "relu", penalty = .0001) |>
-  set_mode("classification") |> 
-  set_engine("brulee") |>  #, verbose = 0, seeds = fit_seeds) |>
-  fit(y ~ ., data = feat_trn)
+set.seed(1234567)
+fit_5 <- mlp(activation = "relu",   #  default in brulee = "relu" 
+             epochs = 30, # default = 100 (set to 30 to speed things up for now)
+             hidden_units = 30, # default = 3,
+             learn_rate = 0.01, # default = .01
+             penalty = .001,  #  default = .001 (and mixture defaults to 0)
+             dropout = 0) |>   # from book, default = 0 
+    set_mode("classification") |> 
+    set_engine("brulee", 
+               verbose = TRUE,    # default = FALSE (output loss for each epoch)
+               validation = 0,    # from book, default = .1 (if 0, calculate loss in training)
+               stop_iter = 5) |>  # default = 5 (stop early after loss increases this many times) 
+    fit(y ~ ., data = feat_trn)
 ```
 
 --------------------------------------------------------------------------------
 
-- Looks like there is not much benefit to regularization for this network.  
+- Looks like there is not much benefit to regularization for this network (though we could explore other values via tuning)
 - Would likely provide much greater benefit in smaller N contexts or with more complicated model architectures (more hidden units, more hidden unit layers).
 
 ```{r}
-accuracy_vec(feat_test$y, predict(fit_penalty, feat_test)$.pred_class)
+accuracy_vec(feat_test$y, predict(fit_5, feat_test)$.pred_class)
 ```
+
+NOTE:  I suspect that there is a bug in the implementation of penalty.  I intend to submit a reprex to confirm this.  Stay tuned!!
 
 --------------------------------------------------------------------------------
 
@@ -691,7 +696,9 @@ In tidymodels, you can set or tune the amount of dropout via the `dropout` argum
 - Srivastava, et al suggest starting with values around .5.  
 - You might consider a range between .1 and .5
 - `droppout = 0` (the default) means no dropout
-- In tidymodels implementation of Keras, you can use a non-zero `penalty` or `dropout` but not both
+- In tidymodels implementation of brulee, you can use a non-zero `penalty` or `dropout` but not both.  
+  - If you set a dropout explicitly, penalty will be set to 0 implicitly.
+  - if you explicitly set both to non-zero, it will generate an error.
 
 --------------------------------------------------------------------------------
 
@@ -700,141 +707,99 @@ Let's try `dropout = .1`.
 ```{r}
 #| label: fit_dropout
 
-fit_dropout <- mlp(hidden_units = 30, activation = "relu", dropout = .1) |>
-  set_mode("classification") |>  
-  set_engine("keras", verbose = 0, seeds = fit_seeds) |>
-  fit(y ~ ., data = feat_trn)
+set.seed(1234567)
+fit_6 <- mlp(activation = "relu",   #  default in brulee = "relu" 
+             epochs = 30, # default = 100 (set to 30 to speed things up for now)
+             hidden_units = 30, # default = 3,
+             learn_rate = 0.01, # default = .01
+             penalty = 0,  #  default = .001 (and mixture defaults to 0)
+             dropout = 0.1) |>   # from book, default = 0 
+    set_mode("classification") |> 
+    set_engine("brulee", 
+               verbose = TRUE,    # default = FALSE (output loss for each epoch)
+               validation = 0,    # from book, default = .1 (if 0, calculate loss in training)
+               stop_iter = 5) |>  # default = 5 (stop early after loss increases this many times) 
+    fit(y ~ ., data = feat_trn)
 ```
 
 --------------------------------------------------------------------------------
 
-- Looks like there may be a little benefit but not substantial.  
+- Looks like dropout hurt rather than helped.  Of course, we may have just selected a bad choice for the amount of dropout.  This should be explored further and compared to what we can do using a L1 or L2 penalty instead.  
 - Would likely provide much greater benefit in smaller N contexts or with more complicated model architectures (more hidden units, more hidden unit layers).
 ```{r}
-accuracy_vec(feat_test$y, predict(fit_dropout, feat_test)$.pred_class)
+accuracy_vec(feat_test$y, predict(fit_6, feat_test)$.pred_class)
 ```
 
 --------------------------------------------------------------------------------
 
 ### Number of Epochs and Early Stopping
 
-Now that we have a model that is working well, lets return to the issue of number of epochs
+We have a model that is working well (`fit_4`) 
+
+```{r}
+accuracy_vec(feat_test$y, predict(fit_4, feat_test)$.pred_class)
+```
+
+
+Now lets return to the issue of number of epochs
 
 - Too many epochs can lead to overfitting
 - Too many epochs also just slow things down (not a bit deal if using GPU or overnight but still.....)
 - Too few epochs can lead to under-fitting (which also produces poor performance)
-- The default of `epochs = 20` is a reasonable starting point for a network with one hidden layer but may not work for all situations
+- The default of `epochs = 100` seems high to may and would take > ~30x longer to train than what we have been using (30 epochs).  
+  - It was likely set to that because the brulee default is to use early stopping.
+  - Lets see what happens if we set epochs to 100 but also turn on early stopping by checking loss in a validation set
 
---------------------------------------------------------------------------------
-
-Monitoring training error (loss, accuracy) is not ideal b/c it will tend to always decrease
-
-- This is what you would get if you set `verbose = 1`
-
-Validation error is what you need to monitor
-
-- Validation error will increase when the model becomes overfit to training
-- We can have Keras hold back some portion of the training data for validation
-  - `validation_split = 1/6`
-  - We pass it in as an optional argument in `set_engine()`
-  - We can use this to monitor validation error rather than training error by epoch. 
-  - You can fit an exploratory model with `epochs = 50` to review the plot
-  - This can allow us to determine an appropriate value for `epochs`
- 
 --------------------------------------------------------------------------------
 
 Let's see this in action in the best model configuration without regularization or dropout
 
-NOTE:
+Early stopping will be invoked if the error increases on some specified number of trials (default is `stop_iter` = 5)
 
-- `epochs = 50`
-- `verbose = 1`
-- `metrics = c("accuracy")`
-- `validation_split = 1/6`
-- You will see message updates and a plot that tracks training and validation loss and accuracy across epochs
-- This is not rendered into my slides but the plot and messages are pretty clear
-- You can use this information to choose appropriate values for `epoch`
-- `val_accuracy` had plateau and `val_loss` had started to creep up by 10 epochs.
+However, this will never happen if you are using training error because training error will never increase because does not include error due to overfitting
 
-```{r}
-#| label: fit_epochs50
-#| message: false
-#| output: false
+Validation error is what you need to monitor if you want to detect overfitting
 
-fit_epochs50 <- mlp(hidden_units = 30, activation = "relu", epochs = 50) |>
-  set_mode("classification") |>  
-  set_engine("keras", verbose = 1, seeds = fit_seeds, 
-             metrics = c("accuracy"), 
-             validation_split = 1/6) |>
-  fit(y ~ ., data = feat_trn)
-```
-
---------------------------------------------------------------------------------
-
-In some instances, it may be that we want to do more than simply look at epoch performance plots during modeling EDA
-
-We can instead set the number of epochs to be high but use an early stopping callback to end 
-the training early at an optimal time
-
---------------------------------------------------------------------------------
-
-Callbacks allow us to interrupt training.   
-
-- There are many types of callbacks in Keras
-- We will only discuss `callback_early_stopping()`
-- We set up callbacks in a list
-- We pass them in as an optional argument in `set_engine()` using `callbacks = `
-- Notice the arguments for `callback_early_stopping()`
-- We also must provide validation error.  Here we set `validation_split = 1/6`
-- This is a method to **tune or select** best number of epochs.  
-  - I haven't yet figured out where the epochs at termination are saved so need to watch the feedback.  It was 35 epochs here
-  - As always, we **could** next refit to the full training set after we have determined the optimal number of epochs.  We won't do that here.
-
---------------------------------------------------------------------------------
-
-This fit stopped at 15 epochs
-
-```{r}
-callback_list <- list(keras::callback_early_stopping(monitor = "val_loss", 
-                                                     min_delta = 0, 
-                                                     patience = 10))
-```
-
-```{r}
-#| label: fit_early
-#| message: false
-#| output: false
-
-fit_early <- mlp(hidden_units = 30, activation = "relu", epochs = 200) |>
-  set_mode("classification") |> 
-  set_engine("keras", verbose = 1,
-             seeds = fit_seeds, 
-             metrics = c("accuracy" ), 
-             validation_split = 1/6,
-             callbacks = callback_list) |>
-  fit(y ~ ., data = feat_trn)
-```
+- Validation error will increase when the model becomes overfit to training
+- We can have tidymodels hold back some portion of the training data for validation
+  - `validation` = .1 is the default
+  - We pass it in as an optional argument in `set_engine()`
+  - This can allow us to stop training once the model starts to become overfit to training
 
 --------------------------------------------------------------------------------
 
 ```{r}
-accuracy_vec(feat_test$y, predict(fit_early, feat_test)$.pred_class)
+set.seed(1234567)
+fit_7 <- mlp(activation = "relu",   # default in brulee = "relu" 
+             epochs = 100, # default = 100
+             hidden_units = 30, # default = 3,
+             learn_rate = 0.01, # default = .01
+             penalty = 0,  # from book, default = .001 (and mixture defaults to 0)
+             dropout = 0) |>   # from book, default = 0 
+    set_mode("classification") |> 
+    set_engine("brulee", 
+               verbose = TRUE,    # default = FALSE (output loss for each epoch)
+               validation = 0.1,    # default = .1 (if 0, calculate loss in training)
+               stop_iter = 5) |>  # default = 5 (stop early after loss increases this many times) 
+    fit(y ~ ., data = feat_trn)
 ```
 
---------------------------------------------------------------------------------
+```{r}
+accuracy_vec(feat_test$y, predict(fit_7, feat_test)$.pred_class)
+```
 
-**Coding sidebar:** You can see many of the optional arguments you can set for Keras in the help [here](https://keras.rstudio.com/reference/fit.html).   
+This stops after 23 epochs yet fits almost identical to our model trained over 30 epochs. 
 
-And you can see more info about `callback_early_stopping()` [here](https://keras.rstudio.com/reference/callback_early_stopping.html)
+It saves substantial time vs. training over 100 epochs
+
+It might have even fit better than without early stopping if we had let the model become even more overfit but setting epochs to 100 without early stopping (we were only using 30 epochs)
 
 --------------------------------------------------------------------------------
 
 ## Using Resampling to Select Best Model Configuration
 
-Developing a good network artchitecture and considering feature enginnering options involves experimentation
+Developing a good network architecture and considering feature engineering options involves experimentation
   
-- This is what Keras is designed to do
-- tidymodels allows this too
 - We need to evaluate configurations with a valid method to evaluate performance
   - validation split metric
   - k-fold metric
@@ -867,9 +832,11 @@ splits_validation <-
 --------------------------------------------------------------------------------
 
 - Set up grid of hyperparameter values
+
+- we haven't considered learning rate yet but that matters too as discussed in the book/videos so lets tune it
 ```{r}
-grid_keras <- expand_grid(hidden_units = c(5, 10, 20, 30, 50, 100), 
-                          penalty = c(.00001, .0001, .01, .1))
+grid_mlp <- expand_grid(hidden_units = c(5, 10, 20, 30, 50, 100), 
+                          learn_rate = c(.001, .01, .1, 1))
 ```
 
 --------------------------------------------------------------------------------
@@ -880,12 +847,19 @@ grid_keras <- expand_grid(hidden_units = c(5, 10, 20, 30, 50, 100),
 
 fits_nn <- cache_rds(
   expr = {
-    mlp(hidden_units = tune(), penalty = tune(), activation = "relu") |>
+    mlp(hidden_units = tune(), 
+        learn_rate = tune(), 
+        activation = "relu",
+        penalty = 0,
+        dropout = 0,
+        epochs = 100) |>
     set_mode("classification") |> 
-    # setting to verbose = 1 to track progress.  Training error not that useful
-    set_engine("keras", verbose = 1, seeds = fit_seeds) |>  
+    set_engine("brulee", 
+               verbose = FALSE,
+               validation = .1,
+               stop_iter = 5) |>  
     tune_grid(preprocessor = rec_scaled, 
-                  grid = grid_keras,
+                  grid = grid_mlp,
                   resamples = splits_validation,
                   metrics = metric_set(accuracy))
   },
@@ -898,53 +872,14 @@ fits_nn <- cache_rds(
 
 - Find model configuration with best performance in the held-out validation set
 ```{r}
-show_best(fits_nn)
+show_best(fits_nn, metric = "accuracy")
 ```
 
---------------------------------------------------------------------------------
-
-## Other Details
-
-We can get a better sense of how tidymodels is interacting with Keras by looking at the function that is called
 
 ```{r}
-mlp(hidden_units = 30, activation = "relu", dropout = .1) |>
-  set_mode("classification") |>  
-  set_engine("keras", verbose = 0, seeds = fit_seeds) |> 
-  translate()
+plot_hyperparameters(fits_nn, hp1 = "hidden_units", hp2 = "learn_rate", metric = "accuracy")
 ```
 
---------------------------------------------------------------------------------
+Looking at this hyperparameter plot, we might want to consider even higher number of hidden units and a higher learning rate!
 
-`keras_mlp()` is a wrapper around the calls to Keras.  Lets see what it does
-```{r}
-keras_mlp
-```
 
-We can see:
-
-- How the activation functions are setup
-- The choice of cost function: mse or binary_crossentropy
-- The optimizer: Adam
-- How the three seeds are being used
-
---------------------------------------------------------------------------------
-
-Finally, you might  have noticed that we never set a learning rate anywhere
-
-The [Adam optimizer](pdfs/kingma_adam_optimizer.pdf) is used instead of classic stochastic gradient descent.  The authors of this optimizer state it is:
-
-- Straightforward to implement.
-- Computationally efficient.
-- Little memory requirements.
-- Invariant to diagonal rescale of the gradients.
-- Well suited for problems that are large in terms of data and/or parameters.
-- Appropriate for non-stationary objectives.
-- Appropriate for problems with very noisy/or sparse gradients.
-- Hyper-parameters have intuitive interpretation and typically require little tuning.
-
---------------------------------------------------------------------------------
-
-You can start additional reading about Adam [here](https://machinelearningmastery.com/adam-optimization-algorithm-for-deep-learning/#:~:text=Adam%20is%20a%20replacement%20optimization,sparse%20gradients%20on%20noisy%20problems)
-
-For now, if you want another optimizer or much more control over your network architecture, you may need to work directly in Keras.
