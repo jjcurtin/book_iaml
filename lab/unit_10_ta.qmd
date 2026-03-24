@@ -1,0 +1,573 @@
+---
+title: "Unit 10 Lab TA"
+format:
+  html:
+    embed-resources: true
+    toc: true
+    toc_depth: 4
+editor_options:
+  chunk_output_type: console
+---
+
+## Happy Tuesday! Welcome to your Unit 10 Lab!
+
+## Practicing with Neural Networks
+
+Today we'll be applying the neural network concepts from lecture using the `brulee` package inside tidymodels. One important thing to note right off the bat: **neural networks work for both classification AND regression**. In lecture you saw a classification example (MNIST digits). Today, we'll use a regression example to show that the same principles carry over.
+
+Below is a quick reference table of the key arguments you'll be working with today. You should recognize a few of these from previous units (like `penalty` from our regularization unit), but several will be new.
+
+| Argument | Where it goes | What it controls | Notes |
+|------------------|------------------|------------------|------------------|
+| `hidden_units` | `mlp()` | Number of neurons in the hidden layer | More units = more complex model |
+| `activation` | `mlp()` | Activation function for hidden units | `relu` is the brulee default |
+| `epochs` | `mlp()` | Maximum number of training passes through data | Use with early stopping |
+| `learn_rate` | `mlp()` | Step size for gradient descent updates | Critical to tune! |
+| `penalty` | `mlp()` | L1/L2 regularization strength (weight decay) | Cannot be used with dropout |
+| `dropout` | `mlp()` | Fraction of neurons randomly deactivated during training | Cannot be used with penalty |
+| `validation` | `set_engine()` | Fraction of training data held for early stopping | Default = 0.1 |
+| `stop_iter` | `set_engine()` | Epochs of no improvement before stopping | Default = 5 |
+
+### Introduction to the data and set-up
+
+We'll be working with the **Concrete Compressive Strength dataset** today:
+
+> The dataset contains 1,030 concrete samples. For each sample, we have the amounts of eight ingredients/properties: cement, blast furnace slag, fly ash, water, superplasticizer, coarse aggregate, fine aggregate, and age (in days). Our outcome is the measured **concrete compressive strength** in megapascals (MPa).
+
+Let's load our libraries and get started.
+
+```{r}
+#| echo: true
+#| message: false
+library(tidyverse)
+library(tidymodels)
+options(conflicts.policy = "depends.ok")
+```
+
+```{r}
+# extra! extra! new package you will need for this unit!
+library(brulee)
+
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+
+theme_set(theme_bw())
+options(tibble.width = Inf)
+
+path_data <- "data"
+```
+
+Let's read in the data and take a look at it.
+
+```{r}
+data_all <- read_csv(here::here(path_data, "concrete.csv"),
+                     show_col_types = FALSE) |>
+  janitor::clean_names()
+
+data_all |> glimpse()
+```
+
+Let's check for any missing values.
+
+```{r}
+data_all |> skim_some()
+```
+
+No missing data. Let's also look at the distribution of our outcome variable.
+
+```{r}
+data_all |>
+  ggplot(aes(x = concrete_compressive_strength)) +
+  geom_histogram(fill = "grey", color = "black") +
+  labs(x = "Compressive Strength (MPa)", y = "Count")
+```
+
+Now let's look at the range of our predictor variables side by side. This will be important in a moment.
+
+```{r}
+data_all |>
+  select(-concrete_compressive_strength) |>
+  summary()
+```
+
+**Take a look at the scale differences between predictors. What do you notice? Why might this be a problem for neural networks?**
+
+Let's set up our train/test split. Since this is a continuous outcome, we don't need a `strata` argument.
+
+```{r}
+set.seed(20241010)
+splits_test <- data_all |>
+  initial_split(prop = 2/3)
+
+data_trn <- splits_test |>
+  analysis()
+
+data_test <- splits_test |>
+  assessment()
+```
+
+### Feature Engineering
+
+Let's start with a minimal recipe, just the formula, no preprocessing.
+
+```{r}
+rec_min <- recipe(concrete_compressive_strength ~ ., data = data_trn)
+
+rec_min_prep <- rec_min |>
+  prep(data_trn)
+
+feat_trn_min <- rec_min_prep |>
+  bake(NULL)
+
+feat_test_min <- rec_min_prep |>
+  bake(data_test)
+
+feat_trn_min |> skim_some()
+```
+
+::: callout-tip
+#### Quick reminder: bake(NULL)
+:::
+
+Now let's think about why scaling matters here:
+
+```{r}
+data_trn |>
+  select(cement, superplasticizer, water) |>
+  summary()
+```
+
+::: callout-important
+#### Feature scaling is critical for neural networks
+
+`cement` values range from about 100–540, while `superplasticizer` values range from 0–32. Gradient descent updates weights using the *gradient* of the loss. When features are on very different scales, the gradients are also on very different scales. This causes the optimizer to take large steps in some weight dimensions and tiny steps in others, making training slow and unstable.
+
+This relates to the same underlying issue we saw in lecture with the MNIST data, where we needed to remove zero-variance features before normalizing. Here, all of our features have variance (a nice change!), so we just need to normalize.
+
+**Always scale your inputs before training a neural network!**
+:::
+
+Let's create our properly scaled recipe.
+
+```{r}
+rec_scaled <- recipe(concrete_compressive_strength ~ ., data = data_trn) |>
+  step_normalize(all_predictors())
+```
+
+Let's prep and bake our scaled feature matrices.
+
+```{r}
+rec_scaled_prep <- rec_scaled |>
+  prep(data_trn)
+
+feat_trn <- rec_scaled_prep |>
+  bake(NULL)
+
+feat_test <- rec_scaled_prep |>
+  bake(data_test)
+
+feat_trn |> skim_some()
+```
+
+All predictors are now centered and scaled. Let's train some models!
+
+### Fitting Neural Networks
+
+We'll build up our neural network configurations progressively.
+
+Each fit will be evaluated on the test set using RMSE.
+
+**Remember:** We are using our held-out set to compare the differences among configurations here -- as always, in a real analysis, you'd evaluate in your held-out only once with your final selected model.
+
+First, let's establish a naive baseline: what RMSE would we get if we just predicted the mean for everyone?
+
+```{r}
+rmse_vec(truth = feat_test_min$concrete_compressive_strength,
+         estimate = rep(mean(feat_trn_min$concrete_compressive_strength),
+                        nrow(feat_test_min)))
+```
+
+Keep that number in mind as we evaluate our models below.
+
+::: callout-tip
+#### Why set a seed inside each fit call, not just once at the top?
+
+`set.seed()` sets the starting position of R's random number generator at that exact moment -- it doesn't freeze randomness for any specific operation. Every subsequent line of code that draws random numbers advances that stream forward by however many draws it needs. By the time an `mlp()` call happens, the stream position depends on exactly how many random draws everything *before it* consumed -- prepping a recipe, printing output, internal tidymodels bookkeeping, etc.
+
+This count is not obvious, and it's not stable: adding a line of code, changing your data, or updating a package can all change how many draws happen upstream, landing your fit at a different stream position.
+
+Setting a seed immediately before each `mlp()` call eliminates that fragility. Each fit starts from a known, fixed RNG position regardless of what happened above it in the script.
+:::
+
+------------------------------------------------------------------------
+
+**fit_1**: Minimal recipe (unscaled), sigmoid activation, 3 hidden units, 30 epochs
+
+```{r}
+set.seed(090724)
+
+fit_1 <- mlp(activation = "sigmoid",   # from book; default in brulee = "relu"
+             epochs = 30,              # default = 100; using fewer to speed things up
+             hidden_units = 3,         # default = 3
+             learn_rate = 0.01,        # default = .01
+             penalty = 0,              # from book; default = .001
+             dropout = 0) |>           # from book; default = 0
+  set_mode("regression") |>
+  set_engine("brulee",
+             verbose = TRUE,           # print loss at each epoch
+             validation = 0,           # from book; default = .1
+             stop_iter = 5) |>         # default = 5
+  fit(concrete_compressive_strength ~ ., data = feat_trn_min)
+```
+
+```{r}
+rmse_vec(truth = feat_test_min$concrete_compressive_strength,
+         estimate = predict(fit_1, feat_test_min)$.pred)
+```
+
+**How does this compare to the naive baseline? Does our unscaled neural network appear to be learning anything useful?**
+
+------------------------------------------------------------------------
+
+**fit_2**: Same configuration, but now with scaled features
+
+```{r}
+set.seed(090724)
+fit_2 <- mlp(activation = "sigmoid",
+             epochs = 30,
+             hidden_units = 3,
+             learn_rate = 0.01,
+             penalty = 0,
+             dropout = 0) |>
+  set_mode("regression") |>
+  set_engine("brulee",
+             verbose = TRUE,
+             validation = 0,
+             stop_iter = 5) |>
+  fit(concrete_compressive_strength ~ ., data = feat_trn)
+```
+
+```{r}
+rmse_vec(truth = feat_test$concrete_compressive_strength,
+         estimate = predict(fit_2, feat_test)$.pred)
+```
+
+**That's a meaningful improvement! What did normalizing the features do for gradient descent?**
+
+------------------------------------------------------------------------
+
+**fit_3**: Scaled features, 30 hidden units
+
+We have only 3 hidden units in our network right now. Let's try a more expressive architecture.
+
+```{r}
+set.seed(090724)
+fit_3 <- mlp(activation = "sigmoid",
+             epochs = 30,
+             hidden_units = 30,        # bumping up from 3 to 30
+             learn_rate = 0.01,
+             penalty = 0,
+             dropout = 0) |>
+  set_mode("regression") |>
+  set_engine("brulee",
+             verbose = TRUE,
+             validation = 0,
+             stop_iter = 5) |>
+  fit(concrete_compressive_strength ~ ., data = feat_trn)
+```
+
+```{r}
+rmse_vec(truth = feat_test$concrete_compressive_strength,
+         estimate = predict(fit_3, feat_test)$.pred)
+```
+
+**A slight improvement, however, what's the tradeoff of using more hidden units?**
+
+------------------------------------------------------------------------
+
+**fit_4**: Relu activation, 30 hidden units
+
+Let's try the default brulee activation function. You can see all available options with:
+
+```{r}
+brulee::brulee_activations()
+```
+
+```{r}
+set.seed(090724)
+fit_4 <- mlp(activation = "relu",     # brulee default
+             epochs = 30,
+             hidden_units = 30,
+             learn_rate = 0.01,
+             penalty = 0,
+             dropout = 0) |>
+  set_mode("regression") |>
+  set_engine("brulee",
+             verbose = TRUE,
+             validation = 0,
+             stop_iter = 5) |>
+  fit(concrete_compressive_strength ~ ., data = feat_trn)
+```
+
+```{r}
+rmse_vec(truth = feat_test$concrete_compressive_strength,
+         estimate = predict(fit_4, feat_test)$.pred)
+```
+
+**How does relu compare to sigmoid here? What properties of relu might make it a better default choice for hidden units?**
+
+### Dealing with Overfitting
+
+As neural networks get more complex, overfitting becomes a real concern. Let's count the parameters in our current model to see why.
+
+```{r}
+fit_4
+```
+
+With 8 predictors and 30 hidden units in a 3-layer network, we have:
+
+-   Hidden layer: (8 inputs + 1 bias) × 30 units = **270 parameters**
+-   Output layer: (30 inputs + 1 bias) × 1 output = **31 parameters**
+-   **Total: 301 parameters**
+
+That's a lot relative to our dataset size, and it would grow quickly with more hidden units or layers! There are three main strategies to address overfitting in neural networks:
+
+1.  **L1/L2 Regularization** (weight decay via `penalty`)
+2.  **Dropout**
+3.  **Early stopping** (via `validation` monitoring)
+
+------------------------------------------------------------------------
+
+**fit_5**: L2 regularization (`penalty = .001`)
+
+L1 and L2 regularization work the same way here as they did with glmnet: a penalty is added to the cost function based on the magnitude of the weights. The `penalty` argument controls $\lambda$ and `mixture` controls the blend (0 = L2, 1 = L1).
+
+```{r}
+set.seed(090724)
+fit_5 <- mlp(activation = "relu",
+             epochs = 30,
+             hidden_units = 30,
+             learn_rate = 0.01,
+             penalty = .001,           # default = .001 (L2 by default since mixture = 0)
+             dropout = 0) |>
+  set_mode("regression") |>
+  set_engine("brulee",
+             verbose = TRUE,
+             validation = 0,
+             stop_iter = 5) |>
+  fit(concrete_compressive_strength ~ ., data = feat_trn)
+```
+
+```{r}
+rmse_vec(truth = feat_test$concrete_compressive_strength,
+         estimate = predict(fit_5, feat_test)$.pred)
+```
+
+------------------------------------------------------------------------
+
+**fit_6**: Dropout (`dropout = 0.1`)
+
+::: callout-tip
+#### What is dropout?
+
+Dropout randomly "turns off" a fraction of neurons during each training pass. Concretely: during forward propagation, each neuron in the hidden layer has a probability `dropout` of having its output set to zero for that batch. During the backward pass, no weight updates flow through those deactivated neurons either.
+
+Why does this help? It prevents neurons from co-adapting too closely — each neuron can't "rely" on any specific other neuron always being there, so the network learns more robust, distributed representations. Think of it as training an ensemble of many slightly different subnetworks.
+
+Typical starting values for `dropout` are between 0.1 and 0.5.
+
+**Important brulee constraint:** You cannot use non-zero `penalty` AND non-zero `dropout` simultaneously in brulee. You must choose one or the other — if you try to set both, you'll get an error.
+:::
+
+```{r}
+set.seed(090724)
+fit_6 <- mlp(activation = "relu",
+             epochs = 30,
+             hidden_units = 30,
+             learn_rate = 0.01,
+             penalty = 0,              # must be 0 when using dropout!
+             dropout = 0.1) |>        # randomly deactivate 10% of neurons
+  set_mode("regression") |>
+  set_engine("brulee",
+             verbose = TRUE,
+             validation = 0,
+             stop_iter = 5) |>
+  fit(concrete_compressive_strength ~ ., data = feat_trn)
+```
+
+```{r}
+rmse_vec(truth = feat_test$concrete_compressive_strength,
+         estimate = predict(fit_6, feat_test)$.pred)
+```
+
+------------------------------------------------------------------------
+
+**fit_7**: Early stopping with validation monitoring
+
+So far we've been training for exactly 30 epochs with no early stopping (using `validation = 0`). Let's now turn on early stopping with 100 epochs maximum.
+
+::: callout-important
+#### Why "validation" error, not training error, is required for early stopping
+
+Training loss only decreases (or stays flat) as the model keeps fitting training data. It will never *increase*, so monitoring training loss can never trigger early stopping.
+
+Validation loss, on the other hand, will start increasing once the model becomes overfit, as it's tracking how well the model generalizes to data it hasn't seen during the current training pass. Early stopping triggers when validation loss fails to improve for `stop_iter` consecutive epochs.
+
+Setting `validation = 0.1` tells brulee to hold back 10% of the training data each epoch to use as a validation check.
+:::
+
+```{r}
+set.seed(090724)
+fit_7 <- mlp(activation = "relu",
+             epochs = 100,             # max epochs; early stopping may stop us sooner
+             hidden_units = 30,
+             learn_rate = 0.01,
+             penalty = 0,
+             dropout = 0) |>
+  set_mode("regression") |>
+  set_engine("brulee",
+             verbose = TRUE,
+             validation = 0.1,         # hold back 10% for early stopping
+             stop_iter = 5) |>         # stop after 5 consecutive epochs of no improvement
+  fit(concrete_compressive_strength ~ ., data = feat_trn)
+```
+
+```{r}
+rmse_vec(truth = feat_test$concrete_compressive_strength,
+         estimate = predict(fit_7, feat_test)$.pred)
+```
+
+**Look at the epoch output above. How many epochs did the model actually train for? What does that tell us about the tradeoff between computation time and performance?**
+
+### Using Resampling to Select the Best Model Configuration
+
+Now that we understand the individual components, let's do this properly: use systematic hyperparameter tuning with `tune_grid()` to find the best configuration.
+
+We'll tune `hidden_units` and `learn_rate` using a validation split. With \~686 training observations, a single validation split gives us a reasonable performance estimate without requiring the computational cost of k-fold or bootstrap resampling.
+
+```{r}
+set.seed(102030)
+splits_validation <- data_trn |>
+  validation_split(prop = 5/6)
+```
+
+Define our hyperparameter grid. We haven't explicitly tuned `learn_rate` yet, but it's one of the most important hyperparameters for neural networks. Too high and training diverges, too low and training is very slow.
+
+```{r}
+grid_mlp <- expand_grid(
+  hidden_units = c(5, 10, 20, 30, 50),
+  learn_rate = c(.001, .01, .1)
+)
+
+grid_mlp
+```
+
+Now let's tune our model. We'll use early stopping inside each fit (via `validation = .1`).
+
+```{r}
+fits_nnet <- mlp(hidden_units = tune(),
+                 learn_rate = tune(),
+                 activation = "relu",
+                 penalty = 0,
+                 dropout = 0,
+                 epochs = 100) |>
+  set_mode("regression") |>
+  set_engine("brulee",
+             verbose = FALSE,
+             validation = .1,
+             stop_iter = 5) |>
+  tune_grid(preprocessor = rec_scaled,
+            grid = grid_mlp,
+            resamples = splits_validation,
+            metrics = metric_set(rmse))
+```
+
+Let's look at our best configurations.
+
+```{r}
+show_best(fits_nnet, metric = "rmse")
+```
+
+And visualize performance across the hyperparameter grid.
+
+```{r}
+plot_hyperparameters(fits_nnet, hp1 = "hidden_units", hp2 = "learn_rate", metric = "rmse")
+```
+
+::: callout-tip
+#### How do I know if my hyperparameter grid is wide enough?
+
+A good starting principle: span the full practical range of each parameter, using a log scale for parameters that vary across orders of magnitude (like `learn_rate` and `penalty`).
+
+For `learn_rate`, values below \~0.0001 train so slowly they're impractical in a fixed-epoch budget, and values above \~1.0 tend to cause divergence, so `c(.0001, .001, .01, .1, 1)` is a reasonable outer boundary to start from.
+
+For `hidden_units`, there's no hard upper limit, so start wide and zoom in.
+
+The hyperparameter plot is your diagnostic. If the best performance is at the edge of your grid, you haven't searched far enough in that direction and need to expand. If you see a clear interior peak, you've covered the right range. **Always look at the plot before concluding your grid was adequate.**
+:::
+
+**What patterns do you see in the hyperparameter plot? Does the plot suggest we should explore a wider range of either hyperparameter?**
+
+### Evaluating in Test
+
+Let's fit our final model using the best hyperparameters and evaluate on the held-out test set.
+
+```{r}
+best_hidden <- select_best(fits_nnet, metric = "rmse")$hidden_units
+best_hidden
+
+best_lr <- select_best(fits_nnet, metric = "rmse")$learn_rate
+best_lr
+```
+
+```{r}
+set.seed(090724)
+fit_best <- mlp(hidden_units = best_hidden,
+                learn_rate = best_lr,
+                activation = "relu",
+                penalty = 0,
+                dropout = 0,
+                epochs = 100) |>
+  set_mode("regression") |>
+  set_engine("brulee",
+             verbose = FALSE,
+             validation = .1,
+             stop_iter = 5) |>
+  fit(concrete_compressive_strength ~ ., data = feat_trn)
+```
+
+```{r}
+rmse_vec(truth = feat_test$concrete_compressive_strength,
+         estimate = predict(fit_best, feat_test)$.pred)
+```
+
+Let's also visualize our predictions vs. the true values to get a sense of how well the model is doing.
+
+```{r}
+tibble(
+  truth = feat_test$concrete_compressive_strength,
+  predicted = predict(fit_best, feat_test)$.pred
+) |>
+  ggplot(aes(x = truth, y = predicted)) +
+  geom_point(alpha = 0.4) +
+  geom_abline(slope = 1, intercept = 0, color = "red", linetype = "dashed") +
+  labs(x = "Actual Compressive Strength (MPa)",
+       y = "Predicted Compressive Strength (MPa)",
+       title = "Neural Network: Predicted vs. Actual") +
+  coord_equal()
+```
+
+**How does our final RMSE compare to the naive baseline from the beginning of lab? Points along the red dashed line are perfect predictions, any thing you notice about where the model tends to over- or under-predict?**
+
+## Wrap-up!
+
+Great work today! You've successfully applied neural networks to a regression problem using the `brulee` package. The key ideas to take away:
+
+-   Feature scaling is essential! Gradient descent doesn't work well with unscaled inputs
+-   More hidden units increase model capacity but also overfitting risk
+-   `penalty`, `dropout`, and early stopping (`validation`) are your three main tools for regularization
+-   In brulee, `penalty` and `dropout` are mutually exclusive, pick one
+-   Hyperparameter tuning with `tune_grid()` works just like it does for other model families
+
+Have a great rest of your week, good luck on the competition. Last one! :\^)
