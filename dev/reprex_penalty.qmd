@@ -1,0 +1,74 @@
+```{r}
+library(tidyverse) # for general data wrangling
+library(tidymodels) # for modeling
+``` 
+
+```{r}
+# get mnist data from keras
+mnist <- keras::dataset_mnist()
+
+# train
+set.seed(1234567)
+d_in <- keras::array_reshape(mnist$train$x, c(nrow(mnist$train$x), 784))
+colnames(d_in) <- str_c("v", 1:784)
+d_in <-  d_in |> 
+  as_tibble() |>  
+  mutate(label = factor(mnist$train$y), .before = 1) |> 
+  slice_sample(10000) # to speed up fit and increase need for regularization
+
+# test
+d_out <- keras::array_reshape(mnist$test$x, c(nrow(mnist$test$x), 784))
+colnames(d_out) <- str_c("v", 1:784)
+d_out <-  d_out |> 
+  as_tibble() |>  
+  mutate(label = factor(mnist$test$y), .before = 1) 
+```
+
+```{r}
+rec <- 
+  recipe(label ~ ., data = d_in) |>
+  step_zv(all_predictors()) |> 
+  step_normalize(all_predictors())
+
+rec_prep <- rec |> 
+  prep(d_in)
+
+feat_in <- rec_prep |> 
+  bake(NULL)
+
+feat_out <- rec_prep |> 
+  bake(d_out)
+```
+
+Default penalty
+```{r}
+set.seed(1234567)
+fit_default <- mlp(penalty = .001) |>   
+    set_mode("classification") |> 
+    set_engine("brulee") |> 
+    fit(label ~ ., data = feat_in)
+
+accuracy_vec(feat_out$label, predict(fit_default, feat_out)$.pred_class)
+```
+
+no penalty - but performance is exactly the same
+```{r}
+set.seed(1234567)
+fit_0 <- mlp(penalty = 0) |>   
+    set_mode("classification") |> 
+    set_engine("brulee") |> 
+    fit(label ~ ., data = feat_in)
+
+accuracy_vec(feat_out$label, predict(fit_0, feat_out)$.pred_class)
+```
+
+big penalty - but performance is exactly the same
+```{r}
+set.seed(1234567)
+fit_big <- mlp(penalty = 10) |>   
+    set_mode("classification") |> 
+    set_engine("brulee") |> 
+    fit(label ~ ., data = feat_in)
+
+accuracy_vec(feat_out$label, predict(fit_big, feat_out)$.pred_class)
+```
