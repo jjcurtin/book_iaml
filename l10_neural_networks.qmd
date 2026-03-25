@@ -833,10 +833,10 @@ splits_validation <-
 
 - Set up grid of hyperparameter values
 
-- we haven't considered learning rate yet but that matters too as discussed in the book/videos so lets tune it
+- we didn't considered penalty carefully before so lets tune it now along with number of hidden units (which we just followed the book/videos)
 ```{r}
 grid_mlp <- expand_grid(hidden_units = c(5, 10, 20, 30, 50, 100), 
-                          learn_rate = c(.001, .01, .1, 1))
+                        penalty = c(.001, .01, .1))
 ```
 
 --------------------------------------------------------------------------------
@@ -848,9 +848,8 @@ grid_mlp <- expand_grid(hidden_units = c(5, 10, 20, 30, 50, 100),
 fits_nn <- cache_rds(
   expr = {
     mlp(hidden_units = tune(), 
-        learn_rate = tune(), 
+        penalty = tune(), 
         activation = "relu",
-        penalty = 0,
         dropout = 0,
         epochs = 100) |>
     set_mode("classification") |> 
@@ -877,9 +876,7 @@ show_best(fits_nn, metric = "accuracy")
 
 
 ```{r}
-plot_hyperparameters(fits_nn, hp1 = "hidden_units", hp2 = "learn_rate", metric = "accuracy")
+plot_hyperparameters(fits_nn, hp1 = "hidden_units", hp2 = "penalty", metric = "accuracy")
 ```
 
-Looking at this hyperparameter plot, we might want to consider even higher number of hidden units and a higher learning rate!
-
-
+Looking at this hyperparameter plot, we might want to consider even higher number of hidden units.
