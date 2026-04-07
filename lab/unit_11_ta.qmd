@@ -1,0 +1,639 @@
+---
+title: "Unit 11 Lab TA"
+format:
+  html:
+    embed-resources: true
+    toc: true
+    toc_depth: 4
+editor_options:
+  chunk_output_type: console
+---
+
+## Happy Tuesday! Welcome to your Unit 11 Lab!
+
+## Explanatory Approaches in Machine Learning
+
+Thus far in the course, we've focused a lot on optimizing our models for prediction. This week's unit focuses on explanatory approaches to machine learning.
+
+The tools we learn this week will help you answer questions such as...
+
+...does adding in a particular feature *significantly* improve my model's performance?
+
+...what features are *most important* in predicting a given outcome in my model?
+
+### Introduction and set up!
+
+We will be using the drug prediction dataset again that we used a few weeks ago.
+
+Here is the description of that study again:
+> Imagine that you are a medical researcher compiling data for a study. You have collected data from a set of patients, all of whom suffer from the same illness. This is a Phase II clinical trial with a single arm, so every patient is receiving the same experimental drug.
+>
+> Your job is to build a model to find out whether or not a future patient with the same illness will respond to this new drug. The features of this dataset are Age, Sex, Blood Pressure, Cholesterol, and Sodium/Potassium Blood Concentrations of the patients, and the target is whether or not the patient responded to the drug (i.e., had significant clinical improvement).
+
+Recall that last time we used this dataset, we wanted to create the best prediction model so that we could assign patients to receive their optimal drug. We are going to set up a model comparison that has us exploring whether or not Sodium/Potassium Blood Concentrations improves our model performance. The other variables in this dataset Age, Sex, Blood Pressure, Cholesterol) are more easily pulled from our patient's medical records, but the medical team you're working with has let you know that they don't really want to be poking their patients with needles every time they come in if they don't have to.
+
+**Based on this information, how would you set up this model comparison?**
+
+Let's take care of all of our set up in one nice chunk today.
+```{r}
+#| message: false
+
+library(tidyverse)
+library(tidymodels)
+
+options(conflicts.policy = "depends.ok")
+
+# weewoo! weewoo! new packages!
+library(tidyposterior) # for bayesian model comparisons
+library(DALEX, exclude= "explain") # to understand our features ("moDel Agnostic Language for Exploration and eXplanation")
+library(DALEXtra)
+
+# and some same old same old packages
+library(xfun, include.only = "cache_rds")
+library(future)
+
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+
+theme_set(theme_classic())
+options(tibble.width = Inf, dplyr.print_max=Inf)
+
+path_data <- "data/"
+
+plan(multisession, workers = parallel::detectCores(logical = FALSE))
+```
+
+Let's load in our data and remind ourselves what we're working with! Since we covered reclassing for this dataset in the last lab we worked with it, we won't spend time reviewing it today.
+
+```{r}
+data_all <- read_csv(here::here(path_data, "drug_response.csv")) |> 
+    mutate(response = factor(response, levels = c("yes", "no")),
+         bp = factor(bp, levels = c("low", "normal", "high")),
+         cholesterol = factor(cholesterol, levels = c("low", "normal", "high"))) |>
+  mutate(across(where(is.character), factor))
+
+data_all |> glimpse()
+```
+
+We'll be using `vfold_cv()` to generate our splits object today (so that we can use repeated k-fold cross-validation splits). **What should I put in as the arguments if I want to to 3x10 cross-validation?**
+
+```{r}
+set.seed(11212021)
+splits <- vfold_cv(data_all, v = 10, repeats = 3)
+```
+
+
+::: {.callout-tip}
+## Reviewing Cross-Validation
+
+ - v = 10 represents 10 folds per repeat
+ - We specify 3 repeats, so our entire 10-fold CV is run 3 times
+ - Resulting in 3 x 10 = 30 splits
+
+Let's take a look at our `splits` object. Note that each split has 900 observations in train and 100 in test (because our total sample size is 1000).
+
+```{r}
+splits |> 
+  mutate(
+    train_n = map_int(splits, ~ nrow(analysis(.x))),
+    test_n  = map_int(splits, ~ nrow(assessment(.x)))
+  ) |> 
+  select(id, id2, train_n, test_n)
+```
+
+**Where will our estimate of performance come from?**
+
+ - Evaluating the model in each of the 30 test folds
+ - Averaging those 30 performance metrics together
+
+:::
+
+
+#### Creating our "full" model
+
+We're going to make our full recipe include all possible features.
+
+```{r}
+rec_full <- recipe(response ~ ., data = data_all)
+```
+
+**But wait! I want to take a look at my features, but since we'll be using repeated k-fold, we're creating our recipe using the full dataset. What technique could I use to minimize data leakage?**
+
+To get around this, we can create an eyeball sample.
+
+::: {.callout-tip}
+## Eyeball samples
+
+We mentioned the phrase "eyeball sample" back in Unit 5, but we haven't really delved into it. 
+As the name suggests, we want to quickly take a small, random sample and use it for EDA (e.g., identify any patterns in our data, catch potential issues, make sure our features are being properly calculated). Of course, we want to do this while minimizing *data leakage*.
+
+We demonstrate this here because we are not specifying explicit train and test splits, but rather using cross-validation.
+
+::: 
+
+Using an eyeball sample is relatively simple to do!
+
+We'll take an eyeball sample of 25% of our data. No need to set a seed because we don't need to reproduce this exactly.
+
+```{r}
+data_eda <- initial_split(data_all, prop = 3/4) |> 
+  assessment()
+```
+
+Once we've done that, we can apply our preprocessing steps to this eyeball sample and take a look at it to make sure our recipe is doing what we want it to do! It would also be appropriate to use an eyeball sample to do basic EDA, like looking for patterns in your data.
+
+```{r}
+rec_full |> 
+  prep(data_eda) |>
+  bake(NULL) |> 
+  skim_all()
+```
+
+#### Creating our "compact" model
+
+Next, we'll create our compact model. This shouldn't be too hard!
+
+**How might we create our compact model?**
+
+```{r}
+rec_compact <- rec_full |>
+  step_rm(contains("na_to_k"))
+
+rec_compact |> 
+  prep(data_eda) |>  
+  bake(NULL) |> 
+  skim_all()
+```
+
+Now we're all set to run both of our models!
+
+### Fitting models
+
+We'll be demonstrating this using Random Forest, since that is what we used with these data last time (so we won't review the ins and outs of tree hyperparameters, since we covered those in Unit 9).
+
+First, we'll set up our hyperparameter grid.
+
+```{r}
+grid_rf <- expand_grid(trees = c(50, 150, 250, 350), 
+                       mtry = c(2, 3, 4),
+                       min_n = c(10, 20, 30, 40, 50, 60, 70))
+```
+
+Next, we'll run our full model.
+
+```{r}
+fits_full <- rand_forest(trees = tune(),
+              mtry = tune(),
+              min_n = tune()) |>
+    set_engine("ranger",
+               respect.unordered.factors = "order",
+               oob.error = FALSE,
+               seed = 102030) |>
+    set_mode("classification") |> 
+    tune_grid(preprocessor = rec_full, # make sure to specify if you're using the full or compact recipe here!
+              resamples = splits,
+              grid = grid_rf, 
+              metrics = metric_set(accuracy))
+```
+
+Let's take a look and see if we've covered a good range of hyperparameters. **Which configuration looks like it's doing the best?**
+
+```{r}
+autoplot(fits_full)
+```
+
+Now let's select our best model configuration to see if we're right. We'll also save our best model configuration as an object so that we can use it later.
+
+```{r}
+select_best(fits_full)
+
+(hp_best_full <- select_best(fits_full))
+```
+
+Recall from Unit 5 that we can use `collect_metrics()` to view our model performance in held out folds.
+
+```{r}
+collect_metrics(fits_full, summarize = TRUE) |> 
+  filter(.config == select_best(fits_full)$.config)
+```
+
+::: {.callout-tip}
+## Quick review of `collect_metrics()`
+
+Remember we can either summarize performance across all folds by changing the summarize argument. By setting `summarize = TRUE`, we are asking to see performance across all 30 folds.
+
+**But hold on... why are there 84 rows?**
+
+```{r}
+collect_metrics(fits_full, summarize = TRUE)
+```
+
+84 comes from the total number of combinations of hyperparameters. We have 4 tree values by 3 mtry values by 7 min_n values (4 x 3 x 7 = 84). If we set `summarize = FALSE`, we should see that we end up with 84 x 30 rows.
+
+```{r}
+nrow((collect_metrics(fits_full, summarize = FALSE)))
+```
+
+This is because our 3x10 cross-validation is run for every possible combination of hyperparameters we've specified. It's easy to see how your work can computationally explode when you're working with an appropriate range of hyperparameters and cross-validation!
+
+:::
+
+Next, we'll fit our compact model. It's the same as before, but remember that we'll be changing our recipe!
+
+```{r}
+fits_compact <- rand_forest(trees = tune(),
+              mtry = tune(),
+              min_n = tune()) |>
+    set_engine("ranger",
+               respect.unordered.factors = "order",
+               oob.error = FALSE,
+               seed = 102030) |>
+    set_mode("classification") |> 
+    tune_grid(preprocessor = rec_compact, # don't forget to update your recipe :^)
+              resamples = splits, 
+              grid = grid_rf, 
+              metrics = metric_set(accuracy))
+```
+
+We can again print our best model configuration and save it out as an object so that we can use it later on.
+
+```{r}
+select_best(fits_compact)
+
+(hp_best_compact <- select_best(fits_compact))
+```
+
+Finally, let's take a look at the mean accuracy of our compact model. **What are your first impressions?**
+
+```{r}
+collect_metrics(fits_compact, summarize = TRUE) |> 
+  filter(.config == select_best(fits_compact)$.config)
+```
+
+## Model Comparisons
+
+We cover two ways of model comparisons on the course website which we'll talk about today: correlated t-tests and the use of Bayesian methods for model comparisons. Note that these aren't the only ways to compare models!
+
+### Correlated *t*-tests
+
+The first approach we'll cover tests whether the difference in performance between two models is statistically different from zero, accounting for dependence between resamples.
+
+This is relatively simple to do! Our first step will be to pull out our performance metrics for the best configurations for both the full and compact models.
+
+```{r}
+cv_full <- collect_metrics(fits_full, summarize = FALSE) |> 
+  filter(.config == hp_best_full$.config) |> 
+  pull(.estimate)
+
+cv_compact <- collect_metrics(fits_compact, summarize = FALSE) |> 
+  filter(.config == hp_best_compact$.config) |> 
+  pull(.estimate)
+```
+
+John created a function that we've already imported to be able to do this test. Remember that you can always print the code for a function by calling the name of the function with no arugments (AKA no parentheses). We can see from this function that it specifically **corrects** for the proportion of our sample in test and train in each fold.
+
+```{r}
+nb_correlated_t_test
+```
+
+Now, we'll run this over our cross-validation outputs we saved above. Since we are doing 3x10 CV, we will set *k* to 10.
+
+```{r}
+nb_correlated_t_test(cv_full, 
+                     cv_compact, 
+                     k = 10)
+```
+
+**Should we cut this p-value in half? Why or why not?**
+
+We should here, because our hypothesis is unidirectional. We're only really interested in understanding if our full model is better than our compact model (AKA, does adding in the Sodium/Potassium ratio variable improve our model performance).
+
+Regardless, we can see that we have quite a tiny p-value -- it's looking like our models are significantly different from one another. Let's take a look at another comparison method before we report back to the medical team.
+
+### Comparing models using Bayesian methods
+
+This approach estimates the posterior distribution of model performance and the probability that one model is better than another.
+
+In Bayesian statistics, your posterior represents updated beliefs about how accurate each model is after seeing the data. Unlike our t-test above, we don't get a simple value from this analysis. Instead, we are generating a distribution for plausible accuracies for both the compact and the full models. Then, we'll take a look at if these distributions are meaningfully different from each other.
+
+Similarly to above, we'll start by pulling information from our folds and saving it out as separate objects. Let's go ahead and do that and take a moment to check out what these objects look like.
+
+```{r}
+acc_full <-
+  collect_metrics(fits_full, summarize = FALSE) |>
+  filter(.config == select_best(fits_full)$.config) |> 
+  select(id, id2, full = .estimate)
+
+acc_compact <-
+     collect_metrics(fits_compact, summarize = FALSE) |>
+     filter(.config == select_best(fits_compact)$.config) |> 
+     select(id, id2, compact = .estimate)
+
+acc_all <- acc_full |> 
+  full_join(acc_compact, by = c("id", "id2"))
+
+acc_all
+```
+
+We can see that all we are doing is creating a tibble of accuracies across all repeats and folds for the full and compact model.
+
+We can now take this and get the posterior probabilities for accuracies for each model using the `perf_mod()` function.
+
+```{r}
+set.seed(11212021)
+
+pp <- perf_mod(acc_all, 
+                    formula = statistic ~ model + (1 | id2/id),
+                    iter = 3000, chains = 4,  
+                    hetero_var = TRUE,
+                    adapt_delta = 0.999)  
+```
+
+::: {.callout-tip}
+## Breaking down `perf_mod()`
+
+Let's take a look at each of the arguments we're specifying here to demistify the `perf_mod()` function.
+
+First, we're specifying our dataset (`acc_all`, which again has accurates for each repeat x fold).
+
+Next, we have our formula, which you'll notice looks similar to an `lmer()` formula. We are modeling accuracy (our statistic of choice) as a function of the model (full versus compact), while accounting for dependencies that arise from folds being nested in repeats. It may be helpful to think of this like a repeated measures design, where multiple observations come from the same repeat/fold combination.
+
+Then, we have four arguments specific to Bayesian analyses:
+
+ - We set `hetero_var = TRUE` to allow the variance of the intercept (accuracy estimate) to differ between our full and our compact models (this is important for metrics like accuracy where variance depends on the mean)
+ - `iter` and `chains` control the number of MCMC iterations and chains (more iterations/chains = better stability and convergence of the posterior estimates)
+ - `adapt_delta` tunes the step size of the sampler to help it converge (try increasing if you see warnings about divergent transitions)
+
+:::
+
+Let's take our `pp` object and plot it. Before we do that we'll reformat our `pp` object using tidy (how handy!) and pull out our credible intervals (in Bayes, they're called credible intervals, not confidence intervals).
+
+```{r}
+pp_tidy <- pp |> 
+  tidy(seed = 123) # set seed because perf_mod() uses MCMC, which has an element of randomness
+
+ci <- pp_tidy |> 
+  summary() |>  # pull my upper and lower credible interval
+  mutate(y = 1550) # setting where on my y-axis I want this to display (usually need to play around with)
+```
+
+Now we're ready to plot! Let's walk through this line by line.
+
+```{r}
+pp_tidy |> 
+  ggplot(aes(x = posterior)) + 
+  geom_histogram(aes(x = posterior, fill = model), color = "white", bins = 50) +  
+  geom_segment(mapping = aes(y = y+50, yend = y-50, x = mean, xend = mean,
+                           color = model),
+               data = ci) +
+  geom_segment(mapping = aes(y = y, yend = y, x = lower, xend = upper, color = model),
+                data = ci) +
+  facet_wrap(~ model, ncol = 1) +
+  theme(legend.position = "none") +
+  ylab("Count") +
+  xlab("Accuracy")
+```
+
+Visually, we can tell our full model is doing much better than our compact model. We can also take a look at this numerically. **What do these numbers represent?**
+
+```{r}
+pp_contrast <- pp |> 
+  contrast_models(seed = 12) |> # contrast_models() compares distributions of 2+ models
+  summary(size = .01) |> # set our region of practical equivalence (ROPE) -- AKA, what is a meaningful difference in accuracy?
+  glimpse()
+```
+
+It's looking like our Sodium to Potassium ratio actually *is* quite important in terms of model accuracy, so we'll have to let the medical team know that their patients will have to keep gettin' poked in the interest of good data!
+
+## Feature Importance
+
+Next, we'll cover two ways to look at feature importance: permutation feature importance and Shapley values. Looking at feature importance is key to explanatory approaches because it tells us what features are contributing most strongly to our predictions.
+
+Both of these approaches are model-agnostic, which means they can be used across many different models (they are not specific to one type of model).
+
+We'll start by fitting our best model on all the data.
+
+```{r}
+feat_all <- rec_full |> 
+  prep(data_all) |> 
+  bake(data_all) 
+
+fit_all_data <- rand_forest(trees = select_best(fits_full)$trees,
+              mtry = select_best(fits_full)$mtry,
+              min_n = select_best(fits_full)$min_n) |>
+    set_engine("ranger",
+               respect.unordered.factors = "order",
+               oob.error = FALSE,
+               seed = 102030) |>
+    set_mode("classification") |>  
+  fit(response ~ ., data = feat_all)
+```
+
+We'll also need to split our `feat_all` object into a dataframe with all of our features and a vector of our outcome variable. Note that if you're doing classification (as we are in today's example), you'll have to make sure your outcome is numeric!
+
+```{r}
+x <- feat_all |> select(-response)
+
+y <- feat_all |>
+  mutate(response = if_else(response == "yes", 1, 0)) |> 
+  pull(response)
+```
+
+We also need three functions that will give us:
+
+ - Numeric predictions for computing feature importance (`predict_wrapper()`)
+ - An "explainer" object that DALEX can use make calculations (`explain_full()`)
+ - A wrapper for our performance metric, accuracy, so that we convert 1/0 back to yes/no at the end (`accuracy_wrapper()`)
+
+John created the following functions that we've pulled from the website for us to use today.
+
+```{r}
+predict_wrapper <- function(model, newdata) {
+  predict(model, newdata, type = "prob") |>  
+    pull(.pred_yes)
+}
+
+explain_full <- explain_tidymodels(fit_all_data, 
+                                   data = x, 
+                                   y = y, 
+                                   predict_function = predict_wrapper)
+
+accuracy_wrapper <- function(observed, predicted) {
+  observed <- fct(if_else(observed == 1, "yes", "no"),
+                  levels = c("yes", "no"))
+  predicted <- fct(if_else(predicted > .5, "yes", "no"), levels  = c("yes", "no"))
+  accuracy_vec(observed, predicted)
+}
+```
+
+### Permutation Feature Importance
+
+In permutation feature importance, we are essentially asking, "What happens if, for each feature, I permute (randomly shuffle) its relationship with the outcome?" By introducing this randomness, we are breaking the relationship with the feature and the outcome (if there is one to begin with). Thus, we expect to see larger loss function values the more improtant a feature is. The larger the drop in performance, the more important the feature is.
+
+```{r}
+set.seed(11212021)
+imp_permute <- model_parts(explain_full, 
+                               type = "raw", 
+                               loss_function = accuracy_wrapper,
+                               B = 100) # number of simulations
+```
+
+We can take a look at our output numerically. Let's look at how the accuracy of our model changes as we permute different features.
+
+```{r}
+imp_permute
+```
+
+It may be also be useful to look at these results as a figure.
+
+```{r}
+plot(imp_permute)
+```
+
+We can see that shuffling `na_to_k`, `bp`, and `age` appear to lead to the largest loss functions (and therefore largest degradations in performance), which suggests that these are important features.
+
+### Shapley Values
+
+Onto the next method for assessing feature importance -- Shapley values! With Shapley values, we are calculating the log odds contribution of each feature to one specific prediction ("local" predictions). We can then average all of these together to understand general directionality of features in our model ("global" predictions).
+
+#### Local
+
+Let's demo this by first looking at one individual's predictions. Let's look at their data.
+
+```{r}
+x1 <- x |> 
+  slice(1)
+
+x1
+```
+
+Then, we can use the `predict_parts()` function to generate Shapley values.
+
+```{r}
+sv <- predict_parts(explain_full, 
+                    new_observation = x1,
+                    type = "shap",
+                    B = 25) # number of simulations
+
+sv
+```
+
+Let's plot these values. **What do you notice?**
+
+```{r}
+plot(sv)
+```
+
+#### Global
+
+We can also look at Shapley values averaged across our entire sample. When we do this, the numbers we get will represent absolute magnitude of change and will no longer have directionality.
+
+We'll take a subsample of our data so we're not here all day waiting for this to generate!
+
+```{r}
+set.seed(101)
+x_sample <- x |> 
+  slice_sample(n = 20) |> 
+  glimpse()
+```
+
+Then, we'll make use of John's `get_shaps()` function to calculate global Shapley values. This will calculate
+
+```{r}
+get_shaps <- function(df1){
+  predict_parts(explain_full, 
+                new_observation = df1,
+                type = "shap",
+                B = 25) |> 
+    filter(B == 0) |> 
+    select(variable_name, variable_value, contribution) |> 
+    as_tibble()
+}
+```
+
+Let's apply this function and see what we get.
+
+```{r}
+local_shaps <- 
+    x_sample |>
+      mutate(id = row_number()) |>
+      nest(.by = id, .key = "dfs") |>  
+      mutate(shapleys = map(dfs, \(df1) get_shaps(df1))) |>
+      select(-dfs) |>
+      unnest(shapleys)
+
+local_shaps |> 
+  glimpse()
+```
+
+This outputs a tibble that has the relative contribution of each feature.
+
+We can also visualize this.
+
+```{r}
+local_shaps |>
+  mutate(contribution = abs(contribution)) |>
+  group_by(variable_name) |>
+  summarize(mean_shap = mean(contribution)) |>
+  arrange(desc(mean_shap)) |>
+  mutate(variable_name = factor(variable_name),
+         variable_name = fct_reorder(variable_name, mean_shap)) |>
+  ggplot(aes(x = variable_name, y = mean_shap)) +
+  geom_point() +
+  coord_flip()
+```
+
+This isn't covered in the course materials in details, but another visually nice way to look at Shapley values is using Sina plots. This is an extremely basic Sina plot. Note that this doesn't tell us *which* values (e.g., high cholesterol or lower age) are contributing to predicting a greater likelihood of drug response or non-response. It is only showing the *distribution* of contributions. You can make Sina plots even fancier to include these things! See Figure 18.5 on this [page](https://christophm.github.io/interpretable-ml-book/shap.html) for some more plotting inspiration!
+
+```{r}
+local_shaps |>
+  ggplot(aes(x = contribution, 
+             y = fct_reorder(variable_name, contribution, .fun = median))) +
+ geom_point(alpha = 0.6, size = 1.5) +
+  labs(x = "Shapley Value Contribution", 
+       y = "Feature", 
+       color = "Feature Value",
+       title = "Basic SINA plot") +
+  theme(panel.grid.major.y = element_blank())
+```
+
+If we think back to what our tree diagrams looked like in our unit 9 lab, these values actually make quite a bit of sense. :^)
+
+### Understanding our features
+
+The last topic we'll cover today is understanding how our features are used to make predictions using visual methods. We'll cover Accumulated Local Effects (ALE) plots today.
+
+We can do this quite simply using the `model_profile()` function. Our x-axis shows the range of observed values of our feature (or categories, if we're looking at a categorical variable). Our y-axis shows the accumulated effect of the prediction.
+
+Let's take a look at this for `na_to_k`, a numeric predictor.
+
+```{r}
+ale_num <- model_profile(explainer = explain_full,
+                     type = "accumulated",
+                     variables = "na_to_k",
+                     N = NULL)  # means we want the full sample
+```
+
+We can see that patients with higher `na_to_k` values appear to be more likely to respond to the drug.
+
+```{r}
+plot(ale_num)
+```
+
+We can also do this with a categorical predictor.
+
+```{r}
+ale_cat <- model_profile(explainer = explain_full,
+                     type = "accumulated",
+                     variables = "bp",
+                     N = NULL)
+```
+
+High blood pressure increases someone's likelihood of responding to the drug.
+
+```{r}
+plot(ale_cat)
+```
+
+In short, ALE plots help us interpret the effect of each feature on model predictions without being biased by correlations with other features, because other features are held constant.
