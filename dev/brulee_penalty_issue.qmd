@@ -1,0 +1,104 @@
+---
+title: "`penalty` parameter silently ignored for LBFGS optimizer"
+format: gfm
+---
+
+## Description
+
+When tuning `penalty` via `tune_grid()` with `brulee`'s default LBFGS optimizer, the penalty parameter has no effect on model training. The CV accuracy is flat across all penalty values, including large values that should meaningfully increase regularization. This appears undocumented, as the `brulee_mlp` documentation makes no mention that `penalty` only takes effect for certain optimizers.
+
+## Reprex
+
+```{r}
+#| message: false
+library(tidyverse)
+library(tidymodels)
+
+mnist <- keras::dataset_mnist()
+
+set.seed(1234567)
+d_in <- keras::array_reshape(mnist$train$x, c(nrow(mnist$train$x), 784))
+colnames(d_in) <- str_c("v", 1:784)
+d_in <- d_in |>
+  as_tibble() |>
+  mutate(label = factor(mnist$train$y), .before = 1) |>
+  slice_sample(n = 10000)
+
+rec <- recipe(label ~ ., data = d_in) |>
+  step_zv(all_predictors()) |>
+  step_normalize(all_predictors())
+
+grid_penalty <- tibble(penalty = c(0, 0.001, 0.5))
+
+set.seed(1234567)
+torch::torch_manual_seed(1234567)
+splits <- vfold_cv(d_in, v = 3)
+```
+
+### Default optimizer (LBFGS)
+
+```{r}
+set.seed(1234567)
+torch::torch_manual_seed(1234567)
+fits_lbfgs <- mlp(penalty = tune(), 
+                  hidden_units = 20, 
+                  epochs = 30) |>
+  set_mode("classification") |>
+  set_engine("brulee", 
+             validation = 0) |>
+  tune_grid(preprocessor = rec, 
+            grid = grid_penalty,
+            resamples = splits, 
+            metrics = metric_set(accuracy))
+```
+
+### ADAMw:
+
+```{r}
+set.seed(1234567)
+torch::torch_manual_seed(1234567)
+fits_adamw <- mlp(penalty = tune(),
+                  hidden_units = 20, 
+                  epochs = 30,
+                  learn_rate = 0.001) |>
+  set_mode("classification") |>
+  set_engine("brulee", 
+             optimizer = "ADAMw", 
+             batch_size = 256, 
+             validation = 0) |>
+  tune_grid(preprocessor = rec, 
+            grid = grid_penalty,
+            resamples = splits, 
+            metrics = metric_set(accuracy))
+```
+
+## Results
+
+LBFGS:
+
+```{r}
+collect_metrics(fits_lbfgs)
+```
+
+ADAMw:
+
+```{r}
+collect_metrics(fits_adamw)
+```
+
+
+## Source code investigation
+
+Tracing through `mlp-fit.R` and `0_utils.R` in the Brulee repository, it seems that penalty is applied through two mechanisms:
+
+1. `make_penalized_loss()` adds the penalty term to the loss, but returns the
+unmodified loss immediately for optimizers not in `opt_uses_penalty()`: `c("ADAM", "ADAMw", "RMSprop", "Adadelta")`
+
+2. `set_optimizer()` passes `weight_decay = penalty` to the torch optimizer,
+but only for `RMSprop`, `ADAMw`, `Adadelta`, and `Adagrad`
+
+LBFGS falls into neither category, so `penalty` is seemingly silently ignored.
+
+## Question
+
+We're not sure whether this is intentional, as perhaps LBFGS doesn't support weight decay natively in torch, or whether it is an oversight. Either way, it seems worth flagging since the `brulee_mlp()` documentation not only doesn't mention that penalty behaves differently depending on the optimizer, but its own examples use penalty with LBFGS, which seemingly has no effect.
