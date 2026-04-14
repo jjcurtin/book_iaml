@@ -1,0 +1,447 @@
+---
+title: "Unit 12 Lab"
+format:
+  html:
+    embed-resources: true
+    toc: true
+    toc_depth: 4
+editor_options:
+  chunk_output_type: console
+---
+
+## Happy Tuesday! Welcome to your Unit 12 Lab!
+
+## Natural Language Processing
+
+This week we're putting NLP concepts from lecture into practice. We'll work through the full text classification pipeline using a very classic dataset: **SMS spam detection**.
+
+The process is as such: given the text of a text message, predict whether it's spam or legitimate ("ham").
+
+Let's start with some vocabulary before we dive in:
+
+| Term | Definition |
+|------------------------------------|------------------------------------|
+| **token** | A single unit of text after splitting. Usually a word, but can be a character, sentence, or n-gram |
+| **tokenization** | The process of splitting a document into tokens |
+| **unigram** | A single token (one word) |
+| **bigram** | A sequence of two consecutive tokens, e.g., "text me" |
+| **n-gram** | A sequence of *n* consecutive tokens; bigrams are a special case |
+| **corpus** | The full collection of documents you're working with |
+| **vocabulary** | The set of all unique tokens across the corpus |
+| **stopword** | A common word (e.g., "the", "is") that is often removed before modeling |
+| **stem** | The root form of a word after stripping suffixes (e.g., "run" from "running") |
+| **document-term matrix** | A matrix where rows = documents, columns = tokens, cells = frequency measure |
+
+Here is a quick reference for the new `textrecipes` steps you'll encounter today:
+
+| Step | Purpose | Key arguments |
+|------------------------|------------------------|------------------------|
+| `step_tokenize()` | Split text into tokens | `token`, `engine`, `options` |
+| `step_stem()` | Reduce words to their stems |  |
+| `step_tokenfilter()` | Keep only the top N tokens | `max_tokens` |
+| `step_tfidf()` | Compute TF-IDF features |  |
+| `step_normalize()` | Scale all numeric predictors | `all_predictors()` |
+| `step_word_embeddings()` | Average pre-trained word vectors | `embeddings` |
+
+### Setup
+
+```{r}
+#| echo: true
+#| message: false
+
+library(tidyverse)
+library(tidymodels)
+options(conflicts.policy = "depends.ok")
+
+# NLP-unique packages
+library(tokenizers)   # underlying tokenizer (wrapped by tidytext & textrecipes)
+library(tidytext)     # unnest_tokens() for EDA
+library(textrecipes)  # step_* functions for NLP recipes
+
+library(kableExtra, exclude = "group_rows")   # scrollable tables
+library(future)
+
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_ml.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_eda.R?raw=true")
+source("https://github.com/jjcurtin/lab_support/blob/main/fun_plots.R?raw=true")
+
+theme_set(theme_classic())
+options(tibble.width = Inf, dplyr.print_max = Inf)
+
+path_data <- "data"
+
+plan(multisession, workers = parallel::detectCores(logical = FALSE))
+```
+
+## Data Loading & Splitting
+
+```{r}
+data <- read_csv(here::here(path_data, "sms_spam.csv"), col_types = cols()) |>
+  mutate(label = factor(label, levels = c("spam", "ham"))) |>
+  glimpse()
+
+data
+```
+
+**What do you notice about the class balance? Why does that matter for our metric choice?**
+
+Now let's set up our validation split:
+
+```{r}
+set.seed(12345)
+
+splits <- data |>
+  initial_validation_split(strata = label)
+
+training_ind <- splits$train_id
+
+data_train <- data |>
+  slice(training_ind)
+
+# Convert to rset for tune_grid()
+splits_val <- validation_set(splits)
+```
+
+::: callout-tip
+## `initial_validation_split()` and `validation_set()`
+
+`validation_split()` was deprecated in rsample 1.2.0.
+
+The replacement, `initial_validation_split()`, creates a three-way split but returns a `three_way_split` object, **not** an `rset`.
+
+An **rset** is rsample's standard container for resampling schemes (cross-validation folds, bootstrap samples, validation sets, etc.).
+
+It's a tibble where each row is one resample, with a `splits` column holding the train/test indices. Functions like `tune_grid()`, `fit_resamples()`, and `collect_metrics()` all expect an rset as input.
+
+`initial_validation_split()` doesn't produce one by default, so we convert it:
+
+``` r
+splits_val <- validation_set(splits)
+```
+
+This wraps the validation portion of the split into a single-row rset that `tune_grid()` can use. Training indices live in `splits$train_id`.
+:::
+
+## EDA: Reading the Data
+
+Before cleaning or modeling, let's look at actual messages. All good NLP work starts here.
+
+```{r}
+data_train |>
+  filter(label == "spam") |>
+  pull(text) |> 
+  head(10)
+```
+
+```{r}
+data_train |>
+  filter(label == "ham") |>
+  pull(text) |> 
+  head(10)
+```
+
+**What patterns do you already notice? What features of the text might distinguish spam from ham?**
+
+## Tokenization & EDA
+
+**Tokenization** breaks each message into individual units. We use two interfaces for the same operation:
+
+-   `unnest_tokens()` from `tidytext` -- for EDA and exploration
+-   `step_tokenize()` from `textrecipes` -- inside a recipe for modeling
+
+```{r}
+tokens <- data_train |>
+  unnest_tokens(word, text, drop = FALSE)
+
+# word: the name of the new output column that will hold the tokens           # text: the input column containing the raw text to tokenize                  # drop = FALSE: keep the original text column in the output
+
+length(tokens$word) # total tokens
+length(unique(tokens$word)) # unique tokens
+```
+
+```{r}
+tokens |>
+  count(label, word, sort = TRUE) |>
+  group_by(label) |>
+  slice(1:20) |>
+  ungroup() |>
+  mutate(word = reorder_within(word, n, label)) |>
+  ggplot(aes(word, n, fill = label)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~label, scales = "free_y") +
+  scale_x_reordered() +
+  coord_flip() +
+  xlab(NULL) +
+  ylab("Count")
+```
+
+**What do you notice? Which words appear in both lists? Which are distinctive to spam?**
+
+Let's also look at bigrams to see if word pairs add anything:
+
+```{r}
+tokens_bigram <- data_train |>
+  unnest_tokens(bigram, text, token = "ngrams", n = 2, drop = FALSE)
+
+tokens_bigram |>
+  filter(str_detect(bigram, " ")) |>
+  count(label, bigram, sort = TRUE) |>
+  group_by(label) |>
+  slice(1:20) |>
+  ungroup() |>
+  mutate(bigram = reorder_within(bigram, n, label)) |>
+  ggplot(aes(bigram, n, fill = label)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~label, scales = "free_y") +
+  scale_x_reordered() +
+  coord_flip() +
+  xlab(NULL) +
+  ylab("Count")
+```
+
+## Stopwords
+
+Common function words ("the", "a", "is") likely don't distinguish spam from ham. Let's load some standard lists:
+
+```{r}
+stop_snowball <- get_stopwords(source = "snowball")  # 175 words
+stop_smart    <- get_stopwords(source = "smart")     # 571 words
+
+stops <- union(pull(stop_snowball, word), pull(stop_smart, word))
+length(stops)
+
+# see what's in each list
+stop_snowball |> pull(word) |> paste()
+stop_smart |> pull(word) |> paste()
+```
+
+To use stopwords in a recipe, pass them through `options` inside `step_tokenize()`:
+
+``` r
+step_tokenize(text, engine = "tokenizers", token = "words",
+              options = list(stopwords = stops))
+```
+
+::: callout-tip
+## Should you always remove stopwords?
+
+Not necessarily! For spam detection, words like "you", "free", "your", "call", "now" are extremely common in spam but might appear in standard stopword lists. Always test empirically: train models with and without and compare `bal_accuracy`. The right answer depends on the data.
+:::
+
+## Stemming
+
+Stemming collapses word variants to a common base, reducing vocabulary size:
+
+```{r}
+library(SnowballC)
+wordStem(c("free", "freeing", "freed", "winner", "winning", "wins", "call", "calling", "called"))
+```
+
+In a recipe, `step_stem()` goes after `step_tokenize()` and before `step_tokenfilter()`:
+
+``` r
+recipe(label ~ text, data = data_train) |>
+  step_tokenize(text, engine = "tokenizers", token = "words") |>
+  step_stem(text) |>
+  step_tokenfilter(text, max_tokens = tune()) |>
+  step_tfidf(text)
+```
+
+::: callout-tip
+## Stemming trade-offs
+
+-   **Pro**: smaller vocabulary, can improve generalization
+-   **Con**: lossy, as unrelated words can collapse together
+-   TLDR: check, it doesn't always help
+:::
+
+## TF-IDF
+
+**Term Frequency–Inverse Document Frequency** is the feature representation used in Bag-of-Words models. It rewards words frequent in a document but rare across documents, ideally capturing what makes each message distinctive.
+
+-   **TF**: how often word *w* appears in message *d*
+-   **IDF**: log(N / df_w) penalizes words appearing in many messages
+-   **TF-IDF** = TF × IDF
+
+You can explore it directly:
+
+```{r}
+tokens |>
+  count(label, word) |>
+  bind_tf_idf(word, label, n) |>
+  arrange(desc(tf_idf)) |>
+  slice(1:20)
+```
+
+**What words have the highest TF-IDF? Do they match your intuitions about spam?**
+
+`step_tfidf()` in a recipe computes this automatically, no need to do it manually for modeling.
+
+## Building NLP Recipes
+
+Now let's build the three recipe types you'll use in the homework.
+
+### Unigram Bag-of-Words
+
+```{r}
+rec_uni <- recipe(label ~ text, data = data_train) |>
+  step_tokenize(text, engine = "tokenizers", token = "words") |>
+  step_tokenfilter(text, max_tokens = tune()) |>
+  step_tfidf(text)
+```
+
+`step_tokenfilter()` keeps only the top `max_tokens` words by frequency. We tune this because vocabulary size affects both performance and speed.
+
+### Unigram BoW with stopwords removed
+
+```{r}
+rec_uni_stop <- recipe(label ~ text, data = data_train) |>
+  step_tokenize(text, engine = "tokenizers", token = "words",
+                options = list(stopwords = stops)) |>
+  step_tokenfilter(text, max_tokens = tune()) |>
+  step_tfidf(text)
+```
+
+### N-gram BoW (unigrams + bigrams)
+
+```{r}
+rec_ngram <- recipe(label ~ text, data = data_train) |>
+  step_tokenize(text, engine = "tokenizers", token = "ngrams",
+                options = list(n = 2, n_min = 1)) |>
+  step_tokenfilter(text, max_tokens = tune()) |>
+  step_tfidf(text) |>
+  step_normalize(all_predictors())
+```
+
+**Why do we add `step_normalize()` for n-gram models but not for unigrams?**
+
+It's easy to think of a recipe as abstract text processing steps, but what it actually produces is a plain numeric matrix, the same kind of feature matrix we've been building all semester. We can inspect it directly with `prep()` and `bake()`:
+
+```{r}
+rec_uni |>
+  finalize_recipe(list(max_tokens = 50)) |>
+  prep(data_train) |>
+  bake(NULL) |>
+  glimpse()
+```
+
+Each row is a message, each column is a TF-IDF score for one token, and most values are zero, this makes sense given most words don't appear in most messages. This is what the model actually trains on. Everything we've done with tokenization, stopwords, and TF-IDF is just deciding what goes into this matrix and how to weight it.
+
+## Hyperparameter Tuning
+
+```{r}
+grid_tokens <- expand_grid(
+  penalty     = exp(seq(-7, 3, length.out = 10)),
+  mixture     = seq(0, 1, length.out = 5),
+  max_tokens  = c(500, 1500)
+)
+
+nrow(grid_tokens)
+```
+
+**What does `mixture` control? What's the difference between mixture = 0 (ridge) and mixture = 1 (lasso) for text data?**
+
+```{r}
+fits_uni <- logistic_reg(penalty = tune(), mixture = tune()) |>
+  set_engine("glmnet") |>
+  tune_grid(preprocessor = rec_uni,
+            resamples = splits_val,
+            grid = grid_tokens,
+            metrics = metric_set(bal_accuracy))
+
+show_best(fits_uni, metric = "bal_accuracy")
+```
+
+```{r}
+autoplot(fits_uni)
+```
+
+::: callout-tip
+## Always use `splits_val`, not `splits`
+
+`tune_grid()` requires an `rset`. The raw `splits` from `initial_validation_split()` is not one. Passing it directly gives:
+
+```         
+Error in check_rset(): The `resamples` argument should be an <rset> object
+```
+
+Always pass `splits_val <- validation_set(splits)` instead.
+:::
+
+Now let's compare -- does removing stopwords help?
+
+```{r}
+fits_uni_stop <- logistic_reg(penalty = tune(), mixture = tune()) |>
+  set_engine("glmnet") |>
+  tune_grid(preprocessor = rec_uni_stop,
+            resamples = splits_val,
+            grid = grid_tokens,
+            metrics = metric_set(bal_accuracy))
+
+show_best(fits_uni_stop, metric = "bal_accuracy")
+```
+
+**Did removing stopwords improve performance? Does that match your intuition about spam language?**
+
+## Final Model Workflow
+
+Once you've selected your best configuration, here's the workflow to train on all data and interpret the results.
+
+```{r}
+best <- select_best(fits_uni, metric = "bal_accuracy")
+best
+```
+
+```{r}
+rec_final <- recipe(label ~ text, data = data) |>
+  step_tokenize(text, engine = "tokenizers", token = "words") |>
+  step_tokenfilter(text, max_tokens = best$max_tokens) |>
+  step_tfidf(text)
+
+feat_final <- rec_final |>
+  prep(data) |>
+  bake(NULL)
+```
+
+```{r}
+final_model <- logistic_reg(penalty = best$penalty, mixture = best$mixture) |>
+  set_engine("glmnet") |>
+  fit(label ~ ., data = feat_final)
+```
+
+### Variable importance
+
+```{r}
+final_model$fit |>
+  vip::vi(method = "model") |>
+  group_by(Sign) |>
+  top_n(20, wt = abs(Importance)) |>
+  ungroup() |>
+  mutate(
+    Importance = abs(Importance),
+    Variable = str_remove(Variable, "tfidf_text_"),
+    Variable = fct_reorder(Variable, Importance)
+  ) |>
+  ggplot(aes(x = Importance, y = Variable, fill = Sign)) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~Sign, scales = "free_y") +
+  labs(y = NULL)
+```
+
+**Do these words make sense? Which words push toward spam? Which toward ham?**
+
+### Confusion matrix
+
+```{r}
+conf_mat(
+  data = tibble(
+    truth    = feat_final$label,
+    estimate = predict(final_model, feat_final)$.pred_class
+  ),
+  truth    = truth,
+  estimate = estimate
+) |>
+  autoplot(type = "heatmap")
+```
+
+**Is the model making more false positives (ham flagged as spam) or false negatives (spam getting through)? For a spam filter, which type of error is more costly?**
