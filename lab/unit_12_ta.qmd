@@ -80,7 +80,7 @@ data <- read_csv(here::here(path_data, "sms_spam.csv"), col_types = cols()) |>
   mutate(label = factor(label, levels = c("spam", "ham"))) |>
   glimpse()
 
-data
+data |> tab(label)
 ```
 
 **What do you notice about the class balance? Why does that matter for our metric choice?**
@@ -153,7 +153,8 @@ data_train |>
 tokens <- data_train |>
   unnest_tokens(word, text, drop = FALSE)
 
-# word: the name of the new output column that will hold the tokens           # text: the input column containing the raw text to tokenize                  # drop = FALSE: keep the original text column in the output
+# word: the name of the new output column that will hold the tokens     
+# text: the input column containing the raw text to tokenize              # drop = FALSE: keep the original text column in the output
 
 length(tokens$word) # total tokens
 length(unique(tokens$word)) # unique tokens
