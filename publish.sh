@@ -28,6 +28,7 @@ if [ "$FORMAT" = "slides_local" ];  then
   cp -r *_files ~/mnt/web/iaml/slides/
   rm *.html
   rm -r *_files
+  rm _quarto.yml
 fi
 
  
